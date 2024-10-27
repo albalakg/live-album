@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use App\Models\Event;
+use App\Services\Enums\StatusEnum;
+use App\Services\Events\EventService;
+use Carbon\Carbon;
+
+class EndEvents extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'event:end';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Check for events that need to end and update their status';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $event_service = new EventService();
+        $events = Event::where('finished_at', '<=', Carbon::now())
+            ->where('status', StatusEnum::IN_PROGRESS)
+            ->get();
+
+        foreach ($events as $event) {
+            $event_service->updateStatus(StatusEnum::ACTIVE, $event->id);
+            $event->save();
+            $this->info("Event ID {$event->id} has been marked as active.");
+            // TODO:: add log here
+        }
+    }
+}

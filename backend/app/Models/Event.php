@@ -2,20 +2,44 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Services\Enums\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public function assets()
     {
-        return $this->hasMany(EventAsset::class, 'event_id', 'id');
+        return $this->hasMany(EventAsset::class, 'event_id', 'id')
+            ->where('status', StatusEnum::ACTIVE);
     }
 
     public function user()
     {
         return $this->hasOne(User::class, 'id', 'user_id');
+    }
+
+    public function order()
+    {
+        return $this->hasOne(Order::class, 'id', 'order_id');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->status === StatusEnum::ACTIVE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInProgress(): bool
+    {
+        return $this->status === StatusEnum::IN_PROGRESS;
     }
 }

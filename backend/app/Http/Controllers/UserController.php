@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Exception;
+use App\Http\Requests\UpdateUserRequest;
+use App\Services\Users\UserService;
+use App\Services\Enums\MessagesEnum;
+use Illuminate\Support\Facades\Auth;
+
+class UserController extends Controller
+{
+    public function update(UpdateUserRequest $request, int $user_id)
+    {
+        try {
+            $user_service = new UserService();
+            $response = $user_service->update($request->validated(), $user_id);
+            return $this->successResponse(MessagesEnum::USER_UPDATED_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function delete()
+    {
+        try {
+            $user_service = new UserService();
+            $user_service->delete(Auth::user()->id, Auth::user()->id);
+            return $this->successResponse(MessagesEnum::USER_DELETED_SUCCESS);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function deleteByAdmin(int $user_id)
+    {
+        try {
+            $user_service = new UserService();
+            $user_service->delete($user_id, Auth::user()->id);
+            return $this->successResponse(MessagesEnum::USER_DELETED_SUCCESS);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function get()
+    {
+        try {
+            $user_service = new UserService();
+            $response = $user_service->get();
+            return $this->successResponse(MessagesEnum::USERS_FETCHED_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function find(int $user_id)
+    {
+        try {
+            $user_service = new UserService();
+            $response = $user_service->find($user_id);
+            return $this->successResponse(MessagesEnum::USER_FOUND_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+}

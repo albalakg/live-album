@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('event_assets', function (Blueprint $table) {
             $table->id();
-            $table->integer('role_id')->unsigned()->index();
-            $table->string('first_name', 100);
-            $table->string('last_name', 100);
-            $table->string('email')->unique();
-            $table->string('password');
+            $table->integer('event_id')->unsigned()->index();
+            $table->integer('asset_type')->unsigned()->index();
+            $table->string('path');
             $table->integer('status')->unsigned()->index();
-            $table->rememberToken();
+            $table->string('user_agent');
+            $table->string('ip', 50);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('event_assets');
     }
 };
