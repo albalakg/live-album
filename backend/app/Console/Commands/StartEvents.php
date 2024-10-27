@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Event;
-use App\Services\Enums\StatusEnum;
 use Carbon\Carbon;
+use App\Models\Event;
+use Illuminate\Console\Command;
+use App\Services\Enums\LogsEnum;
+use App\Services\Enums\StatusEnum;
+use App\Services\Helpers\LogService;
 
 class StartEvents extends Command
 {
@@ -35,8 +37,7 @@ class StartEvents extends Command
         foreach ($events as $event) {
             $event->status = StatusEnum::IN_PROGRESS;
             $event->save();
-            $this->info("Event ID {$event->id} has been started.");
-            // TODO:: add log here
+            LogService::init()->info(LogsEnum::EVENT_STARTED, ['id' => $event->id]);
         }
     }
 }

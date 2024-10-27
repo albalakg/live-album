@@ -5,13 +5,16 @@ namespace App\Services\Users;
 use Exception;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use App\Mail\ForgotPasswordMail;
+use App\Services\Enums\LogsEnum;
 use App\Services\Enums\MailEnum;
 use App\Services\Enums\RoleEnum;
 use App\Models\UserResetPassword;
 use App\Services\Enums\StatusEnum;
+use App\Services\Enums\MessagesEnum;
+use App\Services\Helpers\LogService;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserEmailConfirmation;
-use App\Services\Enums\MessagesEnum;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
 use App\Services\Helpers\TokenService;
@@ -77,7 +80,23 @@ class UserService
             throw new Exception(MessagesEnum::USER_NOT_FOUND);
         }
 
-        // TODO: rest of forgot pass..
+        if (!$this->canResetPassword($email)) {
+            LogService::init()->error(LogsEnum::MAX_PASSWORD_RESET_ATTEMPTS, ['user_id' => $user->id]);
+            return;
+        }
+
+        $this->deactivateUsersResetPasswords($email);
+
+        $forgot_password_request = UserResetPassword::create([
+            'token'       => TokenService::generate(),
+            'email'       => $email,
+            'status'      => StatusEnum::PENDING,
+            'created_at'  => now()
+        ]);
+
+        $forgot_password_request->user_name = $user->details->first_name;
+        LogService::init()->info(LogsEnum::FORGOT_PASSWORD_REQUEST, ['user_id' => $user->id]);
+        $this->mail_service->delay()->send($email, ForgotPasswordMail::class, $forgot_password_request);
     }
 
     /**
@@ -122,7 +141,6 @@ class UserService
             throw new Exception(MessagesEnum::USER_NEW_PASSWORD_MATCH_OLD);
         }
 
-        // TODO: send email confirmation
         return $user->update(['password' => $password]);
     }
 
@@ -198,7 +216,7 @@ class UserService
             ->select('id')
             ->first();
 
-        if(!$deleted_user) {
+        if (!$deleted_user) {
             throw new Exception(MessagesEnum::USER_NOT_FOUND);
         }
 
@@ -206,7 +224,7 @@ class UserService
             try {
                 $this->eventService->delete($event->id, $deleting_user_id);
             } catch (Exception $ex) {
-                // TODO:: add log here
+                LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_DELETE_EVENT]);
             }
         }
 
@@ -261,8 +279,34 @@ class UserService
      * @param int $deleting_user_id
      * @return bool
      */
-    public function canDeleteUser(int $deleted_user_id, int $deleting_user_id): bool
+    private function canDeleteUser(int $deleted_user_id, int $deleting_user_id): bool
     {
         return $deleted_user_id === $deleting_user_id || $this->find($deleted_user_id)->isAdmin();
+    }
+
+
+    /**
+     * Check if user has requested to reset his password less then 3 times
+     * in the last 24 hours 
+     * 
+     * @param string $email
+     * @return bool
+     */
+    private function canResetPassword(string $email): bool
+    {
+        return UserResetPassword::where('email', $email)
+            ->where('created_at', '>', Carbon::now()->subMinutes(1440))
+            ->count() < 3;
+    }
+
+    /**
+     * @param string $email
+     * @return int
+     */
+    private function deactivateUsersResetPasswords(string $email): int
+    {
+        return UserResetPassword::where('email', $email)
+            ->where('status', StatusEnum::PENDING)
+            ->update(['status' => StatusEnum::INACTIVE]);
     }
 }

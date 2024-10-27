@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 use Carbon\Carbon;
 use App\Models\Event;
 use Illuminate\Console\Command;
+use App\Services\Enums\LogsEnum;
 use App\Services\Enums\StatusEnum;
+use App\Services\Helpers\LogService;
 use App\Services\Helpers\MailService;
 use App\Mail\WarningBeforeEventDisabledMail;
 
@@ -47,7 +49,7 @@ class EventsWarnings extends Command
                 'download_link' => config('app.CLIENT_URL') . "/events/{$event->id}/assets"
             ];
             $mail_service->send($event->email, WarningBeforeEventDisabledMail::class, $data);
-            $this->info("Event ID {$event->id} has been warned before disabled.");
+            LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
         }
     }
 }

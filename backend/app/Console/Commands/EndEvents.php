@@ -2,11 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Event;
-use App\Services\Enums\StatusEnum;
-use App\Services\Events\EventService;
 use Carbon\Carbon;
+use App\Models\Event;
+use Illuminate\Console\Command;
+use App\Services\Enums\LogsEnum;
+use App\Services\Enums\StatusEnum;
+use App\Services\Helpers\LogService;
+use App\Services\Events\EventService;
 
 class EndEvents extends Command
 {
@@ -37,8 +39,7 @@ class EndEvents extends Command
         foreach ($events as $event) {
             $event_service->updateStatus(StatusEnum::ACTIVE, $event->id);
             $event->save();
-            $this->info("Event ID {$event->id} has been marked as active.");
-            // TODO:: add log here
+            LogService::init()->info(LogsEnum::EVENT_SET_ACTIVE, ['id' => $event->id]);
         }
     }
 }

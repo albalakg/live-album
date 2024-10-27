@@ -5,9 +5,11 @@ namespace App\Console\Commands;
 use Carbon\Carbon;
 use App\Models\Event;
 use App\Mail\EventDisabledMail;
+use App\Services\Enums\LogsEnum;
 use Illuminate\Console\Command;
 use App\Services\Enums\StatusEnum;
 use App\Services\Users\UserService;
+use App\Services\Helpers\LogService;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
 
@@ -48,7 +50,7 @@ class DisableEvents extends Command
                 'event_name' => $event->name,
             ];
             $mail_service->send($event->email, EventDisabledMail::class, $data);
-            $this->info("Event ID {$event->id} has been disabled.");
+            LogService::init()->info(LogsEnum::EVENT_SET_INACTIVE, ['id' => $event->id]);
         }
     }
 }

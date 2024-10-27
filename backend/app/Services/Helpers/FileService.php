@@ -3,7 +3,9 @@
 namespace App\Services\Helpers;
 
 use Exception;
+use App\Services\Enums\LogsEnum;
 use Illuminate\Http\UploadedFile;
+use App\Services\Helpers\LogService;
 use Illuminate\Support\Facades\Storage;
 
 class FileService
@@ -234,9 +236,7 @@ class FileService
 
   static private function writeErrorLog(Exception $ex)
   {
-    // TODO: add logs
-    // $logger_service = new LogService('files');
-    // $logger_service->critical($ex);
+    LogService::init()->critical($ex, ['error' => LogsEnum::FILE_SERVICE_ERROR]);
   }
 
 }

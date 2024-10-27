@@ -53,6 +53,16 @@ class LogService
     }
     
     /**
+     * @param string $channel
+     * @param ?User $user
+     * @return self
+    */
+    static public function init(string $channel = self::DEFAULT_CHANNEL, ?User $user = null): self
+    {
+        return new Self($channel, $user);
+    }
+    
+    /**
      * Create an info log
      *
      * @param string $content

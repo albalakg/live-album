@@ -6,9 +6,11 @@ use Exception;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\EventAsset;
+use App\Services\Enums\LogsEnum;
 use App\Services\Enums\StatusEnum;
 use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
+use App\Services\Helpers\LogService;
 use App\Services\Helpers\FileService;
 use App\Services\Orders\OrderService;
 use App\Http\Requests\UploadFileRequest;
@@ -252,7 +254,7 @@ class EventService
             try {
                 FileService::create($event_asset->path, 'files', FileService::S3_DISK);
             } catch (Exception $ex) {
-                // TODO:: Add log here
+                LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_DELETE_EVENT_ASSET]);
             }
         }
 
