@@ -9,6 +9,10 @@ class Guard {
   guest(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
     // !store.getters["client/isLogged"] ? next() : next("/game");
   }
+
+  local(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
+    process.env.VUE_APP_ENV === 'local' ? next() : next("/");
+  }
 }
 
 export default new Guard();

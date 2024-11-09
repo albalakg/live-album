@@ -15,6 +15,13 @@ export interface IEventFile {
   type: IEventFileType;
 }
 
+export interface IDesktopBarItem {
+  text: string;
+  url: string;
+  color: string;
+  weight: string;
+}
+
 // export interface IMediatorService {
 //   authenticate(client_id: number): Promise<boolean>;
 //   getScore(): Promise<boolean>;
