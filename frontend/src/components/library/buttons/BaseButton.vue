@@ -1,7 +1,7 @@
 <template>
     <div class="main-button pointer shadow--small text--center"
-        :class="`padding--${size} bg--${color} brs--${borderRadius} text--${textColor}`">
-        <span class="title--medium">
+        :class="`padding--${size} bg--${color} brs--${borderRadius}`">
+        <span class="title--small" :class="`text--${textColor}`" >
             {{ text }}
         </span>
     </div>
@@ -70,7 +70,11 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.main-button {
+    width: 100%;
+}
+
 .main-button-animation {
     transition: .3s transform linear, .3s scale linear;
 

@@ -56,7 +56,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .main-cube {
     opacity: .4;
     position: absolute;

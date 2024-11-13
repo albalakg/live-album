@@ -1,7 +1,7 @@
 <template>
     <div class="desktop-bar display--flex justify--center width--full" :class="{
-        'bg--pink': isLoggedIn,
-        'bg--white': !isLoggedIn
+        'bg--pink': hasActiveEvent,
+        'bg--white': !hasActiveEvent
     }">
         <div class="desktop-content display--flex justify--space-between align--center width--page-size">
             <div class="display--flex justify--space-between">
@@ -10,7 +10,7 @@
             <div>
                 <router-link to="/#header">
                     <span class="title--large" :class="{
-                        'text--white': isLoggedIn
+                        'text--white': hasActiveEvent
                     }">
                         SnapShare
                     </span>
@@ -48,16 +48,20 @@ export default defineComponent({
 
     computed: {
         isLoggedIn(): boolean {
-            return false;
+            return true;
+        },
+        
+        hasActiveEvent(): boolean {
+            return true;
         }
     },
 
     methods: {
         createLinks() {
-            this.isLoggedIn ? this.createLoggedLinks() : this.createGuestLinks();
+            this.hasActiveEvent ? this.createSubscribedLinks() : this.createBaseLinks();
         },
 
-        createLoggedLinks() {
+        createSubscribedLinks() {
             this.links = [
                 {
                     text: 'התנתק',
@@ -66,26 +70,14 @@ export default defineComponent({
                     weight: '800'
                 },
                 {
-                    text: 'מה מקבלים',
-                    url: '/#features',
+                    text: 'האירוע',
+                    url: '/event',
                     color: 'dark',
                     weight: '500'
                 },
                 {
-                    text: 'איך זה עובד',
-                    url: '/#how-it-works',
-                    color: 'dark',
-                    weight: '500'
-                },
-                {
-                    text: 'איך זה נראה',
-                    url: '/#how-it-looks',
-                    color: 'dark',
-                    weight: '500'
-                },
-                {
-                    text: 'המסלולים',
-                    url: '/#pricing',
+                    text: 'פרופיל',
+                    url: '/profile',
                     color: 'dark',
                     weight: '500'
                 },
@@ -98,14 +90,8 @@ export default defineComponent({
             ];
         },
 
-        createGuestLinks() {
+        createBaseLinks() {
             this.links = [
-                {
-                    text: 'התחבר',
-                    url: '/login',
-                    color: 'pink',
-                    weight: '800'
-                },
                 {
                     text: 'מה מקבלים',
                     url: '/#features',
@@ -137,14 +123,38 @@ export default defineComponent({
                     weight: '500'
                 },
             ];
+
+            if(this.isLoggedIn) {
+                this.links.unshift({
+                    text: 'התנתק',
+                    url: '/logout',
+                    color: 'pink',
+                    weight: '800'
+                })
+                this.links.push({
+                    text: 'פרופיל',
+                    url: '/profile',
+                    color: 'dark',
+                    weight: '500'
+                })
+                console.log(this.links);
+                
+            } else {
+                this.links.unshift({
+                    text: 'התחבר',
+                    url: '/login',
+                    color: 'pink',
+                    weight: '800'
+                })
+            }
         }
     }
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .desktop-bar {
-    padding: 30px 0;
+    padding: 20px 0;
     position: fixed;
     z-index: 100;
 }

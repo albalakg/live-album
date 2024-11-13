@@ -41,7 +41,7 @@ export default defineComponent({
 
     span {
         position: relative;
-        top: 3px;
+        top: 6px;
         left: -3px;
     }
 }

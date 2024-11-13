@@ -3,22 +3,26 @@
         <p class="title--small">
             {{ title }}
         </p>
+        
         <div class="inner-input padding--x-small shadow--small"
             :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''}`">
             <template v-if="isFile">
                 <input v-model="value" ref="input" :type="type" :readonly="readonly" :placeholder="placeholder"
                     class="width--full" :hidden="isFile"  @change="filePicked()" :accept="allowedFileTypes">
-                <div class="input-filler">
+                <div class="input-filler" :class="`input-size-${size}`">
                 </div>
             </template>
             <template v-else>
-                <input v-model="value" ref="input" :type="type" :readonly="readonly" :placeholder="placeholder"
-                    class="width--full">
+                <input :maxlength="maxLength" v-model="value" ref="input" :type="type" :readonly="readonly" :placeholder="placeholder"
+                    class="width--full" :class="`input-size-${size}`">
             </template>
             <div class="input-icon-wrapper pointer">
                 <MainIcon v-if="icon" :icon="icon" @onClick="iconClicked()" />
             </div>
         </div>
+        <small v-if="hint">
+            {{ hint }}
+        </small>
     </div>
 </template>
 
@@ -45,6 +49,15 @@ export default defineComponent({
 
         title: {
             type: String
+        },
+
+        hint: {
+            type: String
+        },
+
+        size: {
+            type: String,
+            default: 'medium'
         },
 
         type: {
@@ -135,10 +148,14 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .main-input {
     p {
         margin-bottom: 5px;
+    }
+
+    small {
+        font-size: 0.7em;
     }
 
     .inner-input {
@@ -149,6 +166,22 @@ export default defineComponent({
         input {
             font-size: .9em;
             background-color: white;
+        }
+
+        .input-size-small {
+            height: 15px;
+        }
+
+        .input-size-medium {
+            height: 20px;
+        }
+
+        .input-size-large {
+            height: 25px;
+        }
+
+        .input-size-x-large {
+            height: 30px;
         }
 
         .input-icon-wrapper {

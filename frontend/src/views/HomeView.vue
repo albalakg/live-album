@@ -263,7 +263,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .home-page-section {
   height: calc(100vh - 99px);
   position: relative;

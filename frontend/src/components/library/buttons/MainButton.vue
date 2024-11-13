@@ -71,7 +71,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .main-button-animation {
     transition: .3s transform linear, .3s scale linear;
 

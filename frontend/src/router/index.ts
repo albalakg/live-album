@@ -27,13 +27,13 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/reset-password',
-    name: 'reset-password',
+    name: 'resetPassword',
     beforeEnter: Guard.local,
     component: () => import('@/views/ResetPasswordView.vue')
   },
   {
     path: '/email-confirmation',
-    name: 'email-confirmation',
+    name: 'emailConfirmation',
     beforeEnter: Guard.local,
     component: () => import('@/views/EmailConfirmationView.vue')
   },
@@ -48,6 +48,47 @@ const routes: Array<RouteRecordRaw> = [
     name: 'order',
     beforeEnter: Guard.local,
     component: () => import('@/views/OrderView.vue')
+  },
+  {
+    path: '/terms-and-conditions',
+    name: 'termsAndConditions',
+    beforeEnter: Guard.local,
+    component: () => import('@/views/TermsAndConditionsView.vue')
+  },
+  {
+    path: '/event',
+    name: 'event',
+    beforeEnter: Guard.local,
+    component: () => import('@/views/EventIndexView.vue'),
+    children: [
+      {
+        path: '',
+        name: 'eventDetails',
+        component: () => import('../views/EventDetailsView.vue'),
+      },
+      {
+        path: 'gallery',
+        name: 'eventGallery',
+        component: () => import('../views/EventGalleryView.vue'),
+      },
+      {
+        path: 'assets',
+        name: 'eventAssets',
+        component: () => import('../views/EventAssetsView.vue'),
+      },
+    ]
+  },
+  {
+    path: '/gallery/:galleryId',
+    name: 'gallery',
+    beforeEnter: Guard.local,
+    component: () => import('@/views/GalleryView.vue')
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    beforeEnter: Guard.local,
+    component: () => import('@/views/ProfileView.vue')
   },
   {
     path: '/design',

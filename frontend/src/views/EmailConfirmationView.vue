@@ -55,7 +55,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .email-confirmation {
   height: 100vh;
 }

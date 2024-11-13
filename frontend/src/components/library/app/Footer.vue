@@ -19,8 +19,11 @@
             </div>
             <div class="footer-links display--flex justify--space-between">
                 <div>
-                    <router-link to="/terms-and-conditions">
-                        <p>תנאי האתר</p>
+                    <router-link v-if="isLoggedIn" to="/profile">
+                        <p>פרופיל</p>
+                    </router-link>
+                    <router-link v-if="hasActiveEvent" to="/event">
+                        <p>אירוע</p>
                     </router-link>
                 </div>
                 <div>
@@ -43,6 +46,9 @@
                     </router-link>
                     <router-link to="/order">
                         <p>הזמנה</p>
+                    </router-link>
+                    <router-link to="/terms-and-conditions">
+                        <p>תנאי האתר</p>
                     </router-link>
                 </div>
                 <div>
@@ -93,7 +99,13 @@ export default defineComponent({
     },
 
     computed: {
-
+        isLoggedIn(): boolean {
+            return true;
+        },
+        
+        hasActiveEvent(): boolean {
+            return true;
+        }
     },
 
     methods: {
@@ -102,7 +114,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .footer {
     position: relative;
     height: 40vh;
