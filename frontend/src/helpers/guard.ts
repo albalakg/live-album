@@ -3,11 +3,11 @@ import { RouteLocationNormalized, NavigationGuardNext } from "vue-router";
 
 class Guard {
   user(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
-    // store.getters["client/isLogged"] ? next() : next("/");
+    store.getters["user/isLoggedIn"] ? next() : next("/");
   }
 
   guest(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
-    // !store.getters["client/isLogged"] ? next() : next("/game");
+    !store.getters["user/isLoggedIn"] ? next() : next("/");
   }
 
   local(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {

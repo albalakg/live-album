@@ -6,7 +6,7 @@
         <div class="inner-textarea padding--x-small shadow--small"
             :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''}`">
             <textarea :maxLength="maxLength" :rows="rows" v-model="value" ref="textarea" :readonly="readonly" :placeholder="placeholder"
-                    class="width--full" />
+                    class="width--full" @input="updateValue($event?.target?.value)" />
         </div>
     </div>
 </template>
@@ -48,27 +48,32 @@ export default defineComponent({
             type: Boolean,
             default: false
         },
-    },
-
-    watch: {
-        value() {
-            this.$emit('onChange', this.value);
-        }
+        
+        modelValue: {
+            type: String,
+        },
     },
 
     data() {
         return {
-            value: '' as string,
         };
     },
 
     computed: {
-       
+        localValue: {
+            get(): any {
+                return this.modelValue;
+            },
+
+            set(value: any) {
+                this.$emit('update:modelValue', value);
+            },
+        },
     },
 
     methods: {
-        setValue(value: string) {
-            this.value = value;
+        updateValue(value: any) {
+            this.localValue = value;
         },
     }
 });

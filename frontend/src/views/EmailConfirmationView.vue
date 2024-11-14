@@ -49,6 +49,13 @@ export default defineComponent({
     };
   },
 
+  created() {
+    this.$store.dispatch('user/confirmEmail', {
+      email: this.$route.query.email,
+      token: this.$route.query.token,
+    });
+  },
+
   methods: {
 
   }

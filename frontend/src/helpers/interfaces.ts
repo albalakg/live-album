@@ -1,4 +1,4 @@
-import { IEventFileType } from './types';
+import { EventFileType, SubscriptionType } from './types';
 
 // ***** Base Interfaces *****
 // interface IBaseResponse {
@@ -10,9 +10,28 @@ export interface IEventStoreState {
   files: IEventFile[];
 }
 
+export interface IUserStoreState {
+  user: IUserInfo | null;
+}
+
+export interface IUserInfo {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  subscription_name: SubscriptionType;
+}
+
+export interface IEventInfo {
+  subscription_name: SubscriptionType;
+  start_date: string;
+  end_date: string | null;
+}
+
 export interface IEventFile {
   path: string;
-  type: IEventFileType;
+  type: EventFileType;
 }
 
 export interface IDesktopBarItem {
@@ -28,3 +47,24 @@ export interface IDesktopBarItem {
 //   getConfiguration(): Promise<boolean>;
 //   logout(): boolean;
 // }
+
+
+// ****************
+// ***** APIS *****
+// ****************
+
+export interface ISignupRequest {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface ILoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface IForgotPasswordRequest {
+  email: string;
+}

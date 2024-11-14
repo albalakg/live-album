@@ -11,6 +11,7 @@
 import DesktopBar from '@/components/library/app/DesktopBar.vue';
 import Footer from '@/components/library/app/Footer.vue';
 import { defineComponent } from 'vue';
+import Auth from '@/helpers/Auth';
 
 export default defineComponent({
   name: 'App',
@@ -19,6 +20,18 @@ export default defineComponent({
     DesktopBar,
     Footer,
   },
+
+  created() {
+    this.setInitialSettings();
+  },
+  
+  methods: {
+    async setInitialSettings() {
+      if(Auth.isLogged()) {
+        this.$store.dispatch('user/setUserAsLoggedIn', Auth.get());
+      }
+    },
+  }
 
 });
 </script>

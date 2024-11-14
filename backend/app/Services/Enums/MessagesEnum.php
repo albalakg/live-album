@@ -11,11 +11,14 @@ class MessagesEnum extends BaseEnum
     const USER_LOGIN_UNAUTHORIZED = 'Unauthorized to login';
     const MAINTENANCE_VALIDATION = 'Sorry, Unauthorized to login during maintenance mode';
     const USER_NOT_FOUND = 'User not found';
+    const USER_NOT_ACTIVE = 'User not active';
+    const SUPPORT_TICKET_NOT_FOUND = 'Support Ticket not active';
     const USER_NEW_PASSWORD_MATCH_OLD = 'Can\'t update new password that matches the old password';
     const ORDER_NOT_FOUND = 'Order not found';
     const EVENT_NOT_FOUND = 'Event not found';
     const EVENT_NOT_AUTHORIZED = 'Not authorized to modify this event';
     const USER_NOT_AUTHORIZED_TO_DELETE = 'Not authorized to delete this user';
+    const RESET_PASSWORD_REQUEST_NOT_FOUND = 'Reset Password request not found';
 
     // Info
     const LOGIN_SUCCESS = 'Logged in successfully';
@@ -23,6 +26,7 @@ class MessagesEnum extends BaseEnum
     const RESET_PASSWORD = 'You have reset your password';
     const FORGOT_PASSWORD = 'An email has been sent to the requested address';
     const CONFIRM_EMAIL = 'You have verified your email successfully';
+    const SUPPORT_TICKET_CREATED_SUCCESS = 'Support Ticket created successfully';
     const ORDER_FOUND_SUCCESS = 'Order fetched successfully';
     const ORDER_CREATED_SUCCESS = 'Order created successfully';
     const ORDER_UPDATED_SUCCESS = 'Order updated successfully';

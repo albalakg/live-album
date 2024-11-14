@@ -45,14 +45,20 @@ export default defineComponent({
     created() {
         this.createLinks();
     },
+    
+    watch: {
+        isLoggedIn() {
+            this.createLinks();
+        }
+    },
 
     computed: {
         isLoggedIn(): boolean {
-            return true;
+            return this.$store.getters['user/isLoggedIn'];
         },
         
         hasActiveEvent(): boolean {
-            return true;
+            return this.$store.getters['user/hasActiveEvent'];
         }
     },
 
@@ -137,8 +143,6 @@ export default defineComponent({
                     color: 'dark',
                     weight: '500'
                 })
-                console.log(this.links);
-                
             } else {
                 this.links.unshift({
                     text: 'התחבר',

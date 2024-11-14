@@ -28,16 +28,17 @@
           נאפס את הסיסמה ונעשה דאבל צ'אדק
         </p>
       </div>
-      <div class="center width--half margin--auto layer--one">
-        <MainInput type="password" title="סיסמה" />
-        <MainInput type="password" title="אימות סיסמה" />
+      <form class="center width--half margin--auto layer--one" @submit.prevent="submit()">
+        <MainInput v-model="form.password" type="password" title="סיסמה" />
+        <br>
+        <MainInput v-model="form.password_confirmation" type="password" title="אימות סיסמה" />
         <br>
         <MainButton color="pink" text="שלח בקשה" />
         <p class="text--center">
           נזכרת בסיסמה?
           <router-link to="/login">התחבר כאן</router-link>
         </p>
-      </div>
+      </form>
       <div class="width--half margin--auto">
       </div>
     </div>
@@ -63,11 +64,45 @@ export default defineComponent({
 
   data() {
     return {
+      form: {
+        password: '' as string,
+        password_confirmation: '' as string,
+        email: '' as string,
+        token: '' as string,
+      },
+      isLoading: false as boolean
     };
   },
 
-  methods: {
+  created() {
+    console.log(this.$route);
+    
+    this.form.email = this.$route.query.email?.toString() ?? '';
+    this.form.token = this.$route.query.token?.toString() ?? '';
+  },
 
+  methods: {
+    async submit() {
+      const errors = this.validateForm();   
+      if(errors.length) {
+        this.$store.dispatch('notification/addError', errors[0]);
+        return;
+      } 
+      
+      this.isLoading = true;
+      const isSuccess = await this.$store.dispatch('user/resetPassword', this.form);
+      this.isLoading = false;
+
+      if(!isSuccess) {
+        return;
+      }
+
+      this.$router.push('/login');
+    },
+
+    validateForm() {
+      return [];
+    }
   }
 });
 </script>
@@ -93,6 +128,8 @@ export default defineComponent({
   }
 
   .center {
+    margin-top: 15px;
+
     p {
       margin-top: 15px;
     }

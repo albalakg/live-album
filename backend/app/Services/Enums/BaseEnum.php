@@ -60,13 +60,19 @@ abstract class BaseEnum {
      * Get a constant name value of the class by id
      *
      * @param int $id
-     * @return int
+     * @return ?string
      */
-    public static function getNameById(int $id): int 
+    public static function getNameById(int $id): ?string 
     {
         $reflect = new ReflectionClass(static::class);
-        $keys_name = array_keys($reflect->getConstants());
+        $values = array_values($reflect->getConstants());
 
-        dd($keys_name);
+        foreach($values AS $index => $value) {
+            if($value === $id) {
+                return $values[$index - 1];
+            }
+        }
+
+        return null;
     }
 }

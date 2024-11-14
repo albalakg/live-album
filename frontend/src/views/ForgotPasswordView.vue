@@ -28,15 +28,15 @@
           אל תדאג, נעזור לך ליצור סיסמה חדש דרך המייל
         </p>
       </div>
-      <div class="center width--half margin--auto layer--one">
-        <MainInput type="email" title="כתובת מייל" />
+      <form @submit.prevent="submit()" class="center width--half margin--auto layer--one">
+        <MainInput v-model="form.email" type="email" title="כתובת מייל" />
         <br>
-        <MainButton color="pink" text="שלח בקשה" />
+        <MainButton :loading="isLoading" color="pink" text="שלח בקשה" />
         <p class="text--center">
           נזכרת בסיסמה?
           <router-link to="/login">התחבר כאן</router-link>
         </p>
-      </div>
+      </form>
       <div class="width--half margin--auto">
       </div>
     </div>
@@ -49,6 +49,7 @@ import MainCube from '@/components/library/background/MainCube.vue';
 import MainLine from '@/components/library/background/MainLine.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import { defineComponent } from 'vue';
+import { IForgotPasswordRequest } from '@/helpers/interfaces';
 
 export default defineComponent({
   name: 'ForgotPasswordView',
@@ -62,11 +63,35 @@ export default defineComponent({
 
   data() {
     return {
+      form: {
+        email: ''
+      } as IForgotPasswordRequest,
+      isLoading: false as boolean
     };
   },
 
   methods: {
+    async submit() {
+      const errors = this.validateForm();   
+      if(errors.length) {
+        this.$store.dispatch('notification/addError', errors[0]);
+        return;
+      } 
+      
+      this.isLoading = true;
+      const isSuccess = await this.$store.dispatch('user/forgotPassword', this.form);
+      this.isLoading = false;
 
+      if(!isSuccess) {
+        return;
+      }
+
+      this.$router.push('/login');
+    },
+
+    validateForm() {
+      return [];
+    }
   }
 });
 </script>

@@ -10,5 +10,6 @@ class StatusEnum extends BaseEnum
         ACTIVE      = 1,
         PENDING     = 2,
         IN_PROGRESS = 3,
-        READY       = 4;
+        READY       = 4,
+        CLOSED      = 5;
 }

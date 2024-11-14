@@ -1,11 +1,14 @@
 <template>
-    <div class="main-button pointer shadow--small" :class="`padding--${size} bg--light-${color} brs--${borderRadius} ${animation ? 'main-button-animation' : ''}`">
+    <button class="main-button pointer shadow--small" :class="`padding--${size} bg--light-${color} brs--${borderRadius} ${animation ? 'main-button-animation' : ''} ${loading ? 'main-button-loading' : ''}`" @click="onClick()">
         <div class="inner-button text--center" :class="`bg--${color} padding--${getInnerSize} brs--${getInnerBorderRadius}`">
-            <span class="title--medium text--white">
+            <span class="title--medium text--white" v-if="loading">
+                טוען...
+            </span>
+            <span class="title--medium text--white" v-else>
                 {{ text }}
             </span>
         </div>
-    </div>
+    </button>
 </template>
 
 <script lang="ts">
@@ -35,10 +38,15 @@ export default defineComponent({
             default: false
         },
 
+        loading: {
+            type: Boolean,
+            default: false
+        },
+
         size: {
             type: String,
             default: 'x-small'
-        }
+        },
     },
 
     data() {
@@ -66,12 +74,24 @@ export default defineComponent({
     },
 
     methods: {
-
+        onClick() {
+            this.$emit('onClick');
+        }
     }
 });
 </script>
 
 <style lang="scss" scoped>
+.main-button {
+    width: 100%;
+    border: none;
+}
+
+.main-button-loading {
+    pointer-events: none;
+    opacity: .6;
+}
+
 .main-button-animation {
     transition: .3s transform linear, .3s scale linear;
 

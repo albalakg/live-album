@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 class MaintenanceService
 {    
     /**
+     * TODO: Need to fix this
      * Check if the application is in maintenance mode
      *
      * @return bool
@@ -18,7 +19,7 @@ class MaintenanceService
         return self::getOverrideStatus();
       }
 
-      return config('app.maintenance');
+      return true;
     }
     
     /**

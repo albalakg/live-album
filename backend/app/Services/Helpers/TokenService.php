@@ -12,7 +12,7 @@ class TokenService
    * @param int $length
    * @return string
   */
-  static public function generate(int $length = 30): string
+  static public function generate(int $length = 50): string
   {
     return Str::random($length);
   }

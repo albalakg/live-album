@@ -9,6 +9,10 @@ class UserResetPassword extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
+    public $timestamps = false;
+
     public function user()
     {
         return $this->hasOne(User::class, 'email', 'email');

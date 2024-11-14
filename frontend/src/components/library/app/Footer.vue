@@ -19,14 +19,6 @@
             </div>
             <div class="footer-links display--flex justify--space-between">
                 <div>
-                    <router-link v-if="isLoggedIn" to="/profile">
-                        <p>פרופיל</p>
-                    </router-link>
-                    <router-link v-if="hasActiveEvent" to="/event">
-                        <p>אירוע</p>
-                    </router-link>
-                </div>
-                <div>
                     <router-link to="/#features">
                         <p>מה מקבלים</p>
                     </router-link>
@@ -51,7 +43,7 @@
                         <p>תנאי האתר</p>
                     </router-link>
                 </div>
-                <div>
+                <div v-if="!isLoggedIn">
                     <router-link to="/login">
                         <p>התחבר</p>
                     </router-link>
@@ -60,6 +52,14 @@
                     </router-link>
                     <router-link to="/forgot-password">
                         <p>שכחתי סיסמה</p>
+                    </router-link>
+                </div>
+                <div>
+                    <router-link v-if="isLoggedIn" to="/profile">
+                        <p>פרופיל</p>
+                    </router-link>
+                    <router-link v-if="hasActiveEvent" to="/event">
+                        <p>אירוע</p>
                     </router-link>
                 </div>
             </div>

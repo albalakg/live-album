@@ -29,18 +29,18 @@
         <div class="line"></div>
         <div class="line"></div>
       </div>
-      <div class="contact-form display--flex justify--space-between direction--column">
+      <form @submit.prevent="submit()" class="contact-form display--flex justify--space-between direction--column">
         <div>
-          <MainInput title="כתובת מייל" />
+          <MainInput v-model="form.email" title="כתובת מייל" />
           <br>
-          <MainInput title="שם מלא" />
+          <MainInput v-model="form.full_name" title="שם מלא" />
           <br>
-          <MainTextArea title="טקסט חופשי" />
+          <MainTextArea v-model="form.text" title="טקסט חופשי" />
         </div>
         <div class="contact-bottom">
           <MainButton text="פנו אלינו עכשיו" />
         </div>
-      </div>
+      </form>
       <div class="bottom-background bg--white"></div>
     </div>
   </div>
@@ -67,11 +67,38 @@ export default defineComponent({
 
   data() {
     return {
+      form: {
+        email: '' as string,
+        full_name: '' as string,
+        text: '' as string,
+      },
+      isLoading: false as boolean
     };
   },
 
   methods: {
+    async submit() {
+      const errors = this.validateForm();   
+      if(errors.length) {
+        this.$store.dispatch('notification/addError', errors[0]);
+        return;
+      } 
+      
+      this.isLoading = true;
+      const isSuccess = await this.$store.dispatch('contact/send', this.form);
+      this.isLoading = false;
 
+      if(!isSuccess) {
+        return;
+      }
+
+      this.$router.push('/login');
+      this.$store.dispatch('notification/addInfo', 'ההודעה נשלחה בהצלחה');
+    },
+
+    validateForm() {
+      return [];
+    }
   }
 });
 </script>

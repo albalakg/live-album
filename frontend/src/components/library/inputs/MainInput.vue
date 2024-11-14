@@ -3,18 +3,19 @@
         <p class="title--small">
             {{ title }}
         </p>
-        
+
         <div class="inner-input padding--x-small shadow--small"
             :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''}`">
             <template v-if="isFile">
-                <input v-model="value" ref="input" :type="type" :readonly="readonly" :placeholder="placeholder"
-                    class="width--full" :hidden="isFile"  @change="filePicked()" :accept="allowedFileTypes">
+                <input v-model="localValue" ref="input" :type="type" :readonly="readonly" :placeholder="placeholder"
+                    class="width--full" :hidden="isFile" @change="filePicked()" :accept="allowedFileTypes">
                 <div class="input-filler" :class="`input-size-${size}`">
                 </div>
             </template>
             <template v-else>
-                <input :maxlength="maxLength" v-model="value" ref="input" :type="type" :readonly="readonly" :placeholder="placeholder"
-                    class="width--full" :class="`input-size-${size}`">
+                <input :maxlength="maxLength" v-model="localValue" ref="input" :type="type" :readonly="readonly"
+                    :placeholder="placeholder" class="width--full" :class="`input-size-${size}`"
+                    @input="updateValue($event?.target?.value)">
             </template>
             <div class="input-icon-wrapper pointer">
                 <MainIcon v-if="icon" :icon="icon" @onClick="iconClicked()" />
@@ -82,17 +83,14 @@ export default defineComponent({
         allowedAssets: {
             type: Array
         },
-    },
 
-    watch: {
-        value() {
-            this.$emit('onChange', this.value);
-        }
+        modelValue: {
+            type: String,
+        },
     },
 
     data() {
         return {
-            value: '' as string,
             file: null
         };
     },
@@ -109,23 +107,29 @@ export default defineComponent({
         allowedFileTypes(): string {
             let allowed = '';
 
-            if(this.allowedAssets?.includes('image')) {
+            if (this.allowedAssets?.includes('image')) {
                 allowed = 'image/jpeg,image/png,image/webp,image/gif'
             }
 
-            if(this.allowedAssets?.includes('video')) {
+            if (this.allowedAssets?.includes('video')) {
                 allowed += '/video/mp4,video/quicktime,video/x-msvideo'
             }
 
             return allowed ? allowed : '*';
-        }
+        },
+
+        localValue: {
+            get(): any {
+                return this.modelValue;
+            },
+
+            set(value: any) {
+                this.$emit('update:modelValue', value);
+            },
+        },
     },
 
     methods: {
-        setValue(value: string) {
-            this.value = value;
-        },
-
         iconClicked() {
             if (this.isFile) {
                 (this.$refs as any).input.click();
@@ -134,16 +138,20 @@ export default defineComponent({
 
             this.$emit('iconClicked')
         },
-        
+
         filePicked() {
-            if(!(this.$refs as any).input.files[0]) {
+            if (!(this.$refs as any).input.files[0]) {
                 return;
             }
 
             this.file = (this.$refs as any).input.files[0];
             // TODO: add validations
             this.$emit('onChange', this.file);
-        }
+        },
+
+        updateValue(value: any) {
+            this.localValue = value;
+        },
     }
 });
 </script>

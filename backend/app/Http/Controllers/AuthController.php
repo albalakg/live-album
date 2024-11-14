@@ -31,7 +31,7 @@ class AuthController extends Controller
     public function signup(SignupRequest $request)
     {
         try {
-            $user_service = new UserService();
+            $user_service = new UserService(new MailService);
             $created_user = $user_service->signup($request->validated());
             return $this->successResponse(MessagesEnum::SIGNUP_SUCCESS, $created_user);
         } catch (Exception $ex) {
@@ -53,13 +53,7 @@ class AuthController extends Controller
     public function forgotPassword(ForgotPasswordRequest $request)
     {
         try {
-            $user_service = new UserService(
-                null,
-                null,
-                null,
-                null,
-                new MailService
-            );
+            $user_service = new UserService(new MailService);
             $user_service->forgotPassword($request->email);
             return $this->successResponse(MessagesEnum::FORGOT_PASSWORD);
         } catch (Exception $ex) {

@@ -13,6 +13,18 @@ const EventStore = {
     getFiles(state: IEventStoreState): IEventFile[] {
       return state.files;
     },
+
+    // getSubscriptionStartDate(state: IEventStoreState): string | null {
+    //   return state.event?.start_date ?? null;
+    // },
+
+    // getSubscriptionEndDate(state: IEventStoreState): string | null {
+    //   return state.event?.end_date ?? null;
+    // },
+    
+    // hasActiveEvent(state: IEventStoreState): boolean {
+    //   return !!state.event;
+    // },
   },
 
   mutations: {
@@ -47,7 +59,6 @@ const EventStore = {
       context: { commit: (arg0: string, arg1: any) => void },
       file: any
     ) {
-      console.log("uploadFile", { file });
       return new Promise((resolve, reject) => {
         const packageToSend = serialize({ file }, { indices: true });
         axios
@@ -57,8 +68,6 @@ const EventStore = {
             },
           })
           .then((res) => {
-            console.log('res.data', res.data);
-            
             context.commit("ADD_FILE", res.data);
             resolve(res.data);
           })

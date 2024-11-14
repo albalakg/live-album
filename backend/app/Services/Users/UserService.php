@@ -33,6 +33,24 @@ class UserService
      * @param array $data
      * @return User
      */
+    public function createUser(array $data): User
+    {
+        $new_user = new User();
+        $new_user->role_id = $data['role_id'];
+        $new_user->first_name = $data['first_name'];
+        $new_user->last_name = $data['last_name'];
+        $new_user->email = $data['email'];
+        $new_user->password = $data['password'];
+        $new_user->status = StatusEnum::ACTIVE;
+        $new_user->save();
+
+        return $new_user;
+    }
+
+    /**
+     * @param array $data
+     * @return User
+     */
     public function signup(array $data): User
     {
         $new_user = new User();
@@ -45,7 +63,6 @@ class UserService
         $new_user->save();
 
         $this->sendEmailConfirmation($new_user);
-
         return $new_user;
     }
 
@@ -67,6 +84,7 @@ class UserService
 
         $user_email_confirmation->update(['verified_at' => now()]);
         $this->updateStatus(StatusEnum::ACTIVE, $user_email_confirmation->user_id);
+        return true;
     }
 
     /**
@@ -76,8 +94,8 @@ class UserService
     public function forgotPassword(string $email): void
     {
         $user = User::where('email', $email)->first();
-        if (!$user) {
-            throw new Exception(MessagesEnum::USER_NOT_FOUND);
+        if (!$user || !$user->isActive()) {
+            return;
         }
 
         if (!$this->canResetPassword($email)) {
@@ -86,15 +104,15 @@ class UserService
         }
 
         $this->deactivateUsersResetPasswords($email);
-
         $forgot_password_request = UserResetPassword::create([
             'token'       => TokenService::generate(),
             'email'       => $email,
             'status'      => StatusEnum::PENDING,
             'created_at'  => now()
         ]);
+        
 
-        $forgot_password_request->user_name = $user->details->first_name;
+        $forgot_password_request->user_name = $user->first_name;
         LogService::init()->info(LogsEnum::FORGOT_PASSWORD_REQUEST, ['user_id' => $user->id]);
         $this->mail_service->delay()->send($email, ForgotPasswordMail::class, $forgot_password_request);
     }
@@ -114,12 +132,15 @@ class UserService
             ->first();
 
         if (!$reset_password_request) {
-            throw new Exception('Reset Password request not found');
+            throw new Exception(MessagesEnum::RESET_PASSWORD_REQUEST_NOT_FOUND);
         }
 
-        $user = User::where('email', $email)->exists();
-        if (!$user) {
+        if (!$user = User::where('email', $email)->first()) {
             throw new Exception(MessagesEnum::USER_NOT_FOUND);
+        }
+
+        if(!$user->isActive) {
+            throw new Exception(MessagesEnum::USER_NOT_ACTIVE);
         }
 
         $this->updatePassword($user, $password);
@@ -193,11 +214,20 @@ class UserService
 
     /**
      * @param int $user_id
-     * @return User
+     * @return ?User
      */
     public function find(int $user_id): ?User
     {
         return User::find($user_id);
+    }
+
+    /**
+     * @param string $email
+     * @return ?User
+     */
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
     }
 
     /**
@@ -255,9 +285,10 @@ class UserService
     private function createEmailConfirmation(User $user, string $token): UserEmailConfirmation
     {
         $email_confirmation = new UserEmailConfirmation;
-        $email_confirmation->user_id = $user->user_id;
+        $email_confirmation->user_id = $user->id;
         $email_confirmation->email = $user->email;
         $email_confirmation->token = $token;
+        $email_confirmation->created_at = now();
         $email_confirmation->save();
 
         return $email_confirmation;

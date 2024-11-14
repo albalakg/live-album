@@ -1,0 +1,171 @@
+import axios from "axios";
+import { serialize } from "object-to-formdata";
+import {
+  IUserStoreState,
+  ILoginRequest,
+  IUserInfo,
+  ISignupRequest,
+  IForgotPasswordRequest,
+} from "@/helpers/interfaces";
+import { SubscriptionType } from "@/helpers/types";
+import Auth from "@/helpers/Auth";
+
+const UserStore = {
+  namespaced: true,
+
+  state: {
+    user: null,
+  } as IUserStoreState,
+
+  getters: {
+    getUser(state: IUserStoreState): IUserInfo | null {
+      return state.user;
+    },
+
+    getFirstName(state: IUserStoreState): string | null {
+      return state.user?.first_name ?? null;
+    },
+
+    getLastName(state: IUserStoreState): string | null {
+      return state.user?.last_name ?? null;
+    },
+
+    getEmailName(state: IUserStoreState): string | null {
+      return state.user?.email ?? null;
+    },
+
+    isLoggedIn(state: IUserStoreState): boolean {
+      return !!state.user;
+    },
+
+    getSubscriptionName(state: IUserStoreState): SubscriptionType | null {
+      return state.user?.subscription_name ?? null;
+    },
+
+    hasActiveSubscription(state: IUserStoreState): boolean {
+      return !!state.user?.subscription_name;
+    },
+  },
+
+  mutations: {
+    SET_USER(state: IUserStoreState, user: IUserInfo | null) {
+      state.user = user;
+    },
+  },
+
+  actions: {
+    login(
+      context: {
+        commit: (arg0: string, arg1: IUserInfo) => void;
+      },
+      payload: ILoginRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/login", payload)
+          .then((res) => {
+            const user = res.data.data.user;
+            Auth.login(user);
+            delete user.token;
+            delete user.expired_at;
+            context.commit("SET_USER", user);
+            resolve(user);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
+    },
+    
+    signup(
+      context: {
+        commit: (arg0: string, arg1: IUserInfo) => void;
+      },
+      payload: ISignupRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/signup", payload)
+          .then((res) => {
+            resolve(true);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(false);
+          });
+      });
+    },
+
+    logout(context: {
+      commit: (arg0: string, arg1: null) => void;
+    }) {
+      Auth.deleteCookie();
+      context.commit("SET_USER", null);
+    },
+
+    forgotPassword(context: {
+      commit: (arg0: string, arg1: null) => void;
+    },
+    payload: IForgotPasswordRequest) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/forgot-password", payload)
+          .then((res) => {
+            resolve(true);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(false);
+          });
+      });
+    },
+
+    resetPassword(context: {
+      commit: (arg0: string, arg1: null) => void;
+    },
+    payload: any) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/reset-password", payload)
+          .then((res) => {
+            resolve(true);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(false);
+          });
+      });
+    },
+
+    confirmEmail(context: {
+      commit: (arg0: string, arg1: null) => void;
+    },
+    payload: any) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/email-confirmation", payload)
+          .then((res) => {
+            resolve(true);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(false);
+          });
+      });
+    },
+
+    setUserAsLoggedIn(
+      context: {
+        commit: (arg0: string, arg1: IUserInfo) => void;
+      },
+      data: any
+    ) {
+      context.commit("SET_USER", data);
+    },
+  },
+
+  modules: {},
+};
+
+export default UserStore;

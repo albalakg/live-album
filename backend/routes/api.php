@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
+
+Route::post('contact', [ContactController::class, 'create']);
 
 Route::get('events/{id}', [EventController::class, 'find']);
 Route::post('events/file', [EventController::class, 'uploadFile']);

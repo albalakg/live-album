@@ -10,55 +10,60 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     name: 'login',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/LoginView.vue')
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    beforeEnter: Guard.user,
+    component: () => import('@/views/LogoutView.vue')
   },
   {
     path: '/signup',
     name: 'signup',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/SignupView.vue')
   },
   {
     path: '/forgot-password',
     name: 'forgot-password',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/ForgotPasswordView.vue')
   },
   {
     path: '/reset-password',
     name: 'resetPassword',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/ResetPasswordView.vue')
   },
   {
     path: '/email-confirmation',
     name: 'emailConfirmation',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/EmailConfirmationView.vue')
   },
   {
     path: '/contact-us',
     name: 'contact',
-    beforeEnter: Guard.local,
     component: () => import('@/views/ContactView.vue')
   },
   {
     path: '/order',
     name: 'order',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/OrderView.vue')
   },
   {
     path: '/terms-and-conditions',
     name: 'termsAndConditions',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/TermsAndConditionsView.vue')
   },
   {
     path: '/event',
     name: 'event',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/EventIndexView.vue'),
     children: [
       {
@@ -81,19 +86,19 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/gallery/:galleryId',
     name: 'gallery',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/GalleryView.vue')
   },
   {
     path: '/profile',
     name: 'profile',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/ProfileView.vue')
   },
   {
     path: '/design',
     name: 'design',
-    beforeEnter: Guard.local,
+    beforeEnter: Guard.guest,
     component: () => import('@/views/DesignView.vue')
   },
   {

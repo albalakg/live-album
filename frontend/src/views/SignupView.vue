@@ -16,20 +16,20 @@
         <h3 class="text--dark title--x-large text--center">
           שמחים שמצטרפים אלינו
         </h3>
-        <div class="display--flex width--full justify--space-between">
+        <form class="display--flex width--full justify--space-between" @submit.prevent="signup()">
           <div class="signup-form-content-side padding--large">
-            <MainInput type="email" title="כתובת מייל" />
+            <MainInput v-model="form.email" type="email" title="כתובת מייל" />
             <br>
-            <MainInput type="password" title="סיסמה" />
+            <MainInput v-model="form.password" type="password" title="סיסמה" />
 
             <div class="signup-form-bottom">
-              <MainButton text="הרשמה" />
+              <MainButton :loading="isLoading" text="הרשמה" />
             </div>
           </div>
           <div class="signup-form-content-side padding--large">
-            <MainInput title="שם פרטי" />
+            <MainInput v-model="form.first_name" title="שם פרטי" />
             <br>
-            <MainInput title="שם משפחה" />
+            <MainInput v-model="form.last_name" title="שם משפחה" />
 
             <div class="signup-form-bottom">
               <p class="title--small text--dark text--center">
@@ -39,7 +39,7 @@
               </p>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   </div>
@@ -50,6 +50,7 @@ import MainButton from '@/components/library/buttons/MainButton.vue';
 import MainCube from '@/components/library/background/MainCube.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import { defineComponent } from 'vue';
+import { ISignupRequest } from '@/helpers/interfaces';
 
 export default defineComponent({
   name: 'SignupView',
@@ -62,11 +63,38 @@ export default defineComponent({
 
   data() {
     return {
+      form: {
+        email: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+      } as ISignupRequest,
+      isLoading: false as boolean
     };
   },
 
   methods: {
+    async signup() {
+      const errors = this.validateForm();   
+      if(errors.length) {
+        this.$store.dispatch('notification/addError', errors[0]);
+        return;
+      } 
+      
+      this.isLoading = true;
+      const isSuccess = await this.$store.dispatch('user/signup', this.form);
+      this.isLoading = false;
 
+      if(!isSuccess) {
+        return;
+      }
+
+      this.$router.push('/login');
+    },
+
+    validateForm() {
+      return [];
+    }
   }
 });
 </script>

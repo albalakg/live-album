@@ -1,3 +1,5 @@
-export type IEventFileType = 'image' | 'video';
+export type EventFileType = 'image' | 'video';
 
-export type Size = 'x-small' | 'small' | 'medium' | 'large' | 'x-large';
+export type SizeType = 'x-small' | 'small' | 'medium' | 'large' | 'x-large';
+
+export type SubscriptionType = 'מסלול בסיסי' | 'מסלול פרימיום';
