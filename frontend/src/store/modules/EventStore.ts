@@ -17,13 +17,15 @@ const EventStore = {
 
   mutations: {
     ADD_FILE(state: IEventStoreState, image: IEventFile) {
-      image.path = process.env.VUE_APP_SERVER_BASE_URL + '/files/' + image.path;
+      // image.path = process.env.VUE_APP_SERVER_BASE_URL + '/files/' + image.path;
+      image.path = 'https://d19tazijx5ii9p.cloudfront.net/' + image.path;
       state.files.push(image);
     },
     
     SET_FILES(state: IEventStoreState, files: IEventFile[]) {
       files.forEach(image => {
-        image.path = process.env.VUE_APP_SERVER_BASE_URL + '/files/' + image.path;
+        // image.path = process.env.VUE_APP_SERVER_BASE_URL + '/files/' + image.path;
+        image.path = 'https://d19tazijx5ii9p.cloudfront.net/' + image.path;
         if(!state.files.map(image => image.path).includes(image.path)) {
           state.files.push(image);
         }

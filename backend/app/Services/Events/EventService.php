@@ -34,18 +34,6 @@ class EventService
     }
 
     /**
-     * @param CreateEventRequest $request
-     * @return ?Event
-     */
-    public function create(CreateEventRequest $request): ?Event
-    {
-        $event = new Event;
-        $event->save();
-
-        return $event;
-    }
-
-    /**
      * @param UploadFileRequest $request
      * @return array
      */
