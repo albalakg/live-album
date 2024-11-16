@@ -3,7 +3,7 @@
     <div class="overlay"></div>
     <div class="content-wrapper">
       <h1 class="title">Amit & Gal Wedding 25.11.2024</h1>
-      <button class="upload-button" :disabled="isUploading" @click="uploadFile()">Upload Image</button>
+      <button class="upload-button" :disabled="isUploading" @click="uploadFile">Upload Image</button>
       <div v-if="showNotification" class="notification">
         <span v-if="uploadSuccess">File uploaded successfully!</span>
         <span v-else>Failed to upload</span>
@@ -13,55 +13,59 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   name: 'HomeView',
-  data() {
-    return {
-      isUploading: false,
-      uploadSuccess: false,
-      uploadFailed: false,
-    };
-  },
+  setup() {
+    const store = useStore();
 
-  computed: {
-    showNotification(): boolean {
-      return (this.uploadSuccess || this.uploadFailed);
-    }
-  },
+    const isUploading = ref(false);
+    const uploadSuccess = ref(false);
+    const uploadFailed = ref(false);
 
-  methods: {
-    uploadFile() {
+    const showNotification = computed(() => uploadSuccess.value || uploadFailed.value);
+
+    const uploadFile = () => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*,video/*';
+      input.setAttribute('capture', 'environment'); // Prompt to use camera
       input.onchange = async (event: Event) => {
         const target = event.target as HTMLInputElement;
         if (target.files && target.files[0]) {
-          this.isUploading = true;
-          this.uploadFailed = false;
-          this.uploadSuccess = false;
+          isUploading.value = true;
+          uploadFailed.value = false;
+          uploadSuccess.value = false;
           try {
-            const response = await this.$store.dispatch("event/uploadFile", target.files[0]);
+            const response = await store.dispatch("event/uploadFile", target.files[0]);
             console.log('response from vue', response);
-            this.uploadSuccess = true;
+            uploadSuccess.value = true;
             setTimeout(() => {
-              this.uploadSuccess = false;
+              uploadSuccess.value = false;
             }, 5000);
           } catch (error) {
-            this.uploadFailed = true;
+            uploadFailed.value = true;
             setTimeout(() => {
-              this.uploadFailed = false;
+              uploadFailed.value = false;
             }, 5000);
             console.error('Upload failed', error);
           } finally {
-            this.isUploading = false;
+            isUploading.value = false;
           }
         }
       };
       input.click();
-    }
+    };
+
+    return {
+      isUploading,
+      uploadSuccess,
+      uploadFailed,
+      showNotification,
+      uploadFile
+    };
   }
 });
 </script>
