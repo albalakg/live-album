@@ -51,7 +51,6 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/order',
     name: 'order',
-    beforeEnter: Guard.guest,
     component: () => import('@/views/OrderView.vue')
   },
   {

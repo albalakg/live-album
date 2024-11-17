@@ -30,6 +30,27 @@ class UserService
     ) {}
 
     /**
+     * @param int $user_id
+     * @return ?User
+     */
+    public function getProfile(int $user_id): ?User
+    {
+        return User::with('events')->find($user_id);
+    }
+
+    /**
+     * @param User $user
+     * @return void
+     */
+    public function logout(User $user)
+    {
+        $token = $user->token();
+        if($token) {
+            $token->revoke();
+        }
+    }
+
+    /**
      * @param array $data
      * @return User
      */

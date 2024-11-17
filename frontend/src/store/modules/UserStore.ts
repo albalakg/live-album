@@ -77,7 +77,7 @@ const UserStore = {
           });
       });
     },
-    
+
     signup(
       context: {
         commit: (arg0: string, arg1: IUserInfo) => void;
@@ -97,17 +97,25 @@ const UserStore = {
       });
     },
 
-    logout(context: {
-      commit: (arg0: string, arg1: null) => void;
-    }) {
+    logout(context: { commit: (arg0: string, arg1: null) => void }) {
+      axios
+        .post("user/logout")
+        .then(() => {
+          //
+        })
+        .catch((err) => {
+          console.warn("get: ", err);
+        });
       Auth.deleteCookie();
       context.commit("SET_USER", null);
     },
 
-    forgotPassword(context: {
-      commit: (arg0: string, arg1: null) => void;
-    },
-    payload: IForgotPasswordRequest) {
+    forgotPassword(
+      context: {
+        commit: (arg0: string, arg1: null) => void;
+      },
+      payload: IForgotPasswordRequest
+    ) {
       return new Promise((resolve) => {
         axios
           .post("auth/forgot-password", payload)
@@ -121,10 +129,12 @@ const UserStore = {
       });
     },
 
-    resetPassword(context: {
-      commit: (arg0: string, arg1: null) => void;
-    },
-    payload: any) {
+    resetPassword(
+      context: {
+        commit: (arg0: string, arg1: null) => void;
+      },
+      payload: any
+    ) {
       return new Promise((resolve) => {
         axios
           .post("auth/reset-password", payload)
@@ -138,10 +148,12 @@ const UserStore = {
       });
     },
 
-    confirmEmail(context: {
-      commit: (arg0: string, arg1: null) => void;
-    },
-    payload: any) {
+    confirmEmail(
+      context: {
+        commit: (arg0: string, arg1: null) => void;
+      },
+      payload: any
+    ) {
       return new Promise((resolve) => {
         axios
           .post("auth/email-confirmation", payload)
@@ -155,12 +167,25 @@ const UserStore = {
       });
     },
 
+    getProfile(context: { commit: (arg0: string, arg1: any) => void }) {
+      axios
+        .get("user/profile")
+        .then((res) => {
+          context.commit("SET_USER", res.data.data);
+        })
+        .catch((err) => {
+          console.warn("get: ", err);
+        });
+    },
+
     setUserAsLoggedIn(
       context: {
         commit: (arg0: string, arg1: IUserInfo) => void;
       },
       data: any
     ) {
+      delete data.token;
+      delete data.expired_at;
       context.commit("SET_USER", data);
     },
   },

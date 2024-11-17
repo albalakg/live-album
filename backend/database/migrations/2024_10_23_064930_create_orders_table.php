@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id')->unsigned()->index();
-            $table->integer('event_id')->unsigned()->index();
+            $table->integer('subscription_id')->unsigned()->index();
             $table->string('order_number', 9);
             $table->integer('status')->unsigned()->index();
             $table->decimal('price')->unsigned()->index();

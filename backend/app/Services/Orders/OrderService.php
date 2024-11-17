@@ -48,7 +48,6 @@ class OrderService
     public function create(array $data, int $user_id): Order
     {
         $subscription = $this->subscription_service->find($data['subscription_id']);
-
         $new_order = new Order();
         $new_order->user_id = $user_id;
         $new_order->subscription_id = $data['subscription_id'];
@@ -58,7 +57,6 @@ class OrderService
         $new_order->save();
 
         $this->payment_service->start($new_order);
-
         return $new_order;
     }
 
@@ -83,7 +81,7 @@ class OrderService
         ]);
 
         foreach ($order->subscription->events_allowed ?? 1 as $event) {
-            $this->event_service->create($order->user_id);
+            $this->event_service->create($order);
         }
         return $order;
     }

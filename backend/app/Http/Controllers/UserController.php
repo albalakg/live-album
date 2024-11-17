@@ -6,6 +6,7 @@ use Exception;
 use App\Http\Requests\UpdateUserRequest;
 use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
+use App\Services\Events\EventService;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -60,6 +61,28 @@ class UserController extends Controller
             $user_service = new UserService();
             $response = $user_service->find($user_id);
             return $this->successResponse(MessagesEnum::USER_FOUND_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+    
+    public function profile(int $user_id)
+    {
+        try {
+            $user_service = new UserService(null , new EventService());
+            $response = $user_service->getProfile($user_id);
+            return $this->successResponse(MessagesEnum::USER_FOUND_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+      
+    public function logout()
+    {
+        try {
+            $user_service = new UserService();
+            $response = $user_service->logout(Auth::user());
+            return $this->successResponse(MessagesEnum::LOGIN_SUCCESS, $response);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);
         }

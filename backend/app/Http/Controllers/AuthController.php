@@ -8,6 +8,7 @@ use App\Services\Users\UserService;
 use App\Http\Requests\SignupRequest;
 use App\Services\Enums\MessagesEnum;
 use App\Services\Users\LoginService;
+use Illuminate\Support\Facades\Auth;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
 use App\Http\Requests\UploadFileRequest;

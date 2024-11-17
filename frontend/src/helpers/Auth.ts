@@ -27,9 +27,6 @@ class Auth {
             this.deleteCookie();
             return null;
         }
-        
-        delete data.token;
-        delete data.expired_at;
 
         return data;
     }
@@ -39,6 +36,8 @@ class Auth {
     }
 
     token() {
+        console.log(this.get());
+        
         return this.get() ? this.get().token : '';
     }
 

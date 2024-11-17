@@ -29,6 +29,7 @@ export default defineComponent({
     async setInitialSettings() {
       if(Auth.isLogged()) {
         this.$store.dispatch('user/setUserAsLoggedIn', Auth.get());
+        this.$store.dispatch('user/getProfile');
       }
     },
   }

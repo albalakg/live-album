@@ -37,6 +37,10 @@ class RouteServiceProvider extends ServiceProvider
             Route::prefix('api/auth')
                 ->middleware('throttle:100,10', 'guest')
                 ->group(base_path("routes/groups/auth.php"));
+
+            Route::prefix('api/user')
+                ->middleware('auth:api')
+                ->group(base_path("routes/groups/user.php"));
         });
     }
 
