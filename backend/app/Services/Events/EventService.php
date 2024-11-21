@@ -43,12 +43,47 @@ class EventService
 
     /**
      * @param int $id
-     * @param int $user_id
      * @return ?Event
      */
     public function find(int $id): ?Event
     {
         $event = Event::with('assets')->first($id);
+        if (!$event) {
+            return null;
+        }
+
+        if(!$event->isActive()) {
+            throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
+        }
+
+        return $event;
+    }
+
+    /**
+     * @param int $user_id
+     * @return ?Event
+     */
+    public function getEventByUser(int $user_id): ?Event
+    {
+        $event = Event::where('user_id', $user_id)->select('id', 'name', 'description', 'status', 'starts_at', 'finished_at')->first();
+        if (!$event) {
+            return null;
+        }
+
+        if(!$event->isActive()) {
+            throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
+        }
+
+        return $event;
+    }
+
+    /**
+     * @param int $id
+     * @return ?Event
+     */
+    public function getEventAssets(int $id): ?Event
+    {
+        $event = EventAsset::where('event_id', $id)->get();
         if (!$event) {
             return null;
         }

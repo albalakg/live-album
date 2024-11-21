@@ -66,11 +66,11 @@ class UserController extends Controller
         }
     }
     
-    public function profile(int $user_id)
+    public function profile()
     {
         try {
             $user_service = new UserService(null , new EventService());
-            $response = $user_service->getProfile($user_id);
+            $response = $user_service->getProfile(Auth::user());
             return $this->successResponse(MessagesEnum::USER_FOUND_SUCCESS, $response);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);
@@ -82,7 +82,7 @@ class UserController extends Controller
         try {
             $user_service = new UserService();
             $response = $user_service->logout(Auth::user());
-            return $this->successResponse(MessagesEnum::LOGIN_SUCCESS, $response);
+            return $this->successResponse(MessagesEnum::LOGOUT_SUCCESS, $response);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);
         }

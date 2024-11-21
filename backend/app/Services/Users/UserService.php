@@ -26,16 +26,17 @@ class UserService
 {
     public function __construct(
         private ?MailService $mail_service = null,
-        private ?EventService $eventService = null
+        private ?EventService $event_service = null
     ) {}
 
     /**
-     * @param int $user_id
+     * @param User $user
      * @return ?User
      */
-    public function getProfile(int $user_id): ?User
+    public function getProfile(User $user): ?User
     {
-        return User::with('events')->find($user_id);
+        $user->event = $this->event_service->getEventByUser($user->id);
+        return $user;
     }
 
     /**
@@ -273,7 +274,7 @@ class UserService
 
         foreach ($deleted_user->events as $event) {
             try {
-                $this->eventService->delete($event->id, $deleting_user_id);
+                $this->event_service->delete($event->id, $deleting_user_id);
             } catch (Exception $ex) {
                 LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_DELETE_EVENT]);
             }

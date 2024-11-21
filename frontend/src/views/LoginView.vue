@@ -93,6 +93,8 @@ export default defineComponent({
         return;
       }
 
+      await this.$store.dispatch('user/getProfile');
+
       if(user.subscription_name) {
         this.$router.push('/event');
       } else {

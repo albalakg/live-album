@@ -18,15 +18,19 @@ export interface IUserInfo {
   id: number;
   first_name: string;
   last_name: string;
+  events: IEvent[];
   email: string;
   role: string;
   subscription_name: SubscriptionType;
 }
 
-export interface IEventInfo {
-  subscription_name: SubscriptionType;
-  start_date: string;
-  end_date: string | null;
+export interface IEvent {
+  id: number;
+  status: number;
+  name: string | null;
+  description: string | null;
+  starts_at: string | null;
+  finished_at: string | null;
 }
 
 export interface IEventFile {

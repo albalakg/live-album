@@ -22,6 +22,7 @@ class MessagesEnum extends BaseEnum
 
     // Info
     const LOGIN_SUCCESS = 'Logged in successfully';
+    const LOGOUT_SUCCESS = 'Logged out successfully';
     const SIGNUP_SUCCESS = 'You have Signed Up Successfully';
     const RESET_PASSWORD = 'You have reset your password';
     const FORGOT_PASSWORD = 'An email has been sent to the requested address';
