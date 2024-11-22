@@ -2,11 +2,18 @@
   <div class="home">
     <div class="overlay"></div>
     <div class="content-wrapper">
-      <h1 class="title">Amit & Gal Wedding 25.11.2024</h1>
-      <button class="upload-button" :disabled="isUploading" @click="uploadFile">Upload Image</button>
-      <div v-if="showNotification" class="notification">
-        <span v-if="uploadSuccess">File uploaded successfully!</span>
-        <span v-else>Failed to upload</span>
+      <h1 class="title">Amit & Gal
+        <br>
+        Wedding 25.11.2024</h1>
+      <button class="upload-button" :disabled="isUploading" @click="uploadFile">
+        <span v-if="isUploading">מעלה...</span>
+        <span v-else>תעלו ותשתפו</span>
+      </button>
+      <div :class="{
+        'hidden': !showNotification
+      }" class="notification">
+        <span v-if="uploadSuccess">הקובץ עלה בהצלחה!</span>
+        <span v-else>נכשל לעלות את הקובץ</span>
       </div>
     </div>
   </div>
@@ -27,25 +34,42 @@ export default defineComponent({
 
     const showNotification = computed(() => uploadSuccess.value || uploadFailed.value);
 
+    // Function to detect if the device is mobile
+    const isMobileDevice = () => {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    };
+
     const uploadFile = () => {
+      alert('starting');
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*,video/*';
-      input.setAttribute('capture', 'environment'); // Prompt to use camera
+      
+      if (!isMobileDevice()) {
+        input.removeAttribute('capture');
+      }
+      
       input.onchange = async (event: Event) => {
+        alert('File uploaded');
         const target = event.target as HTMLInputElement;
         if (target.files && target.files[0]) {
+          alert('Has file');
           isUploading.value = true;
           uploadFailed.value = false;
           uploadSuccess.value = false;
           try {
+            alert(target.files[0].name + ' ||| ' + target.files[0].type + ' ||| ' + target.files[0].size);
             const response = await store.dispatch("event/uploadFile", target.files[0]);
             console.log('response from vue', response);
             uploadSuccess.value = true;
             setTimeout(() => {
               uploadSuccess.value = false;
             }, 5000);
-          } catch (error) {
+          } catch (error: any) {
+            console.log(error);
+            alert(error);
+            alert(error?.response);
+            alert(error?.response?.message);
             uploadFailed.value = true;
             setTimeout(() => {
               uploadFailed.value = false;
@@ -54,8 +78,11 @@ export default defineComponent({
           } finally {
             isUploading.value = false;
           }
+        } else {
+          alert('No file:  -  ' + JSON.stringify(target.files));
         }
       };
+
       input.click();
     };
 
@@ -66,7 +93,7 @@ export default defineComponent({
       showNotification,
       uploadFile
     };
-  }
+  },
 });
 </script>
 
@@ -80,7 +107,6 @@ export default defineComponent({
   background-size: cover;
   position: relative;
 }
-
 .overlay {
   position: absolute;
   top: 0;
@@ -120,10 +146,11 @@ export default defineComponent({
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(255, 69, 0, 0.3);
   transition: all 0.3s ease;
+  font-family: system-ui, sans-serif;
 }
 
 .upload-button:disabled {
-  background: #ccc;
+  opacity: .9;
   cursor: not-allowed;
 }
 
@@ -147,6 +174,14 @@ export default defineComponent({
   justify-content: center;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   transition: opacity 0.3s ease;
+}
+
+span {
+  font-family: system-ui, sans-serif;
+}
+
+.hidden {
+  opacity: 0;
 }
 
 @media (min-width: 768px) {

@@ -146,6 +146,7 @@ export default defineComponent({
 .album-wrapper {
   width: 100%;
   height: 100vh;
+  background-color: #222;
 }
 
 .title-container {
