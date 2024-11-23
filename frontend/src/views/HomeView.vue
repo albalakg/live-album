@@ -2,16 +2,13 @@
   <div class="home">
     <div class="overlay"></div>
     <div class="content-wrapper">
-      <h1 class="title">Amit & Gal
-        <br>
-        Wedding 25.11.2024</h1>
-      <button class="upload-button" :disabled="isUploading" @click="uploadFile">
+      <h1 class="title">Amit & Gal<br>Wedding 25.11.2024</h1>
+      <button class="upload-button" :disabled="isUploading" @click="triggerFileUpload">
         <span v-if="isUploading">מעלה...</span>
         <span v-else>תעלו ותשתפו</span>
       </button>
-      <div :class="{
-        'hidden': !showNotification
-      }" class="notification">
+      <input type="file" ref="fileInput" accept="image/*,video/*" @change="handleFileChange" style="display:none;" />
+      <div :class="{ 'hidden': !showNotification }" class="notification">
         <span v-if="uploadSuccess">הקובץ עלה בהצלחה!</span>
         <span v-else>נכשל לעלות את הקובץ</span>
       </div>
@@ -27,6 +24,7 @@ export default defineComponent({
   name: 'HomeView',
   setup() {
     const store = useStore();
+    const fileInput = ref<HTMLInputElement | null>(null);
 
     const isUploading = ref(false);
     const uploadSuccess = ref(false);
@@ -34,56 +32,38 @@ export default defineComponent({
 
     const showNotification = computed(() => uploadSuccess.value || uploadFailed.value);
 
-    // Function to detect if the device is mobile
-    const isMobileDevice = () => {
-      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const triggerFileUpload = () => {
+      if (fileInput.value) {
+        fileInput.value.click();
+      }
     };
 
-    const uploadFile = () => {
-      alert('starting');
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*,video/*';
-      
-      if (!isMobileDevice()) {
-        input.removeAttribute('capture');
-      }
-      
-      input.onchange = async (event: Event) => {
-        alert('File uploaded');
-        const target = event.target as HTMLInputElement;
-        if (target.files && target.files[0]) {
-          alert('Has file');
-          isUploading.value = true;
-          uploadFailed.value = false;
-          uploadSuccess.value = false;
-          try {
-            alert(target.files[0].name + ' ||| ' + target.files[0].type + ' ||| ' + target.files[0].size);
-            const response = await store.dispatch("event/uploadFile", target.files[0]);
-            console.log('response from vue', response);
-            uploadSuccess.value = true;
-            setTimeout(() => {
-              uploadSuccess.value = false;
-            }, 5000);
-          } catch (error: any) {
-            console.log(error);
-            alert(error);
-            alert(error?.response);
-            alert(error?.response?.message);
-            uploadFailed.value = true;
-            setTimeout(() => {
-              uploadFailed.value = false;
-            }, 5000);
-            console.error('Upload failed', error);
-          } finally {
-            isUploading.value = false;
-          }
-        } else {
-          alert('No file:  -  ' + JSON.stringify(target.files));
-        }
-      };
+    const handleFileChange = async (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        isUploading.value = true;
+        uploadFailed.value = false;
+        uploadSuccess.value = false;
 
-      input.click();
+        try {
+          const response = await store.dispatch("event/uploadFile", target.files[0]);
+          console.log('response from vue', response);
+          uploadSuccess.value = true;
+          setTimeout(() => {
+            uploadSuccess.value = false;
+          }, 5000);
+        } catch (error: any) {
+          console.error('Upload failed', error);
+          uploadFailed.value = true;
+          setTimeout(() => {
+            uploadFailed.value = false;
+          }, 5000);
+        } finally {
+          isUploading.value = false;
+        }
+      } else {
+        alert('No file selected');
+      }
     };
 
     return {
@@ -91,11 +71,14 @@ export default defineComponent({
       uploadSuccess,
       uploadFailed,
       showNotification,
-      uploadFile
+      triggerFileUpload,
+      handleFileChange,
+      fileInput,
     };
   },
 });
 </script>
+
 
 <style lang="scss">
 .home {
@@ -106,7 +89,9 @@ export default defineComponent({
   background: url('@/assets/Save-the-Date.jpeg') no-repeat center center;
   background-size: cover;
   position: relative;
+  direction: rtl;
 }
+
 .overlay {
   position: absolute;
   top: 0;

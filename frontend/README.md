@@ -1,4 +1,4 @@
-# Live Albums
+# Snap Share
 
 ## Project setup
 ```
