@@ -32,7 +32,11 @@ const UserStore = {
       return state.user?.last_name ?? null;
     },
 
-    getEmailName(state: IUserStoreState): string | null {
+    getFullName(state: IUserStoreState): string {
+      return state.user?.first_name ?? '' + ' ' + state.user?.last_name ?? '';
+    },
+
+    getEmail(state: IUserStoreState): string | null {
       return state.user?.email ?? null;
     },
 
@@ -41,11 +45,19 @@ const UserStore = {
     },
 
     getSubscriptionName(state: IUserStoreState): SubscriptionType | null {
-      return state.user?.subscription_name ?? null;
+      return state.user?.order?.subscription?.name ?? null;
+    },
+
+    getSubscriptionStartDate(state: IUserStoreState): string | null | undefined {
+      return state.user?.order?.created_at;
+    },
+
+    getEventStatus(state: IUserStoreState): number | undefined {
+      return state.user?.event.status;
     },
 
     hasActiveSubscription(state: IUserStoreState): boolean {
-      return !!state.user?.subscription_name;
+      return !!state.user?.order?.subscription;
     },
   },
 

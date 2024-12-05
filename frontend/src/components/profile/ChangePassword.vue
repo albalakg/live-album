@@ -71,8 +71,7 @@ export default defineComponent({
     position: relative;
     z-index: 1;
     min-height: fit-content;
-    height: calc(100% - 80px);
     margin-top: 20px;
-
+    height: calc(55% - 80px);
 }
 </style>

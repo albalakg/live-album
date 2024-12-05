@@ -65,7 +65,7 @@ class EventService
      */
     public function getEventByUser(int $user_id): ?Event
     {
-        $event = Event::where('user_id', $user_id)->select('id', 'name', 'description', 'status', 'starts_at', 'finished_at')->first();
+        $event = Event::where('user_id', $user_id)->select('id', 'order_id', 'name', 'description', 'status', 'starts_at', 'finished_at')->first();
         if (!$event) {
             return null;
         }

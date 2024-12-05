@@ -34,23 +34,7 @@
         </div>
       </div>
       <div class="profile-left padding--large display--flex direction--column justify--space-between">
-        <div
-          class="general-info brs--medium padding--x-large bg--white display--flex direction--column justify--space-between">
-          <div class="padding--x-small display--flex justify--space-between">
-            <span class="text--dark title--small">סטטוס</span>
-            <span class="text--green title--small">פעיל</span>
-          </div>
-          <div class="padding--x-small display--flex justify--space-between" v-for="(item, index) in items"
-            :key="index">
-            <span class="text--dark title--small">{{ item.text }}</span>
-            <span class="text--dark">{{ item.value }}</span>
-          </div>
-          <div class="display--flex justify--end">
-            <div class="width--half">
-              <MainButton color="pink" text="שדרג מנוי" />
-            </div>
-          </div>
-        </div>
+        <ProfileSubscriptionCard />
         <ChangePassword />
       </div>
     </div>
@@ -60,9 +44,9 @@
 <script lang="ts">
 import MainCube from '@/components/library/background/MainCube.vue';
 import BaseButton from '@/components/library/buttons/BaseButton.vue';
-import MainButton from '@/components/library/buttons/MainButton.vue';
 import ChangePassword from '@/components/profile/ChangePassword.vue';
 import EditProfile from '@/components/profile/EditProfile.vue';
+import ProfileSubscriptionCard from '@/components/profile/ProfileSubscriptionCard.vue';
 import { IUserInfo } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
 export default defineComponent({
@@ -71,7 +55,7 @@ export default defineComponent({
   components: {
     MainCube,
     BaseButton,
-    MainButton,
+    ProfileSubscriptionCard,
     EditProfile,
     ChangePassword,
   },
@@ -87,19 +71,6 @@ export default defineComponent({
   },
 
   computed: {
-    items(): Array<any> {
-      return [
-        {
-          text: 'פרטי מנוי',
-          value: 'מנוי בסיסי',
-        },
-        {
-          text: 'תאריך רכישה',
-          value: '20/11/2024',
-        },
-      ];
-    },
-
     user(): IUserInfo {
       return this.$store.getters['user/getUser'];
     }
@@ -134,16 +105,6 @@ export default defineComponent({
       width: 40%;
       height: 100%;
       min-height: fit-content;
-
-      .general-info {
-        height: calc(40% - 80px);
-        margin-bottom: 20px;
-      }
-
-      .change-password {
-        min-height: fit-content;
-        height: calc(55% - 80px);
-      }
     }
 
     .profile-form {

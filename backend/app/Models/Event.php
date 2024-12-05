@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Event extends Model
 {
     use HasFactory, SoftDeletes;
+    
+    protected $hidden = [
+        'order_id',
+    ];
 
     public function assets()
     {

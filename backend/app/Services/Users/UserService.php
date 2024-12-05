@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\UserEmailConfirmation;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
+use App\Services\Orders\OrderService;
 use App\Services\Helpers\TokenService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -27,7 +28,8 @@ class UserService
 {
     public function __construct(
         private ?MailService $mail_service = null,
-        private ?EventService $event_service = null
+        private ?EventService $event_service = null,
+        private ?OrderService $order_service = null
     ) {}
 
     /**
@@ -37,6 +39,7 @@ class UserService
     public function getProfile(User $user): ?User
     {
         $user->event = $this->event_service->getEventByUser($user->id);
+        $user->order = $this->order_service->find($user->event->order_id)->only(['order_number', 'subscription', 'price', 'created_at']);
         return $user;
     }
 

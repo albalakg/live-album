@@ -52,6 +52,7 @@ import MainLine from '@/components/library/background/MainLine.vue';
 import MainButton from '@/components/library/buttons/MainButton.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import MainTextArea from '@/components/library/inputs/MainTextArea.vue';
+import { IUserInfo } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -76,7 +77,20 @@ export default defineComponent({
     };
   },
 
+  created() {
+    this.setUser();
+  },
+
   methods: {
+    setUser() {
+      if(!this.$store.getters['user/isLoggedIn']) {
+        return;
+      }
+
+      this.form.email = this.$store.getters['user/getEmail'];
+      this.form.full_name = this.$store.getters['user/getFullName'];
+    },
+
     async submit() {
       const errors = this.validateForm();   
       if(errors.length) {
