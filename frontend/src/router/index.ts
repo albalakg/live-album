@@ -91,7 +91,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/profile',
     name: 'profile',
-    beforeEnter: Guard.guest,
+    beforeEnter: Guard.user,
     component: () => import('@/views/ProfileView.vue')
   },
   {

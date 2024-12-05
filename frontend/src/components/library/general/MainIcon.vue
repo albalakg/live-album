@@ -1,5 +1,5 @@
 <template>
-    <div class="main-icon" @click="clicked()" :class="{ disabled }">
+    <div class="main-icon" @click="clicked()" :class="{ disabled, 'pointer': clickable }">
         <span class="material-symbols-outlined">
             {{ icon }}
         </span>
@@ -21,12 +21,19 @@ export default defineComponent({
         disabled: {
             type: Boolean,
             default: false
-        }
+        },
+
+        clickable: {
+            type: Boolean,
+            default: false
+        },
     },
 
     methods: {
         clicked() {
-            this.$emit('onClick')
+            if(this.clickable) {
+                this.$emit('onClick')
+            }
         }
     },
 });

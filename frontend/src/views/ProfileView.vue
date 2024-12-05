@@ -1,14 +1,5 @@
 <template>
   <div class="profile">
-    <!-- <MainLine color="light-green" top="250px" width="full" height="x-large" />
-    <MainLine color="green" top="300px" width="full" height="large" />
-    <MainLine color="light-green" top="335px" width="full" height="medium" />
-    <MainLine color="green" top="350px" width="full" height="xx-large" />
-    <MainLine color="light-green" top="430px" width="full" height="medium" />
-    <MainLine color="green" top="455px" width="full" height="large" />
-    <MainLine color="light-green" top="485px" width="full" height="x-large" />
- -->
-
     <MainCube color="pink" left="27%" top="72%" width="small" height="small" />
     <MainCube color="pink" left="23%" top="73%" width="medium" height="medium" />
     <MainCube color="pink" left="26%" top="76%" width="large" height="large" />
@@ -24,16 +15,7 @@
       class="profile-content bg--gray margin--auto brs--medium padding--medium shadow--small display--flex justify--space-between">
       <div class="profile-right padding--large display--flex justify--space-between direction--column">
         <div>
-          <h2 class="title--large">עריכת פרטי משתמש</h2>
-          <div class="profile-form">
-            <MainInput size="medium" title="כתובת מייל" />
-            <br>
-            <MainInput size="medium" title="שם פרטי" />
-            <br>
-            <MainInput size="medium" title="שם משפחה" />
-            <br>
-            <MainButton class="form-button" text="עדכן משתמש" />
-          </div>
+          <EditProfile :user="user" />
         </div>
         <br>
         <br>
@@ -69,26 +51,7 @@
             </div>
           </div>
         </div>
-        <div class="change-password bg--white brs--medium padding--x-large">
-          <div class="display--flex justify--space-between align--center">
-            <div class="width--half">
-              <h3 class="title--medium">
-                החלפת סיסמה
-              </h3>
-            </div>
-            <div class="width--half text--left">
-              <MainIcon icon="visibility" />
-            </div>
-          </div>
-          <div>
-            <br>
-            <MainInput size="medium" type="password" title="סיסמה ישנה" />
-            <br>
-            <MainInput size="medium" type="password" title="סיסמה חדשה" />
-            <br>
-            <MainButton class="form-button" text="איפוס סיסמה" />
-          </div>
-        </div>
+        <ChangePassword />
       </div>
     </div>
   </div>
@@ -96,27 +59,30 @@
 
 <script lang="ts">
 import MainCube from '@/components/library/background/MainCube.vue';
-import MainLine from '@/components/library/background/MainLine.vue';
 import BaseButton from '@/components/library/buttons/BaseButton.vue';
 import MainButton from '@/components/library/buttons/MainButton.vue';
-import MainIcon from '@/components/library/general/MainIcon.vue';
-import MainInput from '@/components/library/inputs/MainInput.vue';
+import ChangePassword from '@/components/profile/ChangePassword.vue';
+import EditProfile from '@/components/profile/EditProfile.vue';
+import { IUserInfo } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
-
 export default defineComponent({
   name: 'ProfileView',
 
   components: {
     MainCube,
-    // MainLine,
-    MainInput,
     BaseButton,
     MainButton,
-    MainIcon,
+    EditProfile,
+    ChangePassword,
   },
 
   data() {
     return {
+      email: '' as string,
+      form: {
+        first_name: '' as string,
+        last_name: '' as string,
+      }
     };
   },
 
@@ -132,11 +98,17 @@ export default defineComponent({
           value: '20/11/2024',
         },
       ];
+    },
+
+    user(): IUserInfo {
+      return this.$store.getters['user/getUser'];
     }
   },
-
+  
   methods: {
-
+    editProfile() {
+      // 
+    }
   }
 });
 </script>
@@ -157,17 +129,17 @@ export default defineComponent({
       width: 35%;
       min-height: fit-content;
     }
-    
+
     .profile-left {
       width: 40%;
       height: 100%;
       min-height: fit-content;
-      
+
       .general-info {
         height: calc(40% - 80px);
         margin-bottom: 20px;
       }
-      
+
       .change-password {
         min-height: fit-content;
         height: calc(55% - 80px);
@@ -182,7 +154,7 @@ export default defineComponent({
       margin-top: 20px;
 
     }
-    
+
     .form-button {
       margin-top: 15px;
     }

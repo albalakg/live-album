@@ -64,6 +64,16 @@ export interface ISignupRequest {
   last_name: string;
 }
 
+export interface IUpdateUserRequest {
+  first_name: string;
+  last_name: string;
+}
+
+export interface IUpdatePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
 export interface ILoginRequest {
   email: string;
   password: string;

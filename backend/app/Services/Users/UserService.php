@@ -13,6 +13,7 @@ use App\Models\UserResetPassword;
 use App\Services\Enums\StatusEnum;
 use App\Services\Enums\MessagesEnum;
 use App\Services\Helpers\LogService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserEmailConfirmation;
 use App\Services\Events\EventService;
@@ -91,7 +92,6 @@ class UserService
     /**
      * @param string $email
      * @param string $token
-     * @param Authenticatable $user
      * @return bool
      */
     public function confirmEmail(string $email, string $token): bool
@@ -174,20 +174,6 @@ class UserService
     }
 
     /**
-     * @param User $user
-     * @param string $password
-     * @return bool
-     */
-    public function updatePassword(User $user, string $password): bool
-    {
-        if ($this->isNewPasswordMatchesOldPassword($user->password, $password)) {
-            throw new Exception(MessagesEnum::USER_NEW_PASSWORD_MATCH_OLD);
-        }
-
-        return $user->update(['password' => $password]);
-    }
-
-    /**
      * @return User
      */
     public function getAdminUser(): User
@@ -224,6 +210,25 @@ class UserService
         $user->save();
 
         return $user;
+    }
+
+    /**
+     * @param array $data
+     * @param int $user_id
+     * @return void
+     */
+    public function changePassword(array $data, int $user_id)
+    {
+        if (!$user = $this->find($user_id)) {
+            throw new Exception(MessagesEnum::USER_NOT_FOUND);
+        }
+
+        $hasher = app('hash');
+        if (!$hasher->check($data['current_password'], $user->password)) {
+            throw new Exception(MessagesEnum::PASSWORD_INCORRECT);
+        }
+
+        $this->updatePassword($user, $data['new_password']);
     }
 
     /**
@@ -361,5 +366,19 @@ class UserService
         return UserResetPassword::where('email', $email)
             ->where('status', StatusEnum::PENDING)
             ->update(['status' => StatusEnum::INACTIVE]);
+    }
+    
+    /**
+     * @param User $user
+     * @param string $password
+     * @return bool
+     */
+    private function updatePassword(User $user, string $password): bool
+    {
+        if ($this->isNewPasswordMatchesOldPassword($user->password, $password)) {
+            throw new Exception(MessagesEnum::USER_NEW_PASSWORD_MATCH_OLD);
+        }
+
+        return $user->update(['password' => $password]);
     }
 }

@@ -84,7 +84,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 .main-button {
     width: 100%;
-    border: none;
+    transition: .3s scale linear;
+}
+
+.main-button:focus {
+    scale: 1.03;
 }
 
 .main-button-loading {

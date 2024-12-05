@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateUserRequest extends FormRequest
+class UpdateUserPasswordRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,8 +15,8 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'required|string|max:100',
-            'last_name' => 'required|string|max:100',
+            'current_password'  => ['required', new PasswordRule],
+            'new_password'  => ['required', new PasswordRule],
         ];
     }
 }

@@ -1,5 +1,7 @@
 <template>
-    <div class="main-input">
+    <div class="main-input" :class="{
+        'input-error': hasError
+    }">
         <p class="title--small">
             {{ title }}
         </p>
@@ -73,6 +75,11 @@ export default defineComponent({
 
         placeholder: {
             type: String
+        },
+
+        hasError: {
+            type: Boolean,
+            default: false
         },
 
         readonly: {
@@ -173,7 +180,7 @@ export default defineComponent({
 
         input {
             font-size: .9em;
-            background-color: white;
+            background-color: transparent
         }
 
         .input-size-small {
@@ -201,6 +208,11 @@ export default defineComponent({
         .input-filler {
             min-height: 22px;
         }
+    }
+
+    .input-error {
+        border: 2px solid #f68589;
+        background: #f6858988;
     }
 }
 </style>

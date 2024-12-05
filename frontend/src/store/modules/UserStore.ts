@@ -5,6 +5,8 @@ import {
   ILoginRequest,
   IUserInfo,
   ISignupRequest,
+  IUpdateUserRequest,
+  IUpdatePasswordRequest,
   IForgotPasswordRequest,
 } from "@/helpers/interfaces";
 import { SubscriptionType } from "@/helpers/types";
@@ -50,6 +52,13 @@ const UserStore = {
   mutations: {
     SET_USER(state: IUserStoreState, user: IUserInfo | null) {
       state.user = user;
+    },
+
+    SET_USER_PROFILE_UPDATED(state: IUserStoreState, user: IUpdateUserRequest) {
+      if(state.user) {
+        state.user.first_name = user.first_name;
+        state.user.last_name = user.last_name;
+      }
     },
   },
 
@@ -178,6 +187,34 @@ const UserStore = {
         });
     },
 
+    updateProfile(context: { commit: (arg0: string, arg1: any) => void }, payload: IUpdateUserRequest) {
+      return new Promise((resolve) => {
+        axios
+        .post("user/profile", payload)
+        .then((res) => {
+          context.commit("SET_USER_PROFILE_UPDATED", payload);
+          resolve(res);
+        })
+        .catch((err) => {
+          console.warn("get: ", err);
+        });
+      })
+    },
+
+    updatePassword(context: { commit: (arg0: string, arg1: any) => void }, payload: IUpdatePasswordRequest) {
+      return new Promise((resolve) => {
+        axios
+        .post("user/password", payload)
+        .then((res) => {
+          context.commit("SET_USER_PROFILE_UPDATED", payload);
+          resolve(res);
+        })
+        .catch((err) => {
+          console.warn("get: ", err);
+        });
+      })
+    },
+
     setUserAsLoggedIn(
       context: {
         commit: (arg0: string, arg1: IUserInfo) => void;
@@ -186,7 +223,6 @@ const UserStore = {
     ) {
       delete data.token;
       delete data.expired_at;
-      context.commit("SET_USER", data);
     },
   },
 

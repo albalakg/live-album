@@ -8,6 +8,7 @@ class MessagesEnum extends BaseEnum
 {
     // Errors
     const INVALID_CREDENTIALS = 'Email or password is invalid';
+    const PASSWORD_INCORRECT = 'Password is incorrect';
     const USER_LOGIN_UNAUTHORIZED = 'Unauthorized to login';
     const MAINTENANCE_VALIDATION = 'Sorry, Unauthorized to login during maintenance mode';
     const USER_NOT_FOUND = 'User not found';
@@ -39,6 +40,7 @@ class MessagesEnum extends BaseEnum
     const EVENT_FILE_UPLOADED_SUCCESS = 'Event file uploaded successfully';
     const USER_CREATED_SUCCESS = 'User created successfully';
     const USER_UPDATED_SUCCESS = 'User updated successfully';
+    const USER_UPDATED_PASSWORD_SUCCESS = 'User updated password successfully';
     const USER_DELETED_SUCCESS = 'User deleted successfully';
     const USERS_FETCHED_SUCCESS = 'Users fetched successfully';
     const USER_FOUND_SUCCESS = 'User found successfully';

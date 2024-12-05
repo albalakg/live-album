@@ -3,20 +3,32 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use App\Http\Requests\UpdateUserRequest;
 use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
-use App\Services\Events\EventService;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Events\EventService;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\UpdateUserPasswordRequest;
 
 class UserController extends Controller
 {
-    public function update(UpdateUserRequest $request, int $user_id)
+    public function update(UpdateUserRequest $request)
     {
         try {
             $user_service = new UserService();
-            $response = $user_service->update($request->validated(), $user_id);
+            $response = $user_service->update($request->validated(), Auth::user()->id);
             return $this->successResponse(MessagesEnum::USER_UPDATED_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+    
+    public function updatePassword(UpdateUserPasswordRequest $request)
+    {
+        try {
+            $user_service = new UserService();
+            $response = $user_service->changePassword($request->validated(), Auth::user()->id);
+            return $this->successResponse(MessagesEnum::USER_UPDATED_PASSWORD_SUCCESS);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);
         }
