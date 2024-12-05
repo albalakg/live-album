@@ -38,8 +38,8 @@ class UserController extends Controller
     public function delete()
     {
         try {
-            $user_service = new UserService();
-            $user_service->delete(Auth::user()->id, Auth::user()->id);
+            $user_service = new UserService(null, new EventService());
+            $user_service->delete(Auth::user()->id);
             return $this->successResponse(MessagesEnum::USER_DELETED_SUCCESS);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);

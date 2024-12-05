@@ -34,17 +34,6 @@ export default defineComponent({
         SubscriptionStatus
     },
 
-    data() {
-        return {
-            form: {
-                current_password: '' as string,
-                new_password: '' as string,
-            },
-            loading: false as boolean,
-            isTextVisible: false as boolean,
-        };
-    },
-
     computed: {
         items(): Array<any> {
             return [
@@ -72,10 +61,6 @@ export default defineComponent({
         async submit() {
             // 
         },
-
-        toggleVisibility() {
-            this.isTextVisible = !this.isTextVisible;
-        }
     }
 });
 </script>

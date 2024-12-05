@@ -7,4 +7,5 @@ use App\Http\Controllers\UserController;
 Route::get('profile', [UserController::class, 'profile']);
 Route::post('profile', [UserController::class, 'update']);
 Route::post('password', [UserController::class, 'updatePassword']);
+Route::post('delete', [UserController::class, 'delete']);
 Route::post('logout', [UserController::class, 'logout']);

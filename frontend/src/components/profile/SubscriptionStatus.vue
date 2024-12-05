@@ -20,17 +20,6 @@ export default defineComponent({
         }
     },
 
-    data() {
-        return {
-            form: {
-                current_password: '' as string,
-                new_password: '' as string,
-            },
-            loading: false as boolean,
-            isTextVisible: false as boolean,
-        };
-    },
-
     computed: {
         statusColor(): string {
             switch (this.status) {

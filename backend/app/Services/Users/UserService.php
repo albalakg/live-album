@@ -261,34 +261,29 @@ class UserService
     }
 
     /**
-     * @param int $deleted_user_id
-     * @param int $deleting_user_id
+     * @param int $user_id
      * @return bool
      */
-    public function delete(int $deleted_user_id, int $deleting_user_id): bool
+    public function delete(int $user_id): bool
     {
-        if (!$this->canDeleteUser($deleted_user_id, $deleting_user_id)) {
-            throw new Exception(MessagesEnum::USER_NOT_AUTHORIZED_TO_DELETE);
-        }
-
-        $deleted_user = User::where('id', $deleted_user_id)
+        $user = User::where('id', $user_id)
             ->with('events')
             ->select('id')
             ->first();
 
-        if (!$deleted_user) {
+        if (!$user) {
             throw new Exception(MessagesEnum::USER_NOT_FOUND);
         }
 
-        foreach ($deleted_user->events as $event) {
+        foreach ($user->events as $event) {
             try {
-                $this->event_service->delete($event->id, $deleting_user_id);
+                $this->event_service->delete($event->id, $user_id);
             } catch (Exception $ex) {
                 LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_DELETE_EVENT]);
             }
         }
 
-        return $deleted_user->delete();
+        return $user->delete();
     }
 
     /**
@@ -334,17 +329,6 @@ class UserService
     {
         return Hash::check($new_password, $current_password);
     }
-
-    /**
-     * @param int $deleted_user_id
-     * @param int $deleting_user_id
-     * @return bool
-     */
-    private function canDeleteUser(int $deleted_user_id, int $deleting_user_id): bool
-    {
-        return $deleted_user_id === $deleting_user_id || $this->find($deleted_user_id)->isAdmin();
-    }
-
 
     /**
      * Check if user has requested to reset his password less then 3 times

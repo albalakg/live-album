@@ -3,9 +3,8 @@
         'input-error': hasError
     }">
         <p class="title--small">
-            {{ title }}
+            {{ title }} <small class="subtitle" v-if="subtitle">({{ subtitle }})</small>
         </p>
-
         <div class="inner-input padding--x-small shadow--small"
             :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''}`">
             <template v-if="isFile">
@@ -51,6 +50,10 @@ export default defineComponent({
         },
 
         title: {
+            type: String
+        },
+
+        subtitle: {
             type: String
         },
 
@@ -171,6 +174,12 @@ export default defineComponent({
 
     small {
         font-size: 0.7em;
+    }
+
+    .subtitle {
+        position: relative;
+        top: -2px;
+        margin-inline-start: 3px;
     }
 
     .inner-input {

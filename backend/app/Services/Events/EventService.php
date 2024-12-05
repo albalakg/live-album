@@ -235,6 +235,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
+        $this->deleteEventAssets($event_id);
         return $event->delete();
     }
 
@@ -284,7 +285,6 @@ class EventService
         $event_assets = EventAsset::where('event_id', $event_id)
                         ->select('id', 'path')
                         ->get();
-
         foreach($event_assets AS $event_asset) {
             try {
                 FileService::create($event_asset->path, 'files', FileService::S3_DISK);
@@ -303,8 +303,11 @@ class EventService
      */
     private function isAuthorizedToModifyEvent(Event $event, int $user_id): bool
     {
-        $user = $this->user_service->find($user_id);
-        return $event->user_id === $user->id || $user->isAdmin();
+        if($event->user_id === $user_id) {
+            return true;
+        }
+
+        return $this->user_service->find($user_id)->isAdmin();
     }
 
     /**

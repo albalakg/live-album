@@ -19,19 +19,7 @@
         </div>
         <br>
         <br>
-        <div>
-          <span>
-            <strong>שימו לב:</strong> מחיקת המשתמש תמחק את כל פרטי המשתמש
-            והאירוע כולל קבצי האלבום, לא יהיה ניתן לשחזור.
-          </span>
-          <br>
-          <br>
-          <div class="display--flex justify--end">
-            <div class="width--third">
-              <BaseButton textColor="white" color="pink" text="מחיקת משתמש" />
-            </div>
-          </div>
-        </div>
+        <DeleteUser />
       </div>
       <div class="profile-left padding--large display--flex direction--column justify--space-between">
         <ProfileSubscriptionCard />
@@ -43,8 +31,8 @@
 
 <script lang="ts">
 import MainCube from '@/components/library/background/MainCube.vue';
-import BaseButton from '@/components/library/buttons/BaseButton.vue';
 import ChangePassword from '@/components/profile/ChangePassword.vue';
+import DeleteUser from '@/components/profile/DeleteUser.vue';
 import EditProfile from '@/components/profile/EditProfile.vue';
 import ProfileSubscriptionCard from '@/components/profile/ProfileSubscriptionCard.vue';
 import { IUserInfo } from '@/helpers/interfaces';
@@ -54,7 +42,7 @@ export default defineComponent({
 
   components: {
     MainCube,
-    BaseButton,
+    DeleteUser,
     ProfileSubscriptionCard,
     EditProfile,
     ChangePassword,
@@ -87,6 +75,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .profile {
   height: 100vh;
+  z-index: 10;
+  position: relative;
 
   .profile-content {
     height: calc(94% - 100px);

@@ -145,7 +145,7 @@ const UserStore = {
           })
           .catch((err) => {
             console.warn("get: ", err);
-            resolve(false);
+            resolve(null);
           });
       });
     },
@@ -164,7 +164,7 @@ const UserStore = {
           })
           .catch((err) => {
             console.warn("get: ", err);
-            resolve(false);
+            resolve(null);
           });
       });
     },
@@ -209,6 +209,7 @@ const UserStore = {
         })
         .catch((err) => {
           console.warn("get: ", err);
+          resolve(null);
         });
       })
     },
@@ -223,6 +224,21 @@ const UserStore = {
         })
         .catch((err) => {
           console.warn("get: ", err);
+          resolve(null);
+        });
+      })
+    },
+
+    delete(context: { commit: (arg0: string, arg1: any) => void }) {
+      return new Promise((resolve) => {
+        axios
+        .post("user/delete")
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((err) => {
+          console.warn("get: ", err);
+          resolve(null);
         });
       })
     },

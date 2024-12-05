@@ -1,11 +1,12 @@
 <template>
     <h2 class="title--large">עריכת פרטי משתמש</h2>
     <form @submit.prevent="submit()" class="profile-form">
-        <MainInput readonly v-model="email" size="medium" title="כתובת מייל" />
+        <MainInput readonly v-model="email" size="medium" title="כתובת מייל" subtitle="לא ניתן להחליף כתובת מייל" />
         <br>
         <MainInput v-model="form.first_name" size="medium" title="שם פרטי" />
         <br>
         <MainInput v-model="form.last_name" size="medium" title="שם משפחה" />
+        <br>
         <br>
         <MainButton :loading="loading" class="form-button" text="עדכן משתמש" />
     </form>

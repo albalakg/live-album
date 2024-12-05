@@ -1,8 +1,8 @@
 <template>
     <div class="main-button pointer shadow--small text--center"
-        :class="`padding--${size} bg--${color} brs--${borderRadius}`">
+        :class="`padding--${size} bg--${color} brs--${borderRadius} ${(loading || disabled) ? 'disabled' : ''}`" @click="submit()">
         <span class="title--small" :class="`text--${textColor}`" >
-            {{ text }}
+            {{ loading ? 'טוען...' : text }}
         </span>
     </div>
 </template>
@@ -34,16 +34,20 @@ export default defineComponent({
             default: 'white'
         },
 
+        loading: {
+            type: Boolean,
+            default: false
+        },
+
+        disabled: {
+            type: Boolean,
+            default: false
+        },
+
         size: {
             type: String,
             default: 'x-small'
         }
-    },
-
-    data() {
-        return {
-
-        };
     },
 
     computed: {
@@ -65,7 +69,9 @@ export default defineComponent({
     },
 
     methods: {
-
+        submit() {
+            this.$emit('onClick');
+        }
     }
 });
 </script>
