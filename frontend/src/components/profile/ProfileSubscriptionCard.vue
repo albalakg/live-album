@@ -25,7 +25,7 @@
 import MainButton from '@/components/library/buttons/MainButton.vue';
 import { defineComponent } from 'vue';
 import SubscriptionStatus from './SubscriptionStatus.vue';
-import { EventStatus } from '@/helpers/enums';
+import { StatusEnum, SubscriptionTypes } from '@/helpers/enums';
 export default defineComponent({
     name: 'ProfileSubscriptionCard',
 
@@ -52,8 +52,12 @@ export default defineComponent({
             return this.$store.getters['event/getEventStatus'];
         },
 
+        subscriptionName(): string {
+            return this.$store.getters['user/getSubscriptionName'];
+        },
+
         canUpgradeSubscription(): boolean {
-            return this.eventStatus === EventStatus.READY;
+            return [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) && this.subscriptionName === SubscriptionTypes.BASIC;
         }
     },
 

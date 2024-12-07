@@ -38,7 +38,7 @@ return [
 
         'pub' => [
             'driver' => 'local',
-            'root' => public_path('files'),
+            'root' => public_path(''),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],

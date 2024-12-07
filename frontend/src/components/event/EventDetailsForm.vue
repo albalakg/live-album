@@ -11,7 +11,7 @@
         </p>
         <VueDatePicker class="date-picker" :min-date="minDate" locale="he" :format="format" v-model="form.starts_at" select-text="בחר" cancel-text="בטל" :day-names="days"></VueDatePicker>
         <br>
-        <MainInput icon="attach_file" type="file" title="תמונת האירוע"
+        <MainInput :fileExists="imageExists" icon="attach_file" type="file" title="תמונת האירוע"
             hint="התמונה משמשת לעמוד העלאת הקבצים לכן מומלץ ברזולוציה של מכשיר נייד" :allowedAssets="['image']" @onChange="fileUploaded" />
         <br>
         <MainButton :loading="loading" text="שמור" />
@@ -39,6 +39,7 @@ export default defineComponent({
                 starts_at: '' as string,
                 image: null as File | null,
             },
+            imageExists: false as boolean,
             days: ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'],
             format: 'dd/MM/yyyy HH:mm',
             loading: false as boolean
@@ -69,6 +70,7 @@ export default defineComponent({
         setEvent() {
             this.form.name = this.event?.name ?? '';
             this.form.starts_at = this.event?.starts_at ?? '';
+            this.imageExists = !!this.event?.image;
         },
 
         fileUploaded(file: File) {
@@ -91,6 +93,7 @@ export default defineComponent({
     box-shadow: 0 2px 5px 1px var(--darkTransparent);
     
     input {
+        direction: rtl;
         border-radius: 8px;
         padding: 8px 35px;
     }

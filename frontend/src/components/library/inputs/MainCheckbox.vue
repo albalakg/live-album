@@ -1,5 +1,5 @@
 <template>
-    <div class="switch" title="לחצו בשביל לאפשר מחיקה">
+    <div class="switch">
         <input id="switch-1" type="checkbox" class="switch-input" @click="submit()" />
         <label for="switch-1" class="switch-label">Switch</label>
     </div>

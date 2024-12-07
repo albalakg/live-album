@@ -7,7 +7,7 @@ import {
   IEvent,
 } from "@/helpers/interfaces";
 import {
-  EventStatus
+  StatusEnum
 } from "@/helpers/enums";
 
 const EventStore = {
@@ -31,8 +31,12 @@ const EventStore = {
       return state.event;
     },
 
+    getEventImage(state: IEventStoreState): string {
+      return process.env.VUE_APP_SERVER_BASE_URL + '/' + state.event?.image;
+    },
+
     hasActiveEvent(state: IEventStoreState): boolean {
-      return state.event && state.event.status !== EventStatus.INACTIVE;
+      return state.event && state.event.status !== StatusEnum.INACTIVE;
     },
   },
 
@@ -68,10 +72,12 @@ const EventStore = {
       context: { commit: (arg0: string, arg1: any) => void },
       event: IEvent
     ) {
-      const utcStartDate = new Date(event.starts_at + "Z");
-      event.starts_at = utcStartDate.toLocaleString();
-      const utcFinishDate = new Date(event.finished_at + "Z");
-      event.finished_at = utcFinishDate.toLocaleString();
+      if(event) {
+        const utcStartDate = new Date(event.starts_at + "Z");
+        event.starts_at = utcStartDate.toLocaleString();
+        const utcFinishDate = new Date(event.finished_at + "Z");
+        event.finished_at = utcFinishDate.toLocaleString();
+      }
       context.commit("SET_EVENT", event);
     },
 
@@ -91,7 +97,7 @@ const EventStore = {
             },
           })
           .then((res) => {
-            context.commit("UPDATE_EVENT", res.data);
+            context.commit("UPDATE_EVENT", res.data.data);
             resolve(res.data);
           })
           .catch((err) => {

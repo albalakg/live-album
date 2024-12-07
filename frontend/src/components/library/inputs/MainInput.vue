@@ -88,6 +88,11 @@ export default defineComponent({
             default: false
         },
 
+        fileExists: {
+            type: Boolean,
+            default: false
+        },
+
         readonly: {
             type: Boolean,
             default: false
@@ -142,7 +147,7 @@ export default defineComponent({
         },
 
         uploadedFileName(): string {
-            return (this.file)?.name ?? ''
+            return (this.file)?.name ?? (this.fileExists ? 'קיים קובץ באירוע' : '')
         }
     },
 

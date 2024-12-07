@@ -1,6 +1,8 @@
 <template>
     <div class="sidebar bg--gray brs--medium padding--large">
-        <div class="event-image bg--dark brs--medium"></div>
+        <div class="event-image bg--dark brs--medium" :style="`background-image: url(${eventImage})`">
+            <!-- <img class="width--full height--full brs--medium" :src="eventImage" alt="תמונת האירוע"> -->
+        </div>
         <br>
         <div class="text--center">
             <h2 class="text--dark title--medium">
@@ -61,6 +63,10 @@ export default defineComponent({
                 item.isActive = item.path === this.$route.path;
                 return item;
             });
+        },
+
+        eventImage(): string {
+            return this.$store.getters['event/getEventImage'];
         }
     }
 });
@@ -74,6 +80,8 @@ export default defineComponent({
     .event-image {
         width: 100%;
         height: 30%;
+        background-position: center;
+        background-size: cover;
     }
 
     .side-bar-item-wrapper {

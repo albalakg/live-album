@@ -3,12 +3,14 @@
         <span>
             <strong>שימו לב:</strong> מחיקת המשתמש תמחק את כל פרטי המשתמש
             והאירוע כולל קבצי האלבום, לא יהיה ניתן לשחזור.
+            <br>
+            <small>לחצו על הכפתור לשחרר את החסימה</small>
         </span>
         <br>
         <br>
         <div class="display--flex justify--space-between align--center">
             <div class="width--third">
-                <MainCheckbox @onClick="toggleCheck()" />
+                <MainCheckbox @onClick="toggleCheck()" title="לחצו בשביל לאפשר מחיקה" />
             </div>
             <div class="width--third">
                 <BaseButton :disabled="!canDelete" :loading="loading" textColor="white" color="pink" text="מחיקת משתמש" @onClick="submit()" />

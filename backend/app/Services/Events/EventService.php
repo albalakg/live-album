@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Event Life Cycle:
- * Pending -> Ready -> Active -> Inactive
+ * Pending -> Ready -> In Progress -> Active -> Inactive
  * 
  * 1. Creates automatically with pending status while creating an order
  * 2. User moves the status for ready before the start date
@@ -66,16 +66,10 @@ class EventService
      */
     public function getEventByUser(int $user_id): ?Event
     {
-        $event = Event::where('user_id', $user_id)->select('id', 'order_id', 'image', 'name', 'description', 'status', 'starts_at', 'finished_at')->first();
-        if (!$event) {
-            return null;
-        }
-
-        if(!$event->isActive()) {
-            throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
-        }
-
-        return $event;
+        return Event::where('user_id', $user_id)
+                    ->where('status', '!=', StatusEnum::INACTIVE)
+                    ->select('id', 'order_id', 'image', 'name', 'description', 'status', 'starts_at', 'finished_at')
+                    ->first();
     }
 
     /**
@@ -151,11 +145,16 @@ class EventService
         }
 
         $event->name = $data['name'] ?? $event->name;
-        $event->image = FileService::create($data['image'], 'events', FileService::S3_DISK);
+        if($data['image']) {
+            $event->image = FileService::create($data['image'], "events/$event_id", FileService::S3_DISK);
+        }
         // $event->description = $data['description'] ?? $event->description;
-        $event->starts_at = $this->getEventStartTime($data['starts_at'] ?? '') ?? $event->starts_at;
-        if (!empty($data['starts_at'])) {
-            $event->finished_at = $this->getEventFinishTime($event->starts_at);
+
+        if($event->isPending()) {
+            $event->starts_at = $this->getEventStartTime($data['starts_at'] ?? '') ?? $event->starts_at;
+            if (!empty($data['starts_at'])) {
+                $event->finished_at = $this->getEventFinishTime($event->starts_at);
+            }
         }
 
         $event->save();
@@ -314,11 +313,15 @@ class EventService
      */
     private function isAuthorizedToModifyEvent(Event $event, int $user_id): bool
     {
-        if($event->user_id === $user_id) {
+        if($this->user_service->find($user_id)->isAdmin()) {
             return true;
         }
 
-        return $this->user_service->find($user_id)->isAdmin();
+        if(!$event->isInactive() && $event->user_id === $user_id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

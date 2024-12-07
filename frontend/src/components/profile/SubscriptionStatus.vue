@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { EventStatus } from '@/helpers/enums'
+import { StatusEnum } from '@/helpers/enums'
 
 export default defineComponent({
     name: 'SubscriptionStatus',
@@ -23,13 +23,13 @@ export default defineComponent({
     computed: {
         statusColor(): string {
             switch (this.status) {
-                case EventStatus.ACTIVE:
+                case StatusEnum.ACTIVE:
                     return 'green'
-                case EventStatus.PENDING:
+                case StatusEnum.PENDING:
                     return 'dark-gray'
-                case EventStatus.INACTIVE:
+                case StatusEnum.INACTIVE:
                     return 'pink'
-                case EventStatus.READY:
+                case StatusEnum.READY:
                     return 'light-green'
                 default:
                     return 'pink'
@@ -38,13 +38,13 @@ export default defineComponent({
 
         statusText(): string {
             switch (this.status) {
-                case EventStatus.ACTIVE:
+                case StatusEnum.ACTIVE:
                     return 'פעיל'
-                case EventStatus.PENDING:
+                case StatusEnum.PENDING:
                     return 'ממתין'
-                case EventStatus.INACTIVE:
+                case StatusEnum.INACTIVE:
                     return 'לא פעיל'
-                case EventStatus.READY:
+                case StatusEnum.READY:
                     return 'מוכן'
                 default:
                     return 'שגיאה'

@@ -28,7 +28,7 @@ export default defineComponent({
   methods: {
     async setInitialSettings() {
       if(Auth.isLogged()) {
-        this.$store.dispatch('user/setUserAsLoggedIn', Auth.get());
+        this.$store.dispatch('user/setUserAsLoggedIn');
         this.$store.dispatch('user/getProfile');
       }
     },

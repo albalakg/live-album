@@ -34,6 +34,14 @@ class Event extends Model
     /**
      * @return bool
      */
+    public function isInactive(): bool
+    {
+        return $this->status === StatusEnum::INACTIVE;
+    }
+
+    /**
+     * @return bool
+     */
     public function isActive(): bool
     {
         return $this->status === StatusEnum::ACTIVE;
@@ -42,8 +50,24 @@ class Event extends Model
     /**
      * @return bool
      */
+    public function isReady(): bool
+    {
+        return $this->status === StatusEnum::READY;
+    }
+
+    /**
+     * @return bool
+     */
     public function isInProgress(): bool
     {
         return $this->status === StatusEnum::IN_PROGRESS;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPending(): bool
+    {
+        return $this->status === StatusEnum::PENDING;
     }
 }

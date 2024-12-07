@@ -3,7 +3,7 @@
         <div>
             <div class="padding--x-small display--flex justify--space-between">
                 <span class="text--dark title--small">סטטוס</span>
-                <span class="text--dark-gray title--small">ממתין</span>
+                <SubscriptionStatus :status="status" />
             </div>
             <div class="padding--x-small display--flex justify--space-between" v-for="(item, index) in items"
                 :key="index">
@@ -26,12 +26,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import MainButton from '../library/buttons/MainButton.vue';
+import SubscriptionStatus from '../profile/SubscriptionStatus.vue';
 
 export default defineComponent({
     name: 'EventInfoCard',
 
     components: {
         MainButton,
+        SubscriptionStatus,
     },
 
     computed: {
@@ -50,6 +52,10 @@ export default defineComponent({
                     value: 20,
                 },
             ];
+        },
+
+        status(): number {
+            return this.$store.getters['event/getEventStatus'];
         }
     },
 });

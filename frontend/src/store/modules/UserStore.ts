@@ -16,7 +16,7 @@ const UserStore = {
 
   state: {
     user: null,
-    isLoggedIn: false
+    isLoggedIn: false,
   } as IUserStoreState,
 
   getters: {
@@ -75,7 +75,7 @@ const UserStore = {
   actions: {
     login(
       context: {
-        commit: (arg0: string, arg1: IUserInfo) => void;
+        commit: (arg0: string, arg1: IUserInfo | boolean) => void;
       },
       payload: ILoginRequest
     ) {
@@ -88,6 +88,7 @@ const UserStore = {
             delete user.token;
             delete user.expired_at;
             context.commit("SET_USER", user);
+            context.commit("SET_LOGGED_IN", true);
             resolve(user);
           })
           .catch((err) => {
@@ -116,7 +117,10 @@ const UserStore = {
       });
     },
 
-    logout(context: { commit: (arg0: string, arg1: null | false) => void }) {
+    logout(context: {
+      commit: (arg0: string, arg1: null | false) => void;
+      dispatch: (arg0: string, arg1: null, arg2: any) => void;
+    }) {
       axios
         .post("user/logout")
         .then(() => {
@@ -128,6 +132,7 @@ const UserStore = {
       Auth.deleteCookie();
       context.commit("SET_USER", null);
       context.commit("SET_LOGGED_IN", false);
+      context.dispatch("event/setEvent", null, { root: true });
     },
 
     forgotPassword(
@@ -194,7 +199,9 @@ const UserStore = {
       axios
         .get("user/profile")
         .then((res) => {
-          context.dispatch("event/setEvent", res.data.data.event, { root: true });
+          context.dispatch("event/setEvent", res.data.data.event, {
+            root: true,
+          });
           delete res.data.data.event;
           context.commit("SET_USER", res.data.data);
         })
@@ -253,14 +260,9 @@ const UserStore = {
       });
     },
 
-    setUserAsLoggedIn(
-      context: {
-        commit: (arg0: string, arg1: boolean) => void;
-      },
-      data: any
-    ) {
-      delete data.token;
-      delete data.expired_at;
+    setUserAsLoggedIn(context: {
+      commit: (arg0: string, arg1: boolean) => void;
+    }) {
       context.commit("SET_LOGGED_IN", true);
     },
   },
