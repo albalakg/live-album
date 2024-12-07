@@ -1,5 +1,5 @@
 <template>
-  <div class="profile">
+  <div class="profile" v-if="user">
     <MainCube color="pink" left="27%" top="72%" width="small" height="small" />
     <MainCube color="pink" left="23%" top="73%" width="medium" height="medium" />
     <MainCube color="pink" left="26%" top="76%" width="large" height="large" />

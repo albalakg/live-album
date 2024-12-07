@@ -20,9 +20,9 @@ class EventController extends Controller
         try {
             $event_service = new EventService();
             $response = $event_service->find($event_id);
-            $this->successResponse(MessagesEnum::EVENT_FOUND_SUCCESS, $response);
+            return $this->successResponse(MessagesEnum::EVENT_FOUND_SUCCESS, $response);
         } catch (Exception $ex) {
-            $this->errorResponse($ex);
+            return $this->errorResponse($ex);
         }
     }
 
@@ -34,10 +34,10 @@ class EventController extends Controller
                 new OrderService()
             );
             $response = $event_service->uploadFile($event_id, $request);
-            $this->successResponse(MessagesEnum::EVENT_FILE_UPLOADED_SUCCESS, $response);
+            return $this->successResponse(MessagesEnum::EVENT_FILE_UPLOADED_SUCCESS, $response);
 
         } catch (Exception $ex) {
-            $this->errorResponse($ex);
+            return $this->errorResponse($ex);
         }
     }
 
@@ -46,10 +46,10 @@ class EventController extends Controller
         try {
             $event_service = new EventService();
             $response = $event_service->createByAdmin($request->validated());
-            $this->successResponse(MessagesEnum::EVENT_CREATED_SUCCESS, $response);
+            return $this->successResponse(MessagesEnum::EVENT_CREATED_SUCCESS, $response);
 
         } catch (Exception $ex) {
-            $this->errorResponse($ex);
+            return $this->errorResponse($ex);
         }
     }
 
@@ -60,9 +60,9 @@ class EventController extends Controller
                 new UserService()
             );
             $response = $event_service->update($event_id, $request->validated(), Auth::user()->id);
-            $this->successResponse(MessagesEnum::EVENT_UPDATED_SUCCESS, $response);
+            return $this->successResponse(MessagesEnum::EVENT_UPDATED_SUCCESS, $response);
         } catch (Exception $ex) {
-            $this->errorResponse($ex);
+            return $this->errorResponse($ex);
         }
     }
 
@@ -71,9 +71,9 @@ class EventController extends Controller
         try {
             $event_service = new EventService();
             $response = $event_service->updateStatus(StatusEnum::READY, $event_id);
-            $this->successResponse(MessagesEnum::EVENT_UPDATED_SUCCESS, $response);
+            return $this->successResponse(MessagesEnum::EVENT_UPDATED_SUCCESS, $response);
         } catch (Exception $ex) {
-            $this->errorResponse($ex);
+            return $this->errorResponse($ex);
         }
     }
 
@@ -86,7 +86,7 @@ class EventController extends Controller
             $event_service->delete($event_id, Auth::user()->id);
             return response()->json(['message' => MessagesEnum::EVENT_DELETED_SUCCESS]);
         } catch (Exception $ex) {
-            $this->errorResponse($ex);
+            return $this->errorResponse($ex);
         }
     }
 }

@@ -47,18 +47,18 @@ export default defineComponent({
     },
     
     watch: {
-        isLoggedIn() {
+        user() {
             this.createLinks();
         }
     },
 
     computed: {
-        isLoggedIn(): boolean {
-            return this.$store.getters['user/isLoggedIn'];
+        user(): boolean {
+            return this.$store.getters['user/getUser'];
         },
         
         hasActiveEvent(): boolean {
-            return this.$store.getters['user/hasActiveEvent'];
+            return this.$store.getters['event/hasActiveEvent'];
         }
     },
 
@@ -130,7 +130,7 @@ export default defineComponent({
                 },
             ];
 
-            if(this.isLoggedIn) {
+            if(this.user) {
                 this.links.unshift({
                     text: 'התנתק',
                     url: '/logout',

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { serialize } from "object-to-formdata";
 import {
   IUserStoreState,
   ILoginRequest,
@@ -17,6 +16,7 @@ const UserStore = {
 
   state: {
     user: null,
+    isLoggedIn: false
   } as IUserStoreState,
 
   getters: {
@@ -33,7 +33,7 @@ const UserStore = {
     },
 
     getFullName(state: IUserStoreState): string {
-      return state.user?.first_name ?? '' + ' ' + state.user?.last_name ?? '';
+      return state.user?.first_name ?? "" + " " + state.user?.last_name ?? "";
     },
 
     getEmail(state: IUserStoreState): string | null {
@@ -41,23 +41,17 @@ const UserStore = {
     },
 
     isLoggedIn(state: IUserStoreState): boolean {
-      return !!state.user;
+      return state.isLoggedIn;
     },
 
     getSubscriptionName(state: IUserStoreState): SubscriptionType | null {
       return state.user?.order?.subscription?.name ?? null;
     },
 
-    getSubscriptionStartDate(state: IUserStoreState): string | null | undefined {
+    getSubscriptionStartDate(
+      state: IUserStoreState
+    ): string | null | undefined {
       return state.user?.order?.created_at;
-    },
-
-    getEventStatus(state: IUserStoreState): number | undefined {
-      return state.user?.event.status;
-    },
-
-    hasActiveSubscription(state: IUserStoreState): boolean {
-      return !!state.user?.order?.subscription;
     },
   },
 
@@ -66,8 +60,12 @@ const UserStore = {
       state.user = user;
     },
 
+    SET_LOGGED_IN(state: IUserStoreState, isLoggedIn: boolean) {
+      state.isLoggedIn = isLoggedIn;
+    },
+
     SET_USER_PROFILE_UPDATED(state: IUserStoreState, user: IUpdateUserRequest) {
-      if(state.user) {
+      if (state.user) {
         state.user.first_name = user.first_name;
         state.user.last_name = user.last_name;
       }
@@ -118,7 +116,7 @@ const UserStore = {
       });
     },
 
-    logout(context: { commit: (arg0: string, arg1: null) => void }) {
+    logout(context: { commit: (arg0: string, arg1: null | false) => void }) {
       axios
         .post("user/logout")
         .then(() => {
@@ -129,6 +127,7 @@ const UserStore = {
         });
       Auth.deleteCookie();
       context.commit("SET_USER", null);
+      context.commit("SET_LOGGED_IN", false);
     },
 
     forgotPassword(
@@ -188,10 +187,15 @@ const UserStore = {
       });
     },
 
-    getProfile(context: { commit: (arg0: string, arg1: any) => void }) {
+    getProfile(context: {
+      commit: (arg0: string, arg1: any) => void;
+      dispatch: (arg0: string, arg1: any, arg2: any) => void;
+    }) {
       axios
         .get("user/profile")
         .then((res) => {
+          context.dispatch("event/setEvent", res.data.data.event, { root: true });
+          delete res.data.data.event;
           context.commit("SET_USER", res.data.data);
         })
         .catch((err) => {
@@ -199,58 +203,65 @@ const UserStore = {
         });
     },
 
-    updateProfile(context: { commit: (arg0: string, arg1: any) => void }, payload: IUpdateUserRequest) {
+    updateProfile(
+      context: { commit: (arg0: string, arg1: any) => void },
+      payload: IUpdateUserRequest
+    ) {
       return new Promise((resolve) => {
         axios
-        .post("user/profile", payload)
-        .then((res) => {
-          context.commit("SET_USER_PROFILE_UPDATED", payload);
-          resolve(res);
-        })
-        .catch((err) => {
-          console.warn("get: ", err);
-          resolve(null);
-        });
-      })
+          .post("user/profile", payload)
+          .then((res) => {
+            context.commit("SET_USER_PROFILE_UPDATED", payload);
+            resolve(res);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
     },
 
-    updatePassword(context: { commit: (arg0: string, arg1: any) => void }, payload: IUpdatePasswordRequest) {
+    updatePassword(
+      context: { commit: (arg0: string, arg1: any) => void },
+      payload: IUpdatePasswordRequest
+    ) {
       return new Promise((resolve) => {
         axios
-        .post("user/password", payload)
-        .then((res) => {
-          context.commit("SET_USER_PROFILE_UPDATED", payload);
-          resolve(res);
-        })
-        .catch((err) => {
-          console.warn("get: ", err);
-          resolve(null);
-        });
-      })
+          .post("user/password", payload)
+          .then((res) => {
+            context.commit("SET_USER_PROFILE_UPDATED", payload);
+            resolve(res);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
     },
 
     delete(context: { commit: (arg0: string, arg1: any) => void }) {
       return new Promise((resolve) => {
         axios
-        .post("user/delete")
-        .then((res) => {
-          resolve(res);
-        })
-        .catch((err) => {
-          console.warn("get: ", err);
-          resolve(null);
-        });
-      })
+          .post("user/delete")
+          .then((res) => {
+            resolve(res);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
     },
 
     setUserAsLoggedIn(
       context: {
-        commit: (arg0: string, arg1: IUserInfo) => void;
+        commit: (arg0: string, arg1: boolean) => void;
       },
       data: any
     ) {
       delete data.token;
       delete data.expired_at;
+      context.commit("SET_LOGGED_IN", true);
     },
   },
 

@@ -6,11 +6,14 @@
             {{ title }} <small class="subtitle" v-if="subtitle">({{ subtitle }})</small>
         </p>
         <div class="inner-input padding--x-small shadow--small"
-            :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''}`">
+            :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''} ${isFile ? 'pointer' : ''}`" @click="uploadFile()">
             <template v-if="isFile">
-                <input v-model="localValue" ref="input" :type="type" :readonly="readonly" :placeholder="placeholder"
+                <input v-model="localValue" ref="fileInput" :type="type" :readonly="readonly" :placeholder="placeholder"
                     class="width--full" :hidden="isFile" @change="filePicked()" :accept="allowedFileTypes">
                 <div class="input-filler" :class="`input-size-${size}`">
+                    <span class="cut-text">
+                        {{ uploadedFileName }}
+                    </span>
                 </div>
             </template>
             <template v-else>
@@ -19,7 +22,7 @@
                     @input="updateValue($event?.target?.value)">
             </template>
             <div class="input-icon-wrapper pointer">
-                <MainIcon v-if="icon" :icon="icon" @onClick="iconClicked()" />
+                <MainIcon v-if="icon" :icon="icon"/>
             </div>
         </div>
         <small v-if="hint">
@@ -101,7 +104,7 @@ export default defineComponent({
 
     data() {
         return {
-            file: null
+            file: null as null | File
         };
     },
 
@@ -137,24 +140,19 @@ export default defineComponent({
                 this.$emit('update:modelValue', value);
             },
         },
+
+        uploadedFileName(): string {
+            return (this.file)?.name ?? ''
+        }
     },
 
     methods: {
-        iconClicked() {
-            if (this.isFile) {
-                (this.$refs as any).input.click();
-                return;
-            }
-
-            this.$emit('iconClicked')
-        },
-
         filePicked() {
-            if (!(this.$refs as any).input.files[0]) {
+            if (!(this.$refs as any).fileInput.files[0]) {
                 return;
             }
 
-            this.file = (this.$refs as any).input.files[0];
+            this.file = (this.$refs as any).fileInput.files[0];
             // TODO: add validations
             this.$emit('onChange', this.file);
         },
@@ -162,6 +160,14 @@ export default defineComponent({
         updateValue(value: any) {
             this.localValue = value;
         },
+
+        uploadFile() {
+            if(!this.isFile) {
+                return;
+            }
+
+            (this.$refs as any).fileInput.click();
+        }
     }
 });
 </script>
@@ -216,6 +222,7 @@ export default defineComponent({
 
         .input-filler {
             min-height: 22px;
+            padding-inline-end: 20px;
         }
     }
 

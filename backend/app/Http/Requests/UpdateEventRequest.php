@@ -15,10 +15,10 @@ class UpdateEventRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|nullable|string|max:1000',
-            'starts_at' => 'sometimes|required|date_format:Y-m-d H:i:s|after:now',
+            // 'description' => 'sometimes|nullable|string|max:1000',
+            'starts_at' => 'sometimes|required|date|after:now',
             'image' => [
-                'required',
+                'nullable',
                 'file',
                 'mimes:jpeg,png,jpg,webp',
                 'max:10240',

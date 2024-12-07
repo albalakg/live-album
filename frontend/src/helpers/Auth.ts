@@ -36,8 +36,6 @@ class Auth {
     }
 
     token() {
-        console.log(this.get());
-        
         return this.get() ? this.get().token : '';
     }
 

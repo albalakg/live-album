@@ -2,6 +2,7 @@
 
 namespace App\Services\Events;
 
+use DateTime;
 use Exception;
 use App\Models\Event;
 use App\Models\Order;
@@ -65,7 +66,7 @@ class EventService
      */
     public function getEventByUser(int $user_id): ?Event
     {
-        $event = Event::where('user_id', $user_id)->select('id', 'order_id', 'name', 'description', 'status', 'starts_at', 'finished_at')->first();
+        $event = Event::where('user_id', $user_id)->select('id', 'order_id', 'image', 'name', 'description', 'status', 'starts_at', 'finished_at')->first();
         if (!$event) {
             return null;
         }
@@ -151,8 +152,8 @@ class EventService
 
         $event->name = $data['name'] ?? $event->name;
         $event->image = FileService::create($data['image'], 'events', FileService::S3_DISK);
-        $event->description = $data['description'] ?? $event->description;
-        $event->starts_at = $data['starts_at'] ?? $event->starts_at;
+        // $event->description = $data['description'] ?? $event->description;
+        $event->starts_at = $this->getEventStartTime($data['starts_at'] ?? '') ?? $event->starts_at;
         if (!empty($data['starts_at'])) {
             $event->finished_at = $this->getEventFinishTime($event->starts_at);
         }
@@ -175,8 +176,8 @@ class EventService
 
         $event->name = $data['name'] ?? $event->name;
         $event->image = FileService::create($data['image'], 'events', FileService::S3_DISK);
-        $event->description = $data['description'] ?? $event->description;
-        $event->starts_at = $data['starts_at'] ?? $event->starts_at;
+        // $event->description = $data['description'] ?? $event->description;
+        $event->starts_at = $this->getEventStartTime($data['start_at'] ?? '');
         $event->status = $data['status'] ?? $event->status;
         if (!empty($data['starts_at'])) {
             $event->finished_at = $this->getEventFinishTime($event->starts_at);
@@ -267,13 +268,23 @@ class EventService
 
     /**
      * @param string $starts_at
+     * @return ?string
+     */
+    private function getEventStartTime(string $starts_at): ?string
+    {
+        $date = new DateTime($starts_at) ?? '';
+        return $date ? $date->format('Y-m-d H:i:s') : null;
+    }
+
+    /**
+     * @param string $starts_at
      * @return string
      */
     private function getEventFinishTime(string $starts_at): string
     {
-        $startDateTime = new \DateTime($starts_at);
-        $startDateTime->add(new \DateInterval('P1D')); // Add 24 hours to the start time
-        return $startDateTime->format('Y-m-d H:i:s');
+        $date = new DateTime($starts_at);
+        $date->add(new \DateInterval('P1D'));
+        return $date->format('Y-m-d H:i:s');
     }
 
     /**

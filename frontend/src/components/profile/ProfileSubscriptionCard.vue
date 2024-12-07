@@ -49,7 +49,7 @@ export default defineComponent({
         },
 
         eventStatus(): number {
-            return this.$store.getters['user/getEventStatus'];
+            return this.$store.getters['event/getEventStatus'];
         },
 
         canUpgradeSubscription(): boolean {

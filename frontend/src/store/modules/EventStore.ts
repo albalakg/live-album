@@ -1,11 +1,20 @@
 import axios from "axios";
 import { serialize } from "object-to-formdata";
-import { IEventStoreState, IEventFile } from "@/helpers/interfaces";
+import {
+  IEventStoreState,
+  IEventFile,
+  UpdateEventRequest,
+  IEvent,
+} from "@/helpers/interfaces";
+import {
+  EventStatus
+} from "@/helpers/enums";
 
 const EventStore = {
   namespaced: true,
 
   state: {
+    event: null as IEvent | null,
     files: [],
   } as IEventStoreState,
 
@@ -14,55 +23,92 @@ const EventStore = {
       return state.files;
     },
 
-    // getSubscriptionStartDate(state: IEventStoreState): string | null {
-    //   return state.event?.start_date ?? null;
-    // },
+    getEventStatus(state: IEventStoreState): number {
+      return state.event?.status;
+    },
 
-    // getSubscriptionEndDate(state: IEventStoreState): string | null {
-    //   return state.event?.end_date ?? null;
-    // },
-    
-    // hasActiveEvent(state: IEventStoreState): boolean {
-    //   return !!state.event;
-    // },
+    getEvent(state: IEventStoreState): IEvent | null {
+      return state.event;
+    },
+
+    hasActiveEvent(state: IEventStoreState): boolean {
+      return state.event && state.event.status !== EventStatus.INACTIVE;
+    },
   },
 
   mutations: {
+    SET_EVENT(state: IEventStoreState, event: IEvent) {
+      state.event = event;
+    },
+
+    UPDATE_EVENT(state: IEventStoreState, event: any) {
+      state.event.name = event?.name ?? "";
+      state.event.starts_at = event?.starts_at ?? "";
+      state.event.image = event?.image ?? "";
+    },
+
     ADD_FILE(state: IEventStoreState, image: IEventFile) {
-      image.path = process.env.VUE_APP_SERVER_BASE_URL + '/files/' + image.path;
+      image.path = process.env.VUE_APP_SERVER_BASE_URL + "/files/" + image.path;
       state.files.push(image);
     },
-    
+
     SET_FILES(state: IEventStoreState, files: IEventFile[]) {
-      files.forEach(image => {
-        image.path = process.env.VUE_APP_SERVER_BASE_URL + '/files/' + image.path;
-        if(!state.files.map(image => image.path).includes(image.path)) {
+      files.forEach((image) => {
+        image.path =
+          process.env.VUE_APP_SERVER_BASE_URL + "/files/" + image.path;
+        if (!state.files.map((image) => image.path).includes(image.path)) {
           state.files.push(image);
         }
-      })
+      });
     },
   },
 
   actions: {
-    find(context: { commit: (arg0: string, arg1: any) => void }) {
-      axios
-        .get("events/1")
-        .then((res) => {
-          context.commit("SET_FILES", res.data);
-        })
-        .catch((err) => {
-          console.warn("get: ", err);
-        });
+    setEvent(
+      context: { commit: (arg0: string, arg1: any) => void },
+      event: IEvent
+    ) {
+      const utcStartDate = new Date(event.starts_at + "Z");
+      event.starts_at = utcStartDate.toLocaleString();
+      const utcFinishDate = new Date(event.finished_at + "Z");
+      event.finished_at = utcFinishDate.toLocaleString();
+      context.commit("SET_EVENT", event);
     },
 
-    async uploadFile(
+    update(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      data: UpdateEventRequest
+    ) {
+      return new Promise((resolve, reject) => {
+        const packageToSend = serialize(data, { indices: true });
+        axios
+          .post(`events/${context.state.event.id}/update`, packageToSend, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((res) => {
+            context.commit("UPDATE_EVENT", res.data);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            console.warn("update: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    uploadFile(
       context: { commit: (arg0: string, arg1: any) => void },
       file: any
     ) {
       return new Promise((resolve, reject) => {
         const packageToSend = serialize({ file }, { indices: true });
         axios
-          .post("events/file", packageToSend, {
+          .post("event/file", packageToSend, {
             headers: {
               "Content-Type": "multipart/form-data",
             },

@@ -75,8 +75,6 @@ export default defineComponent({
   },
 
   created() {
-    console.log(this.$route);
-    
     this.form.email = this.$route.query.email?.toString() ?? '';
     this.form.token = this.$route.query.token?.toString() ?? '';
   },

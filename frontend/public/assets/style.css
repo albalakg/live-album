@@ -314,6 +314,14 @@ strong {
   font-weight: 800;
 }
 
+.cut-text { 
+  text-overflow: ellipsis;
+  overflow: hidden; 
+  width: 100%; 
+  white-space: nowrap;
+  display: block;
+}
+
 a {
   text-decoration: none;
   color: var(--dark);

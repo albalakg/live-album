@@ -8,7 +8,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vuepic/vue-datepicker": "^10.0.0",
     "axios": "^1.7.7",
+    "object-to-formdata": "^4.5.1",
     "socket.io-client": "^4.8.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",

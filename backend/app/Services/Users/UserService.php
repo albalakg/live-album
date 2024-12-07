@@ -21,8 +21,6 @@ use App\Services\Helpers\MailService;
 use App\Services\Orders\OrderService;
 use App\Services\Helpers\TokenService;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Symfony\Component\Mailer\Event\MessageEvent;
 
 class UserService
 {

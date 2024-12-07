@@ -7,18 +7,19 @@ import { EventFileType, SubscriptionType } from './types';
 // }
 
 export interface IEventStoreState {
+  event: IEvent;
   files: IEventFile[];
 }
 
 export interface IUserStoreState {
   user: IUserInfo | null;
+  isLoggedIn: boolean;
 }
 
 export interface IUserInfo {
   id: number;
   first_name: string;
   last_name: string;
-  event: IEvent;
   email: string;
   role: string;
   order: IOrder;
@@ -46,6 +47,7 @@ export interface IEvent {
   id: number;
   status: number;
   name: string | null;
+  image: string | null;
   description: string | null;
   starts_at: string | null;
   finished_at: string | null;
@@ -85,6 +87,12 @@ export interface ISignupRequest {
 export interface IUpdateUserRequest {
   first_name: string;
   last_name: string;
+}
+
+export interface UpdateEventRequest {
+  name: string;
+  starts_at: string;
+  image: File | null;
 }
 
 export interface IUpdatePasswordRequest {
