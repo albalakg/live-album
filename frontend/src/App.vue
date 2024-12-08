@@ -4,7 +4,7 @@
     <div class="app-content">
       <router-view />
     </div>
-    <Footer />
+    <Footer v-if="!isFullScreen" />
   </div>
 </template>
 <script lang="ts">
@@ -23,6 +23,12 @@ export default defineComponent({
 
   created() {
     this.setInitialSettings();
+  },
+
+  computed: {
+    isFullScreen(): boolean {
+      return this.$route.path.includes('uploads') || this.$route.path.includes('full-screen');
+    }
   },
   
   methods: {

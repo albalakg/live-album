@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('name', 40);
             $table->integer('status')->unsigned()->index();
             $table->decimal('price')->unsigned()->index();
-            $table->decimal('events_allowed')->unsigned()->index();
-            $table->decimal('files_allowed')->unsigned()->index();
-            $table->decimal('storage_time')->unsigned()->index();
+            $table->integer('events_allowed')->unsigned()->index();
+            $table->integer('files_allowed')->unsigned()->index();
+            $table->integer('storage_time')->unsigned()->index();
             $table->timestamps();
         });
     }

@@ -25,7 +25,7 @@
 import MainButton from '@/components/library/buttons/MainButton.vue';
 import { defineComponent } from 'vue';
 import SubscriptionStatus from './SubscriptionStatus.vue';
-import { StatusEnum, SubscriptionTypes } from '@/helpers/enums';
+import { StatusEnum, SubscriptionTypesEnum } from '@/helpers/enums';
 export default defineComponent({
     name: 'ProfileSubscriptionCard',
 
@@ -57,12 +57,12 @@ export default defineComponent({
         },
 
         canUpgradeSubscription(): boolean {
-            return [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) && this.subscriptionName === SubscriptionTypes.BASIC;
+            return [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) && this.subscriptionName === SubscriptionTypesEnum.BASIC;
         }
     },
 
     methods: {
-        async submit() {
+        submit() {
             // 
         },
     }

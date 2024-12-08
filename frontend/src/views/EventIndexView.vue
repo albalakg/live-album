@@ -1,5 +1,5 @@
 <template>
-  <div class="event-main display--flex padding--medium">
+  <div class="event-main display--flex padding--medium" v-if="$store.getters['event/getEvent']">
     <div class="event-sidebar">
       <Sidebar />
     </div>
@@ -11,6 +11,7 @@
 
 <script lang="ts">
 import Sidebar from '@/components/library/app/SideBar.vue';
+import { IEvent } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -18,11 +19,6 @@ export default defineComponent({
 
   components: {
     Sidebar,
-  },
-
-  data() {
-    return {
-    };
   },
 
   methods: {

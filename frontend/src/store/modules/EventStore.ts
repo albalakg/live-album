@@ -1,8 +1,9 @@
 import axios from "axios";
 import { serialize } from "object-to-formdata";
+import Time from '@/helpers/time'
 import {
   IEventStoreState,
-  IEventFile,
+  IEventAsset,
   UpdateEventRequest,
   IEvent,
 } from "@/helpers/interfaces";
@@ -15,20 +16,35 @@ const EventStore = {
 
   state: {
     event: null as IEvent | null,
-    files: [],
   } as IEventStoreState,
 
   getters: {
-    getFiles(state: IEventStoreState): IEventFile[] {
-      return state.files;
+    getFiles(state: IEventStoreState): IEventAsset[] {
+      return state.event.assets;
     },
 
-    getEventStatus(state: IEventStoreState): number {
+    getEventStatus(state: IEventStoreState): number | null {
       return state.event?.status;
+    },
+
+    getEventPath(state: IEventStoreState): string | null {
+      return state.event?.path;
+    },
+
+    isEventReady(state: IEventStoreState): boolean {
+      return state.event?.status === StatusEnum.READY;
+    },
+
+    getEventFinishTime(state: IEventStoreState): string | null {
+      return state.event?.finished_at;
     },
 
     getEvent(state: IEventStoreState): IEvent | null {
       return state.event;
+    },
+
+    getTotalAssets(state: IEventStoreState): number {
+      return state.event?.assets?.length ?? 0;
     },
 
     getEventImage(state: IEventStoreState): string {
@@ -45,23 +61,27 @@ const EventStore = {
       state.event = event;
     },
 
+    UPDATE_EVENT_STATUS(state: IEventStoreState, status: StatusEnum) {
+      state.event.status = status;
+    },
+
     UPDATE_EVENT(state: IEventStoreState, event: any) {
       state.event.name = event?.name ?? "";
       state.event.starts_at = event?.starts_at ?? "";
       state.event.image = event?.image ?? "";
     },
 
-    ADD_FILE(state: IEventStoreState, image: IEventFile) {
-      image.path = process.env.VUE_APP_SERVER_BASE_URL + "/files/" + image.path;
-      state.files.push(image);
+    ADD_FILE(state: IEventStoreState, image: IEventAsset) {
+      image.path = process.env.VUE_APP_SERVER_BASE_URL + "/assets/" + image.path;
+      state.event.assets.push(image);
     },
 
-    SET_FILES(state: IEventStoreState, files: IEventFile[]) {
-      files.forEach((image) => {
+    SET_FILES(state: IEventStoreState, assets: IEventAsset[]) {
+      assets.forEach((image) => {
         image.path =
-          process.env.VUE_APP_SERVER_BASE_URL + "/files/" + image.path;
-        if (!state.files.map((image) => image.path).includes(image.path)) {
-          state.files.push(image);
+          process.env.VUE_APP_SERVER_BASE_URL + "/assets/" + image.path;
+        if (!state.event.assets.map((image) => image.path).includes(image.path)) {
+          state.event.assets.push(image);
         }
       });
     },
@@ -72,11 +92,11 @@ const EventStore = {
       context: { commit: (arg0: string, arg1: any) => void },
       event: IEvent
     ) {
+      console.log('event', event);
+      
       if(event) {
-        const utcStartDate = new Date(event.starts_at + "Z");
-        event.starts_at = utcStartDate.toLocaleString();
-        const utcFinishDate = new Date(event.finished_at + "Z");
-        event.finished_at = utcFinishDate.toLocaleString();
+        event.starts_at = Time.convertToLocalTime(event.starts_at ?? '');
+        event.finished_at = Time.convertToLocalTime(event.finished_at ?? '');
       }
       context.commit("SET_EVENT", event);
     },
@@ -98,6 +118,46 @@ const EventStore = {
           })
           .then((res) => {
             context.commit("UPDATE_EVENT", res.data.data);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            console.warn("update: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    setReady(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+    ) {
+      return new Promise((resolve, reject) => {
+        axios
+          .post(`events/${context.state.event.id}/ready`)
+          .then((res) => {
+            context.commit("UPDATE_EVENT_STATUS", StatusEnum.READY);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            console.warn("update: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    setPending(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+    ) {
+      return new Promise((resolve, reject) => {
+        axios
+          .post(`events/${context.state.event.id}/pending`)
+          .then((res) => {
+            context.commit("UPDATE_EVENT_STATUS", StatusEnum.PENDING);
             resolve(res.data);
           })
           .catch((err) => {

@@ -3,7 +3,7 @@
 //   RED = "red",
 // }
 
-export enum SubscriptionTypes {
+export enum SubscriptionTypesEnum {
   BASIC = 'בסיסי',
   PREMIUM = 'פרימיום',
 }

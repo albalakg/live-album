@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('order_id')->unsigned()->index()->nullable();
             $table->integer('user_id')->unsigned()->index();
+            $table->string('path')->unique();
             $table->string('name')->nullable();
             $table->string('image')->nullable();
             $table->text('description')->nullable();
@@ -25,7 +26,7 @@ return new class extends Migration
             $table->softDeletes();
         });
     }
-
+    
     /**
      * Reverse the migrations.
      */

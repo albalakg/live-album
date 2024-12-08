@@ -1,5 +1,6 @@
 <template>
-    <div class="event-info brs--medium padding--medium bg--white display--flex direction--column justify--space-between">
+    <div
+        class="event-info brs--medium padding--medium bg--white display--flex direction--column justify--space-between">
         <div>
             <div class="padding--x-small display--flex justify--space-between">
                 <span class="text--dark title--small">סטטוס</span>
@@ -14,10 +15,13 @@
         <small class="padding--x-small">
             <strong>שימו לב:</strong>
             האירוע אינו יתחיל עד שתעדכנו את הסטטוס למוכן.
+            <br>
+            ניתן לעדכן את תאריך האירוע רק בסטטוס ממתין.
         </small>
         <div class="display--flex justify--end">
             <div class="width--half">
-                <MainButton text="האירוע מוכן" />
+                <MainButton v-if="isReady" :loading="loading" color="pink" text="החזר להמתנה" @onClick="submit()" />
+                <MainButton v-else :loading="loading" text="האירוע מוכן" @onClick="submit()" />
             </div>
         </div>
     </div>
@@ -27,6 +31,7 @@
 import { defineComponent } from 'vue';
 import MainButton from '../library/buttons/MainButton.vue';
 import SubscriptionStatus from '../profile/SubscriptionStatus.vue';
+import { StatusEnum } from '@/helpers/enums';
 
 export default defineComponent({
     name: 'EventInfoCard',
@@ -34,6 +39,13 @@ export default defineComponent({
     components: {
         MainButton,
         SubscriptionStatus,
+    },
+
+    data() {
+        return {
+            startsAtCounter: '' as string,
+            loading: false as boolean,
+        }
     },
 
     computed: {
@@ -44,21 +56,37 @@ export default defineComponent({
                     value: '05:13:20:11',
                 },
                 {
-                    text: 'סיום לאירוע',
-                    value: '26/11/2024 19:30',
+                    text: 'סיום האירוע',
+                    value: this.$store.getters['event/getEventFinishTime'],
                 },
                 {
                     text: 'סה"כ קבצים',
-                    value: 20,
+                    value: this.$store.getters['event/getTotalAssets'],
                 },
             ];
         },
 
         status(): number {
             return this.$store.getters['event/getEventStatus'];
-        }
+        },
+
+        isReady(): boolean {
+            return this.$store.getters['event/isEventReady'];
+        },
     },
+
+    methods: {
+        async submit() {
+            this.loading = true;
+            this.isReady ? this.$store.dispatch("event/setPending") : this.$store.dispatch("event/setReady");
+            this.loading = false;
+        }
+    }
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.event-info {
+    min-height: fit-content;
+}
+</style>

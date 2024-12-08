@@ -9,7 +9,7 @@
         <p class="title--small">
             תאריך האירוע
         </p>
-        <VueDatePicker class="date-picker" :min-date="minDate" locale="he" :format="format" v-model="form.starts_at" select-text="בחר" cancel-text="בטל" :day-names="days"></VueDatePicker>
+        <VueDatePicker :disabled="isReady" class="date-picker" :min-date="minDate" locale="he" :format="format" v-model="form.starts_at" select-text="בחר" cancel-text="בטל" :day-names="days"></VueDatePicker>
         <br>
         <MainInput :fileExists="imageExists" icon="attach_file" type="file" title="תמונת האירוע"
             hint="התמונה משמשת לעמוד העלאת הקבצים לכן מומלץ ברזולוציה של מכשיר נייד" :allowedAssets="['image']" @onChange="fileUploaded" />
@@ -63,7 +63,11 @@ export default defineComponent({
 
         event(): IEvent {
             return this.$store.getters["event/getEvent"];
-        }
+        },
+        
+        isReady(): boolean {
+            return this.$store.getters['event/isEventReady'];
+        },
     },
 
     methods: {
@@ -95,7 +99,12 @@ export default defineComponent({
     input {
         direction: rtl;
         border-radius: 8px;
-        padding: 8px 35px;
+        padding: 8px 15px;
+    }
+
+    .dp--clear-btn {
+        left: 25px;
+        width: fit-content;
     }
 }
 

@@ -52,6 +52,7 @@ export default defineComponent({
   position: absolute;
   z-index: 1000;
   top: 0;
+  right: 0;
   height: 100vh;
   width: 100vw;
 

@@ -8,7 +8,6 @@ import { EventFileType, SubscriptionType } from './types';
 
 export interface IEventStoreState {
   event: IEvent;
-  files: IEventFile[];
 }
 
 export interface IUserStoreState {
@@ -47,15 +46,19 @@ export interface IEvent {
   id: number;
   status: number;
   name: string | null;
+  path: string;
   image: string | null;
   description: string | null;
   starts_at: string | null;
   finished_at: string | null;
+  assets: IEventAsset[];
 }
 
-export interface IEventFile {
+export interface IEventAsset {
+  id: number;
+  event_id: number;
+  asset_type: EventFileType;
   path: string;
-  type: EventFileType;
 }
 
 export interface IDesktopBarItem {

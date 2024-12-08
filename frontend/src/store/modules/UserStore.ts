@@ -48,6 +48,14 @@ const UserStore = {
       return state.user?.order?.subscription?.name ?? null;
     },
 
+    getSubscriptionFilesAllowed(state: IUserStoreState): number | null {
+      return state.user?.order?.subscription?.files_allowed ?? null;
+    },
+
+    getSubscriptionFilesStorageTime(state: IUserStoreState): number | null {
+      return state.user?.order?.subscription?.storage_time ?? null;
+    },
+
     getSubscriptionStartDate(
       state: IUserStoreState
     ): string | null | undefined {

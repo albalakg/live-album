@@ -77,6 +77,17 @@ class EventController extends Controller
         }
     }
 
+    public function pending(int $event_id)
+    {
+        try {
+            $event_service = new EventService();
+            $response = $event_service->updateStatus(StatusEnum::PENDING, $event_id);
+            return $this->successResponse(MessagesEnum::EVENT_UPDATED_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
     public function delete(int $event_id)
     {
         try {

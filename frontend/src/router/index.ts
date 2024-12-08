@@ -76,17 +76,21 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/EventGalleryView.vue'),
       },
       {
+        path: 'gallery/full-screen',
+        name: 'eventGallery',
+        component: () => import('../views/EventGalleryView.vue'),
+      },
+      {
         path: 'assets',
         name: 'eventAssets',
         component: () => import('../views/EventAssetsView.vue'),
       },
+      {
+        path: 'uploads/:event_path',
+        name: 'gallery',
+        component: () => import('@/views/GalleryView.vue')
+      },
     ]
-  },
-  {
-    path: '/gallery/:galleryId',
-    name: 'gallery',
-    beforeEnter: Guard.guest,
-    component: () => import('@/views/GalleryView.vue')
   },
   {
     path: '/profile',

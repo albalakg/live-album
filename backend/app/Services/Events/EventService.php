@@ -16,6 +16,7 @@ use App\Services\Helpers\FileService;
 use App\Services\Orders\OrderService;
 use App\Http\Requests\UploadFileRequest;
 use App\Services\Enums\EventAssetTypeEnum;
+use App\Services\Helpers\TokenService;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -68,7 +69,8 @@ class EventService
     {
         return Event::where('user_id', $user_id)
                     ->where('status', '!=', StatusEnum::INACTIVE)
-                    ->select('id', 'order_id', 'image', 'name', 'description', 'status', 'starts_at', 'finished_at')
+                    ->select('id', 'order_id', 'path', 'image', 'name', 'description', 'status', 'starts_at', 'finished_at')
+                    ->with('assets:id,event_id,asset_type,path')
                     ->first();
     }
 
@@ -100,6 +102,7 @@ class EventService
     {
         $event = new Event;
         $event->order_id = $order->id;
+        $event->path = TokenService::generate(12);
         $event->user_id = $order->user_id;
         $event->status = StatusEnum::PENDING;
         $event->save();

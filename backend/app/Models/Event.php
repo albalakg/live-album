@@ -15,6 +15,8 @@ class Event extends Model
         'order_id',
     ];
 
+    protected $fillable = ['status'];
+
     public function assets()
     {
         return $this->hasMany(EventAsset::class, 'event_id', 'id')

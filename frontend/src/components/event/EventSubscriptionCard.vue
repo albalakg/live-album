@@ -13,10 +13,12 @@
             שדרוג החבילה ניתן כאשר האירוע בסטטוס ממתין בלבד.
             <br>
             עלות שדרוג החבילה הינו 50₪.
-         </small>
+            <br>
+            קבצים ללא הגבלה ונשאר ל30 יום.
+        </small>
         <div class="display--flex justify--end">
             <div class="width--half">
-                <MainButton color="pink" text="שדרוג חבילה" />
+                <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג מנוי" @onClick="submit()" />
             </div>
         </div>
     </div>
@@ -25,6 +27,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import MainButton from '../library/buttons/MainButton.vue';
+import { StatusEnum, SubscriptionTypesEnum } from '@/helpers/enums';
 
 export default defineComponent({
     name: 'EventSubscriptionCard',
@@ -42,16 +45,38 @@ export default defineComponent({
                 },
                 {
                     text: 'כמות קבצים',
-                    value: 'עד 300 קבצים',
+                    value: this.$store.getters["user/getSubscriptionFilesAllowed"] + ' קבצים',
                 },
                 {
                     text: 'זמן הורדת הקבצים',
-                    value: '14 ימים',
+                    value: this.$store.getters["user/getSubscriptionFilesStorageTime"] + ' ימים',
                 },
             ];
+        },
+        
+        eventStatus(): number {
+            return this.$store.getters['event/getEventStatus'];
+        },
+
+        subscriptionName(): string {
+            return this.$store.getters['user/getSubscriptionName'];
+        },
+
+        canUpgradeSubscription(): boolean {
+            return [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) && this.subscriptionName === SubscriptionTypesEnum.BASIC;
         }
     },
+   
+    methods: {
+        submit() {
+            // 
+        },
+    }
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.event-subscription-card {
+    min-height: fit-content;
+}
+</style>
