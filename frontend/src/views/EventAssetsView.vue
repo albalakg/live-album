@@ -3,11 +3,16 @@
     <div class="assets-top bg--white brs--medium padding--large display--flex justify--space-between">
       <div class="details display--flex direction--column justify--space-between">
         <div>
-          <h1 class="title--large">סה"כ 20 קבצים</h1>
+          <h1 class="title--large">סה"כ {{ totalAssets }} קבצים</h1>
         </div>
         <div>
           <small>
-            <strong>שימו לב:</strong> בעוד <strong>06:05:20:11</strong> כל קבצי האירוע יימחקו ולא יהיה ניתן להוריד/לשחזר.
+            <template v-if="isEventActive">
+              <strong>
+                שימו לב:
+              </strong>
+              בעוד <strong>{{ counter }}</strong> כל קבצי האירוע יימחקו ולא יהיה ניתן להוריד/לשחזר
+            </template>
           </small>
           <br>
           <strong class="text--pink">
@@ -36,7 +41,9 @@
 
 <script lang="ts">
 import MainButton from '@/components/library/buttons/MainButton.vue';
+import { StatusEnum } from '@/helpers/enums';
 import { defineComponent } from 'vue';
+import Time from '@/helpers/time';
 
 export default defineComponent({
   name: 'EventAssetsView',
@@ -47,11 +54,40 @@ export default defineComponent({
 
   data() {
     return {
+      counter: '' as string,
+      intervalId: null as ReturnType<typeof setInterval> | null,
     };
   },
 
-  methods: {
+  computed: {
+    totalAssets(): number {
+      return this.$store.getters['event/getTotalAssets']
+    },
 
+    isEventActive(): boolean {
+      return this.$store.getters['event/getEventStatus'] === StatusEnum.ACTIVE;
+    },
+  },
+
+  methods: {
+    updateCounter() {
+      this.counter = Time.countdownTimer(this.$store.getters['event/getEventFinishTime']);
+      if (this.counter === "00:00:00:00" && this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+      }
+    }
+  },
+
+  mounted() {
+    this.updateCounter(); // Initialize the counter immediately
+    this.intervalId = setInterval(this.updateCounter, 1000); // Refresh the counter every second
+  },
+
+  beforeUnmount() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
 });
 </script>

@@ -1,12 +1,12 @@
 <template>
   <div class="contact">
-    <MainLine color="light-green" top="250px" width="full" height="x-large"/>
-    <MainLine color="green" top="300px" width="full" height="large"/>
-    <MainLine color="light-green" top="335px" width="full" height="medium"/>
-    <MainLine color="green" top="350px" width="full" height="xx-large"/>
-    <MainLine color="light-green" top="430px" width="full" height="medium"/>
-    <MainLine color="green" top="455px" width="full" height="large"/>
-    <MainLine color="light-green" top="485px" width="full" height="x-large"/>
+    <MainLine color="light-green" top="250px" width="full" height="x-large" />
+    <MainLine color="green" top="300px" width="full" height="large" />
+    <MainLine color="light-green" top="335px" width="full" height="medium" />
+    <MainLine color="green" top="350px" width="full" height="xx-large" />
+    <MainLine color="light-green" top="430px" width="full" height="medium" />
+    <MainLine color="green" top="455px" width="full" height="large" />
+    <MainLine color="light-green" top="485px" width="full" height="x-large" />
 
 
     <MainCube color="pink" left="27%" top="72%" width="small" height="small" />
@@ -22,6 +22,9 @@
 
     <div class="contact-content width--corner bg--pink margin--auto brs--medium padding--medium shadow--small">
       <h2 class="text--center text--white title--large">צרו איתנו קשר</h2>
+      <p class="text--center title--small">
+        כל בקשה, הארה, תלונה או טיפ יתקבלו בברכה
+      </p>
       <div>
         <div class="line"></div>
         <div class="line"></div>
@@ -83,7 +86,7 @@ export default defineComponent({
 
   methods: {
     setUser() {
-      if(!this.$store.getters['user/isLoggedIn']) {
+      if (!this.$store.getters['user/isLoggedIn']) {
         return;
       }
 
@@ -92,17 +95,17 @@ export default defineComponent({
     },
 
     async submit() {
-      const errors = this.validateForm();   
-      if(errors.length) {
+      const errors = this.validateForm();
+      if (errors.length) {
         this.$store.dispatch('notification/addError', errors[0]);
         return;
-      } 
-      
+      }
+
       this.isLoading = true;
       const isSuccess = await this.$store.dispatch('contact/send', this.form);
       this.isLoading = false;
 
-      if(!isSuccess) {
+      if (!isSuccess) {
         return;
       }
 
@@ -127,7 +130,7 @@ export default defineComponent({
     position: relative;
     max-width: 400px;
     top: 5%;
-    
+
     .contact-form {
       position: relative;
       z-index: 1;

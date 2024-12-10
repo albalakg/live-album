@@ -23,6 +23,24 @@ class Time {
   
     return `${day}/${month}/${year}`;
   }
+
+  countdownTimer(targetDate: string): string {
+    const targetTime = new Date(targetDate + "Z").getTime(); // UTC time
+    const currentTime = Date.now(); // Local time in milliseconds
+
+    const difference = targetTime - currentTime;
+
+    if (difference <= 0) {
+      return "00:00:00:00"; // If the target time has passed
+    }
+
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+    return `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
 }
 
 export default new Time();

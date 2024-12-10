@@ -31,7 +31,7 @@
 import { defineComponent } from 'vue';
 import MainButton from '../library/buttons/MainButton.vue';
 import SubscriptionStatus from '../profile/SubscriptionStatus.vue';
-import { StatusEnum } from '@/helpers/enums';
+import Time from '@/helpers/time';
 
 export default defineComponent({
     name: 'EventInfoCard',
@@ -45,6 +45,7 @@ export default defineComponent({
         return {
             startsAtCounter: '' as string,
             loading: false as boolean,
+            intervalId: null as ReturnType<typeof setInterval> | null,
         }
     },
 
@@ -53,7 +54,7 @@ export default defineComponent({
             return [
                 {
                     text: 'שעון לאירוע',
-                    value: '05:13:20:11',
+                    value: this.startsAtCounter, // Updated to use the reactive counter
                 },
                 {
                     text: 'סיום האירוע',
@@ -80,11 +81,30 @@ export default defineComponent({
             this.loading = true;
             this.isReady ? this.$store.dispatch("event/setPending") : this.$store.dispatch("event/setReady");
             this.loading = false;
+        },
+
+        updateCounter() {
+            this.startsAtCounter = Time.countdownTimer(this.$store.getters['event/getEventStartTime']);
+            if (this.startsAtCounter === "00:00:00:00" && this.intervalId) {
+                clearInterval(this.intervalId);
+                this.intervalId = null;
+            }
+        }
+    },
+
+    mounted() {
+        this.updateCounter(); // Initialize the counter immediately
+        this.intervalId = setInterval(this.updateCounter, 1000); // Refresh the counter every second
+    },
+
+    beforeUnmount() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
         }
     }
 });
 </script>
-
+  
 <style lang="scss" scoped>
 .event-info {
     min-height: fit-content;

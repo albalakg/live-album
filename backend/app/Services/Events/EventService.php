@@ -88,20 +88,22 @@ class EventService
 
     /**
      * @param int $id
-     * @return ?Event
+     * @param int $user_id
+     * @return Collection
      */
-    public function getEventAssets(int $id): ?Event
+    public function getEventAssets(int $id, int $user_id): Collection
     {
-        $event = EventAsset::where('event_id', $id)->get();
-        if (!$event) {
-            return null;
+        if (!$event = Event::find($id)) {
+            throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if(!$event->isActive()) {
+        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
-        return $event;
+        return EventAsset::where('event_id', $id)
+                ->select('id', 'event_id', 'asset_type', 'path')
+                ->get();
     }
 
     /**

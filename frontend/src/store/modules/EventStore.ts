@@ -37,6 +37,10 @@ const EventStore = {
       return Time.extractDate(state.event?.starts_at ?? "");
     },
 
+    getEventStartTime(state: IEventStoreState): string | null {
+      return state.event?.starts_at;
+    },
+
     getEventFinishTime(state: IEventStoreState): string | null {
       return state.event?.finished_at;
     },
@@ -89,10 +93,8 @@ const EventStore = {
       if(!state.event.assets) {
         return state.event.assets = [];
       }
-      
+
       assets.forEach((image) => {
-        image.path =
-          process.env.VUE_APP_SERVER_BASE_URL + "/assets/" + image.path;
         if (
           !state.event.assets.map((image) => image.path).includes(image.path)
         ) {
@@ -115,6 +117,27 @@ const EventStore = {
           .get(`events/${path}/base-info`)
           .then((res) => {
             context.commit("SET_EVENT", res.data.data);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            console.warn("getBaseEvent: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    getEventAssets(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      path: string
+    ) {
+      return new Promise((resolve) => {
+        axios
+        .get(`events/${context.state.event.id}/assets`)
+        .then((res) => {
+            context.commit("SET_FILES", res.data.data);
             resolve(res.data);
           })
           .catch((err) => {

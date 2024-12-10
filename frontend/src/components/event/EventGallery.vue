@@ -50,9 +50,9 @@ export default defineComponent({
     },
 
     created() {
-        this.$store.dispatch("event/fetchAssets");
+        this.$store.dispatch("event/getEventAssets");
         this.interval = setInterval(() => {
-            this.$store.dispatch("event/fetchAssets");
+            this.$store.dispatch("event/getEventAssets");
         }, 10000);
     },
 
@@ -106,7 +106,6 @@ export default defineComponent({
             if (this.assets.length === 0) return;
             const index = this.getRandomAssetIndexes();
             this.sessionAsset = [this.assets[index]];
-            console.log('sessionAsset', this.sessionAsset);
             
             this.currentIndex = index;
         },
