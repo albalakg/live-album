@@ -77,20 +77,20 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'gallery/full-screen',
-        name: 'eventGallery',
-        component: () => import('../views/EventGalleryView.vue'),
+        name: 'eventGalleryFullScreen',
+        component: () => import('../views/EventGalleryFullScreenView.vue'),
       },
       {
         path: 'assets',
         name: 'eventAssets',
         component: () => import('../views/EventAssetsView.vue'),
       },
-      {
-        path: 'uploads/:event_path',
-        name: 'gallery',
-        component: () => import('@/views/GalleryView.vue')
-      },
     ]
+  },
+  {
+    path: '/event/uploads/:event_path',
+    name: 'gallery',
+    component: () => import('@/views/EventUploadsView.vue')
   },
   {
     path: '/profile',

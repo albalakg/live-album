@@ -53,6 +53,17 @@ class EventController extends Controller
         }
     }
 
+    public function getBaseInfo(string $event_path)
+    {
+        try {
+            $event_service = new EventService();
+            $response = $event_service->getBaseInfo($event_path);
+            return $this->successResponse(MessagesEnum::EVENT_FOUND_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
     public function update(int $event_id, UpdateEventRequest $request)
     {
         try {

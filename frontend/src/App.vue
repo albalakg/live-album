@@ -1,10 +1,11 @@
 <template>
-  <div class="app-wrapper">
+  <router-view v-if="isFullScreen"/>
+  <div class="app-wrapper" v-else>
     <DesktopBar />
     <div class="app-content">
       <router-view />
     </div>
-    <Footer v-if="!isFullScreen" />
+    <Footer />
   </div>
 </template>
 <script lang="ts">

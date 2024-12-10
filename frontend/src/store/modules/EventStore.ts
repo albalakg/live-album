@@ -1,15 +1,13 @@
 import axios from "axios";
 import { serialize } from "object-to-formdata";
-import Time from '@/helpers/time'
+import Time from "@/helpers/time";
 import {
   IEventStoreState,
   IEventAsset,
   UpdateEventRequest,
   IEvent,
 } from "@/helpers/interfaces";
-import {
-  StatusEnum
-} from "@/helpers/enums";
+import { StatusEnum } from "@/helpers/enums";
 
 const EventStore = {
   namespaced: true,
@@ -35,6 +33,10 @@ const EventStore = {
       return state.event?.status === StatusEnum.READY;
     },
 
+    getEventDate(state: IEventStoreState): string | null {
+      return Time.extractDate(state.event?.starts_at ?? "");
+    },
+
     getEventFinishTime(state: IEventStoreState): string | null {
       return state.event?.finished_at;
     },
@@ -48,7 +50,7 @@ const EventStore = {
     },
 
     getEventImage(state: IEventStoreState): string {
-      return process.env.VUE_APP_SERVER_BASE_URL + '/' + state.event?.image;
+      return process.env.VUE_APP_SERVER_BASE_URL + "/" + state.event?.image;
     },
 
     hasActiveEvent(state: IEventStoreState): boolean {
@@ -72,15 +74,22 @@ const EventStore = {
     },
 
     ADD_FILE(state: IEventStoreState, image: IEventAsset) {
-      image.path = process.env.VUE_APP_SERVER_BASE_URL + "/assets/" + image.path;
-      state.event.assets.push(image);
+      image.path =
+        process.env.VUE_APP_SERVER_BASE_URL + "/assets/" + image.path;
+      state.event.assets ? state.event.assets.push(image) : state.event.assets = [image];
     },
 
     SET_FILES(state: IEventStoreState, assets: IEventAsset[]) {
+      if(!state.event.assets) {
+        return state.event.assets = [];
+      }
+      
       assets.forEach((image) => {
         image.path =
           process.env.VUE_APP_SERVER_BASE_URL + "/assets/" + image.path;
-        if (!state.event.assets.map((image) => image.path).includes(image.path)) {
+        if (
+          !state.event.assets.map((image) => image.path).includes(image.path)
+        ) {
           state.event.assets.push(image);
         }
       });
@@ -88,15 +97,34 @@ const EventStore = {
   },
 
   actions: {
+    getEventBaseInfo(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      path: string
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .get(`events/${path}/base-info`)
+          .then((res) => {
+            context.commit("SET_EVENT", res.data.data);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            console.warn("getBaseEvent: ", err);
+            resolve(null);
+          });
+      });
+    },
+
     setEvent(
       context: { commit: (arg0: string, arg1: any) => void },
       event: IEvent
     ) {
-      console.log('event', event);
-      
-      if(event) {
-        event.starts_at = Time.convertToLocalTime(event.starts_at ?? '');
-        event.finished_at = Time.convertToLocalTime(event.finished_at ?? '');
+      if (event) {
+        event.starts_at = Time.convertToLocalTime(event.starts_at ?? "");
+        event.finished_at = Time.convertToLocalTime(event.finished_at ?? "");
       }
       context.commit("SET_EVENT", event);
     },
@@ -127,12 +155,10 @@ const EventStore = {
       });
     },
 
-    setReady(
-      context: {
-        state: IEventStoreState;
-        commit: (arg0: string, arg1: any) => void;
-      },
-    ) {
+    setReady(context: {
+      state: IEventStoreState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
       return new Promise((resolve, reject) => {
         axios
           .post(`events/${context.state.event.id}/ready`)
@@ -141,18 +167,16 @@ const EventStore = {
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("update: ", err);
+            console.warn("setReady: ", err);
             resolve(null);
           });
       });
     },
 
-    setPending(
-      context: {
-        state: IEventStoreState;
-        commit: (arg0: string, arg1: any) => void;
-      },
-    ) {
+    setPending(context: {
+      state: IEventStoreState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
       return new Promise((resolve, reject) => {
         axios
           .post(`events/${context.state.event.id}/pending`)
@@ -161,20 +185,23 @@ const EventStore = {
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("update: ", err);
+            console.warn("setPending: ", err);
             resolve(null);
           });
       });
     },
 
     uploadFile(
-      context: { commit: (arg0: string, arg1: any) => void },
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
       file: any
     ) {
       return new Promise((resolve, reject) => {
         const packageToSend = serialize({ file }, { indices: true });
         axios
-          .post("event/file", packageToSend, {
+          .post(`events/${context.state.event.id}/upload`, packageToSend, {
             headers: {
               "Content-Type": "multipart/form-data",
             },

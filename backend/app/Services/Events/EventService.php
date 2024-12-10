@@ -44,6 +44,18 @@ class EventService
     }
 
     /**
+     * @param string $event_path
+     * @return ?Event
+     */
+    public function getBaseInfo(string $event_path): ?Event
+    {
+        return Event::where('path', $event_path)
+                    ->select('id', 'image', 'name', 'starts_at')
+                    ->where('status', StatusEnum::ACTIVE)
+                    ->first();
+    }
+
+    /**
      * @param int $id
      * @return ?Event
      */
@@ -69,7 +81,7 @@ class EventService
     {
         return Event::where('user_id', $user_id)
                     ->where('status', '!=', StatusEnum::INACTIVE)
-                    ->select('id', 'order_id', 'path', 'image', 'name', 'description', 'status', 'starts_at', 'finished_at')
+                    ->select('id', 'order_id', 'path', 'image', 'name', 'status', 'starts_at', 'finished_at')
                     ->with('assets:id,event_id,asset_type,path')
                     ->first();
     }
@@ -177,7 +189,7 @@ class EventService
         }
 
         $event->name = $data['name'] ?? $event->name;
-        $event->image = FileService::create($data['image'], 'events', FileService::S3_DISK);
+        $event->image = FileService::create($data['image'], "events/$event_id", FileService::S3_DISK);
         // $event->description = $data['description'] ?? $event->description;
         $event->starts_at = $this->getEventStartTime($data['start_at'] ?? '');
         $event->status = $data['status'] ?? $event->status;
@@ -259,9 +271,11 @@ class EventService
         }
 
         $event_asset = new EventAsset;
-        $event_asset->path = FileService::create($request['file'], 'files', FileService::S3_DISK);
+        $event_asset->path = FileService::create($request['file'], "events/$event_id/gallery", FileService::S3_DISK);
         $event_asset->event_id = $request->event_id;
-        $event_asset->type = $this->getFileType($request);
+        $event_asset->asset_type = $this->getFileType($request);
+        $event_asset->user_agent = $request->userAgent();
+        $event_asset->ip = $request->ip();
         $event_asset->status = StatusEnum::ACTIVE;
         $event_asset->save();
 

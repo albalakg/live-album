@@ -1,12 +1,15 @@
 <template>
-  <div class="event-main display--flex padding--medium" v-if="$store.getters['event/getEvent']">
-    <div class="event-sidebar">
-      <Sidebar />
+  <template v-if="$store.getters['event/getEvent']">
+    <router-view v-if="isFullScreen"></router-view>
+    <div class="event-main display--flex padding--medium" v-else>
+      <div class="event-sidebar">
+        <Sidebar />
+      </div>
+      <div class="event-content bg--gray padding--large brs--medium">
+        <router-view></router-view>
+      </div>
     </div>
-    <div class="event-content bg--gray padding--large brs--medium">
-      <router-view></router-view>
-    </div>
-  </div>
+  </template>
 </template>
 
 <script lang="ts">
@@ -21,8 +24,20 @@ export default defineComponent({
     Sidebar,
   },
 
-  methods: {
+  computed: {
+    isFullScreen(): boolean {
+      return this.$route.path.includes('uploads') || this.$route.path.includes('full-screen');
+    }
+  },
 
+  methods: {
+    getEventDetails() {
+      if(this.$store.getters["event/getEvent"]) {
+        return;
+      }
+
+      this.$store.dispatch("event/getEventBaseInfo")
+    }
   }
 });
 </script>
@@ -42,5 +57,4 @@ export default defineComponent({
     margin-inline-start: 40px;
   }
 }
-
 </style>

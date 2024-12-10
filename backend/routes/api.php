@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ContactController;
 
+Route::get('events/{event_path}/base-info', [EventController::class, 'getBaseInfo']);
 Route::get('user/profile', [UserController::class, 'profile']);
 
 Route::post('contact', [ContactController::class, 'create']);

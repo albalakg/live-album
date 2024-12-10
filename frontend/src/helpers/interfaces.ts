@@ -48,7 +48,6 @@ export interface IEvent {
   name: string | null;
   path: string;
   image: string | null;
-  description: string | null;
   starts_at: string | null;
   finished_at: string | null;
   assets: IEventAsset[];

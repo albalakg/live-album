@@ -43,7 +43,6 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path("routes/groups/user.php"));
 
             Route::prefix('api/events')
-                ->middleware('auth:api')
                 ->group(base_path("routes/groups/event.php"));
         });
     }

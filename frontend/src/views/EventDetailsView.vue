@@ -5,12 +5,12 @@
       <div class="display--flex justify--space-between align--center">
         <div class="display--flex align--center">
           <div class="icon-wrapper">
-            <MainIcon clickable icon="content_copy" />
+            <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
           </div>
-          <small>לחצו להעתקת הקישור</small>
+          <small>{{ copyText }}</small>
         </div>
         <div>
-          <router-link :to="`/event/uploads/${eventPath}`">
+          <router-link target="_blank" :to="`/event/uploads/${eventPath}`">
             <BaseButton text="צפייה בעמוד העלאות" />
           </router-link>
         </div>
@@ -42,14 +42,74 @@ export default defineComponent({
     MainIcon,
   },
 
-  computed: {
-    eventPath(): string {
-      return this.$store.getters['event/getEventPath']
+  data() {
+    return {
+      textCopied: false as boolean,
     }
   },
 
-  methods: {
+  computed: {
+    eventPath(): string {
+      return this.$store.getters['event/getEventPath']
+    },
+    
+    copyText(): string {
+      return this.textCopied ? 'הקישור הועתק' : 'לחצו להעתקת הקישור';
+    },
+  },
 
+  methods: {
+    copyUrl() {      
+      this.copyTextToClipboard(window.location.origin + `/event/uploads/${this.eventPath}`);
+    },
+
+    fallbackCopyTextToClipboard(text: string) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+
+      // Avoid scrolling to bottom
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+        if(successful) {
+          this.textCopied = true;
+          setTimeout(() => {
+            this.textCopied = false;
+          }, 2000);
+        }
+        console.log('Fallback: Copying text command was ' + msg);
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+      }
+
+      document.body.removeChild(textArea);
+    },
+
+    copyTextToClipboard(text: string) {
+      if (!navigator.clipboard) {
+        this.fallbackCopyTextToClipboard(text);
+        return;
+      }
+      
+      navigator.clipboard.writeText(text).then(() => {
+        console.log('Async: Copying to clipboard was successful!');
+        this.textCopied = true;
+        setTimeout(() => {
+          this.textCopied = false;
+        }, 2000);
+      }, (err) => {
+        console.error('Async: Could not copy text: ', err);
+        this.fallbackCopyTextToClipboard(text);
+      });
+    }
   }
 });
 </script>
@@ -60,6 +120,7 @@ export default defineComponent({
   .icon-wrapper {
     width: 30px;
     height: 30px;
+    margin-inline-end: 5px;
   }
 
   .event-right {
