@@ -56,8 +56,9 @@ export interface IEvent {
 export interface IEventAsset {
   id: number;
   event_id: number;
-  asset_type: EventFileType;
+  type: EventFileType;
   path: string;
+  fullPath: string;
 }
 
 export interface IDesktopBarItem {

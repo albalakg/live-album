@@ -8,12 +8,15 @@
       </div>
       <span class="title--small">סה"כ {{ totalAssets }} קבצים</span>
     </div>
-    <div class="gallery-content brs--medium width--full bg--dark"></div>
+    <div class="gallery-content brs--medium width--full bg--dark">
+      <EventGallery rounded hideMenu />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import MainButton from '@/components/library/buttons/MainButton.vue';
+import EventGallery from '@/components/event/EventGallery.vue';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -21,6 +24,7 @@ export default defineComponent({
 
   components: {
     MainButton,
+    EventGallery,
   },
 
   data() {

@@ -49,6 +49,10 @@ const EventStore = {
       return state.event?.assets?.length ?? 0;
     },
 
+    getAssets(state: IEventStoreState): IEventAsset[] {
+      return state.event?.assets ?? [];
+    },
+
     getEventImage(state: IEventStoreState): string {
       return process.env.VUE_APP_SERVER_BASE_URL + "/" + state.event?.image;
     },

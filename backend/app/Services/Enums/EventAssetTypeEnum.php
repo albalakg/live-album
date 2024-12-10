@@ -6,6 +6,8 @@ use App\Services\Enums\BaseEnum;
 
 class EventAssetTypeEnum extends BaseEnum
 {
-  const VIDEO = 1,
-        IMAGE = 2;
+  const VIDEO = 'video',
+        VIDEO_ID = 1,
+        IMAGE = 'image',
+        IMAGE_ID = 2;
 }

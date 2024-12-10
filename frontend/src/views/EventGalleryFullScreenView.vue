@@ -19,19 +19,22 @@
         </router-link>
       </div>
     </div>
-    <div class="gallery-content"></div>
+    <div class="gallery-content">
+      <EventGallery />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { IEvent, IEventAsset } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
+import EventGallery from '@/components/event/EventGallery.vue';
 
 export default defineComponent({
   name: 'GalleryView',
 
   components: {
-
+    EventGallery,
   },
 
   data() {
@@ -89,6 +92,7 @@ export default defineComponent({
     top: 0;
     height: 70px;
     padding: 0 30px;
+    z-index: 10000;
   }
 }
 </style>

@@ -368,6 +368,6 @@ class EventService
     private function getFileType(UploadFileRequest $request): int
     {
         $extension = strtolower($request->file('file')->getClientOriginalExtension());
-        return in_array($extension, ['mp4', 'mov', 'avi']) ? EventAssetTypeEnum::VIDEO : EventAssetTypeEnum::IMAGE;
+        return in_array($extension, ['mp4', 'mov', 'avi']) ? EventAssetTypeEnum::VIDEO_ID : EventAssetTypeEnum::IMAGE_ID;
     }
 }
