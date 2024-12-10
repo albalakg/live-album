@@ -137,10 +137,10 @@ const UserStore = {
         .catch((err) => {
           console.warn("get: ", err);
         });
-      Auth.deleteCookie();
-      context.commit("SET_USER", null);
-      context.commit("SET_LOGGED_IN", false);
-      context.dispatch("event/setEvent", null, { root: true });
+        Auth.deleteCookie();
+        context.commit("SET_USER", null);
+        context.commit("SET_LOGGED_IN", false);
+        context.dispatch("event/setEvent", null, { root: true });
     },
 
     forgotPassword(

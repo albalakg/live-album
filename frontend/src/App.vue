@@ -25,10 +25,21 @@ export default defineComponent({
   created() {
     this.setInitialSettings();
   },
+  
+  data() {
+    return {
+      links: ['uploads', 'full-screen']
+    }
+  },
 
   computed: {
     isFullScreen(): boolean {
-      return this.$route.path.includes('uploads') || this.$route.path.includes('full-screen');
+      for(let index = 0; index < this.links.length; index++) {
+        if(this.$route.path.includes(this.links[index])) {{
+          return true;
+        }}
+      }
+      return false;
     }
   },
   

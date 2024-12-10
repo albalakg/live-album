@@ -1,50 +1,94 @@
 <template>
-  <div class="event-gallery height--full">
-    <div class="gallery-top display--flex justify--space-between align--center">
-      <MainButton @clicked="goToGallery()" text="צפה בגלרייה" class="gallery-button width--sixth" />
-      <span class="title--small">סה"כ 30 קבצים</span>
+  <div class="gallery bg--dark" v-if="event">
+    <div class="gallery-header bg--white display--flex justify--space-between align--center">
+      <div>
+        <strong class="pointer" @click="toggleFullScreen()">
+          {{ screenText }}
+        </strong>
+      </div>
+      <div>
+        <h1 class="title--large text--pink">
+          {{ event.name }}
+        </h1>
+      </div>
+      <div>
+        <router-link to="/event/gallery">
+          <strong class="pointer">
+            יציאה
+          </strong>
+        </router-link>
+      </div>
     </div>
-    <div class="gallery-content brs--medium width--full bg--dark"></div>
+    <div class="gallery-content"></div>
   </div>
 </template>
 
 <script lang="ts">
-import MainButton from '@/components/library/buttons/MainButton.vue';
+import { IEvent, IEventAsset } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'EventGalleryFullScreenView',
+  name: 'GalleryView',
 
   components: {
-    MainButton,
+
   },
 
   data() {
     return {
+      isFullScreen: false as boolean,
     };
   },
 
   computed: {
-    // event()
+    event(): IEvent | null {
+      return this.$store.getters["event/getEvent"];
+    },
+
+    screenText(): string {
+      return this.isFullScreen ? 'הורד מסך מלא' : 'מסך מלא';
+    }
   },
 
   methods: {
-    goToGallery() {
-      this.$router.push('/gallery/1')
+    toggleFullScreen() {
+      const elem = document.getElementsByTagName('body')[0];
+      this.isFullScreen = !this.isFullScreen;
+      if (this.isFullScreen) {
+        (elem as any).requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  },
+
+  beforeUnmount() {
+    try {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+    } catch (err) {
+      console.error("Error exiting fullscreen mode:", err);
     }
   }
 });
 </script>
 
 <style lang="scss" scoped>
-.event-gallery {}
+.gallery {
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 100vw;
 
-.gallery-top {
-  height: 50px;
-  margin-bottom: 20px;
-}
-
-.gallery-content {
-  height: calc(100% - 70px);
+  .gallery-header {
+    position: absolute;
+    width: calc(100% - 60px);
+    top: 0;
+    height: 70px;
+    padding: 0 30px;
+  }
 }
 </style>

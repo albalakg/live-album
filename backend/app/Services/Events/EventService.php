@@ -51,7 +51,7 @@ class EventService
     {
         return Event::where('path', $event_path)
                     ->select('id', 'image', 'name', 'starts_at')
-                    ->where('status', StatusEnum::ACTIVE)
+                    ->whereIn('status', [StatusEnum::ACTIVE, StatusEnum::READY, StatusEnum::PENDING])
                     ->first();
     }
 
@@ -348,7 +348,8 @@ class EventService
     private function isAuthorizedToUploadAsset(Event $event): bool
     {
         $order = $this->order_service->find($event->order_id);
-        return $event->isActive() && $this->getEventTotalAssets($event->id) < $order->subscription->files_allowed;
+        return ($event->isActive() || $event->isReady() || $event->isPending()) && 
+                ($this->getEventTotalAssets($event->id) < $order->subscription->files_allowed);
     }
 
     /**

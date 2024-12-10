@@ -155,6 +155,8 @@ export default defineComponent({
 
   computed: {
     event(): IEvent {
+      console.log(this.$store.getters["event/getEvent"]);
+      
       return this.$store.getters["event/getEvent"];
     },
 

@@ -60,6 +60,8 @@ const EventStore = {
 
   mutations: {
     SET_EVENT(state: IEventStoreState, event: IEvent) {
+      console.log('SET_EVENT', event);
+      
       state.event = event;
     },
 
