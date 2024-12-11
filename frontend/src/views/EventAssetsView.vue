@@ -23,10 +23,11 @@
       </div>
       <div class="actions width--fifth display--flex direction--column justify--space-between text--center">
         <div class="display--flex justify--space-between align--center">
-          <MainCheckbox :disabled="loading" ref="downloadCheckbox" @onClick="toggleDownloadCheck()" title="לחצו בשביל לאפשר הורדה" />
+          <MainCheckbox :disabled="loading" ref="downloadCheckbox" @onClick="toggleDownloadCheck()"
+            title="לחצו בשביל לאפשר הורדה" />
           <div class="width--half">
-            <BaseButton :loading="loading" :disabled="!canDownload || !pickedAssets.length" text="הורד קבצים" color="green"
-              @onClick="downloadFiles()" />
+            <BaseButton :loading="loading" :disabled="!canDownload || !pickedAssets.length" text="הורד קבצים"
+              color="green" @onClick="downloadFiles()" />
           </div>
         </div>
         <div class="display--flex justify--space-between align--center">
@@ -40,7 +41,8 @@
         <div class="display--flex align--center" :class="{
           'disabled': !canDelete && !canDownload
         }">
-          <MainCheckbox :disabled="loading" ref="chooseAllCheckbox" title="לחצו בשביל לבחור את כולם" @onClick="toggleAllAssets()" />
+          <MainCheckbox :disabled="loading" ref="chooseAllCheckbox" title="לחצו בשביל לבחור את כולם"
+            @onClick="toggleAllAssets()" />
           <small class="choose-all-text">
             בחר את כולם
           </small>
@@ -123,43 +125,45 @@ export default defineComponent({
     },
 
     toggleDownloadCheck() {
+      this.pickedAssets.forEach(assetId => {
+        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
+      })
       this.pickedAssets = [];
+
       this.canDownload = !this.canDownload;
-      if (this.canDownload) {
-        if (this.canDelete) {
-          (this.$refs.deleteCheckbox as any).toggle()
-        }
+      if (this.canDownload && this.canDelete) {
+        (this.$refs.deleteCheckbox as any).toggle()
         this.canDelete = false;
       }
 
       if (this.pickedAll) {
         (this.$refs.chooseAllCheckbox as any).toggle()
+        this.pickedAll = false;
       }
     },
 
     toggleDeleteCheck() {
+      this.pickedAssets.forEach(assetId => {
+        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
+      })
+
       this.pickedAssets = [];
       this.canDelete = !this.canDelete;
-      if (this.canDelete) {
-        if (this.canDownload) {
-          (this.$refs.downloadCheckbox as any).toggle()
-        }
+      if (this.canDelete && this.canDownload) {
+        (this.$refs.downloadCheckbox as any).toggle()
         this.canDownload = false;
       }
 
       if (this.pickedAll) {
         (this.$refs.chooseAllCheckbox as any).toggle()
+        this.pickedAll = false;
       }
     },
 
     toggleAllAssets() {
       this.pickedAll = !this.pickedAll;
-
       this.assets.forEach(asset => {
-        if (!this.pickedAssets.includes(asset.id)) {
-          (this.$refs[`asset-checkbox-${asset.id}`] as any)[0].toggle()
-          this.pickedAssets.push(asset.id)
-        }
+        this.addToPickedAssets(asset.id);
 
         if (!this.pickedAll) {
           if (this.pickedAssets.includes(asset.id)) {
@@ -173,9 +177,24 @@ export default defineComponent({
       }
     },
 
+    togglePickedAsset(assetId: number) {
+      this.addToPickedAssets(assetId);
+      this.removeFromPickedAssets(assetId);
+    },
+
     addToPickedAssets(assetId: number) {
-      this.pickedAssets.push(assetId);
-      (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
+      if (!this.pickedAssets.includes(assetId)) {
+        this.pickedAssets.push(assetId);
+        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
+      }
+    },
+
+    removeFromPickedAssets(assetId: number) {
+      const assetIndex = this.pickedAssets.findIndex(pickedAssetId => pickedAssetId === assetId);
+      if (assetIndex !== -1) {
+        this.pickedAssets.splice(assetIndex, 1);
+        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
+      }
     },
 
     async downloadFiles() {
