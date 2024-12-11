@@ -125,8 +125,7 @@ export default defineComponent({
   height: 100vh;
 
   .contact-content {
-    height: 65%;
-    min-height: 500px;
+    min-height: 520px;
     position: relative;
     max-width: 400px;
     top: 5%;
