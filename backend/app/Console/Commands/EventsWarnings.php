@@ -9,6 +9,7 @@ use App\Services\Enums\LogsEnum;
 use App\Services\Enums\StatusEnum;
 use App\Services\Helpers\LogService;
 use App\Services\Helpers\MailService;
+use App\Services\Enums\SubscriptionEnum;
 use App\Mail\WarningBeforeEventDisabledMail;
 
 class EventsWarnings extends Command
@@ -34,15 +35,18 @@ class EventsWarnings extends Command
     {
         $mail_service = new MailService();
 
-        $events = Event::where('finished_at', '<=', Carbon::now()->subDays(27))
-            ->join('users', 'users.id', 'events.user_id')
-            ->where('status', StatusEnum::ACTIVE)
-            ->select('events.id', 'events.name', 'users.first_name', 'users.email')
+        $events = Event::join('users', 'users.id', 'events.user_id')
+            ->join('orders', 'orders.id', 'events.order_id')
+            ->where('events.status', StatusEnum::ACTIVE)
+            ->select('events.id', 'events.name', 'users.first_name', 'users.email', 'events.status', 'orders.subscription_id')
             ->get();
 
-        
 
         foreach ($events as $event) {
+            if($event->subscription_id === SubscriptionEnum::NORMAL_ID && $event->finished_at === Carbon::now()->subDays(14)) {
+
+            }
+
             $data = [
                 'event_name' => $event->name,
                 'first_name' => $event->first_name,

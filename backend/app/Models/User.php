@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Role;
-use App\Enums\RoleEnumV2;
 use App\Services\Enums\RoleEnum;
 use App\Services\Enums\StatusEnum;
 use Laravel\Passport\HasApiTokens;

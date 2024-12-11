@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('event:start')->everyTenMinutes();
         $schedule->command('event:end')->everyTenMinutes();
+        $schedule->command('event:disable')->everyTenMinutes();
+        $schedule->command('event:warning')->everyTenMinutes();
     }
 
     /**
