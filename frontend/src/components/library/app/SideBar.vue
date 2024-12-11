@@ -57,6 +57,11 @@ export default defineComponent({
                     path: '/event/assets',
                     isActive: false,
                 },
+                {
+                    text: 'כרטיס QR',
+                    path: '/event/qr',
+                    isActive: false,
+                },
             ];
 
             return items.map(item => {

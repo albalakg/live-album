@@ -85,6 +85,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'eventAssets',
         component: () => import('../views/EventAssetsView.vue'),
       },
+      {
+        path: 'qr',
+        name: 'eventQRCard',
+        component: () => import('../views/EventQRCardView.vue'),
+      },
     ]
   },
   {
