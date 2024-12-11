@@ -131,8 +131,6 @@ export default defineComponent({
         } finally {
           isUploading.value = false;
         }
-      } else {
-        alert('No file selected');
       }
     };
 

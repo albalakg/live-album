@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Services\Enums\StatusEnum;
+use App\Services\Users\UserService;
+use App\Services\Enums\MessagesEnum;
+use Illuminate\Support\Facades\Auth;
 use App\Services\Events\EventService;
+use App\Services\Orders\OrderService;
 use App\Http\Requests\UploadFileRequest;
 use App\Http\Requests\CreateEventRequest;
 use App\Http\Requests\UpdateEventRequest;
-use App\Services\Enums\MessagesEnum;
-use App\Services\Enums\StatusEnum;
-use App\Services\Orders\OrderService;
-use App\Services\Users\UserService;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\DeleteEventAssetsRequest;
 
 class EventController extends Controller
 {
@@ -59,6 +60,28 @@ class EventController extends Controller
             $event_service = new EventService(new UserService());
             $response = $event_service->getEventAssets($event_id, Auth::user()->id);
             return $this->successResponse(MessagesEnum::EVENT_FOUND_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function deleteAssets(int $event_id, DeleteEventAssetsRequest $request)
+    {
+        try {
+            $event_service = new EventService(new UserService());
+            $response = $event_service->deleteEventAssets($event_id, $request->validated(), Auth::user()->id);
+            return $this->successResponse(MessagesEnum::DELETED_EVENT_ASSET_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function downloadAssets(int $event_id, DeleteEventAssetsRequest $request)
+    {
+        try {
+            $event_service = new EventService(new UserService());
+            return $event_service->downloadEventAssets($event_id, $request->validated(), Auth::user()->id);
+            // return $this->successResponse(MessagesEnum::DELETED_EVENT_ASSET_SUCCESS, $response);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);
         }

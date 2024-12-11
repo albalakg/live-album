@@ -4,6 +4,7 @@ namespace App\Services\Events;
 
 use DateTime;
 use Exception;
+use ZipArchive;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\EventAsset;
@@ -12,11 +13,12 @@ use App\Services\Enums\StatusEnum;
 use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
 use App\Services\Helpers\LogService;
+use Illuminate\Support\Facades\Http;
 use App\Services\Helpers\FileService;
 use App\Services\Orders\OrderService;
+use App\Services\Helpers\TokenService;
 use App\Http\Requests\UploadFileRequest;
 use App\Services\Enums\EventAssetTypeEnum;
-use App\Services\Helpers\TokenService;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -27,7 +29,7 @@ use Illuminate\Database\Eloquent\Collection;
  * 2. User moves the status for ready before the start date
  * 3. When the event starts the status turns to active via a job
  * 4. After 30 days the event becomes disabled and all assets are removed
-*/
+ */
 class EventService
 {
     public function __construct(
@@ -50,9 +52,9 @@ class EventService
     public function getBaseInfo(string $event_path): ?Event
     {
         return Event::where('path', $event_path)
-                    ->select('id', 'image', 'name', 'starts_at')
-                    ->whereIn('status', [StatusEnum::ACTIVE, StatusEnum::READY, StatusEnum::PENDING])
-                    ->first();
+            ->select('id', 'image', 'name', 'starts_at')
+            ->whereIn('status', [StatusEnum::ACTIVE, StatusEnum::READY, StatusEnum::PENDING])
+            ->first();
     }
 
     /**
@@ -66,7 +68,7 @@ class EventService
             return null;
         }
 
-        if(!$event->isActive()) {
+        if (!$event->isActive()) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
@@ -80,10 +82,10 @@ class EventService
     public function getEventByUser(int $user_id): ?Event
     {
         return Event::where('user_id', $user_id)
-                    ->where('status', '!=', StatusEnum::INACTIVE)
-                    ->select('id', 'order_id', 'path', 'image', 'name', 'status', 'starts_at', 'finished_at')
-                    ->with('assets:id,event_id,asset_type,path')
-                    ->first();
+            ->where('status', '!=', StatusEnum::INACTIVE)
+            ->select('id', 'order_id', 'path', 'image', 'name', 'status', 'starts_at', 'finished_at')
+            ->with('assets:id,event_id,asset_type,path')
+            ->first();
     }
 
     /**
@@ -102,8 +104,84 @@ class EventService
         }
 
         return EventAsset::where('event_id', $id)
-                ->select('id', 'event_id', 'asset_type', 'path')
-                ->get();
+            ->select('id', 'event_id', 'asset_type', 'path')
+            ->get();
+    }
+
+    /**
+     * @param int $id
+     * @param array $data
+     * @param int $user_id
+     * @return bool
+     */
+    public function deleteEventAssets(int $id, array $data, int $user_id)
+    {
+        if (!$event = Event::find($id)) {
+            throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
+        }
+
+        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+            throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
+        }
+
+        $event_assets = EventAsset::whereIn('id', $data['assets'])
+            ->select('id', 'event_id', 'path')
+            ->get();
+
+        foreach ($event_assets as $event_asset) {
+            try {
+                FileService::delete($event_asset->path, FileService::S3_DISK);
+            } catch (Exception $ex) {
+                LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_DELETE_EVENT_ASSET]);
+            }
+        }
+
+        return EventAsset::whereIn('id', $data['assets'])->delete();
+    }
+
+    /**
+     * @param int $id
+     * @param array $data
+     * @param int $user_id
+     * @return bool
+     */
+    public function downloadEventAssets(int $id, array $data, int $user_id)
+    {
+        if (!$event = Event::find($id)) {
+            throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
+        }
+
+        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+            throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
+        }
+
+        $event_assets = EventAsset::whereIn('id', $data['assets'])
+            ->select('id', 'event_id', 'path')
+            ->get();
+
+        if ($event_assets->isEmpty()) {
+            return response()->json(['message' => 'No files found.'], 404);
+        }
+
+        $zipFileName = "event-assets-{$id}.zip";
+        $zip_path = storage_path($zipFileName);
+        $zip = new ZipArchive();
+
+        if ($zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            throw new Exception('Could not create ZIP file.');
+        }
+
+        foreach ($event_assets as $event_asset) {
+            try {
+                $fileContent = FileService::get($event_asset->path, FileService::S3_DISK);
+                $zip->addFromString(basename($event_asset->path), $fileContent);
+            } catch (Exception $ex) {
+                // LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_PROCESS_EVENT_ASSET]);
+            }
+        }
+
+        $zip->close();
+        return response()->download($zip_path)->deleteFileAfterSend(true);
     }
 
     /**
@@ -162,12 +240,12 @@ class EventService
         }
 
         $event->name = $data['name'] ?? $event->name;
-        if($data['image']) {
+        if ($data['image']) {
             $event->image = FileService::create($data['image'], "events/$event_id", FileService::S3_DISK);
         }
         // $event->description = $data['description'] ?? $event->description;
 
-        if($event->isPending()) {
+        if ($event->isPending()) {
             $event->starts_at = $this->getEventStartTime($data['starts_at'] ?? '') ?? $event->starts_at;
             if (!empty($data['starts_at'])) {
                 $event->finished_at = $this->getEventFinishTime($event->starts_at);
@@ -232,7 +310,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
-        $this->deleteEventAssets($event_id);
+        $this->deleteEventsAssetsByEvent($event_id);
         return $this->updateStatus(StatusEnum::INACTIVE, $event->id);
     }
 
@@ -252,7 +330,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
-        $this->deleteEventAssets($event_id);
+        $this->deleteEventsAssetsByEvent($event_id);
         return $event->delete();
     }
 
@@ -309,14 +387,14 @@ class EventService
      * @param int $event_id
      * @return void
      */
-    private function deleteEventAssets(int $event_id): void
+    private function deleteEventsAssetsByEvent(int $event_id): void
     {
         $event_assets = EventAsset::where('event_id', $event_id)
-                        ->select('id', 'path')
-                        ->get();
-        foreach($event_assets AS $event_asset) {
+            ->select('id', 'path')
+            ->get();
+        foreach ($event_assets as $event_asset) {
             try {
-                FileService::create($event_asset->path, 'files', FileService::S3_DISK);
+                FileService::delete($event_asset->path, FileService::S3_DISK);
             } catch (Exception $ex) {
                 LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_DELETE_EVENT_ASSET]);
             }
@@ -332,11 +410,11 @@ class EventService
      */
     private function isAuthorizedToModifyEvent(Event $event, int $user_id): bool
     {
-        if($this->user_service->find($user_id)->isAdmin()) {
+        if ($this->user_service->find($user_id)->isAdmin()) {
             return true;
         }
 
-        if(!$event->isInactive() && $event->user_id === $user_id) {
+        if (!$event->isInactive() && $event->user_id === $user_id) {
             return true;
         }
 
@@ -350,8 +428,8 @@ class EventService
     private function isAuthorizedToUploadAsset(Event $event): bool
     {
         $order = $this->order_service->find($event->order_id);
-        return ($event->isActive() || $event->isReady() || $event->isPending()) && 
-                ($this->getEventTotalAssets($event->id) < $order->subscription->files_allowed);
+        return ($event->isActive() || $event->isReady() || $event->isPending()) &&
+            ($this->getEventTotalAssets($event->id) < $order->subscription->files_allowed);
     }
 
     /**
@@ -362,11 +440,11 @@ class EventService
     {
         return EventAsset::where('event_id', $event_id)->count();
     }
-    
+
     /**
      * @param UploadFileRequest $request
      * @return int
-    */
+     */
     private function getFileType(UploadFileRequest $request): int
     {
         $extension = strtolower($request->file('file')->getClientOriginalExtension());

@@ -22,7 +22,7 @@ class EventAsset extends Model
 
     public function getFullPathAttribute()
     {
-        return config('app.url') . '/' . $this->path;  
+        return config('app.storage_url') . '/' . $this->path;  
     }
 
     public function event()

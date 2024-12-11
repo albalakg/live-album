@@ -33,7 +33,7 @@ class FileService
       if(is_string($file)) {
         return self::copy($file, $path, 'local');
       } else {
-        return Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->putFile($path, $file);
+        return Storage::disk($disk)->putFile($path, $file);
       }
 
     } catch(Exception $ex) {
@@ -54,7 +54,7 @@ class FileService
   static public function createWithName(mixed $file, string $path, string $name, string $disk = self::DEFAULT_DISK): string
   {
     try {
-      return Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->putFileAs($path, $file, $name);
+      return Storage::disk($disk)->putFileAs($path, $file, $name);
     } catch(Exception $ex) {
       self::writeErrorLog($ex);
       return '';
@@ -93,11 +93,11 @@ class FileService
   static public function delete(string $path, string $disk = self::DEFAULT_DISK): bool
   {
     try {
-      if( !Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->exists($path) ) {
+      if( !Storage::disk($disk)->exists($path) ) {
         throw new Exception("File $path not found");
       }
       
-      Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->delete($path);
+      Storage::disk($disk)->delete($path);
       return true;
     } catch(Exception $ex) {
       self::writeErrorLog($ex);
@@ -116,11 +116,11 @@ class FileService
   static public function move(string $path_from, string $path_to, string $disk = self::DEFAULT_DISK):bool
   {
     try {
-      if( !Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->exists($path_from) ) {
+      if( !Storage::disk($disk)->exists($path_from) ) {
         throw new Exception("File $path_from not found");
       }
       
-      Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->move($path_from, $path_to);
+      Storage::disk($disk)->move($path_from, $path_to);
       return true;
     } catch(Exception $ex) {
       self::writeErrorLog($ex);
@@ -162,11 +162,11 @@ class FileService
   static public function get(string $path, string $disk = self::DEFAULT_DISK): string
   {
     try {
-      if( !Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->exists($path) ) {
+      if( !Storage::disk($disk)->exists($path) ) {
         throw new Exception("File $path not found");
       } 
 
-      return Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->get($path);
+      return Storage::disk($disk)->get($path);
     } catch(Exception $ex) {
       self::writeErrorLog($ex);
       return '';
@@ -183,11 +183,11 @@ class FileService
   static public function getAllFilesInFolder(string $folder_path, string $disk = self::DEFAULT_DISK): ?array
   {
     try {
-      if( !Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->exists($folder_path) ) {
+      if( !Storage::disk($disk)->exists($folder_path) ) {
         throw new Exception("File $folder_path not found");
       } 
 
-      return Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->files($folder_path);
+      return Storage::disk($disk)->files($folder_path);
     } catch(Exception $ex) {
       self::writeErrorLog($ex);
       return null;
@@ -204,7 +204,7 @@ class FileService
   static public function exists(string $path, string $disk = self::DEFAULT_DISK): bool
   {
     try {
-      return Storage::disk(EnvService::isLocal() ? self::DEFAULT_DISK : $disk)->exists($path);
+      return Storage::disk($disk)->exists($path);
     } catch(Exception $ex) {
       self::writeErrorLog($ex);
       return false;

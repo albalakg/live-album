@@ -55,6 +55,8 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    
+    'storage_url' => env('APP_STORAGE_URL', 'http://localhost'),
 
     'client_url' => env('APP_CLIENT_URL', 'https://livealbums.com'),
 

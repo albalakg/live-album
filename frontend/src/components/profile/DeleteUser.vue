@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import BaseButton from '@/components/library/buttons/BaseButton.vue';
-import MainCheckbox from '../library/inputs/MainCheckbox.vue';
+import MainCheckbox from '@/components/library/inputs/MainCheckbox.vue';
 
 export default defineComponent({
     name: 'DeleteUser',

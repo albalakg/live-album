@@ -1,7 +1,8 @@
 <template>
-    <div class="switch">
-        <input id="switch-1" type="checkbox" class="switch-input" @click="submit()" />
-        <label for="switch-1" class="switch-label">Switch</label>
+    <div class="switch" :class="{disabled}">
+        <input ref="input" :id="`switch-${uniqueId}`" type="checkbox" class="switch-input"
+            :class="`switch-input-${color}`" @click="submit()" />
+        <label :for="`switch-${uniqueId}`" class="switch-label">Switch</label>
     </div>
 </template>
 
@@ -15,11 +16,31 @@ export default defineComponent({
         text: {
             type: String
         },
+
+        color: {
+            type: String,
+            default: 'green'
+        },
+
+        disabled: {
+            type: Boolean,
+            default: false
+        },
+    },
+
+    computed: {
+        uniqueId(): number {
+            return Math.random()
+        }
     },
 
     methods: {
         submit() {
             this.$emit('onClick');
+        },
+
+        toggle() {
+            (this.$refs.input as any).click();
         }
     }
 });
@@ -74,8 +95,12 @@ export default defineComponent({
     transition: left 0.25s ease;
 }
 
-.switch-input:checked+.switch-label::before {
+.switch-input-green:checked+.switch-label::before {
     background-color: var(--green);
+}
+
+.switch-input-pink:checked+.switch-label::before {
+    background-color: var(--pink);
 }
 
 .switch-input:checked+.switch-label::after {

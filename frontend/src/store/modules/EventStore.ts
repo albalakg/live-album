@@ -8,6 +8,7 @@ import {
   IEvent,
 } from "@/helpers/interfaces";
 import { StatusEnum } from "@/helpers/enums";
+import Auth from "@/helpers/Auth";
 
 const EventStore = {
   namespaced: true,
@@ -31,6 +32,10 @@ const EventStore = {
 
     isEventReady(state: IEventStoreState): boolean {
       return state.event?.status === StatusEnum.READY;
+    },
+
+    isEventRending(state: IEventStoreState): boolean {
+      return state.event?.status === StatusEnum.PENDING;
     },
 
     getEventDate(state: IEventStoreState): string | null {
@@ -58,7 +63,7 @@ const EventStore = {
     },
 
     getEventImage(state: IEventStoreState): string {
-      return process.env.VUE_APP_SERVER_BASE_URL + "/" + state.event?.image;
+      return process.env.VUE_APP_STORAGE_BASE_URL + "/" + state.event?.image;
     },
 
     hasActiveEvent(state: IEventStoreState): boolean {
@@ -68,8 +73,8 @@ const EventStore = {
 
   mutations: {
     SET_EVENT(state: IEventStoreState, event: IEvent) {
-      console.log('SET_EVENT', event);
-      
+      console.log("SET_EVENT", event);
+
       state.event = event;
     },
 
@@ -83,23 +88,46 @@ const EventStore = {
       state.event.image = event?.image ?? "";
     },
 
-    ADD_FILE(state: IEventStoreState, image: IEventAsset) {
-      image.path =
-        process.env.VUE_APP_SERVER_BASE_URL + "/assets/" + image.path;
-      state.event.assets ? state.event.assets.push(image) : state.event.assets = [image];
+    ADD_FILE(state: IEventStoreState, asset: IEventAsset) {
+      asset.path =
+        process.env.VUE_APP_STORAGE_BASE_URL + "/assets/" + asset.path;
+      state.event.assets
+        ? state.event.assets.push(asset)
+        : (state.event.assets = [asset]);
     },
 
     SET_FILES(state: IEventStoreState, assets: IEventAsset[]) {
-      if(!state.event.assets) {
-        return state.event.assets = [];
+      if (!state.event.assets) {
+        return (state.event.assets = []);
       }
 
-      assets.forEach((image) => {
+      assets.forEach((asset) => {
         if (
-          !state.event.assets.map((image) => image.path).includes(image.path)
+          !state.event.assets.map((asset) => asset.path).includes(asset.path)
         ) {
-          state.event.assets.push(image);
+          state.event.assets.push(asset);
         }
+      });
+    },
+
+    DELETE_FILES(state: IEventStoreState, deletedAssets: number[]) {
+      if (!state.event.assets) {
+        return (state.event.assets = []);
+      }
+
+      deletedAssets.forEach((deletedAsset, index) => {
+        const foundIndex = state.event.assets.findIndex(
+          (asset) => asset.id === deletedAsset
+        );
+        if (foundIndex >= 0) {
+          state.event.assets.splice(foundIndex, 1);
+        }
+
+        // if (
+        //   state.event.assets.map((asset) => asset.id).includes(deletedAsset)
+        // ) {
+        //   state.event.assets.splice(index, 1)
+        // }
       });
     },
   },
@@ -135,8 +163,8 @@ const EventStore = {
     ) {
       return new Promise((resolve) => {
         axios
-        .get(`events/${context.state.event.id}/assets`)
-        .then((res) => {
+          .get(`events/${context.state.event.id}/assets`)
+          .then((res) => {
             context.commit("SET_FILES", res.data.data);
             resolve(res.data);
           })
@@ -144,6 +172,74 @@ const EventStore = {
             console.warn("getBaseEvent: ", err);
             resolve(null);
           });
+      });
+    },
+
+    deleteAssets(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      assets: number[]
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/assets/delete`, { assets })
+          .then((res) => {
+            context.commit("DELETE_FILES", assets);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            console.warn("getBaseEvent: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    downloadAssets(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      assets: number[]
+    ) {
+      // eslint-disable-next-line no-async-promise-executor
+      return new Promise(async (resolve) => {
+        try {
+          // Make a POST request to your backend
+          const response = await axios.post(
+            `events/${context.state.event.id}/assets/download`,
+            {
+              assets: assets, // Send the selected assets
+            },
+            {
+              responseType: "blob", // Important: This tells axios to handle the response as binary data
+            }
+          );
+
+          // Get the filename from Content-Disposition header
+          const contentDisposition = response.headers["content-disposition"];
+          const fileName = contentDisposition
+            ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+            : "download.zip";
+
+          // Create a link to download the blob file
+          const blob = new Blob([response.data], {
+            type: response.headers["content-type"],
+          });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+          resolve(true);
+        } catch (error) {
+          console.error("Error downloading files:", error);
+          alert("An error occurred while downloading the files.");
+          resolve(false);
+        }
       });
     },
 
