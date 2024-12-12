@@ -8,11 +8,12 @@
     <Footer />
   </div>
 </template>
+
 <script lang="ts">
-import DesktopBar from '@/components/library/app/DesktopBar.vue';
-import Footer from '@/components/library/app/Footer.vue';
+import DesktopBar from './components/library/app/DesktopBar.vue';
+import Footer from './components/library/app/Footer.vue';
 import { defineComponent } from 'vue';
-import Auth from '@/helpers/Auth';
+import Auth from './helpers/Auth';
 
 export default defineComponent({
   name: 'App',
@@ -35,9 +36,9 @@ export default defineComponent({
   computed: {
     isFullScreen(): boolean {
       for(let index = 0; index < this.links.length; index++) {
-        if(this.$route.path.includes(this.links[index])) {{
+        if(this.$route.path.includes(this.links[index])) {
           return true;
-        }}
+        }
       }
       return false;
     }
@@ -51,12 +52,16 @@ export default defineComponent({
       }
     },
   }
-
 });
 </script>
 
 <style>
+.app-wrapper {
+  direction: inherit;
+}
+
 .app-content {
   padding-top: 99px;
+  direction: inherit;
 }
 </style>

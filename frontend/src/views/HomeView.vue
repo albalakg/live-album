@@ -1,24 +1,21 @@
 <template>
   <div class="home">
-
     <!-- Header Section -->
     <section class="home-page-section header-section width--page-size margin--auto" id="header">
       <h1 class="title--x-large">
-        ברוכים הבאים ל
+        {{ t('home.header.welcome') }}
         <strong class="text--pink">SnapShare</strong>
       </h1>
       <p>
-        שתפו רגעים חיים באירוע שלכם!
+        {{ t('home.header.subtitle') }}
         <br>
-        האורחים מעלים את הרגעים שלהם בזמן אמת
-        <br>
-        וכל מה שנשאר זה להנות מהחוויות והזכרונות
+        {{ t('home.header.description') }}
       </p>
       <br>
       <br>
       <div class="width--corner">
         <router-link to="/order">
-          <MainButton animation text="הזמן עכשיו את האלבום שלך" />
+          <MainButton animation :text="t('home.header.orderButton')" />
         </router-link>
       </div>
       <img class="header-image-gallery" src="/assets/home-gallery.png" alt="header-gallery-image">
@@ -60,59 +57,32 @@
       <MainLine top="0" left="calc(25% + 192px)" color="white" width="x-large" />
       <div class="home-page-content width--page-size margin--auto height--full">
         <h2 class="text--white title--x-large">
-          מה מקבלים אתם שואלים?
+          {{ t('home.features.title') }}
         </h2>
 
         <div class="display--flex justify--space-between height--full width--page-size margin--auto">
           <div class="what-you-get-card width--corner brs--medium shadow--small padding--large">
             <h3 class="text--white title--large">
-              אלבום דיגיטלי חי
-              בזמן האירוע
+              {{ t('home.features.liveAlbum.title') }}
             </h3>
-            <p>
-              מרגע שהאירוע מתחיל ניתן יהיה לצפות
-              באלבום האירוע ולהקרין אותו לכל האורחים.
-              <br>
-              האלבום יהיה נגיש עד 24 שעות לאחר
-              תחילת האירוע.
-              <br>
-              האלבום רץ על הקבצים שהועלו בסדר אקראי לפי סבבים, ומתאפס ברגע שנגמר.
-              <br>
-              כאשר מתווספים קבצים
-              חדשים הם נכנסים ישירות לסבב הנוכחי.
-            </p>
+            <p>{{ t('home.features.liveAlbum.description') }}</p>
           </div>
           <div class="what-you-get-card width--corner brs--medium shadow--small padding--large">
             <h3 class="text--white title--large">
-              כל קבצי האלבום
-              להורדה וצבירת זכרונות
+              {{ t('home.features.downloads.title') }}
             </h3>
-            <p>
-              כל התמונות והסרטונים נשמרים במערכת וניתנים להורדה בכל רגע נתון כל עוד האירוע פעיל.
-              <br>
-              לאחר מספר ימים מאז
-              תחילת האירוע, האירוע ייסגר ועם זה יימחקו כל קבצי האירוע.
-              <br>
-              לא יהיה ניתן לשחזר לאחר שנמחקו.
-            </p>
+            <p>{{ t('home.features.downloads.description') }}</p>
           </div>
           <div class="what-you-get-card width--corner brs--medium shadow--small padding--large">
             <h3 class="text--white title--large">
-              כרטיס הזמנה עם QR
-              המוביל לעמוד ייחודי
+              {{ t('home.features.qrCard.title') }}
             </h3>
-            <p>
-              כל אירוע מקבל קישור ייחודי לעמוד של האירוע שבו יהיה ניתן לאורחים לעלות את התמונות והסרטונים.
-              <br>
-              אנחנו מספקים בשביל זה כרטיס מעוצב עם QR, שאותו האורחים יוכלו לסרוק בקלות ולהגיע ישירות לעמוד ולשתף את
-              הרגעים שלהם איתכם באירוע.
-            </p>
+            <p>{{ t('home.features.qrCard.description') }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TODO: Add last decorations -->
     <!-- How It Works Section -->
     <section class="home-page-section how-it-work-section" id="how-it-works">
       <MainCube left="10%" top="10%" width="xxxx-large" height="large" />
@@ -122,28 +92,18 @@
       <MainCube color="pink" left="75%" bottom="7%" width="large" height="xx-large" />
       <div class="how-it-work-content text--center">
         <h2 class="text--green title--x-large">
-          אז איך זה בעצם עובד?
+          {{ t('home.howItWorks.title') }}
         </h2>
         <p class="title--medium text--dark">
-          נרשמים, מזמינים ועורכים את האירוע שלכם.
-          <br>
-          תוך מספר דקות והאירוע שלכם מוכן.
-          <br>
-          ברגע שהאירוע מתחיל, האירוע מופעל אוטומטית, מה שמאפשר צפייה
-          <br>
-          באלבום והעלאת קבצים לאורחים. לאחר 24 שעות האירוע נחשב שהסתיים אך עדיין זמין לצפייה אישית ולהורדת הקבצים.
-          <br>
-          לאחר
-          מספר ימים בהתאם למסלול, האירוע נסגר ואיתו נמחקים הקבצים.
+          {{ t('home.howItWorks.description') }}
         </p>
         <div class="width--corner margin--auto">
           <router-link to="/signup">
-            <MainButton animation color="pink" text="הצטרפו עכשיו" size="small" />
+            <MainButton animation color="pink" :text="t('home.howItWorks.joinButton')" size="small" />
           </router-link>
         </div>
       </div>
     </section>
-
 
     <!-- How It Looks Section -->
     <section class="home-page-section how-it-looks-section" id="how-it-looks">
@@ -158,19 +118,15 @@
       <MainCube color="pink" left="72%" top="80%" width="xx-large" height="large" />
       <MainCube rounded color="pink" left="30%" top="10%" width="xxxxx-large" height="xxxxx-large" />
       <MainCube rounded color="pink" left="45%" top="30%" width="xxxxx-large" height="xxxxx-large" />
-      <!-- <MainCube left="55%" bottom="10%" width="xxxx-large" height="large" /> -->
-      <!-- <MainCube color="pink" left="75%" bottom="7%" width="large" height="xx-large" /> -->
       <div class="how-it-looks-content width--page-size margin--auto">
         <h2 class="text--pink title--x-large">
-          בואו נראה איך זה נראה
+          {{ t('home.howItLooks.title') }}
         </h2>
       </div>
 
-      <!-- <div class="height--full width--full"> -->
-      <DisplayAssetCard width="small" height="x-large" right="5%" title="עמוד העלאת קבצים" />
-      <DisplayAssetCard width="medium" height="large" bottom="10%" right="27%" title="ניהול האירוע" />
-      <DisplayAssetCard width="large" height="x-large" bottom="35%" right="60%" title="האלבום החי" />
-      <!-- </div> -->
+      <DisplayAssetCard width="small" height="x-large" right="5%" :title="t('home.howItLooks.uploadPage')" />
+      <DisplayAssetCard width="medium" height="large" bottom="10%" right="27%" :title="t('home.howItLooks.eventManagement')" />
+      <DisplayAssetCard width="large" height="x-large" bottom="35%" right="60%" :title="t('home.howItLooks.liveAlbum')" />
     </section>
 
     <!-- Pricing Section -->
@@ -195,46 +151,37 @@
         <MainLine top="73.5%" left="0" color="white" height="large" width="full" />
         <MainLine top="78.5%" left="0" color="white" height="small" width="full" />
         <h2 class="text--pink title--x-large">
-          המסלולים שלנו
+          {{ t('home.pricing.title') }}
         </h2>
 
         <div class="pricing-cards display--flex justify--space-between margin--auto">
           <div class="pricing-card bg--white height--full shadow--small brs--medium">
             <h3 class="text--dark title--medium">
-              מסלול הבסיסי
+              {{ t('home.pricing.basic.title') }}
             </h3>
-            <p>
-              המסלול הבסיסי מוגבל עד 300 קבצים
-            </p>
-            <p>
-              הקבצים נמחקים 14 יום מתחילת האירוע
-            </p>
+            <p>{{ t('home.pricing.basic.limit') }}</p>
+            <p>{{ t('home.pricing.basic.deletion') }}</p>
             <div class="pricing-card-action">
               <h4 class="title--large">
-                ₪120
+                {{ t('home.pricing.basic.price') }}
               </h4>
               <router-link to="/order?subscription=basic">
-                <MainButton animation text="הצטרפו עכשיו" size="x-small" />
+                <MainButton animation :text="t('home.pricing.basic.button')" size="x-small" />
               </router-link>
             </div>
           </div>
           <div class="pricing-card bg--white height--full shadow--small brs--medium">
             <h3 class="text--dark title--medium">
-              מסלול פרימיום
+              {{ t('home.pricing.premium.title') }}
             </h3>
-
-            <p>
-              המסלול פרימיום אינו מוגבל בכמות קבצים
-            </p>
-            <p>
-              הקבצים נמחקים 30 יום מתחילת האירוע
-            </p>
+            <p>{{ t('home.pricing.premium.limit') }}</p>
+            <p>{{ t('home.pricing.premium.deletion') }}</p>
             <div class="pricing-card-action">
               <h4 class="title--large">
-                ₪170
+                {{ t('home.pricing.premium.price') }}
               </h4>
               <router-link to="/order?subscription=premium">
-                <MainButton animation text="הצטרפו עכשיו" size="x-small" />
+                <MainButton animation :text="t('home.pricing.premium.button')" size="x-small" />
               </router-link>
             </div>
           </div>
@@ -245,28 +192,37 @@
 </template>
 
 <script lang="ts">
-import MainCube from '@/components/library/background/MainCube.vue';
-import MainLine from '@/components/library/background/MainLine.vue';
-import MainButton from '@/components/library/buttons/MainButton.vue';
-import DisplayAssetCard from '@/components/library/cards/DisplayAssetCard.vue';
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
+import MainCube from '../components/library/background/MainCube.vue';
+import MainLine from '../components/library/background/MainLine.vue';
+import MainButton from '../components/library/buttons/MainButton.vue';
+import DisplayAssetCard from '../components/library/cards/DisplayAssetCard.vue';
 
 export default defineComponent({
   name: 'HomeView',
-
   components: {
     MainButton,
     MainCube,
     MainLine,
     DisplayAssetCard,
   },
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  }
 });
 </script>
 
 <style lang="scss" scoped>
+.home {
+  direction: inherit;
+}
+
 .home-page-section {
   height: calc(100vh - 99px);
   position: relative;
+  direction: inherit;
 
   h2 {
     font-weight: 700;
@@ -292,7 +248,7 @@ export default defineComponent({
   .header-image-gallery {
     width: 35%;
     position: absolute;
-    left: 0;
+    inset-inline-start: 0;
     bottom: 25%;
     border-radius: 60px 120px 60px 120px;
   }
@@ -300,26 +256,12 @@ export default defineComponent({
   .social-media {
     position: absolute;
     height: 100px;
-    right: -70px;
+    inset-inline-end: -70px;
     top: 20%;
 
     img {
       width: 35px;
     }
-  }
-
-  .cube {
-    position: absolute;
-  }
-
-  .cube-1 {
-    left: 0;
-    top: -180px;
-  }
-
-  .cube-2 {
-    left: 50px;
-    top: -130px;
   }
 }
 
@@ -330,6 +272,7 @@ export default defineComponent({
   .home-page-content {
     z-index: 10;
     position: relative;
+    direction: inherit;
 
     h2 {
       margin-bottom: 5%;
@@ -357,6 +300,7 @@ export default defineComponent({
   width: 100%;
   top: 15%;
   position: relative;
+  direction: inherit;
 
   h2 {
     padding-top: 3%;
@@ -370,9 +314,9 @@ export default defineComponent({
 
 .how-it-looks-content {
   position: relative;
+  direction: inherit;
 
   h2 {
-
     padding-top: 8%;
     margin-bottom: 2%;
   }
@@ -391,6 +335,7 @@ export default defineComponent({
   position: relative;
   border-radius: 50px 350px;
   text-align: center;
+  direction: inherit;
 
   h2 {
     position: relative;
@@ -402,11 +347,13 @@ export default defineComponent({
     height: 60%;
     min-height: fit-content;
     width: 80%;
+    direction: inherit;
 
     .pricing-card {
       width: calc(35% - 60px);
       padding: 0 30px;
       position: relative;
+      direction: inherit;
 
       h3 {
         margin-top: 10%;

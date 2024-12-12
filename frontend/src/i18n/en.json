@@ -1,0 +1,89 @@
+{
+  "navigation": {
+    "home": "Home",
+    "gallery": "Gallery",
+    "events": "Events",
+    "profile": "Profile",
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "features": "What You Get",
+    "howItWorks": "How It Works",
+    "howItLooks": "How It Looks",
+    "pricing": "Plans",
+    "event": "Event"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password"
+  },
+  "events": {
+    "create": "Create Event",
+    "details": "Event Details",
+    "gallery": "Event Gallery",
+    "assets": "Event Assets"
+  },
+  "home": {
+    "header": {
+      "welcome": "Welcome to",
+      "subtitle": "Share live moments at your event!",
+      "description": "Guests upload their moments in real time\nand all that's left is to enjoy the experiences and memories",
+      "orderButton": "Order your album now"
+    },
+    "features": {
+      "title": "What do you get?",
+      "liveAlbum": {
+        "title": "Live Digital Album During the Event",
+        "description": "From the moment the event starts, you can view the event album and project it to all guests.\nThe album will be accessible up to 24 hours after the event starts.\nThe album runs on uploaded files in random order by rounds, and resets when finished.\nWhen new files are added, they enter directly into the current round."
+      },
+      "downloads": {
+        "title": "All Album Files for Download and Memory Collection",
+        "description": "All photos and videos are stored in the system and can be downloaded at any time while the event is active.\nAfter several days since the event start, the event will close and all event files will be deleted.\nThey cannot be recovered after deletion."
+      },
+      "qrCard": {
+        "title": "Invitation Card with QR Leading to a Unique Page",
+        "description": "Each event receives a unique link to the event page where guests can upload their photos and videos.\nWe provide a designed card with QR code, which guests can easily scan to go directly to the page and share their moments with you at the event."
+      }
+    },
+    "howItWorks": {
+      "title": "So how does it actually work?",
+      "description": "Sign up, order and edit your event.\nWithin minutes your event is ready.\nWhen the event starts, it activates automatically, allowing viewing\nof the album and file uploads for guests. After 24 hours the event is considered finished but still available for personal viewing and file downloads.\nAfter several days according to the plan, the event closes and the files are deleted.",
+      "joinButton": "Join Now"
+    },
+    "howItLooks": {
+      "title": "Let's see how it looks",
+      "uploadPage": "File Upload Page",
+      "eventManagement": "Event Management",
+      "liveAlbum": "The Live Album"
+    },
+    "pricing": {
+      "title": "Our Plans",
+      "basic": {
+        "title": "Basic Plan",
+        "limit": "Basic plan is limited to 300 files",
+        "deletion": "Files are deleted 14 days from event start",
+        "price": "₪120",
+        "button": "Join Now"
+      },
+      "premium": {
+        "title": "Premium Plan",
+        "limit": "Premium plan has no file limit",
+        "deletion": "Files are deleted 30 days from event start",
+        "price": "₪170",
+        "button": "Join Now"
+      }
+    }
+  }
+}
