@@ -56,7 +56,6 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/terms-and-conditions',
     name: 'termsAndConditions',
-    beforeEnter: Guard.guest,
     component: () => import('@/views/TermsAndConditionsView.vue')
   },
   {
