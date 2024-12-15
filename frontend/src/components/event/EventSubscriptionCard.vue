@@ -78,5 +78,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .event-subscription-card {
     min-height: fit-content;
+    margin-top: 10px;
 }
 </style>

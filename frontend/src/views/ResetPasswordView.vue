@@ -83,7 +83,6 @@ export default defineComponent({
     async submit() {
       const errors = this.validateForm();   
       if(errors.length) {
-        this.$store.dispatch('notification/addError', errors[0]);
         return;
       } 
       

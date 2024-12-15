@@ -351,6 +351,25 @@ a {
   position: absolute;
 }
 
+.vue-notification-group {
+  top: 85px !important;
+}
+
+.vue-notification.error {
+  background: #f58589 !important;
+  border-left-color: #e5565b !important;
+}
+
+.notification-content {
+  font-weight: 700 !important;
+}
+
+.vue-notification-template {
+  border-radius: 8px;
+  box-shadow: -3px 3px 3px #222a;
+  text-align: right !important;
+  direction: rtl;
+}
 
 ::-webkit-scrollbar-track
 {

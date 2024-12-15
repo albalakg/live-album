@@ -9,7 +9,7 @@
                 האירוע של
                 <br>
                 <span class="text--pink title--medium">
-                    החתונה של עמית וגל
+                    {{ eventName }}
                 </span>
             </h2>
         </div>
@@ -72,7 +72,11 @@ export default defineComponent({
 
         eventImage(): string {
             return this.$store.getters['event/getEventImage'];
-        }
+        },
+
+        eventName(): string {
+            return this.$store.getters['event/getEventName'];
+        },
     }
 });
 </script>

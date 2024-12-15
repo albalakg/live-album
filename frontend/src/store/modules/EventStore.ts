@@ -8,7 +8,8 @@ import {
   IEvent,
 } from "@/helpers/interfaces";
 import { StatusEnum } from "@/helpers/enums";
-import Auth from "@/helpers/Auth";
+import ErrorsHandler from "@/helpers/errorsHandler";
+import { notify } from "@kyvg/vue3-notification";
 
 const EventStore = {
   namespaced: true,
@@ -24,6 +25,10 @@ const EventStore = {
 
     getEventStatus(state: IEventStoreState): number | null {
       return state.event?.status;
+    },
+
+    getEventName(state: IEventStoreState): string | null {
+      return state.event?.name;
     },
 
     getEventPath(state: IEventStoreState): string | null {
@@ -148,7 +153,6 @@ const EventStore = {
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("getBaseEvent: ", err);
             resolve(null);
           });
       });
@@ -169,7 +173,6 @@ const EventStore = {
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("getBaseEvent: ", err);
             resolve(null);
           });
       });
@@ -186,11 +189,23 @@ const EventStore = {
         axios
           .post(`events/${context.state.event.id}/assets/delete`, { assets })
           .then((res) => {
+            notify({
+              text: "הקבצים נמחקו בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
             context.commit("DELETE_FILES", assets);
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("getBaseEvent: ", err);
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך הייתה תקלה במחיקת הקבצים"
+              ),
+              type: "error",
+              duration: 5000,
+            });
             resolve(null);
           });
       });
@@ -270,11 +285,20 @@ const EventStore = {
             },
           })
           .then((res) => {
+            notify({
+              text: "האירוע עודכן בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
             context.commit("UPDATE_EVENT", res.data.data);
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("update: ", err);
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך עדכון האירוע נכשל, נסה שוב בקרוב'),
+              type: "error",
+              duration: 5000
+            });
             resolve(null);
           });
       });
@@ -288,11 +312,15 @@ const EventStore = {
         axios
           .post(`events/${context.state.event.id}/ready`)
           .then((res) => {
+            notify({
+              text: "האירוע עודכן לסטטוס מוכן (מחכה לתחילת האירוע)",
+              type: "success",
+              duration: 5000,
+            });
             context.commit("UPDATE_EVENT_STATUS", StatusEnum.READY);
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("setReady: ", err);
             resolve(null);
           });
       });
@@ -306,11 +334,15 @@ const EventStore = {
         axios
           .post(`events/${context.state.event.id}/pending`)
           .then((res) => {
+            notify({
+              text: "האירוע עודכן לסטטוס ממתין (ניתן לעריכה מלאה)",
+              type: "success",
+              duration: 5000,
+            });
             context.commit("UPDATE_EVENT_STATUS", StatusEnum.PENDING);
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("setPending: ", err);
             resolve(null);
           });
       });
@@ -336,7 +368,6 @@ const EventStore = {
             resolve(res.data);
           })
           .catch((err) => {
-            console.warn("uploadFile: ", err);
             reject(err);
           });
       });

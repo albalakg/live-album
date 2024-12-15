@@ -14,14 +14,14 @@
         </div>
         <small class="padding--x-small">
             <strong>שימו לב:</strong>
-            האירוע אינו יתחיל עד שתעדכנו את הסטטוס למוכן.
+            האירוע אינו יתחיל עד שתעדכנו את הסטטוס למוכן, במידה ומוכן והגיע הזמן תחילת האירוע, יהפוך לסטטוס פעיל אוטומטית.
             <br>
             ניתן לעדכן את תאריך האירוע רק בסטטוס ממתין.
         </small>
         <div class="display--flex justify--end">
             <div class="width--half">
                 <MainButton v-if="isReady" :loading="loading" color="pink" text="החזר להמתנה" @onClick="submit()" />
-                <MainButton v-else :loading="loading" text="האירוע מוכן" @onClick="submit()" />
+                <MainButton v-else :disabled="!isPending" :loading="loading" text="האירוע מוכן" @onClick="submit()" />
             </div>
         </div>
     </div>
@@ -73,6 +73,10 @@ export default defineComponent({
 
         isReady(): boolean {
             return this.$store.getters['event/isEventReady'];
+        },
+
+        isPending(): boolean {
+            return this.$store.getters['event/isEventRending'];
         },
     },
 

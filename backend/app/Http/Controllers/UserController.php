@@ -28,7 +28,7 @@ class UserController extends Controller
     {
         try {
             $user_service = new UserService();
-            $response = $user_service->changePassword($request->validated(), Auth::user()->id);
+            $user_service->changePassword($request->validated(), Auth::user()->id);
             return $this->successResponse(MessagesEnum::USER_UPDATED_PASSWORD_SUCCESS);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);

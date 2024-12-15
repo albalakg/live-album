@@ -26,7 +26,7 @@ class EventsWarnings extends Command
      *
      * @var string
      */
-    protected $description = 'Warn users 3 days ahead before the event is being disabled';
+    protected $description = 'Warn users when their event is close to being disabled based on subscription type';
 
     /**
      * Execute the console command.
@@ -38,22 +38,32 @@ class EventsWarnings extends Command
         $events = Event::join('users', 'users.id', 'events.user_id')
             ->join('orders', 'orders.id', 'events.order_id')
             ->where('events.status', StatusEnum::ACTIVE)
-            ->select('events.id', 'events.name', 'users.first_name', 'users.email', 'events.status', 'orders.subscription_id')
+            ->select('events.id', 'events.name', 'events.finished_at', 'users.first_name', 'users.email', 'events.status', 'orders.subscription_id')
             ->get();
 
-
         foreach ($events as $event) {
-            if($event->subscription_id === SubscriptionEnum::NORMAL_ID && $event->finished_at === Carbon::now()->subDays(14)) {
+            $shouldWarn = false;
+            $finishedAt = Carbon::parse($event->finished_at);
 
+            if ($event->subscription_id === SubscriptionEnum::NORMAL_ID && 
+                $finishedAt->diffInDays(Carbon::now()) === 11) {
+                $shouldWarn = true;
             }
 
-            $data = [
-                'event_name' => $event->name,
-                'first_name' => $event->first_name,
-                'download_link' => config('app.CLIENT_URL') . "/events/{$event->id}/assets"
-            ];
-            $mail_service->send($event->email, WarningBeforeEventDisabledMail::class, $data);
-            LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
+            if ($event->subscription_id === SubscriptionEnum::PREMIUM_ID && 
+                $finishedAt->diffInDays(Carbon::now()) === 27) {
+                $shouldWarn = true;
+            }
+
+            if ($shouldWarn) {
+                $data = [
+                    'event_name' => $event->name,
+                    'first_name' => $event->first_name,
+                    'download_link' => config('app.CLIENT_URL') . "/events/{$event->id}/assets"
+                ];
+                $mail_service->send($event->email, WarningBeforeEventDisabledMail::class, $data);
+                LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
+            }
         }
     }
 }

@@ -10,6 +10,9 @@ import {
 } from "@/helpers/interfaces";
 import { SubscriptionType } from "@/helpers/types";
 import Auth from "@/helpers/Auth";
+import ErrorsHandler from "@/helpers/errorsHandler";
+import { notify } from "@kyvg/vue3-notification";
+import router from "@/router";
 
 const UserStore = {
   namespaced: true,
@@ -33,7 +36,7 @@ const UserStore = {
     },
 
     getFullName(state: IUserStoreState): string {
-      return state.user?.first_name ?? "" + " " + state.user?.last_name ?? "";
+      return (state.user?.first_name ?? "") + " " + (state.user?.last_name ?? "");
     },
 
     getEmail(state: IUserStoreState): string | null {
@@ -97,10 +100,20 @@ const UserStore = {
             delete user.expired_at;
             context.commit("SET_USER", user);
             context.commit("SET_LOGGED_IN", true);
+            notify({
+              text: "התחברת בהצלחה",
+              type: "success",
+              duration: 5000
+            });
             resolve(user);
           })
           .catch((err) => {
             console.warn("get: ", err);
+            notify({
+              text: "כתובת המייל או הסיסמה אינם תקינים",
+              type: "error",
+              duration: 5000
+            });
             resolve(null);
           });
       });
@@ -116,9 +129,19 @@ const UserStore = {
         axios
           .post("auth/signup", payload)
           .then((res) => {
+            notify({
+              text: "נרשמת בהצלחה! ברוכים הבאים",
+              type: "success",
+              duration: 5000
+            });
             resolve(true);
           })
           .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך ההרשמה נכשלה'),
+              type: "error",
+              duration: 5000
+            });
             console.warn("get: ", err);
             resolve(false);
           });
@@ -153,6 +176,11 @@ const UserStore = {
         axios
           .post("auth/forgot-password", payload)
           .then((res) => {
+            notify({
+              text: "נשלח אימייל לכתובת המייל לאיפוס הסיסמה",
+              type: "success",
+              duration: 5000
+            });
             resolve(true);
           })
           .catch((err) => {
@@ -172,9 +200,19 @@ const UserStore = {
         axios
           .post("auth/reset-password", payload)
           .then((res) => {
+            notify({
+              text: "איפסת את הסיסמה בהצלחה",
+              type: "success",
+              duration: 5000
+            });
             resolve(true);
           })
           .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך האיפוס סיסמה נכשל'),
+              type: "error",
+              duration: 5000
+            });
             console.warn("get: ", err);
             resolve(null);
           });
@@ -214,6 +252,7 @@ const UserStore = {
           context.commit("SET_USER", res.data.data);
         })
         .catch((err) => {
+          router.push('/logout')
           console.warn("get: ", err);
         });
     },
@@ -226,10 +265,20 @@ const UserStore = {
         axios
           .post("user/profile", payload)
           .then((res) => {
+            notify({
+              text: "פרופיל המשתמש נערך בהצלחה",
+              type: "success",
+              duration: 5000
+            });
             context.commit("SET_USER_PROFILE_UPDATED", payload);
             resolve(res);
           })
           .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך עריכת המשתמש נכשלה'),
+              type: "error",
+              duration: 5000
+            });
             console.warn("get: ", err);
             resolve(null);
           });
@@ -244,10 +293,20 @@ const UserStore = {
         axios
           .post("user/password", payload)
           .then((res) => {
+            notify({
+              text: "הסיסמה עודכנה בהצלחה",
+              type: "success",
+              duration: 5000
+            });
             context.commit("SET_USER_PROFILE_UPDATED", payload);
             resolve(res);
           })
           .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך עדכון הסיסמה נכשל'),
+              type: "error",
+              duration: 5000
+            });
             console.warn("get: ", err);
             resolve(null);
           });

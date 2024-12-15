@@ -14,7 +14,7 @@ class CreateSupportTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'bail|required|email|unique:users,email',
+            'email' => 'required|email',
             'full_name' => 'required|string|between:1,100',
             'text' => 'required|string|max:1500',
         ];

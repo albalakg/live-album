@@ -1,4 +1,5 @@
 <template>
+  <notifications position="top right" />
   <router-view v-if="isFullScreen"/>
   <div class="app-wrapper" v-else>
     <DesktopBar />

@@ -162,7 +162,7 @@ class UserService
             throw new Exception(MessagesEnum::USER_NOT_FOUND);
         }
 
-        if(!$user->isActive) {
+        if(!$user->isActive()) {
             throw new Exception(MessagesEnum::USER_NOT_ACTIVE);
         }
 

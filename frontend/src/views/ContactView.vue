@@ -55,8 +55,8 @@ import MainLine from '@/components/library/background/MainLine.vue';
 import MainButton from '@/components/library/buttons/MainButton.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import MainTextArea from '@/components/library/inputs/MainTextArea.vue';
-import { IUserInfo } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
+import { IUserInfo } from '@/helpers/interfaces';
 
 export default defineComponent({
   name: 'ContactView',
@@ -80,8 +80,20 @@ export default defineComponent({
     };
   },
 
-  created() {
+  mounted() {
     this.setUser();
+  },
+
+  watch: {
+    user() {
+      this.setUser()
+    }
+  },
+
+  computed: {
+    user(): IUserInfo | null {
+      return this.$store.getters['user/getUser'];
+    }
   },
 
   methods: {
@@ -90,14 +102,13 @@ export default defineComponent({
         return;
       }
 
-      this.form.email = this.$store.getters['user/getEmail'];
-      this.form.full_name = this.$store.getters['user/getFullName'];
+      this.form.email = this.$store.getters['user/getEmail'] ?? '';
+      this.form.full_name = this.$store.getters['user/getFullName'] ?? '';
     },
 
     async submit() {
       const errors = this.validateForm();
       if (errors.length) {
-        this.$store.dispatch('notification/addError', errors[0]);
         return;
       }
 
@@ -109,8 +120,7 @@ export default defineComponent({
         return;
       }
 
-      this.$router.push('/login');
-      this.$store.dispatch('notification/addInfo', 'ההודעה נשלחה בהצלחה');
+      this.$router.push('/home');
     },
 
     validateForm() {

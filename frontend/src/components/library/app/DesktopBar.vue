@@ -128,6 +128,12 @@ export default defineComponent({
                     color: 'dark',
                     weight: '500'
                 },
+                {
+                    text: 'הזמנה',
+                    url: '/order',
+                    color: 'dark',
+                    weight: '500'
+                },
             ];
 
             if(this.user) {

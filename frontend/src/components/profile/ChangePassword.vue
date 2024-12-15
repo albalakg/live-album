@@ -55,7 +55,11 @@ export default defineComponent({
     methods: {
         async submit() {
             this.loading = true;
-            await this.$store.dispatch("user/updatePassword", this.form);
+            const res = await this.$store.dispatch("user/updatePassword", this.form);
+            if(res) {
+                this.form.current_password = '';
+                this.form.new_password = '';
+            }
             this.loading = false;
         },
 
