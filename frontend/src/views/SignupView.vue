@@ -51,6 +51,7 @@ import MainCube from '@/components/library/background/MainCube.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import { defineComponent } from 'vue';
 import { ISignupRequest } from '@/helpers/interfaces';
+import ErrorsHandler from '@/helpers/errorsHandler';
 
 export default defineComponent({
   name: 'SignupView',
@@ -69,6 +70,12 @@ export default defineComponent({
         first_name: '',
         last_name: '',
       } as ISignupRequest,
+      errors: {
+        email: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+      },
       isLoading: false as boolean
     };
   },
@@ -76,9 +83,18 @@ export default defineComponent({
   methods: {
     async signup() {
       const errors = this.validateForm();   
-      if(errors.length) {
+      if(Object.values(errors).some(error => error !== '')) {
+        Object.values(errors).forEach(error => {
+          if(error) {
+            this.$notify({
+              text: error,
+              type: "error",
+              duration: 5000
+            });
+          }
+        })
         return;
-      } 
+      }
       
       this.isLoading = true;
       const isSuccess = await this.$store.dispatch('user/signup', this.form);
@@ -92,7 +108,42 @@ export default defineComponent({
     },
 
     validateForm() {
-      return [];
+      this.errors = {
+        email: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+      };
+
+      // Email validation
+      if (!this.form.email) {
+        this.errors.email = 'מייל הינו שדה חובה';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = 'כתובת אימייל לא תקינה';
+      }
+
+      // Password validation
+      if (!this.form.password) {
+        this.errors.password = 'סיסמה הינה שדה חובה';
+      } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d#$@!%&*^?]{8,40}$/.test(this.form.password)) {
+        this.errors.password = 'הסיסמה חייבת להכיל 8-40 תווים, אות גדולה, אות קטנה ומספר';
+      }
+
+      // First Name validation
+      if (!this.form.first_name) {
+        this.errors.first_name = 'שם פרטי הינו שדה חובה';
+      } else if (!/^.{0,100}$/.test(this.form.last_name)) {
+        this.errors.first_name = 'השם פרטי הוא עד 100 תווים';
+      }
+
+      // Last Name validation
+      if (!this.form.last_name) {
+        this.errors.last_name = 'שם משפחה הינו שדה חובה';
+      } else if (!/^.{0,100}$/.test(this.form.last_name)) {
+        this.errors.last_name = 'השם משפחה הוא עד 100 תווים';
+      }
+
+      return this.errors;
     }
   }
 });

@@ -130,9 +130,9 @@ const UserStore = {
           .post("auth/signup", payload)
           .then((res) => {
             notify({
-              text: "נרשמת בהצלחה! ברוכים הבאים",
+              text: "נרשמת בהצלחה, ברוכים הבאים! נשלח אליך מייל לאימות",
               type: "success",
-              duration: 5000
+              duration: 10000
             });
             resolve(true);
           })

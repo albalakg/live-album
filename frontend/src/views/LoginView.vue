@@ -17,9 +17,19 @@
           התחברות
         </h3>
         <div>
-          <MainInput v-model="form.email" type="email" title="כתובת מייל" />
+          <MainInput 
+            v-model="form.email" 
+            type="email" 
+            title="כתובת מייל"
+            :error="errors.email" 
+          />
           <br>
-          <MainInput v-model="form.password" type="password" title="סיסמה" />
+          <MainInput 
+            v-model="form.password" 
+            type="password" 
+            title="סיסמה"
+            :error="errors.password"
+          />
         </div>
         <div>
           <MainButton :loading="isLoading" text="כניסה למערכת" />
@@ -56,6 +66,7 @@ import MainCube from '@/components/library/background/MainCube.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import { defineComponent } from 'vue';
 import { ILoginRequest } from '@/helpers/interfaces';
+import ErrorsHandler from '@/helpers/errorsHandler';
 
 export default defineComponent({
   name: 'LoginView',
@@ -72,7 +83,10 @@ export default defineComponent({
         email: '',
         password: '',
       } as ILoginRequest,
-      
+      errors: {
+        email: '',
+        password: '',
+      },
       isLoading: false as boolean
     };
   },
@@ -80,9 +94,18 @@ export default defineComponent({
   methods: {
     async login() {
       const errors = this.validateForm();   
-      if(errors.length) {
+      if(Object.values(errors).some(error => error !== '')) {
+        Object.values(errors).forEach(error => {
+          if(error) {
+            this.$notify({
+              text: error,
+              type: "error",
+              duration: 5000
+            });
+          }
+        })
         return;
-      } 
+      }
       
       this.isLoading = true;
       const user = await this.$store.dispatch('user/login', this.form);
@@ -102,7 +125,26 @@ export default defineComponent({
     },
 
     validateForm() {
-      return [];
+      this.errors = {
+        email: '',
+        password: '',
+      };
+
+      // Email validation
+      if (!this.form.email) {
+        this.errors.email = 'מייל הינו שדה חובה';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = 'כתובת אימייל לא תקינה';
+      }
+
+      // Password validation
+      if (!this.form.password) {
+        this.errors.password = 'סיסמה הינה שדה חובה';
+      } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d#$@!%&*^?]{8,40}$/.test(this.form.password)) {
+        this.errors.password = 'הסיסמה חייבת להכיל 8-40 תווים, אות גדולה, אות קטנה ומספר';
+      }
+
+      return this.errors;
     }
   }
 });
