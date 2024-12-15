@@ -41,6 +41,10 @@ export default defineComponent({
                 current_password: '' as string,
                 new_password: '' as string,
             },
+            errors: {
+                current_password: '',
+                new_password: ''
+            },
             loading: false as boolean,
             isTextVisible: false as boolean,
         };
@@ -54,9 +58,23 @@ export default defineComponent({
 
     methods: {
         async submit() {
+            const errors = this.validateForm();
+            if (Object.values(errors).some(error => error !== '')) {
+                Object.values(errors).forEach(error => {
+                    if (error) {
+                        this.$notify({
+                            text: error,
+                            type: "error",
+                            duration: 5000
+                        });
+                    }
+                })
+                return;
+            }
+
             this.loading = true;
             const res = await this.$store.dispatch("user/updatePassword", this.form);
-            if(res) {
+            if (res) {
                 this.form.current_password = '';
                 this.form.new_password = '';
             }
@@ -65,7 +83,32 @@ export default defineComponent({
 
         toggleVisibility() {
             this.isTextVisible = !this.isTextVisible;
-        }
+        },
+
+        validateForm() {
+            this.errors = {
+                current_password: '',
+                new_password: ''
+            };
+
+            // Current Password validation
+            if (!this.form.current_password) {
+                this.errors.current_password = 'סיסמה נוכחית הינה שדה חובה';
+            } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d#$@!%&*^?]{8,40}$/.test(this.form.current_password)) {
+                this.errors.current_password = 'הסיסמה הנוכחית חייבת להכיל 8-40 תווים, אות גדולה, אות קטנה ומספר';
+            }
+
+            // New Password validation
+            if (!this.form.new_password) {
+                this.errors.new_password = 'סיסמה חדשה הינו שדה חובה';
+            } else if (this.form.new_password === this.form.current_password) {
+                this.errors.new_password = 'הסיסמאות לא יכולות להיות זהות';
+            } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d#$@!%&*^?]{8,40}$/.test(this.form.new_password)) {
+                this.errors.current_password = 'הסיסמה החדשה חייבת להכיל 8-40 תווים, אות גדולה, אות קטנה ומספר';
+            }
+
+            return this.errors;
+        },
     }
 });
 </script>

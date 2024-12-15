@@ -29,7 +29,12 @@
         </p>
       </div>
       <form @submit.prevent="submit()" class="center width--half margin--auto layer--one">
-        <MainInput v-model="form.email" type="email" title="כתובת מייל" />
+        <MainInput 
+          v-model="form.email" 
+          type="email" 
+          title="כתובת מייל"
+          :error="errors.email"
+        />
         <br>
         <MainButton :loading="isLoading" color="pink" text="שלח בקשה" />
         <p class="text--center">
@@ -66,6 +71,9 @@ export default defineComponent({
       form: {
         email: ''
       } as IForgotPasswordRequest,
+      errors: {
+        email: ''
+      },
       isLoading: false as boolean
     };
   },
@@ -73,9 +81,18 @@ export default defineComponent({
   methods: {
     async submit() {
       const errors = this.validateForm();   
-      if(errors.length) {
+      if(Object.values(errors).some(error => error !== '')) {
+        Object.values(errors).forEach(error => {
+          if(error) {
+            this.$notify({
+              text: error,
+              type: "error",
+              duration: 5000
+            });
+          }
+        })
         return;
-      } 
+      }
       
       this.isLoading = true;
       const isSuccess = await this.$store.dispatch('user/forgotPassword', this.form);
@@ -89,7 +106,18 @@ export default defineComponent({
     },
 
     validateForm() {
-      return [];
+      this.errors = {
+        email: ''
+      };
+
+      // Email validation
+      if (!this.form.email) {
+        this.errors.email = 'מייל הינו שדה חובה';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = 'כתובת אימייל לא תקינה';
+      }
+
+      return this.errors;
     }
   }
 });

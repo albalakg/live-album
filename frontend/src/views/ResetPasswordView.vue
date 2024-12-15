@@ -29,11 +29,21 @@
         </p>
       </div>
       <form class="center width--half margin--auto layer--one" @submit.prevent="submit()">
-        <MainInput v-model="form.password" type="password" title="סיסמה" />
+        <MainInput 
+          v-model="form.password" 
+          type="password" 
+          title="סיסמה"
+          :error="errors.password"
+        />
         <br>
-        <MainInput v-model="form.password_confirmation" type="password" title="אימות סיסמה" />
+        <MainInput 
+          v-model="form.password_confirmation" 
+          type="password" 
+          title="אימות סיסמה"
+          :error="errors.password_confirmation"
+        />
         <br>
-        <MainButton color="pink" text="שלח בקשה" />
+        <MainButton :loading="isLoading" color="pink" text="שלח בקשה" />
         <p class="text--center">
           נזכרת בסיסמה?
           <router-link to="/login">התחבר כאן</router-link>
@@ -53,7 +63,7 @@ import MainInput from '@/components/library/inputs/MainInput.vue';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'ForgotPasswordView',
+  name: 'ResetPasswordView',
 
   components: {
     MainInput,
@@ -70,6 +80,10 @@ export default defineComponent({
         email: '' as string,
         token: '' as string,
       },
+      errors: {
+        password: '',
+        password_confirmation: ''
+      },
       isLoading: false as boolean
     };
   },
@@ -82,9 +96,18 @@ export default defineComponent({
   methods: {
     async submit() {
       const errors = this.validateForm();   
-      if(errors.length) {
+      if(Object.values(errors).some(error => error !== '')) {
+        Object.values(errors).forEach(error => {
+          if(error) {
+            this.$notify({
+              text: error,
+              type: "error",
+              duration: 5000
+            });
+          }
+        })
         return;
-      } 
+      }
       
       this.isLoading = true;
       const isSuccess = await this.$store.dispatch('user/resetPassword', this.form);
@@ -98,7 +121,26 @@ export default defineComponent({
     },
 
     validateForm() {
-      return [];
+      this.errors = {
+        password: '',
+        password_confirmation: ''
+      };
+
+      // Password validation
+      if (!this.form.password) {
+        this.errors.password = 'סיסמה הינה שדה חובה';
+      } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d#$@!%&*^?]{8,40}$/.test(this.form.password)) {
+        this.errors.password = 'הסיסמה חייבת להכיל 8-40 תווים, אות גדולה, אות קטנה ומספר';
+      }
+
+      // Password confirmation validation
+      if (!this.form.password_confirmation) {
+        this.errors.password_confirmation = 'אימות סיסמה הינו שדה חובה';
+      } else if (this.form.password_confirmation !== this.form.password) {
+        this.errors.password_confirmation = 'הסיסמאות אינן תואמות';
+      }
+
+      return this.errors;
     }
   }
 });
