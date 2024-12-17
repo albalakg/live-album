@@ -3,7 +3,7 @@
     <div class="assets-top bg--white brs--medium padding--large display--flex justify--space-between">
       <div class="details display--flex direction--column justify--space-between">
         <div>
-          <h1 class="title--large">סה"כ {{ totalAssets }} קבצים <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
+          <h1 class="title--large">{{ totalAssets }} קבצים <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
           </h1>
           <strong class="text--pink">
             ממליצים להוריד ישר אחרי האירוע
@@ -279,7 +279,7 @@ export default defineComponent({
 .event-assets {
 
   h1 small {
-    font-size: .6em;
+    font-size: .5em;
   }
 
   .assets-top {
