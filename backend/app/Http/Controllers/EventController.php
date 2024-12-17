@@ -80,8 +80,19 @@ class EventController extends Controller
     {
         try {
             $event_service = new EventService(new UserService());
-            return $event_service->downloadEventAssets($event_id, $request->validated(), Auth::user()->id);
-            // return $this->successResponse(MessagesEnum::DELETED_EVENT_ASSET_SUCCESS, $response);
+            $response = $event_service->downloadEventAssets($event_id, $request->validated(), Auth::user()->id);
+            return $this->successResponse(MessagesEnum::DOWNLOAD_EVENT_ASSET_START_SUCCESS, $response);
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function getDownloadStatus(int $event_id)
+    {
+        try {
+            $event_service = new EventService(new UserService());
+            $response = $event_service->getActiveDownloadProcess($event_id, Auth::user()->id);
+            return $this->successResponse(MessagesEnum::EVENT_FOUND_SUCCESS, $response);
         } catch (Exception $ex) {
             return $this->errorResponse($ex);
         }

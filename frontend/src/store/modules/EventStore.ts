@@ -6,8 +6,10 @@ import {
   IEventAsset,
   UpdateEventRequest,
   IEvent,
+  IEventDownloadAssetsProcess,
 } from "@/helpers/interfaces";
 import { StatusEnum } from "@/helpers/enums";
+import { EventAssetsManagementModesType } from "@/helpers/types";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
 
@@ -16,6 +18,10 @@ const EventStore = {
 
   state: {
     event: null as IEvent | null,
+    assetsManagement: {
+      mode: null,
+      assetsIds: [],
+    },
   } as IEventStoreState,
 
   getters: {
@@ -74,12 +80,32 @@ const EventStore = {
     hasActiveEvent(state: IEventStoreState): boolean {
       return state.event && state.event.status !== StatusEnum.INACTIVE;
     },
+
+    getManagedAssetsMode(
+      state: IEventStoreState
+    ): EventAssetsManagementModesType | null {
+      return state.assetsManagement.mode;
+    },
+
+    getManagedAssetsIds(state: IEventStoreState): number[] {
+      return state.assetsManagement.assetsIds;
+    },
+
+    getTotalManagedAssetsIds(state: IEventStoreState): number {
+      return state.assetsManagement.assetsIds.length;
+    },
+
+    getDownloadAssetsProcess(state: IEventStoreState): null | IEventDownloadAssetsProcess {
+      return state?.event?.active_download_process ?? null;
+    },
+
+    getEventProcessFileName(state: IEventStoreState): string {
+      return (state?.event?.name ?? 'קבצי האלבום') + '.zip';
+    },
   },
 
   mutations: {
     SET_EVENT(state: IEventStoreState, event: IEvent) {
-      console.log("SET_EVENT", event);
-
       state.event = event;
     },
 
@@ -91,6 +117,10 @@ const EventStore = {
       state.event.name = event?.name ?? "";
       state.event.starts_at = event?.starts_at ?? "";
       state.event.image = event?.image ?? "";
+    },
+
+    SET_DOWNLOAD_ASSET_PROCESS(state: IEventStoreState, eventDownloadAssetsProcess: IEventDownloadAssetsProcess) {
+      state.event.active_download_process = eventDownloadAssetsProcess;
     },
 
     ADD_FILE(state: IEventStoreState, asset: IEventAsset) {
@@ -106,9 +136,9 @@ const EventStore = {
         return (state.event.assets = []);
       }
 
-      assets.forEach((asset) => {
+      assets.forEach((asset: IEventAsset) => {
         if (
-          !state.event.assets.map((asset) => asset.path).includes(asset.path)
+          !state.event.assets.map((asset: IEventAsset) => asset.path).includes(asset.path)
         ) {
           state.event.assets.push(asset);
         }
@@ -120,20 +150,52 @@ const EventStore = {
         return (state.event.assets = []);
       }
 
-      deletedAssets.forEach((deletedAsset, index) => {
+      deletedAssets.forEach((deletedAsset: number) => {
         const foundIndex = state.event.assets.findIndex(
-          (asset) => asset.id === deletedAsset
+          (asset: IEventAsset) => asset.id === deletedAsset
         );
         if (foundIndex >= 0) {
           state.event.assets.splice(foundIndex, 1);
         }
-
-        // if (
-        //   state.event.assets.map((asset) => asset.id).includes(deletedAsset)
-        // ) {
-        //   state.event.assets.splice(index, 1)
-        // }
       });
+    },
+
+    ADD_ASSET_FOR_ASSETS_MANAGEMENT(state: IEventStoreState, assetId: number) {
+      if (!state.assetsManagement.assetsIds.includes(assetId)) {
+        state.assetsManagement.assetsIds.push(assetId);
+      }
+    },
+
+    REMOVE_ASSET_FOR_ASSETS_MANAGEMENT(
+      state: IEventStoreState,
+      assetId: number
+    ) {
+      const index = state.assetsManagement.assetsIds.findIndex(
+        (item: number) => item === assetId
+      );
+      if (index !== -1) {
+        state.assetsManagement.assetsIds.splice(index, 1);
+      }
+    },
+
+    TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT(
+      state: IEventStoreState,
+      mode: boolean
+    ) {
+      if (mode) {
+        state.assetsManagement.assetsIds = state.event.assets.map(
+          (asset: IEventAsset) => asset.id
+        );
+      } else {
+        state.assetsManagement.assetsIds = [];
+      }
+    },
+
+    SET_MODE_FOR_ASSETS_MANAGEMENT(
+      state: IEventStoreState,
+      mode: EventAssetsManagementModesType | null
+    ) {
+      state.assetsManagement.mode = mode;
     },
   },
 
@@ -178,23 +240,26 @@ const EventStore = {
       });
     },
 
-    deleteAssets(
-      context: {
-        state: IEventStoreState;
-        commit: (arg0: string, arg1: any) => void;
-      },
-      assets: number[]
-    ) {
+    deleteAssets(context: {
+      state: IEventStoreState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
       return new Promise((resolve) => {
         axios
-          .post(`events/${context.state.event.id}/assets/delete`, { assets })
+          .post(`events/${context.state.event.id}/assets/delete`, {
+            assets: context.state.assetsManagement.assetsIds,
+          })
           .then((res) => {
             notify({
               text: "הקבצים נמחקו בהצלחה",
               type: "success",
               duration: 5000,
             });
-            context.commit("DELETE_FILES", assets);
+            context.commit(
+              "DELETE_FILES",
+              context.state.assetsManagement.assetsIds
+            );
+            context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
             resolve(res.data);
           })
           .catch((err) => {
@@ -211,50 +276,39 @@ const EventStore = {
       });
     },
 
-    downloadAssets(
-      context: {
-        state: IEventStoreState;
-        commit: (arg0: string, arg1: any) => void;
-      },
-      assets: number[]
-    ) {
-      // eslint-disable-next-line no-async-promise-executor
-      return new Promise(async (resolve) => {
-        try {
-          // Make a POST request to your backend
-          const response = await axios.post(
-            `events/${context.state.event.id}/assets/download`,
-            {
-              assets: assets, // Send the selected assets
-            },
-            {
-              responseType: "blob", // Important: This tells axios to handle the response as binary data
-            }
-          );
-
-          // Get the filename from Content-Disposition header
-          const contentDisposition = response.headers["content-disposition"];
-          const fileName = contentDisposition
-            ? contentDisposition.split("filename=")[1].replace(/"/g, "")
-            : "download.zip";
-
-          // Create a link to download the blob file
-          const blob = new Blob([response.data], {
-            type: response.headers["content-type"],
+    downloadAssets(context: {
+      state: IEventStoreState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/assets/download`, {
+            assets: context.state.assetsManagement.assetsIds,
+          })
+          .then((res) => {
+            context.commit("SET_DOWNLOAD_ASSET_PROCESS", res.data.data)
+            resolve(true);
+          })
+          .catch((err) => {
+            resolve(false);
           });
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(link.href);
-          resolve(true);
-        } catch (error) {
-          console.error("Error downloading files:", error);
-          alert("An error occurred while downloading the files.");
-          resolve(false);
-        }
+      });
+    },
+
+    getDownloadAssetsProcess(context: {
+      state: IEventStoreState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
+      return new Promise((resolve) => {
+        axios
+          .get(`events/${context.state.event.id}/assets/download/status`)
+          .then((res) => {
+            context.commit("SET_DOWNLOAD_ASSET_PROCESS", res.data.data);
+            resolve(res.data.data);
+          })
+          .catch((err) => {
+            resolve(null);
+          });
       });
     },
 
@@ -295,9 +349,12 @@ const EventStore = {
           })
           .catch((err) => {
             notify({
-              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך עדכון האירוע נכשל, נסה שוב בקרוב'),
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך עדכון האירוע נכשל, נסה שוב בקרוב"
+              ),
               type: "error",
-              duration: 5000
+              duration: 5000,
             });
             resolve(null);
           });
@@ -371,6 +428,49 @@ const EventStore = {
             reject(err);
           });
       });
+    },
+
+    addAssetForAssetsManagement(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: number) => void;
+      },
+      assetId: number
+    ) {
+      context.commit("ADD_ASSET_FOR_ASSETS_MANAGEMENT", assetId);
+    },
+
+    removeAssetFromAssetsManagement(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: number) => void;
+      },
+      assetId: number
+    ) {
+      context.commit("REMOVE_ASSET_FOR_ASSETS_MANAGEMENT", assetId);
+    },
+
+    toggleAllAssetsInAssetsManagement(
+      context: {
+        state: IEventStoreState;
+        commit: (arg0: string, arg1: boolean) => void;
+      },
+      mode: boolean
+    ) {
+      context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", mode);
+    },
+
+    setModeForAssetsManagement(
+      context: {
+        state: IEventStoreState;
+        commit: (
+          arg0: string,
+          arg1: EventAssetsManagementModesType | null
+        ) => void;
+      },
+      mode: EventAssetsManagementModesType | null
+    ) {
+      context.commit("SET_MODE_FOR_ASSETS_MANAGEMENT", mode);
     },
   },
 

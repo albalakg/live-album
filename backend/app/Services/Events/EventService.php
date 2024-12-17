@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\Order;
 use App\Models\EventAsset;
 use App\Services\Enums\LogsEnum;
+use App\Models\EventAssetDownload;
 use App\Services\Enums\StatusEnum;
 use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
@@ -84,7 +85,31 @@ class EventService
         return Event::where('user_id', $user_id)
             ->where('status', '!=', StatusEnum::INACTIVE)
             ->select('id', 'order_id', 'path', 'image', 'name', 'status', 'starts_at', 'finished_at')
-            ->with('assets:id,event_id,asset_type,path')
+            ->with('assets:id,event_id,asset_type,path', 'activeDownloadProcess:id,path,status,event_id')
+            ->first();
+    }
+
+    /**
+     * Get active download process for an event
+     * 
+     * @param int $event_id
+     * @param int $user_id
+     * @return ?EventAssetDownload
+     */
+    public function getActiveDownloadProcess(int $event_id, int $user_id): ?EventAssetDownload
+    {
+        if (!$event = Event::find($event_id)) {
+            throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
+        }
+
+        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
+            throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
+        }
+
+        return EventAssetDownload::where('event_id', $event_id)
+            ->where('status', '!=', StatusEnum::INACTIVE)
+            ->select('id', 'path', 'status', 'event_id')
+            ->latest()
             ->first();
     }
 
@@ -99,7 +124,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
@@ -120,7 +145,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
@@ -143,45 +168,24 @@ class EventService
      * @param int $id
      * @param array $data
      * @param int $user_id
-     * @return bool
+     * @return ?array
      */
-    public function downloadEventAssets(int $id, array $data, int $user_id)
+    public function downloadEventAssets(int $id, array $data, int $user_id): ?array
     {
         if (!$event = Event::find($id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
-
-        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+        
+        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
-        $event_assets = EventAsset::whereIn('id', $data['assets'])
-            ->select('id', 'event_id', 'path')
-            ->get();
-
-        if ($event_assets->isEmpty()) {
-            return response()->json(['message' => 'No files found.'], 404);
+        $download_job = new ZipEventAssetsForDownload($event, $data['assets'], $user_id);
+        if($download_job->canStartNewProcess($event)) {
+            return $download_job->zip()->only(['id', 'event_id', 'status', 'path']) ?? null;
         }
 
-        $zipFileName = "event-assets-{$id}.zip";
-        $zip_path = storage_path($zipFileName);
-        $zip = new ZipArchive();
-
-        if ($zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            throw new Exception('Could not create ZIP file.');
-        }
-
-        foreach ($event_assets as $event_asset) {
-            try {
-                $fileContent = FileService::get($event_asset->path, FileService::S3_DISK);
-                $zip->addFromString(basename($event_asset->path), $fileContent);
-            } catch (Exception $ex) {
-                // LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_PROCESS_EVENT_ASSET]);
-            }
-        }
-
-        $zip->close();
-        return response()->download($zip_path)->deleteFileAfterSend(true);
+        return null;
     }
 
     /**
@@ -235,7 +239,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
@@ -306,7 +310,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
@@ -326,7 +330,7 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if (!$this->isAuthorizedToModifyEvent($event, $user_id)) {
+        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
@@ -408,7 +412,7 @@ class EventService
      * @param int $user_id
      * @return bool
      */
-    private function isAuthorizedToModifyEvent(Event $event, int $user_id): bool
+    private function isAuthorizedToAccessEvent(Event $event, int $user_id): bool
     {
         if ($this->user_service->find($user_id)->isAdmin()) {
             return true;

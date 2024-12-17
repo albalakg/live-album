@@ -15,3 +15,8 @@ export enum StatusEnum {
   IN_PROGRESS = 3,
   INACTIVE = 0,
 }
+
+export enum EventAssetsManagementModesEnum {
+  DOWNLOAD = 'הורדה',
+  DELETE = 'מחיקה',
+}

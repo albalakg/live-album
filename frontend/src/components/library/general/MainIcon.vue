@@ -1,6 +1,6 @@
 <template>
     <div class="main-icon" @click="clicked()" :class="{ disabled, 'pointer': clickable }">
-        <span class="material-symbols-outlined">
+        <span class="material-symbols-outlined" :style="`${size ? 'font-size: ' + size + ';' : ''}`">
             {{ icon }}
         </span>
     </div>
@@ -27,6 +27,11 @@ export default defineComponent({
             type: Boolean,
             default: false
         },
+
+        size: {
+            type: String,
+            default: ''
+        }
     },
 
     methods: {
@@ -45,11 +50,12 @@ export default defineComponent({
     height: 100%;
     border-radius: 50%;
     background-color: #fff8;
+    display: inline;
+    padding: 1px;
 
     span {
         position: relative;
-        top: 3px;
-        left: -3px;
+        top: 4px;
     }
 }
 </style>

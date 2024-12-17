@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Services\Events;
+
+use App\Jobs\ZipEventAssetsForDownloadJob;
+use App\Models\Event;
+use App\Models\EventAsset;
+use App\Models\EventAssetDownload;
+use App\Services\Enums\MessagesEnum;
+use App\Services\Enums\StatusEnum;
+use Exception;
+
+class ZipEventAssetsForDownload
+{
+    public function __construct(
+        private Event $event,
+        private array $asset_ids,
+        private int $created_by,
+    )
+    {}
+
+    public function canStartNewProcess(Event $event): bool
+    {
+        $no_active_process = !EventAssetDownload::where('event_id', $event->id)
+                                ->whereIn('status', [StatusEnum::PENDING, StatusEnum::IN_PROGRESS])
+                                ->exists();
+
+        $valid_amount_of_processes = !EventAssetDownload::where('event_id', $event->id)
+                                ->where('status', '!=', StatusEnum::INACTIVE)
+                                ->count() < 25;
+
+        return $no_active_process && $valid_amount_of_processes;
+    }
+
+    /**
+     * @return ?EventAssetDownload
+    */
+    public function zip(): ?EventAssetDownload
+    {
+        // Validate assets exist and belong to the event
+        $total_assets = EventAsset::whereIn('id', $this->asset_ids)
+            ->where('event_id', $this->event->id)
+            ->count();
+
+        if ($total_assets !== count($this->asset_ids)) {
+            throw new Exception(MessagesEnum::EVENTS_ASSETS_NOT_FOUND);
+        }
+
+        try {
+            // Create download record
+            $download = EventAssetDownload::create([
+                'event_id' => $this->event->id,
+                'event_assets' => json_encode($this->asset_ids),
+                'status' => StatusEnum::PENDING,
+                'created_by' => $this->created_by
+            ]);
+
+            // Dispatch job
+            ZipEventAssetsForDownloadJob::dispatch($download);
+
+            return $download;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+}

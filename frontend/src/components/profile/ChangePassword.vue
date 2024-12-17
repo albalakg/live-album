@@ -7,7 +7,7 @@
                 </h3>
             </div>
             <div class="width--half text--left">
-                <MainIcon clickable icon="visibility" @onClick="toggleVisibility()" />
+                <MainIcon clickable :icon="icon" @onClick="toggleVisibility()" />
             </div>
         </div>
         <form @submit.prevent="submit()">
@@ -53,7 +53,11 @@ export default defineComponent({
     computed: {
         inputType(): string {
             return this.isTextVisible ? 'text' : 'password';
-        }
+        },
+
+        icon(): string {
+            return this.isTextVisible ? 'visibility_off' : 'visibility';
+        },
     },
 
     methods: {

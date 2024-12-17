@@ -17,9 +17,11 @@ class MessagesEnum extends BaseEnum
     const USER_NEW_PASSWORD_MATCH_OLD = 'Can\'t update new password that matches the old password';
     const ORDER_NOT_FOUND = 'Order not found';
     const EVENT_NOT_FOUND = 'Event not found';
+    const EVENTS_ASSETS_NOT_FOUND = 'Event Assets not found';
     const EVENT_NOT_AUTHORIZED = 'Not authorized to modify this event';
     const USER_NOT_AUTHORIZED_TO_DELETE = 'Not authorized to delete this user';
     const RESET_PASSWORD_REQUEST_NOT_FOUND = 'Reset Password request not found';
+    const DOWNLOAD_EVENT_ASSET_START_FAILED = 'Failed to prepare event assets for download';
 
     // Info
     const LOGIN_SUCCESS = 'Logged in successfully';
@@ -34,6 +36,7 @@ class MessagesEnum extends BaseEnum
     const ORDER_UPDATED_SUCCESS = 'Order updated successfully';
     const ORDER_DELETED_SUCCESS = 'Order deleted successfully';
     const DELETED_EVENT_ASSET_SUCCESS = 'Deleted event asset successfully';
+    const DOWNLOAD_EVENT_ASSET_START_SUCCESS = 'Started preparing event assets for download successfully';
     const EVENT_FOUND_SUCCESS = 'Event fetched successfully';
     const EVENT_CREATED_SUCCESS = 'Event created successfully';
     const EVENT_UPDATED_SUCCESS = 'Event updated successfully';

@@ -1,4 +1,5 @@
-import { EventFileType, SubscriptionType } from './types';
+import { StatusEnum } from './enums';
+import { EventFileType, SubscriptionType, EventAssetsManagementModesType } from './types';
 
 // ***** Base Interfaces *****
 // interface IBaseResponse {
@@ -8,6 +9,12 @@ import { EventFileType, SubscriptionType } from './types';
 
 export interface IEventStoreState {
   event: IEvent;
+  assetsManagement: IEventAssetsManagement
+}
+
+export interface IEventAssetsManagement {
+  mode: EventAssetsManagementModesType | null;
+  assetsIds: number[];
 }
 
 export interface IUserStoreState {
@@ -51,6 +58,15 @@ export interface IEvent {
   starts_at: string | null;
   finished_at: string | null;
   assets: IEventAsset[];
+  active_download_process: IEventDownloadAssetsProcess;
+}
+
+export interface IEventDownloadAssetsProcess {
+  id: number;
+  event_id: number;
+  status: StatusEnum;
+  path: string;
+  fullPath: string;
 }
 
 export interface IEventAsset {

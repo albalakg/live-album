@@ -1,5 +1,5 @@
 <template>
-    <div class="switch" :class="{disabled}">
+    <div class="switch" :class="{ disabled }">
         <input ref="input" :id="`switch-${uniqueId}`" type="checkbox" class="switch-input"
             :class="`switch-input-${color}`" @click="submit()" />
         <label :for="`switch-${uniqueId}`" class="switch-label">Switch</label>
@@ -26,11 +26,26 @@ export default defineComponent({
             type: Boolean,
             default: false
         },
+
+        value: {
+            type: Boolean,
+            default: false
+        },
     },
 
     computed: {
         uniqueId(): number {
             return Math.random()
+        }
+    },
+
+    mounted() {
+        (this.$refs.input as any).checked = this.value;
+    },
+
+    watch: {
+        value() {
+            (this.$refs.input as any).checked = this.value;
         }
     },
 
@@ -40,7 +55,7 @@ export default defineComponent({
         },
 
         toggle() {
-            (this.$refs.input as any).click();
+            (this.$refs.input as any)?.click();
         }
     }
 });

@@ -43,6 +43,32 @@ class FileService
   }
 
   /**
+   * @param string|UploadedFile $file
+   * @param string $path
+   * @param string $disk
+   * @param string $name
+   * @return string
+  */
+  static public function createFileWithPut($file, string $path, string $disk = self::DEFAULT_DISK): string
+  {
+    try {
+      if(!$file) {
+        throw new Exception('File is invalid');
+      }
+
+      if(is_string($file)) {
+        return self::copy($file, $path, 'local');
+      } else {
+        return Storage::disk($disk)->put($path, $file);
+      }
+
+    } catch(Exception $ex) {
+      self::writeErrorLog($ex);
+      return '';
+    }
+  }
+
+  /**
    * Create a file
    *
    * @param string|UploadedFile $file

@@ -3,10 +3,40 @@
     <div class="assets-top bg--white brs--medium padding--large display--flex justify--space-between">
       <div class="details display--flex direction--column justify--space-between">
         <div>
-          <h1 class="title--large">סה"כ {{ totalAssets }} קבצים</h1>
+          <h1 class="title--large">סה"כ {{ totalAssets }} קבצים <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
+          </h1>
           <strong class="text--pink">
             ממליצים להוריד ישר אחרי האירוע
           </strong>
+          <div class="collapse-container">
+            <strong class="pointer" @click="toggleCollapse">
+              איך מורידים?
+              <MainIcon icon="info" size="1.1em" />
+            </strong>
+
+            <!-- Content section with smooth transition -->
+            <transition name="collapse">
+              <div v-if="isOpen">
+                <slot>
+                  <small>
+                    בוחרים את הקבצים שרוצים להורדה, ולוחצים על הכפתור "הכנת קבצים להורדה".
+                    <br>
+                    לאחר מכן, אנחנו נכין את כל הקבצים להורדה ותוך כמה דקות יהיה מוכן.
+                    <br>
+                    כאשר מוכן, יופיע כאן למטה, כפתור להורדת הקובץ.
+                    <br>
+                    מוזמנים לחכות בינתיים או שתחזרו לעיסוקכם ואנחנו כבר נדאג לעדכן אתכם.
+                  </small>
+                </slot>
+              </div>
+            </transition>
+          </div>
+          <div class="width--half">
+            <a :href="downloadProcess.fullPath" :download="processFileName" v-if="isDownloadProcessFinished">
+              <BaseButton :loading="loading" text="הורדת הקבצים" color="green" />
+            </a>
+            <BaseButton v-if="isDownloadProcessPreparing" disabled text="מכין קבצים..." color="pink" />
+          </div>
         </div>
         <div>
           <small>
@@ -21,28 +51,30 @@
 
         </div>
       </div>
-      <div class="actions width--fifth display--flex direction--column justify--space-between text--center">
+      <div class="actions display--flex direction--column justify--space-between text--center">
         <div class="display--flex justify--space-between align--center">
           <MainCheckbox :disabled="loading" ref="downloadCheckbox" @onClick="toggleDownloadCheck()"
-            title="לחצו בשביל לאפשר הורדה" />
+            title="לחצו בשביל לאפשר הורדה" :value="isDownloadMode" />
           <div class="width--half">
-            <BaseButton :loading="loading" :disabled="!canDownload || !pickedAssets.length" text="הורד קבצים"
-              color="green" @onClick="downloadFiles()" />
+            <BaseButton :loading="loading" :disabled="!canDownload" text="הכנת קבצים להורדה" color="green"
+              @onClick="downloadFiles()" />
           </div>
         </div>
+        <br>
         <div class="display--flex justify--space-between align--center">
           <MainCheckbox :disabled="loading" color="pink" ref="deleteCheckbox" @onClick="toggleDeleteCheck()"
-            title="לחצו בשביל לאפשר מחיקה" />
+            title="לחצו בשביל לאפשר מחיקה" :value="isDeleteMode" />
           <div class="width--half">
-            <BaseButton :loading="loading" :disabled="!canDelete || !pickedAssets.length" text="מחק קבצים" color="pink"
+            <BaseButton :loading="loading" :disabled="!canDelete" text="מחק קבצים" color="pink"
               @onClick="deleteFiles()" />
           </div>
         </div>
+        <br>
         <div class="display--flex align--center" :class="{
-          'disabled': !canDelete && !canDownload
+          'disabled': !mode
         }">
           <MainCheckbox :disabled="loading" ref="chooseAllCheckbox" title="לחצו בשביל לבחור את כולם"
-            @onClick="toggleAllAssets()" />
+            @onClick="toggleAllAssets()" :value="pickedAll" />
           <small class="choose-all-text">
             בחר את כולם
           </small>
@@ -50,32 +82,23 @@
       </div>
     </div>
     <div class="assets-content display--flex flex--wrap brs--medium">
-      <div class="gallery-asset-wrapper padding--small" v-for="(asset, index) in assets" :key="index">
-        <div class="gallery-asset position--relative bg--dark height--full width--full brs--medium">
-          <div class="gallery-asset-chip padding--x-small brs--large" v-show="canDelete || canDownload">
-            <MainCheckbox :disabled="loading" :ref="`asset-checkbox-${asset.id}`" :color="assetToggleColor"
-              @onClick="addToPickedAssets(asset.id)" title="לחצו בשביל לסמן למחיקה" />
-          </div>
-          <template v-if="asset.type === 'image'">
-            <img :src="asset.fullPath" alt="image" class="album-asset brs--medium" />
-          </template>
-          <template v-else-if="asset.type === 'video'">
-            <video :src="asset.fullPath" class="album-asset" autoplay muted loop></video>
-          </template>
-        </div>
-      </div>
+      <template v-for="(asset, index) in assets" :key="index">
+        <EventAssetCard :loading="loading" :assetIndex="index" :asset="asset" />
+      </template>
     </div>
   </div>
 </template>
 
-<!-- TODO: Update the download to 2 parts: 1. create zip and store in S3. 2. download from s3 with a download link -->
 <script lang="ts">
-import { StatusEnum } from '@/helpers/enums';
-import { IEventAsset } from '@/helpers/interfaces';
+import { EventAssetsManagementModesEnum, StatusEnum } from '@/helpers/enums';
+import { IEventAsset, IEventDownloadAssetsProcess } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
 import Time from '@/helpers/time';
 import MainCheckbox from '@/components/library/inputs/MainCheckbox.vue';
 import BaseButton from '@/components/library/buttons/BaseButton.vue';
+import EventAssetCard from '@/components/event/EventAssetCard.vue';
+import { EventAssetsManagementModesType } from '@/helpers/types';
+import MainIcon from '@/components/library/general/MainIcon.vue';
 
 export default defineComponent({
   name: 'EventAssetsView',
@@ -83,18 +106,38 @@ export default defineComponent({
   components: {
     BaseButton,
     MainCheckbox,
+    EventAssetCard,
+    MainIcon,
   },
 
   data() {
     return {
       counter: '' as string,
       intervalId: null as ReturnType<typeof setInterval> | null,
-      canDelete: false as boolean,
-      canDownload: false as boolean,
+      processPollingId: null as ReturnType<typeof setInterval> | null,
       pickedAll: false as boolean,
       loading: false as boolean,
-      pickedAssets: [] as number[],
+      isOpen: false as boolean,
     };
+  },
+
+  watch: {
+    totalManagedAssetsIds() {
+      this.pickedAll = this.totalManagedAssetsIds === this.totalAssets;
+    },
+
+    mode() {
+      if (!this.mode) {
+        this.pickedAll = false;
+        this.$store.dispatch("event/toggleAllAssetsInAssetsManagement", false)
+      }
+    },
+
+    isDownloadProcessFinished() {
+      if (this.isDownloadProcessFinished && this.processPollingId) {
+        this.stopPollingProcessStatus();
+      }
+    }
   },
 
   computed: {
@@ -113,9 +156,57 @@ export default defineComponent({
     isEventActive(): boolean {
       return this.$store.getters['event/getEventStatus'] === StatusEnum.ACTIVE;
     },
+
+    mode(): EventAssetsManagementModesType | null {
+      return this.$store.getters['event/getManagedAssetsMode'];
+    },
+
+    isDownloadMode(): boolean {
+      return this.mode === EventAssetsManagementModesEnum.DOWNLOAD
+    },
+
+    isDeleteMode(): boolean {
+      return this.mode === EventAssetsManagementModesEnum.DELETE
+    },
+
+    totalManagedAssetsIds(): number {
+      return this.$store.getters['event/getTotalManagedAssetsIds'];
+    },
+
+    managedAssetsIds(): number[] {
+      return this.$store.getters['event/getManagedAssetsIds'];
+    },
+
+    downloadProcess(): IEventDownloadAssetsProcess {
+      return this.$store.getters['event/getDownloadAssetsProcess'];
+    },
+
+    isDownloadProcessFinished(): boolean {
+      return this.downloadProcess?.status === StatusEnum.ACTIVE && !!this.downloadProcess?.fullPath;
+    },
+
+    isDownloadProcessPreparing(): boolean {
+      return this.downloadProcess && [StatusEnum.PENDING, StatusEnum.IN_PROGRESS].includes(this.downloadProcess.status);
+    },
+
+    canDownload(): boolean {
+      return this.isDownloadMode && this.managedAssetsIds.length > 0
+    },
+
+    canDelete(): boolean {
+      return this.isDeleteMode && this.managedAssetsIds.length > 0
+    },
+
+    processFileName(): string {
+      return this.$store.getters['event/getEventProcessFileName'];
+    },
   },
 
   methods: {
+    toggleCollapse() {
+      this.isOpen = !this.isOpen;
+    },
+
     updateCounter() {
       this.counter = Time.countdownTimer(this.$store.getters['event/getEventFinishTime']);
       if (this.counter === "00:00:00:00" && this.intervalId) {
@@ -125,106 +216,61 @@ export default defineComponent({
     },
 
     toggleDownloadCheck() {
-      this.pickedAssets.forEach(assetId => {
-        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
-      })
-      this.pickedAssets = [];
-
-      this.canDownload = !this.canDownload;
-      if (this.canDownload && this.canDelete) {
-        (this.$refs.deleteCheckbox as any).toggle()
-        this.canDelete = false;
-      }
-
-      if (this.pickedAll) {
-        (this.$refs.chooseAllCheckbox as any).toggle()
-        this.pickedAll = false;
-      }
+      this.$store.dispatch("event/setModeForAssetsManagement", this.isDownloadMode ? null : EventAssetsManagementModesEnum.DOWNLOAD)
     },
 
     toggleDeleteCheck() {
-      this.pickedAssets.forEach(assetId => {
-        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
-      })
-
-      this.pickedAssets = [];
-      this.canDelete = !this.canDelete;
-      if (this.canDelete && this.canDownload) {
-        (this.$refs.downloadCheckbox as any).toggle()
-        this.canDownload = false;
-      }
-
-      if (this.pickedAll) {
-        (this.$refs.chooseAllCheckbox as any).toggle()
-        this.pickedAll = false;
-      }
+      this.$store.dispatch("event/setModeForAssetsManagement", this.isDeleteMode ? null : EventAssetsManagementModesEnum.DELETE)
     },
 
     toggleAllAssets() {
       this.pickedAll = !this.pickedAll;
-      this.assets.forEach(asset => {
-        this.addToPickedAssets(asset.id);
-
-        if (!this.pickedAll) {
-          if (this.pickedAssets.includes(asset.id)) {
-            (this.$refs[`asset-checkbox-${asset.id}`] as any)[0].toggle()
-          }
-        }
-      })
-
-      if (!this.pickedAll) {
-        this.pickedAssets = [];
-      }
+      this.$store.dispatch("event/toggleAllAssetsInAssetsManagement", this.pickedAll)
     },
 
-    togglePickedAsset(assetId: number) {
-      this.addToPickedAssets(assetId);
-      this.removeFromPickedAssets(assetId);
+    startPollingProcessStatus() {
+      this.processPollingId = setInterval(async () => {
+        await this.$store.dispatch("event/getDownloadAssetsProcess");
+      }, 15000); // Poll every 15 seconds
     },
 
-    addToPickedAssets(assetId: number) {
-      if (!this.pickedAssets.includes(assetId)) {
-        this.pickedAssets.push(assetId);
-        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
-      }
-    },
-
-    removeFromPickedAssets(assetId: number) {
-      const assetIndex = this.pickedAssets.findIndex(pickedAssetId => pickedAssetId === assetId);
-      if (assetIndex !== -1) {
-        this.pickedAssets.splice(assetIndex, 1);
-        (this.$refs[`asset-checkbox-${assetId}`] as any)[0].toggle()
+    stopPollingProcessStatus() {
+      if (this.processPollingId) {
+        clearInterval(this.processPollingId);
+        this.processPollingId = null;
       }
     },
 
     async downloadFiles() {
       this.loading = true;
-      const response = await this.$store.dispatch("event/downloadAssets", this.pickedAssets);
-      this.loading = false;
-      if (response) {
-        this.pickedAssets = [];
+      const success = await this.$store.dispatch("event/downloadAssets");
+      if (success) {
+        this.startPollingProcessStatus();
       }
+      this.loading = false;
     },
 
     async deleteFiles() {
       this.loading = true;
-      const response = await this.$store.dispatch("event/deleteAssets", this.pickedAssets);
+      await this.$store.dispatch("event/deleteAssets");
       this.loading = false;
-      if (response) {
-        this.pickedAssets = [];
-      }
     },
   },
 
   mounted() {
-    this.updateCounter(); // Initialize the counter immediately
-    this.intervalId = setInterval(this.updateCounter, 1000); // Refresh the counter every second
+    this.updateCounter();
+    this.intervalId = setInterval(this.updateCounter, 1000);
+    // If there's an active download process, start polling
+    if (this.isDownloadProcessPreparing) {
+      this.startPollingProcessStatus();
+    }
   },
 
   beforeUnmount() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+    this.stopPollingProcessStatus();
   }
 });
 </script>
@@ -232,35 +278,20 @@ export default defineComponent({
 <style lang="scss" scoped>
 .event-assets {
 
+  h1 small {
+    font-size: .6em;
+  }
 
   .assets-top {
     height: 18%;
-    min-height: 110px;
+    min-height: fit-content;
   }
 
   .assets-content {
+    margin-top: 20px;
     height: 72%;
     overflow-y: auto;
 
-    .gallery-asset-wrapper {
-      text-align: center;
-      height: calc((70vw - 32px) / 5);
-      width: calc(20% - 16px);
-    }
-  }
-
-  .album-asset {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .gallery-asset-chip {
-    background-color: #222d;
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    z-index: 1;
   }
 
   .choose-all-text {
@@ -269,6 +300,51 @@ export default defineComponent({
 
   .actions {
     margin-inline-end: 10px;
+    max-height: fit-content;
+    width: 30%;
   }
+}
+
+.collapse-container {
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 400px;
+  margin-bottom: 5px;
+}
+
+.collapse-button {
+  width: 100%;
+  background-color: #f7f7f7;
+  color: #333;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  text-align: center;
+}
+
+.collapse-button:hover {
+  background-color: #eaeaea;
+}
+
+/* Smooth transition */
+.collapse-enter-active,
+.collapse-leave-active {
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+  overflow: hidden;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.collapse-enter-to,
+.collapse-leave-from {
+  max-height: 200px;
+  /* Adjust as needed for content */
+  opacity: 1;
 }
 </style>

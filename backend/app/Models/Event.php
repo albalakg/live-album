@@ -33,6 +33,17 @@ class Event extends Model
         return $this->hasOne(Order::class, 'id', 'order_id');
     }
 
+    public function activeDownloadProcess()
+    {
+        return $this->hasOne(EventAssetDownload::class, 'event_id', 'id')
+                    ->where('status', '!=', StatusEnum::INACTIVE);
+    }
+
+    public function downloadProcesses()
+    {
+        return $this->hasMany(EventAssetDownload::class, 'event_id', 'id');
+    }
+
     /**
      * @return bool
      */
