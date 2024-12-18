@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Order;
+use App\Models\Subscription;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -10,14 +10,14 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmedMail extends Mailable implements ShouldQueue
+class SubscriptionUpgradedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     protected array $mail_data;
-    protected Order $order;
     protected string $first_name;
-    protected string $order_url;
+    protected Subscription $subscription;
+    protected string $manage_url;
 
     /**
      * Create a new message instance.
@@ -25,9 +25,9 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function __construct(array $mail_data)
     {
         $this->mail_data = $mail_data;
-        $this->order = $mail_data['order'];
         $this->first_name = $mail_data['first_name'];
-        $this->order_url = $mail_data['order_url'];
+        $this->subscription = $mail_data['subscription'];
+        $this->manage_url = $mail_data['manage_url'];
     }
 
     /**
@@ -36,7 +36,7 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'אישור הזמנה #' . $this->order->id . ' - ' . config('app.name'),
+            subject: 'החבילה שלך שודרגה! - ' . config('app.name'),
         );
     }
 
@@ -46,11 +46,11 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'mails.orderConfirmed',
+            view: 'mails.subscriptionUpgraded',
             with: [
-                'order' => $this->order,
                 'first_name' => $this->first_name,
-                'order_url' => $this->order_url,
+                'subscription' => $this->subscription,
+                'manage_url' => $this->manage_url,
             ]
         );
     }

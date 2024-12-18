@@ -58,7 +58,7 @@ return [
     
     'storage_url' => env('APP_STORAGE_URL', 'http://localhost'),
 
-    'client_url' => env('APP_CLIENT_URL', 'https://livealbums.com'),
+    'client_url' => env('APP_CLIENT_URL', 'https://snapshare-live.com'),
 
     'asset_url' => env('ASSET_URL', '/'),
 

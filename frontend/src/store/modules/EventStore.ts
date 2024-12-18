@@ -25,20 +25,20 @@ const EventStore = {
   } as IEventStoreState,
 
   getters: {
-    getFiles(state: IEventStoreState): IEventAsset[] {
-      return state.event.assets;
+    getFiles(state: IEventStoreState): IEventAsset[] | null {
+      return state.event?.assets ?? null;
     },
 
     getEventStatus(state: IEventStoreState): number | null {
-      return state.event?.status;
+      return state.event?.status ?? null;
     },
 
     getEventName(state: IEventStoreState): string | null {
-      return state.event?.name;
+      return state.event?.name ?? null;
     },
 
     getEventPath(state: IEventStoreState): string | null {
-      return state.event?.path;
+      return state.event?.path ?? null;
     },
 
     isEventReady(state: IEventStoreState): boolean {

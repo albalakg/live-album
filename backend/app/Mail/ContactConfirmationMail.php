@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -10,14 +9,13 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmedMail extends Mailable implements ShouldQueue
+class ContactConfirmationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     protected array $mail_data;
-    protected Order $order;
     protected string $first_name;
-    protected string $order_url;
+    protected string $subject;
 
     /**
      * Create a new message instance.
@@ -25,9 +23,8 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function __construct(array $mail_data)
     {
         $this->mail_data = $mail_data;
-        $this->order = $mail_data['order'];
         $this->first_name = $mail_data['first_name'];
-        $this->order_url = $mail_data['order_url'];
+        $this->subject = $mail_data['subject'];
     }
 
     /**
@@ -36,7 +33,7 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'אישור הזמנה #' . $this->order->id . ' - ' . config('app.name'),
+            subject: 'פנייתך התקבלה - ' . config('app.name'),
         );
     }
 
@@ -46,11 +43,10 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'mails.orderConfirmed',
+            view: 'mails.contactConfirmation',
             with: [
-                'order' => $this->order,
                 'first_name' => $this->first_name,
-                'order_url' => $this->order_url,
+                'subject' => $this->subject,
             ]
         );
     }

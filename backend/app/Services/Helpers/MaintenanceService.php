@@ -19,7 +19,7 @@ class MaintenanceService
         return self::getOverrideStatus();
       }
 
-      return true;
+      return false;
     }
     
     /**

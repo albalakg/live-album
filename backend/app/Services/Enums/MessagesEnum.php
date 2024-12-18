@@ -22,6 +22,7 @@ class MessagesEnum extends BaseEnum
     const USER_NOT_AUTHORIZED_TO_DELETE = 'Not authorized to delete this user';
     const RESET_PASSWORD_REQUEST_NOT_FOUND = 'Reset Password request not found';
     const DOWNLOAD_EVENT_ASSET_START_FAILED = 'Failed to prepare event assets for download';
+    const FAILED_TO_DELETE_EVENT_ASSETS_FOLDER = 'Failed to delete event\'s assets folder';
 
     // Info
     const LOGIN_SUCCESS = 'Logged in successfully';

@@ -15,7 +15,7 @@ export default defineComponent({
 
     props: {
         status: {
-            type: Number,
+            type: [Number, null],
             required: true
         }
     },
@@ -47,7 +47,7 @@ export default defineComponent({
                 case StatusEnum.READY:
                     return 'מוכן'
                 default:
-                    return 'שגיאה'
+                    return 'אין מנוי'
             }
         },
     },

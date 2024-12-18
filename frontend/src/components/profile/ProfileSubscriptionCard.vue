@@ -5,19 +5,31 @@
             <span class="text--dark title--small">סטטוס</span>
             <SubscriptionStatus :status="eventStatus" />
         </div>
-        <div class="padding--x-small display--flex justify--space-between" v-for="(item, index) in items" :key="index">
-            <span class="text--dark title--small">{{ item.text }}</span>
-            <span class="text--dark">{{ item.value }}</span>
-        </div>
-        <br>
-        <small>
-            <strong>שימו לב:</strong> שדרוג החבילה ניתן כאשר האירוע בסטטוס ממתין. עלות שדרוג החבילה הינו 50₪.
-        </small>
-        <div class="display--flex justify--end">
-            <div class="width--half">
-                <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג מנוי" @onClick="submit()" />
+        <template v-if="eventStatus">
+            <div class="padding--x-small display--flex justify--space-between" v-for="(item, index) in items"
+                :key="index">
+                <span class="text--dark title--small">{{ item.text }}</span>
+                <span class="text--dark">{{ item.value }}</span>
             </div>
-        </div>
+            <br>
+            <small>
+                <strong>שימו לב:</strong> שדרוג החבילה ניתן כאשר האירוע בסטטוס ממתין. עלות שדרוג החבילה הינו 50₪.
+            </small>
+            <div class="display--flex justify--end">
+                <div class="width--half">
+                    <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג מנוי" @onClick="submit()" />
+                </div>
+            </div>
+        </template>
+        <template v-else>
+            <div class="display--flex justify--end">
+                <div class="width--half">
+                    <router-link to="/order">
+                        <MainButton color="pink" text="רכוש עכשיו" @onClick="submit()" />
+                    </router-link>
+                </div>
+            </div>
+        </template>
     </div>
 </template>
 
@@ -48,7 +60,7 @@ export default defineComponent({
             ];
         },
 
-        eventStatus(): number {
+        eventStatus(): number | null {
             return this.$store.getters['event/getEventStatus'];
         },
 
@@ -57,6 +69,10 @@ export default defineComponent({
         },
 
         canUpgradeSubscription(): boolean {
+            if(this.eventStatus === null) {
+                return false;
+            }
+
             return [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) && this.subscriptionName === SubscriptionTypesEnum.BASIC;
         }
     },

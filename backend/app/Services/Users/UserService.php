@@ -37,7 +37,10 @@ class UserService
     public function getProfile(User $user): ?User
     {
         $user->event = $this->event_service->getEventByUser($user->id);
-        $user->order = $this->order_service->find($user->event->order_id)->only(['order_number', 'subscription', 'price', 'created_at']);
+        $user->order = $user->event ? 
+                        $this->order_service->find($user->event->order_id)
+                        ->only(['order_number', 'subscription', 'price', 'created_at'])
+                        : null;
         return $user;
     }
 
@@ -281,6 +284,13 @@ class UserService
             }
         }
 
+        $user->update([
+            'first_name' => '',
+            'last_name' => '',
+            'email' => '',
+            'password' => '',
+        ]);
+
         return $user->delete();
     }
 
@@ -290,14 +300,14 @@ class UserService
      */
     private function sendEmailConfirmation(User $user)
     {
+        $token = TokenService::generate();
         $mail_data = [
-            'token' => TokenService::generate(),
-            'email' => $user->email,
+            'verification_url' => config('app.client_url') . "/email-confirmation?email={$user->email}&token={$token}",
             'first_name' => $user->first_name,
         ];
 
         $this->mail_service->send($user->email, MailEnum::USER_SIGNUP, $mail_data);
-        $this->createEmailConfirmation($user, $mail_data['token']);
+        $this->createEmailConfirmation($user, $token);
     }
 
     /**

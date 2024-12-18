@@ -13,12 +13,18 @@ class UserSignupMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    protected array $mail_data;
+    protected string $first_name;
+    protected string $verification_url;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(array $mail_data)
     {
-        //
+        $this->mail_data = $mail_data;
+        $this->first_name = $mail_data['first_name'];
+        $this->verification_url = $mail_data['verification_url'];
     }
 
     /**
@@ -37,7 +43,11 @@ class UserSignupMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.mails.userSignup',
+            view: 'mails.userSignup',
+            with: [
+                'first_name' => $this->first_name,
+                'verification_url' => $this->verification_url,
+            ]
         );
     }
 

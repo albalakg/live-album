@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Order;
+use App\Models\Event;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -10,14 +10,14 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmedMail extends Mailable implements ShouldQueue
+class EventStartedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     protected array $mail_data;
-    protected Order $order;
+    protected Event $event;
     protected string $first_name;
-    protected string $order_url;
+    protected string $event_url;
 
     /**
      * Create a new message instance.
@@ -25,9 +25,9 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function __construct(array $mail_data)
     {
         $this->mail_data = $mail_data;
-        $this->order = $mail_data['order'];
+        $this->event = $mail_data['event'];
         $this->first_name = $mail_data['first_name'];
-        $this->order_url = $mail_data['order_url'];
+        $this->event_url = $mail_data['event_url'];
     }
 
     /**
@@ -36,7 +36,7 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'אישור הזמנה #' . $this->order->id . ' - ' . config('app.name'),
+            subject: 'האירוע התחיל - ' . $this->event->name,
         );
     }
 
@@ -46,11 +46,11 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'mails.orderConfirmed',
+            view: 'mails.eventStarted',
             with: [
-                'order' => $this->order,
+                'event' => $this->event,
                 'first_name' => $this->first_name,
-                'order_url' => $this->order_url,
+                'event_url' => $this->event_url,
             ]
         );
     }

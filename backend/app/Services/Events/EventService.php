@@ -175,13 +175,13 @@ class EventService
         if (!$event = Event::find($id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
-        
+
         if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
         $download_job = new ZipEventAssetsForDownload($event, $data['assets'], $user_id);
-        if($download_job->canStartNewProcess($event)) {
+        if ($download_job->canStartNewProcess($event)) {
             return $download_job->zip()->only(['id', 'event_id', 'status', 'path']) ?? null;
         }
 
@@ -335,6 +335,7 @@ class EventService
         }
 
         $this->deleteEventsAssetsByEvent($event_id);
+        $this->deleteEventsDownloadProcesses($event_id);
         return $event->delete();
     }
 
@@ -396,11 +397,12 @@ class EventService
         $event_assets = EventAsset::where('event_id', $event_id)
             ->select('id', 'path')
             ->get();
+
         foreach ($event_assets as $event_asset) {
             try {
-                FileService::delete($event_asset->path, FileService::S3_DISK);
+                FileService::delete("events/$event_id", FileService::S3_DISK);
             } catch (Exception $ex) {
-                LogService::init()->error($ex, ['error' => LogsEnum::FAILED_TO_DELETE_EVENT_ASSET]);
+                LogService::init()->error($ex, ['message' => MessagesEnum::FAILED_TO_DELETE_EVENT_ASSETS_FOLDER]);
             }
         }
 
