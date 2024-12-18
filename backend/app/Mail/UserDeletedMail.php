@@ -15,7 +15,7 @@ class UserDeletedMail extends Mailable implements ShouldQueue
 
     protected array $mail_data;
     protected string $first_name;
-    protected string $user_email;
+    protected string $email;
     protected string $register_url;
 
     /**
@@ -25,7 +25,7 @@ class UserDeletedMail extends Mailable implements ShouldQueue
     {
         $this->mail_data = $mail_data;
         $this->first_name = $mail_data['first_name'];
-        $this->user_email = $mail_data['user_email'];
+        $this->email = $mail_data['email'];
         $this->register_url = $mail_data['register_url'];
     }
 
@@ -48,7 +48,7 @@ class UserDeletedMail extends Mailable implements ShouldQueue
             view: 'mails.userDeleted',
             with: [
                 'first_name' => $this->first_name,
-                'user_email' => $this->user_email,
+                'email' => $this->email,
                 'register_url' => $this->register_url,
             ]
         );

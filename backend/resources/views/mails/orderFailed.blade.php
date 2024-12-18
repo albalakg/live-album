@@ -3,7 +3,6 @@
 @section('content')
     <h2>בעיה בביצוע ההזמנה</h2>
     <p>שלום {{ $first_name }},</p>
-    <p>לצערנו נתקלנו בבעיה בעת עיבוד ההזמנה שלך ב-{{ config('app.name') }}.</p>
     
     <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <h3>פרטי ההזמנה:</h3>
@@ -19,8 +18,10 @@
     <p>אנא נסה/י שוב או צור/י קשר עם התמיכה אם הבעיה נמשכת.</p>
     
     <div style="text-align: center;">
-        <a href="{{ $retryUrl }}" class="button">ניסיון חוזר</a>
+        <a href="{{ $retry_url }}" class="button">ניסיון חוזר</a>
     </div>
 
-    <p>אנו מתנצלים על אי הנוחות.</p>
+    <div class="warning">
+        <p>אנו מתנצלים על אי הנוחות.</p>
+    </div>
 @endsection

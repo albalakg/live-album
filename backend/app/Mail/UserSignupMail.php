@@ -15,6 +15,7 @@ class UserSignupMail extends Mailable
 
     protected array $mail_data;
     protected string $first_name;
+    protected string $order_url;
     protected string $verification_url;
 
     /**
@@ -25,6 +26,7 @@ class UserSignupMail extends Mailable
         $this->mail_data = $mail_data;
         $this->first_name = $mail_data['first_name'];
         $this->verification_url = $mail_data['verification_url'];
+        $this->order_url = $mail_data['order_url'];
     }
 
     /**
@@ -47,6 +49,7 @@ class UserSignupMail extends Mailable
             with: [
                 'first_name' => $this->first_name,
                 'verification_url' => $this->verification_url,
+                'order_url' => $this->order_url,
             ]
         );
     }

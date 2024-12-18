@@ -154,7 +154,7 @@ class UserService
         $reset_password_request = UserResetPassword::where('email', $email)
             ->where('token', $token)
             ->where('status', StatusEnum::PENDING)
-            ->where('created_at', '>=', Carbon::now()->subDay()->toDateTimeString())
+            ->where('created_at', '>=', Carbon::now()->subHour()->toDateTimeString())
             ->first();
 
         if (!$reset_password_request) {

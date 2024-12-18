@@ -47,7 +47,7 @@ export default defineComponent({
                 case StatusEnum.READY:
                     return 'מוכן'
                 default:
-                    return 'אין מנוי'
+                    return 'אין חבילה'
             }
         },
     },

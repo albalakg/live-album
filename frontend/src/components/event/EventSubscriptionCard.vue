@@ -20,7 +20,7 @@
         </small>
         <div class="display--flex justify--end">
             <div class="width--half">
-                <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג מנוי" @onClick="submit()" />
+                <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג חבילה" @onClick="submit()" />
             </div>
         </div>
     </div>
@@ -42,8 +42,8 @@ export default defineComponent({
         items(): Array<any> {
             return [
                 {
-                    text: 'פרטי מנוי',
-                    value: 'מנוי בסיסי',
+                    text: 'פרטי חבילה',
+                    value: 'חבילה בסיסי',
                 },
                 {
                     text: 'כמות קבצים',

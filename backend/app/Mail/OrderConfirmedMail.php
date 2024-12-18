@@ -17,7 +17,7 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
     protected array $mail_data;
     protected Order $order;
     protected string $first_name;
-    protected string $order_url;
+    protected string $event_url;
 
     /**
      * Create a new message instance.
@@ -27,7 +27,7 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
         $this->mail_data = $mail_data;
         $this->order = $mail_data['order'];
         $this->first_name = $mail_data['first_name'];
-        $this->order_url = $mail_data['order_url'];
+        $this->event_url = $mail_data['event_url'];
     }
 
     /**
@@ -50,7 +50,7 @@ class OrderConfirmedMail extends Mailable implements ShouldQueue
             with: [
                 'order' => $this->order,
                 'first_name' => $this->first_name,
-                'order_url' => $this->order_url,
+                'event_url' => $this->event_url,
             ]
         );
     }

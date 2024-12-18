@@ -1,36 +1,33 @@
 @extends('mails.layouts.base')
 
 @section('content')
-    <h2>התראה: האירוע שלך עומד להיות מושבת</h2>
+    <h2>התראה: האירוע שלכם עומד להיות מושבת</h2>
     <p>שלום {{ $first_name }},</p>
-    <p>אנו מתריעים כי האירוע "{{ $event->name }}" עומד להיות מושבת בקרוב.</p>
     
-    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <div class="info-box">
         <h3>פרטי האירוע:</h3>
         <p><strong>שם האירוע:</strong> {{ $event->name }}</p>
         <p><strong>תאריך האירוע:</strong> {{ $event->date->format('d/m/Y') }}</p>
+        <p><strong>ימים להשבתה:</strong> {{ $days_remaining }}</p>
         <p><strong>תאריך השבתה:</strong> {{ $deactivation_date->format('d/m/Y') }}</p>
-        <p><strong>ימים שנותרו:</strong> {{ $days_remaining }}</p>
     </div>
 
-    <p>לאחר השבתת האירוע:</p>
-    <ul style="list-style-type: disc; margin-right: 20px;">
-        <li>לא ניתן יהיה להעלות תמונות חדשות</li>
-        <li>הגלריה לא תהיה זמינה לצפייה</li>
-        <li>כל הקבצים המשויכים לאירוע יימחקו</li>
-    </ul>
+    <div class="note">
+        <p>לאחר השבתת האירוע:</p>
+        <ul>
+            <li>לא ניתן להיכנס לעמוד האירוע</li>
+            <li>כל הקבצים המשויכים לאירוע נמחקו ולא ניתנים לשחזור</li>
+        </ul>
+    </div>
 
-    <p>אם ברצונך להאריך את משך האירוע, אנא בצע/י שדרוג לחבילה מתאימה:</p>
-    
-    <div style="text-align: center;">
+    <div class="success">
+        <p>כדי למנוע את השבתת האירוע, יש לכם אפשרות לשדרג את החבילה ובכך להאריך את זמן שמירת הקבצים:</p>
         <a href="{{ $upgrade_url }}" class="button">שדרוג חבילה</a>
     </div>
 
-    <p>או הורד/י את כל הקבצים לפני מועד ההשבתה:</p>
-    
-    <div style="text-align: center;">
-        <a href="{{ $download_url }}" class="button">הורדת קבצים</a>
+    <div class="button-container">
+        <p>אם זאת, אנו ממליצים להיכנס ולהוריד את הקבצים ברגע זה.</p>
+        <a href="{{ $download_url }}" class="button secondary">הורדת קבצים</a>
     </div>
 
-    <p style="font-size: 12px; color: #666;">* לאחר השבתת האירוע, לא תהיה אפשרות לשחזר את הקבצים.</p>
 @endsection

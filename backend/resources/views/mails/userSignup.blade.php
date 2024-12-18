@@ -2,18 +2,24 @@
 
 @section('content')
     <h2>ברוכים הבאים!</h2>
-    <p>שלום {{ $first_name }},</p>
-    <p>תודה שנרשמת ל-{{ config('app.name') }}.</p>
-    <p>כדי להשלים את תהליך ההרשמה, אנא אמת/י את כתובת האימייל שלך על ידי לחיצה על הכפתור למטה:</p>
     
-    <div style="text-align: center;">
+    <p>שלום {{ $first_name }},</p>
+
+    <div class="info-box">
+        <h3>השלמת הרשמה</h3>
+        <p>כדי להשלים את תהליך ההרשמה ולהתחיל להשתמש בשירות, אנא אמתו את כתובת האימייל שלך.</p>
+    </div>
+    
+    <div class="button-container">
         <a href="{{ $verification_url }}" class="button">אימות כתובת אימייל</a>
     </div>
 
-    <p>או על ידי העתקת הקישור הבא לדפדפן:</p>
-    <p style="word-break: break-all;">{{ $verification_url }}</p>
+    <div class="warning">
+        <p>אם לא ביקשת להירשם לשירות שלנו, אנא התעלמו מהודעה זו.</p>
+    </div>
 
-    <p>קישור זה יהיה תקף למשך 24 שעות.</p>
-    
-    <p>אם לא ביקשת להירשם לשירות שלנו, אנא התעלם/י מהודעה זו.</p>
+    <div class="success">
+        <p>לאחר אימות האימייל תוכלו להמשיך לרכישת החבילה שלכם:</p>
+        <a href="{{ $order_url }}" class="button">הזמנת החבילה</a>
+    </div>
 @endsection

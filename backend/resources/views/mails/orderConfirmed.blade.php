@@ -1,9 +1,8 @@
 @extends('mails.layouts.base')
 
 @section('content')
-    <h2>הזמנתך אושרה!</h2>
+    <h2>הזמנתכם אושרה!</h2>
     <p>שלום {{ $first_name }},</p>
-    <p>תודה על הזמנתך ב-{{ config('app.name') }}.</p>
     
     <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <h3>פרטי ההזמנה:</h3>
@@ -15,11 +14,13 @@
         @endif
     </div>
 
-    <p>תוכל/י לצפות בפרטי ההזמנה המלאים באזור האישי באתר:</p>
+    <p>מוזמנים להיכנס לממשק ניהול האירוע:</p>
     
     <div style="text-align: center;">
-        <a href="{{ $order_url }}" class="button">צפייה בהזמנה</a>
+        <a href="{{ $event_url }}" class="button">ממשק ניהול האירוע</a>
     </div>
 
-    <p>תודה שבחרת בנו!</p>
+    <div class="success">
+        <p>תודה שבחרתם בנו!</p>
+    </div>
 @endsection

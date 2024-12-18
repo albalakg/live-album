@@ -1,5 +1,3 @@
-{{ <mail-header></mail-header> }}
-
 <body>
     <table>
         <thead>
