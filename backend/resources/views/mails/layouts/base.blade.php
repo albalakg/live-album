@@ -6,20 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }}</title>
     <style>
-        :root {
-            --green: #79AE60;
-            --lightGreen: #A3D18D;
-            --pink: #F68589;
-            --lightPink: #FFAEB1;
-            --dark-gray: #686666;
-            --gray: #EEEEEE;
-            --dark: #222;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, sans-serif;
             line-height: 1.6;
-            color: var(--dark);
+            color: #222;
             margin: 0;
             padding: 0;
             direction: rtl;
@@ -33,108 +23,116 @@
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            border: 1px solid #bbb;
         }
 
         .header {
             text-align: center;
             padding: 30px 20px;
-            background-color: var(--green);
+            background-color: #F68589;
             color: white;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 36px;
             font-weight: 600;
+            color: #fff;
         }
 
         .content {
-            padding: 30px;
+            padding: 20px;
             background-color: #ffffff;
+            direction: rtl;
+            text-align: right;
+            font-family: system-ui, sans-serif;
         }
 
         .content h2 {
-            color: var(--green);
+            color: #79AE60;
             margin-top: 0;
             margin-bottom: 20px;
             font-size: 20px;
         }
 
         .info-box {
-            background-color: var(--gray);
             border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            margin: 10px 0;
+            background: #eee8;
+            padding: 8px;
         }
 
         .info-box h3 {
-            color: var(--dark);
+            color: #222;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 2px;
             font-size: 16px;
-        }
-
-        .info-box p {
-            margin: 8px 0;
         }
 
         .button {
             display: inline-block;
-            padding: 12px 24px;
-            background-color: var(--green);
-            color: white !important;
+            padding: 7px 24px;
+            background-color: #79AE60;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 600;
-            margin: 10px 0;
+            margin-bottom: 10px;
             text-align: center;
             transition: background-color 0.3s ease;
+            color: #fff !important;
         }
 
         .button:hover {
-            background-color: var(--lightGreen);
+            background-color: #A3D18D;
         }
 
         .button.secondary {
-            background-color: var(--pink);
+            background-color: #F68589;
         }
 
         .button.secondary:hover {
-            background-color: var(--lightPink);
+            background-color: #FFAEB1;
         }
 
         .footer {
             text-align: center;
             padding: 20px;
-            color: var(--dark-gray);
+            color: #686666;
             font-size: 12px;
-            background-color: var(--gray);
+            background-color: #EEEEEE;
             border-top: 1px solid #ddd;
         }
 
+        footer small {
+            color: #222;
+            font-weight: 600;
+        }
+
         .warning {
-            background-color: var(--lightPink);
+            background-color: #FFAEB188;
             border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-            color: var(--dark);
+            padding: 8px;
+            margin: 3px 0;
+            font-weight: 600;
+            color: #222;
         }
 
         .success {
-            background-color: var(--lightGreen);
+            background-color: #A3D18D88;
             border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-            color: var(--dark);
+            padding: 8px;
+            margin: 3px 0;
+            color: #222;
+            font-weight: 600;
         }
 
         .note {
             font-size: 12px;
-            color: var(--dark-gray);
+            color: #686666;
             margin-top: 15px;
             padding: 10px;
-            border-right: 3px solid var(--dark-gray);
-            background-color: var(--gray);
+            border-right: 3px solid #686666;
+            background-color: #EEEEEE;
         }
 
         ul {
@@ -147,7 +145,7 @@
         }
 
         strong {
-            color: var(--dark);
+            color: #222;
         }
 
         .text-center {
@@ -157,6 +155,15 @@
         .button-container {
             text-align: center;
             margin: 25px 0;
+        }
+
+        a {
+            text-decoration: none;
+            color: #222 !important;
+        }
+
+        p {
+            margin-top: 0 !important;
         }
 
         @media only screen and (max-width: 600px) {

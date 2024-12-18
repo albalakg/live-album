@@ -16,17 +16,39 @@
         ברוכים הבאים ל &nbsp;<strong class="text--pink">SnapShare</strong>
       </h2>
       <br>
-      <h3 class="title--medium text--dark">
+      <h3 v-if="loading" class="title--medium text--dark">
         תודה שאימתתם את המייל
         <br>
         ועכשיו הגיע הזמן להזמין ולהכין את האירוע
       </h3>
-      <br>
-      <div class="width--corner margin--auto">
-        <router-link to="/order">
-          <MainButton text="הזמן עכשיו" animation />
-        </router-link>
-      </div>
+      <template v-else>
+        <div v-if="isConfirmed">
+          <h3 class="title--medium text--dark">
+            תודה שאימתתם את המייל
+            <br>
+            ועכשיו הגיע הזמן להזמין ולהכין את האירוע, אך קודם רק צריך להתחבר
+          </h3>
+          <br>
+          <div class="width--fifth margin--auto">
+            <router-link to="/login?redirect=/order">
+              <MainButton text="התחבר" animation />
+            </router-link>
+          </div>
+        </div>
+        <div v-else>
+          <h3 class="title--medium text--dark">
+            הקישור הזה אינו תקין
+          <br>
+          נסה להירשם מחדש או צור קשר ונחזור בהקדם
+          </h3>
+          <br>
+          <div class="width--fifth margin--auto">
+            <router-link to="/signup">
+              <MainButton text="הירשם" animation />
+            </router-link>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -46,14 +68,17 @@ export default defineComponent({
 
   data() {
     return {
+      loading: true as boolean,
+      isConfirmed: false as boolean,
     };
   },
 
-  created() {
-    this.$store.dispatch('user/confirmEmail', {
+  async created() {
+    this.isConfirmed = await this.$store.dispatch('user/confirmEmail', {
       email: this.$route.query.email,
       token: this.$route.query.token,
     });
+    this.loading = false;
   },
 
   methods: {

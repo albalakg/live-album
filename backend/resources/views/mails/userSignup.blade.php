@@ -14,12 +14,11 @@
         <a href="{{ $verification_url }}" class="button">אימות כתובת אימייל</a>
     </div>
 
-    <div class="warning">
-        <p>אם לא ביקשת להירשם לשירות שלנו, אנא התעלמו מהודעה זו.</p>
-    </div>
+    <p>לאחר אימות המייל, תוכלו להמשיך לרכישת החבילה שלכם:</p>
+    <a href="{{ $order_url }}" class="button">הזמנת החבילה</a>
 
     <div class="success">
-        <p>לאחר אימות האימייל תוכלו להמשיך לרכישת החבילה שלכם:</p>
-        <a href="{{ $order_url }}" class="button">הזמנת החבילה</a>
+        <span>תודה רבה שהצטרפתם אלינו ושבחרתם בנו לאירוע שלכם!</span>
     </div>
+
 @endsection

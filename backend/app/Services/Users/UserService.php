@@ -303,6 +303,7 @@ class UserService
         $token = TokenService::generate();
         $mail_data = [
             'verification_url' => config('app.client_url') . "/email-confirmation?email={$user->email}&token={$token}",
+            'order_url' => config('app.client_url') . '/order',
             'first_name' => $user->first_name,
         ];
 

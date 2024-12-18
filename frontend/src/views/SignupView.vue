@@ -168,6 +168,7 @@ export default defineComponent({
     padding: 5% 4%;
     height: 80%;
     width: 92%;
+    min-height: fit-content;
 
     h3 {
       margin-bottom: 2%;

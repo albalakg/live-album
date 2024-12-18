@@ -117,11 +117,16 @@ export default defineComponent({
 
       await this.$store.dispatch('user/getProfile');
 
-      if(user.subscription_name) {
-        this.$router.push('/event');
-      } else {
-        this.$router.push('/');
+      if(this.$route.query.redirect) {
+        this.$router.push(this.$route.query.redirect.toString());
+        return;
       }
+
+      // if(user.subscription_name) {
+      //   this.$router.push('/event');
+      // } else {
+      //   this.$router.push('/');
+      // }
     },
 
     validateForm() {
@@ -167,6 +172,7 @@ export default defineComponent({
     padding: 5% 8%;
     width: 34%;
     height: 80%;
+    min-height: fit-content;
   }
 
   .login-details {
