@@ -34,7 +34,7 @@
       </div>
       <form @submit.prevent="submit()" class="contact-form display--flex justify--space-between direction--column">
         <div>
-          <MainInput v-model="form.email" title="כתובת מייל" />
+          <MainInput type="email" v-model="form.email" title="כתובת מייל" />
           <br>
           <MainInput v-model="form.full_name" title="שם מלא" />
           <br>

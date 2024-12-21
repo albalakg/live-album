@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id')->unsigned()->index();
             $table->integer('subscription_id')->unsigned()->index();
-            $table->string('order_number', 9);
+            $table->string('order_number', 11);
             $table->integer('status')->unsigned()->index();
+            $table->integer('supplier_id')->unsigned()->index()->nullable();
+            $table->string('token', 100)->nullable();
             $table->decimal('price')->unsigned()->index();
             $table->timestamps();
         });

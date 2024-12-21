@@ -8,7 +8,7 @@ use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Events\EventService;
-use App\Services\Orders\OrderService;
+use App\Services\Orders\StoreService;
 use App\Http\Requests\UploadFileRequest;
 use App\Http\Requests\CreateEventRequest;
 use App\Http\Requests\UpdateEventRequest;
@@ -32,7 +32,7 @@ class EventController extends Controller
         try {
             $event_service = new EventService(
                 new UserService(),
-                new OrderService()
+                new StoreService()
             );
             $response = $event_service->uploadFile($event_id, $request);
             return $this->successResponse(MessagesEnum::EVENT_FILE_UPLOADED_SUCCESS, $response);

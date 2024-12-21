@@ -2,7 +2,7 @@ import axios from "axios";
 import { serialize } from "object-to-formdata";
 import Time from "@/helpers/time";
 import {
-  IEventStoreState,
+  IEventModuleState,
   IEventAsset,
   UpdateEventRequest,
   IEvent,
@@ -13,7 +13,7 @@ import { EventAssetsManagementModesType } from "@/helpers/types";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
 
-const EventStore = {
+const EventModule = {
   namespaced: true,
 
   state: {
@@ -22,108 +22,108 @@ const EventStore = {
       mode: null,
       assetsIds: [],
     },
-  } as IEventStoreState,
+  } as IEventModuleState,
 
   getters: {
-    getFiles(state: IEventStoreState): IEventAsset[] | null {
+    getFiles(state: IEventModuleState): IEventAsset[] | null {
       return state.event?.assets ?? null;
     },
 
-    getEventStatus(state: IEventStoreState): number | null {
+    getEventStatus(state: IEventModuleState): number | null {
       return state.event?.status ?? null;
     },
 
-    getEventName(state: IEventStoreState): string | null {
+    getEventName(state: IEventModuleState): string | null {
       return state.event?.name ?? null;
     },
 
-    getEventPath(state: IEventStoreState): string | null {
+    getEventPath(state: IEventModuleState): string | null {
       return state.event?.path ?? null;
     },
 
-    isEventReady(state: IEventStoreState): boolean {
+    isEventReady(state: IEventModuleState): boolean {
       return state.event?.status === StatusEnum.READY;
     },
 
-    isEventRending(state: IEventStoreState): boolean {
+    isEventRending(state: IEventModuleState): boolean {
       return state.event?.status === StatusEnum.PENDING;
     },
 
-    getEventDate(state: IEventStoreState): string | null {
+    getEventDate(state: IEventModuleState): string | null {
       return Time.extractDate(state.event?.starts_at ?? "");
     },
 
-    getEventStartTime(state: IEventStoreState): string | null {
+    getEventStartTime(state: IEventModuleState): string | null {
       return state.event?.starts_at;
     },
 
-    getEventFinishTime(state: IEventStoreState): string | null {
+    getEventFinishTime(state: IEventModuleState): string | null {
       return state.event?.finished_at;
     },
 
-    getEvent(state: IEventStoreState): IEvent | null {
+    getEvent(state: IEventModuleState): IEvent | null {
       return state.event;
     },
 
-    getTotalAssets(state: IEventStoreState): number {
+    getTotalAssets(state: IEventModuleState): number {
       return state.event?.assets?.length ?? 0;
     },
 
-    getAssets(state: IEventStoreState): IEventAsset[] {
+    getAssets(state: IEventModuleState): IEventAsset[] {
       return state.event?.assets ?? [];
     },
 
-    getEventImage(state: IEventStoreState): string {
+    getEventImage(state: IEventModuleState): string {
       return process.env.VUE_APP_STORAGE_BASE_URL + "/" + state.event?.image;
     },
 
-    hasActiveEvent(state: IEventStoreState): boolean {
+    hasActiveEvent(state: IEventModuleState): boolean {
       return state.event && state.event.status !== StatusEnum.INACTIVE;
     },
 
     getManagedAssetsMode(
-      state: IEventStoreState
+      state: IEventModuleState
     ): EventAssetsManagementModesType | null {
       return state.assetsManagement.mode;
     },
 
-    getManagedAssetsIds(state: IEventStoreState): number[] {
+    getManagedAssetsIds(state: IEventModuleState): number[] {
       return state.assetsManagement.assetsIds;
     },
 
-    getTotalManagedAssetsIds(state: IEventStoreState): number {
+    getTotalManagedAssetsIds(state: IEventModuleState): number {
       return state.assetsManagement.assetsIds.length;
     },
 
-    getDownloadAssetsProcess(state: IEventStoreState): null | IEventDownloadAssetsProcess {
+    getDownloadAssetsProcess(state: IEventModuleState): null | IEventDownloadAssetsProcess {
       return state?.event?.active_download_process ?? null;
     },
 
-    getEventProcessFileName(state: IEventStoreState): string {
+    getEventProcessFileName(state: IEventModuleState): string {
       return (state?.event?.name ?? 'קבצי האלבום') + '.zip';
     },
   },
 
   mutations: {
-    SET_EVENT(state: IEventStoreState, event: IEvent) {
+    SET_EVENT(state: IEventModuleState, event: IEvent) {
       state.event = event;
     },
 
-    UPDATE_EVENT_STATUS(state: IEventStoreState, status: StatusEnum) {
+    UPDATE_EVENT_STATUS(state: IEventModuleState, status: StatusEnum) {
       state.event.status = status;
     },
 
-    UPDATE_EVENT(state: IEventStoreState, event: any) {
+    UPDATE_EVENT(state: IEventModuleState, event: any) {
       state.event.name = event?.name ?? "";
       state.event.starts_at = event?.starts_at ?? "";
       state.event.image = event?.image ?? "";
     },
 
-    SET_DOWNLOAD_ASSET_PROCESS(state: IEventStoreState, eventDownloadAssetsProcess: IEventDownloadAssetsProcess) {
+    SET_DOWNLOAD_ASSET_PROCESS(state: IEventModuleState, eventDownloadAssetsProcess: IEventDownloadAssetsProcess) {
       state.event.active_download_process = eventDownloadAssetsProcess;
     },
 
-    ADD_FILE(state: IEventStoreState, asset: IEventAsset) {
+    ADD_FILE(state: IEventModuleState, asset: IEventAsset) {
       asset.path =
         process.env.VUE_APP_STORAGE_BASE_URL + "/assets/" + asset.path;
       state.event.assets
@@ -131,7 +131,7 @@ const EventStore = {
         : (state.event.assets = [asset]);
     },
 
-    SET_FILES(state: IEventStoreState, assets: IEventAsset[]) {
+    SET_FILES(state: IEventModuleState, assets: IEventAsset[]) {
       if (!state.event.assets) {
         return (state.event.assets = []);
       }
@@ -145,7 +145,7 @@ const EventStore = {
       });
     },
 
-    DELETE_FILES(state: IEventStoreState, deletedAssets: number[]) {
+    DELETE_FILES(state: IEventModuleState, deletedAssets: number[]) {
       if (!state.event.assets) {
         return (state.event.assets = []);
       }
@@ -160,14 +160,14 @@ const EventStore = {
       });
     },
 
-    ADD_ASSET_FOR_ASSETS_MANAGEMENT(state: IEventStoreState, assetId: number) {
+    ADD_ASSET_FOR_ASSETS_MANAGEMENT(state: IEventModuleState, assetId: number) {
       if (!state.assetsManagement.assetsIds.includes(assetId)) {
         state.assetsManagement.assetsIds.push(assetId);
       }
     },
 
     REMOVE_ASSET_FOR_ASSETS_MANAGEMENT(
-      state: IEventStoreState,
+      state: IEventModuleState,
       assetId: number
     ) {
       const index = state.assetsManagement.assetsIds.findIndex(
@@ -179,7 +179,7 @@ const EventStore = {
     },
 
     TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT(
-      state: IEventStoreState,
+      state: IEventModuleState,
       mode: boolean
     ) {
       if (mode) {
@@ -192,7 +192,7 @@ const EventStore = {
     },
 
     SET_MODE_FOR_ASSETS_MANAGEMENT(
-      state: IEventStoreState,
+      state: IEventModuleState,
       mode: EventAssetsManagementModesType | null
     ) {
       state.assetsManagement.mode = mode;
@@ -202,7 +202,7 @@ const EventStore = {
   actions: {
     getEventBaseInfo(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
       path: string
@@ -222,7 +222,7 @@ const EventStore = {
 
     getEventAssets(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
       path: string
@@ -241,7 +241,7 @@ const EventStore = {
     },
 
     deleteAssets(context: {
-      state: IEventStoreState;
+      state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
     }) {
       return new Promise((resolve) => {
@@ -277,7 +277,7 @@ const EventStore = {
     },
 
     downloadAssets(context: {
-      state: IEventStoreState;
+      state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
     }) {
       return new Promise((resolve) => {
@@ -296,7 +296,7 @@ const EventStore = {
     },
 
     getDownloadAssetsProcess(context: {
-      state: IEventStoreState;
+      state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
     }) {
       return new Promise((resolve) => {
@@ -325,7 +325,7 @@ const EventStore = {
 
     update(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
       data: UpdateEventRequest
@@ -362,7 +362,7 @@ const EventStore = {
     },
 
     setReady(context: {
-      state: IEventStoreState;
+      state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
     }) {
       return new Promise((resolve, reject) => {
@@ -384,7 +384,7 @@ const EventStore = {
     },
 
     setPending(context: {
-      state: IEventStoreState;
+      state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
     }) {
       return new Promise((resolve, reject) => {
@@ -407,7 +407,7 @@ const EventStore = {
 
     uploadFile(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
       file: any
@@ -432,7 +432,7 @@ const EventStore = {
 
     addAssetForAssetsManagement(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (arg0: string, arg1: number) => void;
       },
       assetId: number
@@ -442,7 +442,7 @@ const EventStore = {
 
     removeAssetFromAssetsManagement(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (arg0: string, arg1: number) => void;
       },
       assetId: number
@@ -452,7 +452,7 @@ const EventStore = {
 
     toggleAllAssetsInAssetsManagement(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (arg0: string, arg1: boolean) => void;
       },
       mode: boolean
@@ -462,7 +462,7 @@ const EventStore = {
 
     setModeForAssetsManagement(
       context: {
-        state: IEventStoreState;
+        state: IEventModuleState;
         commit: (
           arg0: string,
           arg1: EventAssetsManagementModesType | null
@@ -477,4 +477,4 @@ const EventStore = {
   modules: {},
 };
 
-export default EventStore;
+export default EventModule;

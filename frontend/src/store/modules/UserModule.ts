@@ -1,6 +1,6 @@
 import axios from "axios";
 import {
-  IUserStoreState,
+  IUserModuleState,
   ILoginRequest,
   IUserInfo,
   ISignupRequest,
@@ -14,68 +14,68 @@ import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
 import router from "@/router";
 
-const UserStore = {
+const UserModule = {
   namespaced: true,
 
   state: {
     user: null,
     isLoggedIn: false,
-  } as IUserStoreState,
+  } as IUserModuleState,
 
   getters: {
-    getUser(state: IUserStoreState): IUserInfo | null {
+    getUser(state: IUserModuleState): IUserInfo | null {
       return state.user;
     },
 
-    getFirstName(state: IUserStoreState): string | null {
+    getFirstName(state: IUserModuleState): string | null {
       return state.user?.first_name ?? null;
     },
 
-    getLastName(state: IUserStoreState): string | null {
+    getLastName(state: IUserModuleState): string | null {
       return state.user?.last_name ?? null;
     },
 
-    getFullName(state: IUserStoreState): string {
+    getFullName(state: IUserModuleState): string {
       return (state.user?.first_name ?? "") + " " + (state.user?.last_name ?? "");
     },
 
-    getEmail(state: IUserStoreState): string | null {
+    getEmail(state: IUserModuleState): string | null {
       return state.user?.email ?? null;
     },
 
-    isLoggedIn(state: IUserStoreState): boolean {
+    isLoggedIn(state: IUserModuleState): boolean {
       return state.isLoggedIn;
     },
 
-    getSubscriptionName(state: IUserStoreState): SubscriptionType | null {
+    getSubscriptionName(state: IUserModuleState): SubscriptionType | null {
       return state.user?.order?.subscription?.name ?? null;
     },
 
-    getSubscriptionFilesAllowed(state: IUserStoreState): number | null {
+    getSubscriptionFilesAllowed(state: IUserModuleState): number | null {
       return state.user?.order?.subscription?.files_allowed ?? null;
     },
 
-    getSubscriptionFilesStorageTime(state: IUserStoreState): number | null {
+    getSubscriptionFilesStorageTime(state: IUserModuleState): number | null {
       return state.user?.order?.subscription?.storage_time ?? null;
     },
 
     getSubscriptionStartDate(
-      state: IUserStoreState
+      state: IUserModuleState
     ): string | null | undefined {
       return state.user?.order?.created_at;
     },
   },
 
   mutations: {
-    SET_USER(state: IUserStoreState, user: IUserInfo | null) {
+    SET_USER(state: IUserModuleState, user: IUserInfo | null) {
       state.user = user;
     },
 
-    SET_LOGGED_IN(state: IUserStoreState, isLoggedIn: boolean) {
+    SET_LOGGED_IN(state: IUserModuleState, isLoggedIn: boolean) {
       state.isLoggedIn = isLoggedIn;
     },
 
-    SET_USER_PROFILE_UPDATED(state: IUserStoreState, user: IUpdateUserRequest) {
+    SET_USER_PROFILE_UPDATED(state: IUserModuleState, user: IUpdateUserRequest) {
       if (state.user) {
         state.user.first_name = user.first_name;
         state.user.last_name = user.last_name;
@@ -337,4 +337,4 @@ const UserStore = {
   modules: {},
 };
 
-export default UserStore;
+export default UserModule;

@@ -6,13 +6,7 @@
     <p>שלום {{ $first_name }},</p>
     <p>תודה שפניתם אלינו. הודעתך התקבלה בהצלחה ותטופל בהקדם.</p>
 
-    <div class="info-box">
-        <h3>פרטי הפנייה:</h3>
-        <p><strong>נושא הפנייה:</strong> {{ $subject }}</p>
-        <p><strong>תאריך קבלה:</strong> {{ now()->format('d/m/Y H:i') }}</p>
-    </div>
-
-    <div class="success">
+    <div class="info">
         <h3>מה הלאה?</h3>
         <ul>
             <li>צוות התמיכה שלנו יבחן את פנייתכם</li>

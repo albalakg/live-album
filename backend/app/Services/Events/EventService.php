@@ -16,7 +16,7 @@ use App\Services\Enums\MessagesEnum;
 use App\Services\Helpers\LogService;
 use Illuminate\Support\Facades\Http;
 use App\Services\Helpers\FileService;
-use App\Services\Orders\OrderService;
+use App\Services\Orders\StoreService;
 use App\Services\Helpers\TokenService;
 use App\Http\Requests\UploadFileRequest;
 use App\Services\Enums\EventAssetTypeEnum;
@@ -35,7 +35,7 @@ class EventService
 {
     public function __construct(
         private ?UserService $user_service = null,
-        private ?OrderService $order_service = null
+        private ?StoreService $order_service = null
     ) {}
 
     /**

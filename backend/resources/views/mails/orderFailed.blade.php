@@ -12,7 +12,7 @@
         @if($order->subscription)
             <p><strong>חבילה:</strong> {{ $order->subscription->name }}</p>
         @endif
-        <p><strong>סיבת הכישלון:</strong> {{ $failure_reason }}</p>
+        <p><strong>הסבר:</strong> {{ $failure_reason }}</p>
     </div>
 
     <p>אנא נסה/י שוב או צור/י קשר עם התמיכה אם הבעיה נמשכת.</p>

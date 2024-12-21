@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\UserEmailConfirmation;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
-use App\Services\Orders\OrderService;
+use App\Services\Orders\StoreService;
 use App\Services\Helpers\TokenService;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -27,7 +27,7 @@ class UserService
     public function __construct(
         private ?MailService $mail_service = null,
         private ?EventService $event_service = null,
-        private ?OrderService $order_service = null
+        private ?StoreService $order_service = null
     ) {}
 
     /**
@@ -140,7 +140,10 @@ class UserService
 
         $forgot_password_request->user_name = $user->first_name;
         LogService::init()->info(LogsEnum::FORGOT_PASSWORD_REQUEST, ['user_id' => $user->id]);
-        $this->mail_service->delay()->send($email, ForgotPasswordMail::class, $forgot_password_request);
+        $this->mail_service->delay()->send($email, MailEnum::FORGOT_PASSWORD, [
+            'first_name' => $user->first_name,
+            'reset_url' => config('app.client_url') . "/reset-password?token={$forgot_password_request->token}",
+        ]);
     }
 
     /**
@@ -350,7 +353,7 @@ class UserService
     {
         return UserResetPassword::where('email', $email)
             ->where('created_at', '>', Carbon::now()->subMinutes(1440))
-            ->count() < 3;
+            ->count() <= 3;
     }
 
     /**

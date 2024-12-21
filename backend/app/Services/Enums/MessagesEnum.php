@@ -11,11 +11,13 @@ class MessagesEnum extends BaseEnum
     const PASSWORD_INCORRECT = 'Password is incorrect';
     const USER_LOGIN_UNAUTHORIZED = 'Unauthorized to login';
     const MAINTENANCE_VALIDATION = 'Sorry, Unauthorized to login during maintenance mode';
+    const ORDER_ALREADY_IN_PROGRESS = 'Order already in progress';
     const USER_NOT_FOUND = 'User not found';
     const USER_NOT_ACTIVE = 'User not active';
     const SUPPORT_TICKET_NOT_FOUND = 'Support Ticket not active';
     const USER_NEW_PASSWORD_MATCH_OLD = 'Can\'t update new password that matches the old password';
     const ORDER_NOT_FOUND = 'Order not found';
+    const SUBSCRIPTION_NOT_FOUND = 'Subscription not found';
     const EVENT_NOT_FOUND = 'Event not found';
     const EVENTS_ASSETS_NOT_FOUND = 'Event Assets not found';
     const EVENT_NOT_AUTHORIZED = 'Not authorized to modify this event';
@@ -23,6 +25,8 @@ class MessagesEnum extends BaseEnum
     const RESET_PASSWORD_REQUEST_NOT_FOUND = 'Reset Password request not found';
     const DOWNLOAD_EVENT_ASSET_START_FAILED = 'Failed to prepare event assets for download';
     const FAILED_TO_DELETE_EVENT_ASSETS_FOLDER = 'Failed to delete event\'s assets folder';
+    const ORDER_CALLBACK_PAYLOAD_INVALID = 'Order callback payload is invalid';
+    const ORDER_IN_INVALID_STATUS_WHILE_SETTING_TO_IN_PROGRESS = 'Order isn\'t in "in_progress" status while receiving the order confirmation';
 
     // Info
     const LOGIN_SUCCESS = 'Logged in successfully';

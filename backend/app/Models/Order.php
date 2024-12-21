@@ -11,6 +11,13 @@ class Order extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'status',
+        'token',
+        'supplier_id'
+    ];
+
+
     protected function createdAt(): Attribute
     {
         return Attribute::get(fn($value) => \Carbon\Carbon::parse($value)->format('d/m/Y'));

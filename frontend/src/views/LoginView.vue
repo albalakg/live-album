@@ -122,11 +122,11 @@ export default defineComponent({
         return;
       }
 
-      // if(user.subscription_name) {
-      //   this.$router.push('/event');
-      // } else {
-      //   this.$router.push('/');
-      // }
+      if(user.subscription_name) {
+        this.$router.push('/event');
+      } else {
+        this.$router.push('/');
+      }
     },
 
     validateForm() {

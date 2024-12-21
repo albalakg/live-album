@@ -15,7 +15,6 @@ class ContactConfirmationMail extends Mailable implements ShouldQueue
 
     protected array $mail_data;
     protected string $first_name;
-    protected string $subject;
 
     /**
      * Create a new message instance.
@@ -24,7 +23,6 @@ class ContactConfirmationMail extends Mailable implements ShouldQueue
     {
         $this->mail_data = $mail_data;
         $this->first_name = $mail_data['first_name'];
-        $this->subject = $mail_data['subject'];
     }
 
     /**
@@ -46,7 +44,6 @@ class ContactConfirmationMail extends Mailable implements ShouldQueue
             view: 'mails.contactConfirmation',
             with: [
                 'first_name' => $this->first_name,
-                'subject' => $this->subject,
             ]
         );
     }

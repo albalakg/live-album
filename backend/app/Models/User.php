@@ -102,4 +102,12 @@ class User extends Authenticatable
     {
         return RoleEnum::getNameById($this->role_id);
     }
+    
+    /**
+     * @return string
+    */
+    public function getFullName(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
 }

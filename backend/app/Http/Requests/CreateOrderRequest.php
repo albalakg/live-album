@@ -14,7 +14,7 @@ class CreateOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'subscription_id' => 'bail|required|integer|min:1|exists:subscriptions,id',
+           'subscription' => 'bail|required|in:בסיסי,פרימיום',
         ];
     }
 }

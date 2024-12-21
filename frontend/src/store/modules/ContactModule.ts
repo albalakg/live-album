@@ -2,7 +2,7 @@ import axios from "axios";
 import { notify } from "@kyvg/vue3-notification";
 import ErrorsHandler from "@/helpers/errorsHandler";
 
-const ContactStore = {
+const ContactModule = {
   namespaced: true,
 
   state: {},
@@ -45,4 +45,4 @@ const ContactStore = {
   modules: {},
 };
 
-export default ContactStore;
+export default ContactModule;

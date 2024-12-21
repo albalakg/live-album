@@ -6,6 +6,7 @@ use App\Services\Enums\StatusEnum;
 use App\Services\Users\UserService;
 use App\Services\Helpers\MailService;
 use App\Models\SupportTicket;
+use App\Services\Enums\MailEnum;
 use App\Services\Enums\MessagesEnum;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -62,6 +63,10 @@ class SupportService
         $support_ticket->text = $data['text'];
         $support_ticket->status = StatusEnum::PENDING;
         $support_ticket->save();
+
+        $this->mail_service->delay()->send($support_ticket->email, MailEnum::CONTACT_CONFIRMATION, [
+            'first_name' => $support_ticket->full_name,
+        ]);
         return $support_ticket;
     }
     

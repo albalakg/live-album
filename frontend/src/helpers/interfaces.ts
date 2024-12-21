@@ -7,7 +7,7 @@ import { EventFileType, SubscriptionType, EventAssetsManagementModesType } from 
 //   error_code?: number;
 // }
 
-export interface IEventStoreState {
+export interface IEventModuleState {
   event: IEvent;
   assetsManagement: IEventAssetsManagement
 }
@@ -17,7 +17,7 @@ export interface IEventAssetsManagement {
   assetsIds: number[];
 }
 
-export interface IUserStoreState {
+export interface IUserModuleState {
   user: IUserInfo | null;
   isLoggedIn: boolean;
 }
@@ -126,4 +126,8 @@ export interface ILoginRequest {
 
 export interface IForgotPasswordRequest {
   email: string;
+}
+
+export interface IOrderResponse {
+  payment_page_link: string;
 }

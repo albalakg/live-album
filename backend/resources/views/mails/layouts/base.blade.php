@@ -126,6 +126,10 @@
             font-weight: 600;
         }
 
+        .success p{
+            margin-bottom: 0 !important;
+        }
+
         .note {
             font-size: 12px;
             color: #686666;
