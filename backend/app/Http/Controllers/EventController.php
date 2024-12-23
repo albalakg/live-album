@@ -8,6 +8,7 @@ use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Events\EventService;
+use App\Services\Helpers\MailService;
 use App\Services\Orders\StoreService;
 use App\Http\Requests\UploadFileRequest;
 use App\Http\Requests\CreateEventRequest;
@@ -79,7 +80,7 @@ class EventController extends Controller
     public function downloadAssets(int $event_id, DeleteEventAssetsRequest $request)
     {
         try {
-            $event_service = new EventService(new UserService());
+            $event_service = new EventService(new UserService(), mail_service: new MailService());
             $response = $event_service->downloadEventAssets($event_id, $request->validated(), Auth::user()->id);
             return $this->successResponse(MessagesEnum::DOWNLOAD_EVENT_ASSET_START_SUCCESS, $response);
         } catch (Exception $ex) {

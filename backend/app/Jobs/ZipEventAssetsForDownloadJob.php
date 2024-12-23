@@ -6,9 +6,11 @@ use Exception;
 use ZipStream\ZipStream;
 use App\Models\EventAsset;
 use Illuminate\Bus\Queueable;
+use App\Services\Enums\MailEnum;
 use App\Models\EventAssetDownload;
 use App\Services\Enums\StatusEnum;
 use App\Services\Helpers\FileService;
+use App\Services\Helpers\MailService;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,14 +20,15 @@ class ZipEventAssetsForDownloadJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $event_asset_download;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(EventAssetDownload $event_asset_download)
+    public function __construct(
+        protected EventAssetDownload $event_asset_download,
+        protected ?MailService $mail_service = null,
+    )
     {
-        $this->event_asset_download = $event_asset_download;
     }
 
     /**
@@ -71,6 +74,14 @@ class ZipEventAssetsForDownloadJob implements ShouldQueue
                 'status' => StatusEnum::ACTIVE,
                 'path' => $s3_zip_path
             ]);
+
+            $data = [
+                'event' => $this->event_asset_download->event,
+                'first_name' => $this->event_asset_download->event->user->first_name ?? '',
+                'download_url' => config('app.CLIENT_URL') . "/events/assets",
+            ];
+            $this->mail_service->send($this->event_asset_download->event->user->email, MailEnum::ASSETS_READY_FOR_DOWNLOAD, $data);
+            
         } catch (\Exception $e) {
             $this->event_asset_download->update(['status' => StatusEnum::INACTIVE]);
             if (isset($stream) && is_resource($stream)) {

@@ -67,7 +67,7 @@ class EventsWarnings extends Command
                     'deactivation_date' => Carbon::now()->addDays(3),
                     'days_remaining' => 3,
                 ];
-                $mail_service->send('gal.blacky@gmail.com', MailEnum::EVENT_WARNING_BEFORE_DEACTIVATION, $data);
+                $mail_service->send($event->email, MailEnum::EVENT_WARNING_BEFORE_DEACTIVATION, $data);
                 LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
             }
         }

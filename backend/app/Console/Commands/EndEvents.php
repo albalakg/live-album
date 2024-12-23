@@ -36,8 +36,10 @@ class EndEvents extends Command
         $mail_service = new MailService();
         $event_service = new EventService();
 
-        $events = Event::where('finished_at', '<=', Carbon::now()->endOfDay())
+        $events = Event::join('users', 'users.id', 'events.user_id')
+            ->where('finished_at', '<=', Carbon::now()->endOfDay())
             ->where('status', StatusEnum::IN_PROGRESS)
+            ->select('events.id', 'events.name', 'events.finished_at', 'users.first_name', 'users.email', 'events.status')
             ->withCount('assets')
             ->get();
 
@@ -48,7 +50,7 @@ class EndEvents extends Command
                 'first_name' => $event->first_name ?? '',
                 'event_url' => config('app.CLIENT_URL') . '/events',
             ];
-            $mail_service->send('gal.blacky@gmail.com', MailEnum::EVENT_FINISHED, $data);
+            $mail_service->send($event->email, MailEnum::EVENT_FINISHED, $data);
             LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
         }
     }

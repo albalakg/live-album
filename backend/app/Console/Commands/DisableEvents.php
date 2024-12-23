@@ -39,8 +39,10 @@ class DisableEvents extends Command
         $event_service = new EventService();
         $mail_service = new MailService();
 
-        $events = Event::where('finished_at', '<=', Carbon::now()->subDays(14)->endOfDay())
+        $events = Event::join('users', 'users.id', 'events.user_id')
+            ->where('finished_at', '<=', Carbon::now()->subDays(14)->endOfDay())
             ->where('status', StatusEnum::ACTIVE)
+            ->select('events.id', 'events.name', 'events.finished_at', 'users.first_name', 'users.email', 'events.status')
             ->get();
 
         foreach ($events as $event) {
@@ -64,7 +66,7 @@ class DisableEvents extends Command
                     'event' => $event,
                     'first_name' => $event->first_name ?? '',
                 ];
-                $mail_service->send('gal.blacky@gmail.com', MailEnum::EVENT_DISABLED, $data);
+                $mail_service->send($event->email, MailEnum::EVENT_DISABLED, $data);
                 LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
             }
         }

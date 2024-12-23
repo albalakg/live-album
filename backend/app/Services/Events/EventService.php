@@ -16,6 +16,7 @@ use App\Services\Enums\MessagesEnum;
 use App\Services\Helpers\LogService;
 use Illuminate\Support\Facades\Http;
 use App\Services\Helpers\FileService;
+use App\Services\Helpers\MailService;
 use App\Services\Orders\StoreService;
 use App\Services\Helpers\TokenService;
 use App\Http\Requests\UploadFileRequest;
@@ -35,7 +36,8 @@ class EventService
 {
     public function __construct(
         private ?UserService $user_service = null,
-        private ?StoreService $order_service = null
+        private ?StoreService $order_service = null,
+        private ?MailService $mail_service = null,
     ) {}
 
     /**
@@ -180,7 +182,12 @@ class EventService
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
-        $download_job = new ZipEventAssetsForDownload($event, $data['assets'], $user_id);
+        $download_job = new ZipEventAssetsForDownload(
+            $event, 
+            $data['assets'], 
+            $user_id,
+            $this->mail_service
+        );
         if ($download_job->canStartNewProcess($event)) {
             return $download_job->zip()->only(['id', 'event_id', 'status', 'path']) ?? null;
         }

@@ -2,13 +2,14 @@
 
 namespace App\Services\Events;
 
-use App\Jobs\ZipEventAssetsForDownloadJob;
+use Exception;
 use App\Models\Event;
 use App\Models\EventAsset;
 use App\Models\EventAssetDownload;
-use App\Services\Enums\MessagesEnum;
 use App\Services\Enums\StatusEnum;
-use Exception;
+use App\Services\Enums\MessagesEnum;
+use App\Services\Helpers\MailService;
+use App\Jobs\ZipEventAssetsForDownloadJob;
 
 class ZipEventAssetsForDownload
 {
@@ -16,6 +17,7 @@ class ZipEventAssetsForDownload
         private Event $event,
         private array $asset_ids,
         private int $created_by,
+        protected ?MailService $mail_service = null,
     )
     {}
 
@@ -56,7 +58,7 @@ class ZipEventAssetsForDownload
             ]);
 
             // Dispatch job
-            ZipEventAssetsForDownloadJob::dispatch($download);
+            ZipEventAssetsForDownloadJob::dispatch($download, $this->mail_service);
 
             return $download;
         } catch (\Exception $e) {
