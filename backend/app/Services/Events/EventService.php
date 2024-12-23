@@ -300,18 +300,20 @@ class EventService
 
     /**
      * @param int $event_id
-     * @param int $user_id
+     * @param ?int $user_id
      * @return bool
      */
-    public function disable(int $event_id, int $user_id): bool
+    public function disable(int $event_id, ?int $user_id = null): bool
     {
         $event = Event::find($event_id);
         if (!$event) {
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
-            throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
+        if($user_id) {
+            if (!$this->isAuthorizedToAccessEvent($event, $user_id)) {
+                throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
+            }
         }
 
         $this->deleteEventsAssetsByEvent($event_id);

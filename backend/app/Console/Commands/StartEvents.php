@@ -6,8 +6,11 @@ use Carbon\Carbon;
 use App\Models\Event;
 use Illuminate\Console\Command;
 use App\Services\Enums\LogsEnum;
+use App\Services\Enums\MailEnum;
 use App\Services\Enums\StatusEnum;
 use App\Services\Helpers\LogService;
+use App\Services\Events\EventService;
+use App\Services\Helpers\MailService;
 
 class StartEvents extends Command
 {
@@ -30,14 +33,22 @@ class StartEvents extends Command
      */
     public function handle()
     {
-        $events = Event::where('starts_at', '<=', Carbon::now())
+        $mail_service = new MailService();
+        $event_service = new EventService();
+
+        $events = Event::where('starts_at', '>=', Carbon::now())
             ->where('status', StatusEnum::READY)
             ->get();
 
         foreach ($events as $event) {
-            $event->status = StatusEnum::IN_PROGRESS;
-            $event->save();
-            LogService::init()->info(LogsEnum::EVENT_STARTED, ['id' => $event->id]);
+            $event_service->updateStatus(StatusEnum::IN_PROGRESS, $event->id);
+            $data = [
+                'event' => $event,
+                'first_name' => $event->first_name ?? '',
+                'event_url' => config('app.CLIENT_URL') . '/events',
+            ];
+            $mail_service->send('gal.blacky@gmail.com', MailEnum::EVENT_STARTED, $data);
+            LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
         }
     }
 }

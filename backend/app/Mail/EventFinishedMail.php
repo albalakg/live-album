@@ -18,7 +18,6 @@ class EventFinishedMail extends Mailable implements ShouldQueue
     protected Event $event;
     protected string $first_name;
     protected string $event_url;
-    protected int $participants_count;
 
     /**
      * Create a new message instance.
@@ -29,7 +28,6 @@ class EventFinishedMail extends Mailable implements ShouldQueue
         $this->event = $mail_data['event'];
         $this->first_name = $mail_data['first_name'];
         $this->event_url = $mail_data['event_url'];
-        $this->participants_count = $mail_data['participants_count'];
         
         // Load the assets count
         $this->event->loadCount('assets');
@@ -56,7 +54,6 @@ class EventFinishedMail extends Mailable implements ShouldQueue
                 'event' => $this->event,
                 'first_name' => $this->first_name,
                 'event_url' => $this->event_url,
-                'participants_count' => $this->participants_count,
             ]
         );
     }

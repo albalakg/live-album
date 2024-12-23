@@ -11,6 +11,7 @@ use App\Services\Helpers\LogService;
 use App\Services\Helpers\MailService;
 use App\Services\Enums\SubscriptionEnum;
 use App\Mail\WarningBeforeEventDisabledMail;
+use App\Services\Enums\MailEnum;
 
 class EventsWarnings extends Command
 {
@@ -44,24 +45,29 @@ class EventsWarnings extends Command
         foreach ($events as $event) {
             $shouldWarn = false;
             $finishedAt = Carbon::parse($event->finished_at);
-
-            if ($event->subscription_id === SubscriptionEnum::NORMAL_ID && 
-                $finishedAt->diffInDays(Carbon::now()) === 11) {
+            $days_diff = $finishedAt->diffInDays(Carbon::now()->endOfDay());
+            if (
+                $event->subscription_id === SubscriptionEnum::NORMAL_ID &&
+                $days_diff === 11
+            ) {
                 $shouldWarn = true;
             }
-
-            if ($event->subscription_id === SubscriptionEnum::PREMIUM_ID && 
-                $finishedAt->diffInDays(Carbon::now()) === 27) {
+            else if (
+                $event->subscription_id === SubscriptionEnum::PREMIUM_ID &&
+                $days_diff === 27
+            ) {
                 $shouldWarn = true;
             }
 
             if ($shouldWarn) {
                 $data = [
-                    'event_name' => $event->name,
-                    'first_name' => $event->first_name,
-                    'download_link' => config('app.CLIENT_URL') . "/events/{$event->id}/assets"
+                    'event' => $event,
+                    'first_name' => $event->first_name ?? '',
+                    'download_url' => config('app.CLIENT_URL') . "/events/assets",
+                    'deactivation_date' => Carbon::now()->addDays(3),
+                    'days_remaining' => 3,
                 ];
-                $mail_service->send($event->email, WarningBeforeEventDisabledMail::class, $data);
+                $mail_service->send('gal.blacky@gmail.com', MailEnum::EVENT_WARNING_BEFORE_DEACTIVATION, $data);
                 LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
             }
         }

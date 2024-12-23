@@ -20,13 +20,8 @@
         </ul>
     </div>
 
-    <div class="success">
-        <p>כדי למנוע את השבתת האירוע, יש לכם אפשרות לשדרג את החבילה ובכך להאריך את זמן שמירת הקבצים:</p>
-        <a href="{{ $upgrade_url }}" class="button">שדרוג חבילה</a>
-    </div>
-
     <div class="button-container">
-        <p>אם זאת, אנו ממליצים להיכנס ולהוריד את הקבצים ברגע זה.</p>
+        <p>אנו ממליצים להיכנס ולהוריד את הקבצים ברגע זה.</p>
         <a href="{{ $download_url }}" class="button secondary">הורדת קבצים</a>
     </div>
 

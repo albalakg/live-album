@@ -18,7 +18,6 @@ class EventWarningBeforeDeactivationMail extends Mailable implements ShouldQueue
     protected array $mail_data;
     protected Event $event;
     protected string $first_name;
-    protected string $upgrade_url;
     protected string $download_url;
     protected Carbon $deactivation_date;
     protected int $days_remaining;
@@ -31,9 +30,8 @@ class EventWarningBeforeDeactivationMail extends Mailable implements ShouldQueue
         $this->mail_data = $mail_data;
         $this->event = $mail_data['event'];
         $this->first_name = $mail_data['first_name'];
-        $this->upgrade_url = $mail_data['upgrade_url'];
         $this->download_url = $mail_data['download_url'];
-        $this->deactivation_date = $this->event->deactivation_date;
+        $this->deactivation_date = $mail_data['deactivation_date'];
         $this->days_remaining = now()->diffInDays($this->deactivation_date, false);
     }
 
@@ -59,7 +57,6 @@ class EventWarningBeforeDeactivationMail extends Mailable implements ShouldQueue
                 'first_name' => $this->first_name,
                 'deactivation_date' => $this->deactivation_date,
                 'days_remaining' => $this->days_remaining,
-                'upgrade_url' => $this->upgrade_url,
                 'download_url' => $this->download_url,
             ]
         );

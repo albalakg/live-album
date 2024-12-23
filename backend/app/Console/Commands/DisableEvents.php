@@ -5,13 +5,15 @@ namespace App\Console\Commands;
 use Carbon\Carbon;
 use App\Models\Event;
 use App\Mail\EventDisabledMail;
-use App\Services\Enums\LogsEnum;
 use Illuminate\Console\Command;
+use App\Services\Enums\LogsEnum;
+use App\Services\Enums\MailEnum;
 use App\Services\Enums\StatusEnum;
 use App\Services\Users\UserService;
 use App\Services\Helpers\LogService;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
+use App\Services\Enums\SubscriptionEnum;
 
 class DisableEvents extends Command
 {
@@ -36,21 +38,35 @@ class DisableEvents extends Command
     {
         $event_service = new EventService();
         $mail_service = new MailService();
-        $user_service = new UserService();
-        $admin_user = $user_service->getAdminUser();
 
-        $events = Event::where('finished_at', '<=', Carbon::now()->subDays(30))
+        $events = Event::where('finished_at', '<=', Carbon::now()->subDays(14)->endOfDay())
             ->where('status', StatusEnum::ACTIVE)
             ->get();
 
         foreach ($events as $event) {
-            $event_service->disable($event->id, $admin_user->id);
-            $data = [
-                'first_name' => $event->first_name,
-                'event_name' => $event->name,
-            ];
-            $mail_service->send($event->email, EventDisabledMail::class, $data);
-            LogService::init()->info(LogsEnum::EVENT_SET_INACTIVE, ['id' => $event->id]);
+            $event_service->disable($event->id);
+            
+            $shouldWarn = false;
+            $finishedAt = Carbon::parse($event->finished_at);
+            $days_diff = $finishedAt->diffInDays(Carbon::now()->endOfDay());
+            if ($event->subscription_id === SubscriptionEnum::NORMAL_ID) {
+                $shouldWarn = true;
+            }
+            else if (
+                $event->subscription_id === SubscriptionEnum::PREMIUM_ID &&
+                $days_diff === 27
+            ) {
+                $shouldWarn = true;
+            }
+
+            if ($shouldWarn) {
+                $data = [
+                    'event' => $event,
+                    'first_name' => $event->first_name ?? '',
+                ];
+                $mail_service->send('gal.blacky@gmail.com', MailEnum::EVENT_DISABLED, $data);
+                LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
+            }
         }
     }
 }

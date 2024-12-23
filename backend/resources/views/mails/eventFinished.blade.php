@@ -8,8 +8,7 @@
         <h3>סיכום האירוע:</h3>
         <p><strong>שם האירוע:</strong> {{ $event->name }}</p>
         <p><strong>תאריך:</strong> {{ $event->date->format('d/m/Y') }}</p>
-        <p><strong>מספר תמונות שהועלו:</strong> {{ $event->assets_count }}</p>
-        <p><strong>מספר משתתפים:</strong> {{ $participants_count }}</p>
+        <p><strong>מספר קבצים שהועלו:</strong> {{ $event->assets_count }}</p>
     </div>
 
     <p>

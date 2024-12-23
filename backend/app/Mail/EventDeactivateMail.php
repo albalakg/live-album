@@ -10,14 +10,13 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class EventDisabledMail extends Mailable implements ShouldQueue
+class EventDeactivateMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     protected array $mail_data;
     protected Event $event;
     protected string $first_name;
-    protected string $upgrade_url;
 
     /**
      * Create a new message instance.
@@ -27,7 +26,6 @@ class EventDisabledMail extends Mailable implements ShouldQueue
         $this->mail_data = $mail_data;
         $this->event = $mail_data['event'];
         $this->first_name = $mail_data['first_name'];
-        $this->upgrade_url = $mail_data['upgrade_url'];
     }
 
     /**
@@ -50,7 +48,6 @@ class EventDisabledMail extends Mailable implements ShouldQueue
             with: [
                 'event' => $this->event,
                 'first_name' => $this->first_name,
-                'upgrade_url' => $this->upgrade_url,
             ]
         );
     }

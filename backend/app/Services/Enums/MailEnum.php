@@ -5,7 +5,7 @@ namespace App\Services\Enums;
 use App\Mail\ApplicationErrorMail;
 use App\Mail\AssetsReadyForDownloadMail;
 use App\Mail\ContactConfirmationMail;
-use App\Mail\EventDisabledMail;
+use App\Mail\EventDeactivateMail;
 use App\Mail\EventFinishedMail;
 use App\Mail\EventStartedMail;
 use App\Mail\EventWarningBeforeDeactivationMail;
@@ -27,7 +27,7 @@ class MailEnum extends BaseEnum
     const EVENT_STARTED = EventStartedMail::class;
     const EVENT_FINISHED = EventFinishedMail::class;
     const EVENT_WARNING_BEFORE_DEACTIVATION = EventWarningBeforeDeactivationMail::class;
-    const EVENT_DISABLED = EventDisabledMail::class;
+    const EVENT_DISABLED = EventDeactivateMail::class;
     const ASSETS_READY_FOR_DOWNLOAD = AssetsReadyForDownloadMail::class;
     const SUBSCRIPTION_UPGRADED = SubscriptionUpgradedMail::class;
     const CONTACT_CONFIRMATION = ContactConfirmationMail::class;

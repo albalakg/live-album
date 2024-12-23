@@ -181,14 +181,6 @@ class UserService
     }
 
     /**
-     * @return User
-     */
-    public function getAdminUser(): User
-    {
-        return User::where('role_id', RoleEnum::ADMIN_ID)->first();
-    }
-
-    /**
      * @param int $status
      * @param int $user_id
      * @return bool
