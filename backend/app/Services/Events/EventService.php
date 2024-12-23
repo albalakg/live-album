@@ -391,6 +391,7 @@ class EventService
     }
 
     /**
+     * Deletes the records from the DB and removes the entire folder of the event in S3
      * @param int $event_id
      * @return void
      */
@@ -409,6 +410,15 @@ class EventService
         }
 
         EventAsset::where('event_id', $event_id)->delete();
+    }
+
+    /**
+     * @param int $event_id
+     * @return void
+     */
+    private function deleteEventsDownloadProcesses(int $event_id): void
+    {
+        EventAssetDownload::where('event_id', $event_id)->delete();
     }
 
     /**

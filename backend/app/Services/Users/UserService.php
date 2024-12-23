@@ -37,10 +37,10 @@ class UserService
     public function getProfile(User $user): ?User
     {
         $user->event = $this->event_service->getEventByUser($user->id);
-        $user->order = $user->event ? 
-                        $this->order_service->find($user->event->order_id)
-                        ->only(['order_number', 'subscription', 'price', 'created_at'])
-                        : null;
+        $user->order = $user->event ?
+            $this->order_service->find($user->event->order_id)
+            ->only(['order_number', 'subscription', 'price', 'created_at'])
+            : null;
         return $user;
     }
 
@@ -51,7 +51,7 @@ class UserService
     public function logout(User $user)
     {
         $token = $user->token();
-        if($token) {
+        if ($token) {
             $token->revoke();
         }
     }
@@ -136,7 +136,7 @@ class UserService
             'status'      => StatusEnum::PENDING,
             'created_at'  => now()
         ]);
-        
+
 
         $forgot_password_request->user_name = $user->first_name;
         LogService::init()->info(LogsEnum::FORGOT_PASSWORD_REQUEST, ['user_id' => $user->id]);
@@ -168,7 +168,7 @@ class UserService
             throw new Exception(MessagesEnum::USER_NOT_FOUND);
         }
 
-        if(!$user->isActive()) {
+        if (!$user->isActive()) {
             throw new Exception(MessagesEnum::USER_NOT_ACTIVE);
         }
 
@@ -258,9 +258,9 @@ class UserService
 
     /**
      * @param int $user_id
-     * @return bool
+     * @return void
      */
-    public function delete(int $user_id): bool
+    public function delete(int $user_id)
     {
         $user = User::where('id', $user_id)
             ->with('events')
@@ -279,6 +279,11 @@ class UserService
             }
         }
 
+        $mail_data = [
+            'first_name' => $user->first_name,
+        ];
+        $this->mail_service->send($user->email, MailEnum::USER_DELETED, $mail_data);
+
         $user->update([
             'first_name' => '',
             'last_name' => '',
@@ -286,7 +291,7 @@ class UserService
             'password' => '',
         ]);
 
-        return $user->delete();
+        $user->delete();
     }
 
     /**
@@ -358,7 +363,7 @@ class UserService
             ->where('status', StatusEnum::PENDING)
             ->update(['status' => StatusEnum::INACTIVE]);
     }
-    
+
     /**
      * @param User $user
      * @param string $password
