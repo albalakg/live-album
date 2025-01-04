@@ -22,6 +22,10 @@ export interface IUserModuleState {
   isLoggedIn: boolean;
 }
 
+export interface IAppModuleState {
+  menuState: boolean;
+}
+
 export interface IUserInfo {
   id: number;
   first_name: string;
@@ -82,6 +86,12 @@ export interface IDesktopBarItem {
   url: string;
   color: string;
   weight: string;
+}
+
+export interface IMobileBarItem {
+  url: string;
+  icon: string;
+  color: string;
 }
 
 // export interface IMediatorService {

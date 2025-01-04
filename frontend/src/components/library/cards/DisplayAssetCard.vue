@@ -1,5 +1,6 @@
 <template>
-    <div class="display-asset-card"
+    <div class="display-asset-card width--90-mobile"
+        :class="`${left || right || top || bottom ? 'position--absolute' : 'position--relative'}`"
         :style="`${left ? `left: ${left};` : ''} ${top ? `top: ${top};` : ''} ${right ? `right: ${right};` : ''} ${bottom ? `bottom: ${bottom};` : ''}`">
         <p v-if="title">
             {{ title }}
@@ -20,12 +21,10 @@ export default defineComponent({
     props: {
         width: {
             type: String,
-            default: 'medium'
         },
 
         height: {
             type: String,
-            default: 'medium'
         },
 
         title: {
@@ -64,7 +63,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .display-asset-card {
-    position: absolute;
+    z-index: 3;
 
     p {
         font-weight: 700;

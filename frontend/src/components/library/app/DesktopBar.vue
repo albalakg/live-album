@@ -32,10 +32,6 @@ export default defineComponent({
         DesktopBarLink,
     },
 
-    props: {
-
-    },
-
     data() {
         return {
             links: [] as IDesktopBarItem[]

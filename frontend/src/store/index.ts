@@ -1,17 +1,19 @@
 import { createStore } from 'vuex'
-import EventStore from './modules/EventModule'
-import UserStore from './modules/UserModule'
-import ContactStore from './modules/ContactModule'
-import OrderStore from './modules/StoreModule'
+import EventModule from './modules/EventModule'
+import UserModule from './modules/UserModule'
+import ContactModule from './modules/ContactModule'
+import StoreModuleZ from './modules/StoreModule'
+import AppModule from './modules/AppModule'
 
-// Create Vuex store
-const store = createStore({
+// Create Vuex module
+const module = createStore({
   modules: {
-    event: EventStore,
-    user: UserStore,
-    contact: ContactStore,
-    store: OrderStore,
+    event: EventModule,
+    user: UserModule,
+    contact: ContactModule,
+    module: StoreModuleZ,
+    app: AppModule,
   },
 })
 
-export default store
+export default module

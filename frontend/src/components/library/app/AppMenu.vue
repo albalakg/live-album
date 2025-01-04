@@ -1,22 +1,14 @@
 <template>
-    <div class="mobile-bar bg--light-green">
-        <div v-for="(link, index) in links" :key="index" class="mobile-bar-icon display--flex align--center justify--center" @click="iconAction(link)">
-            <MainIcon size="1.9em" :background="false" :icon="link.icon" color="#222" />
-        </div>
-    </div>
+    App Menu
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IMobileBarItem } from '@/helpers/interfaces'
-import MainIcon from '../general/MainIcon.vue';
 
 export default defineComponent({
-    name: 'MobileBar',
+    name: 'AppMenu',
 
-    components: {
-        MainIcon,
-    },
 
     data() {
         return {
@@ -35,6 +27,10 @@ export default defineComponent({
     },
 
     computed: {
+        isMenuOpen(): boolean {
+            return this.$store.getters['app/getMenuState'];
+        },
+
         user(): boolean {
             return this.$store.getters['user/getUser'];
         },
@@ -45,15 +41,6 @@ export default defineComponent({
     },
 
     methods: {
-        iconAction(link: IMobileBarItem) {
-            if(link.url.includes('menu')) {
-                this.$store.dispatch("app/toggleMenu");
-                return;
-            }
-
-            this.$router.push(link.url);            
-        },
-
         createLinks() {
             this.hasActiveEvent ? this.createSubscribedLinks() : this.createBaseLinks();
         },
@@ -61,13 +48,13 @@ export default defineComponent({
         createSubscribedLinks() {
             this.links = [
                 {
-                    url: '?menu',
+                    url: 'menu',
                     icon: 'menu',
                     color: 'dark',
                 },
                 {
                     url: '/contact-us',
-                    icon: 'contact_support',
+                    icon: 'contact-us',
                     color: 'dark',
                 },
                 {
@@ -82,7 +69,7 @@ export default defineComponent({
                 },
                 {
                     url: '/profile',
-                    icon: 'account_circle',
+                    icon: 'profile',
                     color: 'dark',
                 },
                
@@ -97,18 +84,18 @@ export default defineComponent({
                     color: 'dark',
                 },
                 {
-                    url: '/order',
-                    icon: 'storefront',
-                    color: 'dark',
-                },
-                {
-                    url: '/',
-                    icon: 'house',
-                    color: 'dark',
-                },
-                {
                     url: '/contact-us',
-                    icon: 'contact_support',
+                    icon: 'contact-us',
+                    color: 'dark',
+                },
+                {
+                    url: '/home',
+                    icon: 'home',
+                    color: 'dark',
+                },
+                {
+                    url: '/order',
+                    icon: 'order',
                     color: 'dark',
                 },
             ];
@@ -116,7 +103,7 @@ export default defineComponent({
             if (this.user) {
                 this.links.push({
                     url: '/profile',
-                    icon: 'account_circle',
+                    icon: 'profile',
                     color: 'dark',
                 })
             } else {
@@ -132,25 +119,5 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.mobile-bar {
-    height: 60px;
-    width: calc(100% - 20px);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 10000;
-    padding: 0 10px;
-    border-top: 2px solid var(--green);
 
-    .mobile-bar-icon {
-        width: 31px;
-        height: 31px;
-        text-align: center;
-        position: relative;
-        top: -3px;
-    }
-}
 </style>

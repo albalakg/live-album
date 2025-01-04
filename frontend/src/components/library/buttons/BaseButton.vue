@@ -79,6 +79,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .main-button {
     width: 100%;
+    z-index: 2;
+    position: relative;
 }
 
 .main-button-animation {

@@ -166,6 +166,10 @@
   width: 50%;
 }
 
+.width--two-thirds {
+  width: calc(100 / 3) * 2;
+}
+
 .width--page-size {
   width: 85%;
 }
@@ -386,4 +390,42 @@ a {
 ::-webkit-scrollbar-thumb
 {
 	background-color: var(--pink);
+}
+
+@media only screen and (max-width: 600px) { 
+  .hide--in-mobile {
+    display: none;
+  }
+
+  .width--page-size {
+    width: 96%;
+  }
+
+  .flex--wrap-mobile {
+    flex-wrap: wrap;
+  }
+
+  .text--center-mobile {
+    text-align: center;
+  }
+
+  .justify--center-mobile {
+    justify-content: center;
+  }
+
+  .width--full-mobile {
+    width: 100%;
+  }
+
+  .title--x-large {
+    font-size: 2.5em;
+  }
+
+  .width--90-mobile {
+    width: 90%;
+  }
+
+  .width--two-thirds-mobile {
+    width: calc(100% / 3 * 2);
+  }
 }

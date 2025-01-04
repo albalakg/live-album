@@ -4,3 +4,11 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+import { useBreakpoints } from '@/composables/useBreakpoints';
+
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $bp: ReturnType<typeof useBreakpoints>;
+  }
+}

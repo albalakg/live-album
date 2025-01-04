@@ -1,6 +1,6 @@
 <template>
     <div class="footer bg--pink width--full">
-        <div class="footer-content height--full width--page-size margin--auto display--flex justify--space-between">
+        <div class="footer-content height--full width--page-size margin--auto display--flex justify--space-between flex--wrap-mobile text--center-mobile">
             <div>
                 <h3 class="footer-logo text--white">
                     SnapShare
@@ -8,7 +8,7 @@
                 <h4>
                     האלבום שלך באירוע הקרוב
                 </h4>
-                <div class="social-media display--flex">
+                <div class="social-media display--flex justify--center-mobile">
                     <router-link to="/" target="_blank">
                         <img src="/assets/icons/facebook-icon.png" alt="facebook">
                     </router-link>
@@ -100,11 +100,11 @@ export default defineComponent({
 
     computed: {
         isLoggedIn(): boolean {
-            return true;
+            return this.$store.getters["user/isLoggedIn"];
         },
         
         hasActiveEvent(): boolean {
-            return true;
+            return this.$store.getters['event/hasActiveEvent'];
         }
     },
 
@@ -117,9 +117,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 .footer {
     position: relative;
-    height: 40vh;
+    height: fit-content;
+    min-height: 40vh;
     margin-top: 5%;
     padding-top: 5%;
+
+    @media only screen and (max-width: 600px) { 
+        padding-bottom: 75px;
+    }
 
     .footer-logo {
         font-size: 2.8em;
@@ -140,6 +145,10 @@ export default defineComponent({
         width: 40%;
         position: relative;
         z-index: 1;
+        
+        @media only screen and (max-width: 600px) { 
+            width: 100%;
+        }
          
         p {
             font-size: 1.2em;

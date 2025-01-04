@@ -3,7 +3,7 @@
 
     <!-- Header Section -->
     <section class="home-page-section header-section width--page-size margin--auto" id="header">
-      <h1 class="title--x-large">
+      <h1 class="title--x-large text--center-mobile">
         ברוכים הבאים ל
         <strong class="text--pink">SnapShare</strong>
       </h1>
@@ -15,8 +15,7 @@
         וכל מה שנשאר זה להנות מהחוויות והזכרונות
       </p>
       <br>
-      <br>
-      <div class="width--corner">
+      <div class="width--corner width--full-mobile">
         <router-link to="/order">
           <MainButton animation text="הזמן עכשיו את האלבום שלך" />
         </router-link>
@@ -51,20 +50,20 @@
 
     <!-- What You Get Section -->
     <section class="home-page-section what-you-get-section bg--pink" id="features">
-      <MainLine top="0" left="25%" color="white" width="x-large" />
-      <MainLine top="0" left="calc(25% + 45px)" color="white" width="small" />
-      <MainLine top="0" left="calc(25% + 56px)" color="white" width="medium" />
-      <MainLine top="0" left="calc(25% + 71px)" color="white" width="xxx-large" />
-      <MainLine top="0" left="calc(25% + 166px)" color="white" width="medium" />
-      <MainLine top="0" left="calc(25% + 181px)" color="white" width="small" />
-      <MainLine top="0" left="calc(25% + 192px)" color="white" width="x-large" />
+      <MainLine :opacity="'0.7'" top="0" left="25%" color="white" width="x-large" />
+      <MainLine :opacity="'0.7'" top="0" left="calc(25% + 45px)" color="white" width="small" />
+      <MainLine :opacity="'0.7'" top="0" left="calc(25% + 56px)" color="white" width="medium" />
+      <MainLine :opacity="'0.7'" top="0" left="calc(25% + 71px)" color="white" width="xxx-large" />
+      <MainLine :opacity="'0.7'" top="0" left="calc(25% + 166px)" color="white" width="medium" />
+      <MainLine :opacity="'0.7'" top="0" left="calc(25% + 181px)" color="white" width="small" />
+      <MainLine :opacity="'0.7'" top="0" left="calc(25% + 192px)" color="white" width="x-large" />
       <div class="home-page-content width--page-size margin--auto height--full">
-        <h2 class="text--white title--x-large">
+        <h2 class="text--dark title--x-large text--center-mobile">
           מה מקבלים אתם שואלים?
         </h2>
 
-        <div class="display--flex justify--space-between height--full width--page-size margin--auto">
-          <div class="what-you-get-card width--corner brs--medium shadow--small padding--large">
+        <div class="display--flex justify--space-between height--full width--page-size margin--auto flex--wrap-mobile">
+          <div class="what-you-get-card width--corner width--full-mobile brs--medium shadow--small padding--large">
             <h3 class="text--white title--large">
               אלבום דיגיטלי חי
               בזמן האירוע
@@ -82,7 +81,7 @@
               חדשים הם נכנסים ישירות לסבב הנוכחי.
             </p>
           </div>
-          <div class="what-you-get-card width--corner brs--medium shadow--small padding--large">
+          <div class="what-you-get-card width--corner width--full-mobile brs--medium shadow--small padding--large">
             <h3 class="text--white title--large">
               כל קבצי האלבום
               להורדה וצבירת זכרונות
@@ -96,7 +95,7 @@
               לא יהיה ניתן לשחזר לאחר שנמחקו.
             </p>
           </div>
-          <div class="what-you-get-card width--corner brs--medium shadow--small padding--large">
+          <div class="what-you-get-card width--corner width--full-mobile brs--medium shadow--small padding--large">
             <h3 class="text--white title--large">
               כרטיס הזמנה עם QR
               המוביל לעמוד ייחודי
@@ -120,33 +119,35 @@
       <MainCube left="25%" bottom="10%" width="large" height="large" />
       <MainCube left="55%" bottom="10%" width="xxxx-large" height="large" />
       <MainCube color="pink" left="75%" bottom="7%" width="large" height="xx-large" />
-      <div class="how-it-work-content text--center">
-        <h2 class="text--green title--x-large">
-          אז איך זה בעצם עובד?
-        </h2>
-        <p class="title--medium text--dark">
-          נרשמים, מזמינים ועורכים את האירוע שלכם.
-          <br>
-          תוך מספר דקות והאירוע שלכם מוכן.
-          <br>
-          ברגע שהאירוע מתחיל, האירוע מופעל אוטומטית, מה שמאפשר צפייה
-          <br>
-          באלבום והעלאת קבצים לאורחים. לאחר 24 שעות האירוע נחשב שהסתיים אך עדיין זמין לצפייה אישית ולהורדת הקבצים.
-          <br>
-          לאחר
-          מספר ימים בהתאם למסלול, האירוע נסגר ואיתו נמחקים הקבצים.
-        </p>
-        <div class="width--corner margin--auto">
-          <router-link to="/signup">
-            <MainButton animation color="pink" text="הצטרפו עכשיו" size="small" />
-          </router-link>
+      <div class="how-it-work-content text--center display--flex justify--center align--center">
+        <div>
+          <h2 class="text--green title--x-large">
+            אז איך זה בעצם עובד?
+          </h2>
+          <p class="title--medium text--dark">
+            נרשמים, מזמינים ועורכים את האירוע שלכם.
+            <br>
+            תוך מספר דקות והאירוע שלכם מוכן.
+            <br>
+            ברגע שהאירוע מתחיל, האירוע מופעל אוטומטית, מה שמאפשר צפייה
+            <br>
+            באלבום והעלאת קבצים לאורחים. לאחר 24 שעות האירוע נחשב שהסתיים אך עדיין זמין לצפייה אישית ולהורדת הקבצים.
+            <br>
+            לאחר
+            מספר ימים בהתאם למסלול, האירוע נסגר ואיתו נמחקים הקבצים.
+          </p>
+          <div class="width--corner width--two-thirds-mobile margin--auto">
+            <router-link to="/signup">
+              <MainButton animation color="pink" text="הצטרפו עכשיו" size="small" />
+            </router-link>
+          </div>
         </div>
       </div>
     </section>
 
 
     <!-- How It Looks Section -->
-    <section class="home-page-section how-it-looks-section" id="how-it-looks">
+    <section style="display: none" class="home-page-section how-it-looks-section" id="how-it-looks">
       <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
       <MainCube color="pink" left="10%" top="10%" width="large" height="x-large" />
       <MainCube left="8%" top="3%" width="large" height="large" />
@@ -167,14 +168,21 @@
       </div>
 
       <!-- <div class="height--full width--full"> -->
-      <DisplayAssetCard width="small" height="x-large" right="5%" title="עמוד העלאת קבצים" />
-      <DisplayAssetCard width="medium" height="large" bottom="10%" right="27%" title="ניהול האירוע" />
-      <DisplayAssetCard width="large" height="x-large" bottom="35%" right="60%" title="האלבום החי" />
+      <template v-if="$bp.isMediumAndUp">
+        <DisplayAssetCard width="small" height="x-large" right="5%" title="עמוד העלאת קבצים" />
+        <DisplayAssetCard width="medium" height="large" bottom="10%" right="27%" title="ניהול האירוע" />
+        <DisplayAssetCard width="large" height="x-large" bottom="35%" right="60%" title="האלבום החי" />
+      </template>
+      <template v-else>
+        <DisplayAssetCard width="x-large" height="x-large" title="עמוד העלאת קבצים" />
+        <DisplayAssetCard height="x-large" title="ניהול האירוע" />
+        <DisplayAssetCard height="x-large" title="האלבום החי" />
+      </template>
       <!-- </div> -->
     </section>
 
     <!-- Pricing Section -->
-    <section class="home-page-section pricing-section" id="pricing">
+    <section class="home-page-section pricing-section display--flex align--center" id="pricing">
       <MainCube left="5%" top="5%" width="large" height="large" />
       <MainCube left="8%" top="8%" width="medium" height="medium" />
       <MainCube color="pink" left="7%" top="12%" width="medium" height="x-large" />
@@ -184,9 +192,16 @@
       <MainCube left="12%" top="79%" width="large" height="xx-large" />
       <MainCube color="pink" left="6%" top="77%" width="xxx-large" height="medium" />
       <div class="pricing-section-content">
-        <MainLine top="13%" left="0" color="white" height="small" width="full" />
-        <MainLine top="15%" left="0" color="white" height="xx-large" width="full" />
-        <MainLine top="28%" left="0" color="white" height="small" width="full" />
+        <template v-if="$bp.isMediumAndUp">
+          <MainLine top="13%" left="0" color="white" height="small" width="full" />
+          <MainLine top="15%" left="0" color="white" height="xx-large" width="full" />
+          <MainLine top="28%" left="0" color="white" height="small" width="full" />
+        </template>
+        <template v-else>
+          <MainLine top="6%" left="0" color="white" height="small" width="full" />
+          <MainLine top="8%" left="0" color="white" height="xx-large" width="full" />
+          <MainLine top="17.5%" left="0" color="white" height="small" width="full" />
+        </template>
         <MainLine top="58%" left="0" color="white" height="medium" width="full" />
         <MainLine top="61%" left="0" color="white" height="large" width="full" />
         <MainLine top="66%" left="0" color="white" height="medium" width="full" />
@@ -265,7 +280,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .home-page-section {
-  height: calc(100vh - 99px);
+  min-height: calc(100vh - 99px);
   position: relative;
 
   h2 {
@@ -279,8 +294,10 @@ export default defineComponent({
     font-weight: 700;
     letter-spacing: 3px;
 
-    strong {
-      margin-inline-start: 20px;
+    @media only screen and (min-width: 600px) {
+      strong {
+        margin-inline-start: 20px;
+      }
     }
   }
 
@@ -295,6 +312,14 @@ export default defineComponent({
     left: 0;
     bottom: 25%;
     border-radius: 60px 120px 60px 120px;
+    z-index: 2;
+
+    @media only screen and (max-width: 600px) {
+      width: 95%;
+      bottom: 10px;
+      right: 0;
+      margin: auto;
+    }
   }
 
   .social-media {
@@ -325,7 +350,17 @@ export default defineComponent({
 
 .what-you-get-section {
   padding-top: 6%;
-  height: calc(94vh - 99px);
+  height: fit-content;
+  min-height: calc(94vh - 99px);
+  margin-top: 50px;
+
+  @media only screen and (max-width: 600px) {
+    padding: 10px 0;
+
+    .what-you-get-card {
+      margin: 10px 0;
+    }
+  }
 
   .home-page-content {
     z-index: 10;
@@ -353,10 +388,10 @@ export default defineComponent({
 
 .how-it-work-content {
   background-color: #79AE6044;
-  height: 70%;
-  width: 100%;
-  top: 15%;
+  height: 85vh;
+  width: calc(100% - 20px);
   position: relative;
+  padding: 0 10px;
 
   h2 {
     padding-top: 3%;
@@ -384,13 +419,13 @@ export default defineComponent({
 
 .pricing-section-content {
   width: 55%;
-  height: 70vh;
+  height: 75vh;
   background-color: #79AE6088;
   margin: auto;
-  top: 10%;
   position: relative;
   border-radius: 50px 350px;
   text-align: center;
+  z-index: 3;
 
   h2 {
     position: relative;
@@ -425,6 +460,26 @@ export default defineComponent({
         position: absolute;
         bottom: 20px;
         width: 80%;
+      }
+    }
+  }
+}
+
+
+@media only screen and (max-width: 600px) { 
+  .pricing-section-content {
+    border-radius: 50px;
+    min-height: fit-content;
+    padding-bottom: 15px;
+    width: 90%;
+
+    .pricing-cards {
+      flex-wrap: wrap;
+      margin-top: 30%;
+
+      .pricing-card {
+        width: 80%;
+        margin-top: 20px;
       }
     }
   }

@@ -90,6 +90,8 @@ export default defineComponent({
 .main-button {
     width: 100%;
     transition: .3s scale linear;
+    z-index: 2;
+    position: relative;
 }
 
 .main-button:focus {
