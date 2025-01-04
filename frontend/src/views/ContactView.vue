@@ -20,7 +20,7 @@
     <MainCube color="pink" right="32%" top="80%" width="xx-large" height="large" />
     <MainCube color="green" right="31%" top="84%" width="medium" height="xxx-large" />
 
-    <div class="contact-content width--corner bg--pink margin--auto brs--medium padding--medium shadow--small">
+    <div class="contact-content width--corner width--80-mobile bg--pink margin--auto brs--medium padding--medium shadow--small">
       <h2 class="text--center text--white title--large">צרו איתנו קשר</h2>
       <p class="text--center title--small">
         כל בקשה, הארה, תלונה או טיפ יתקבלו בברכה

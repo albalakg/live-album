@@ -421,6 +421,10 @@ a {
     font-size: 2.5em;
   }
 
+  .width--80-mobile {
+    width: 80%;
+  }
+
   .width--90-mobile {
     width: 90%;
   }
