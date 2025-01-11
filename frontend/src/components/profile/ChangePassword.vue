@@ -1,5 +1,5 @@
 <template>
-    <div class="change-password bg--white brs--medium padding--x-large">
+    <div class="change-password bg--white brs--medium padding--x-large padding--large-mobile">
         <div class="display--flex justify--space-between align--center">
             <div class="width--half">
                 <h3 class="title--medium">

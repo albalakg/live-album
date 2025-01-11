@@ -1,6 +1,6 @@
 <template>
     <div
-        class="general-info brs--medium padding--x-large bg--white display--flex direction--column justify--space-between">
+        class="general-info brs--medium padding--x-large padding--large-mobile bg--white display--flex direction--column justify--space-between">
         <div class="padding--x-small display--flex justify--space-between">
             <span class="text--dark title--small">סטטוס</span>
             <SubscriptionStatus :status="eventStatus" />
@@ -15,6 +15,7 @@
             <small>
                 <strong>שימו לב:</strong> שדרוג החבילה ניתן כאשר האירוע בסטטוס ממתין. עלות שדרוג החבילה הינו 50₪.
             </small>
+            <br>
             <div class="display--flex justify--end">
                 <div class="width--half">
                     <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג חבילה" @onClick="submit()" />

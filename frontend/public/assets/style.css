@@ -432,4 +432,16 @@ a {
   .width--two-thirds-mobile {
     width: calc(100% / 3 * 2);
   }
+
+  .padding--medium-mobile {
+    padding: 12px; 
+  }
+
+  .padding--small-mobile {
+    padding: 8px; 
+  }
+
+  .padding--large-mobile {
+    padding: 20px; 
+  }
 }

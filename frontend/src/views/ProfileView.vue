@@ -12,18 +12,21 @@
     <MainCube color="green" right="31%" top="84%" width="medium" height="xxx-large" />
 
     <div
-      class="profile-content bg--gray margin--auto brs--medium padding--medium shadow--small display--flex justify--space-between">
-      <div class="profile-right padding--large display--flex justify--space-between direction--column">
+      class="profile-content bg--gray margin--auto brs--medium padding--medium shadow--small display--flex justify--space-between flex--wrap">
+      <div class="profile-right padding--small-mobile padding--large display--flex justify--space-between direction--column">
         <div>
           <EditProfile :user="user" />
         </div>
         <br>
         <br>
-        <DeleteUser />
+        <DeleteUser v-if="!$bp.isMobile" />
       </div>
-      <div class="profile-left padding--large display--flex direction--column justify--space-between">
+      <div class="profile-left padding--small-mobile padding--large display--flex direction--column justify--space-between">
         <ProfileSubscriptionCard />
         <ChangePassword />
+      </div>
+      <div v-if="$bp.isMobile" class="padding--large-mobile">
+        <DeleteUser />
       </div>
     </div>
   </div>
@@ -75,8 +78,13 @@ export default defineComponent({
 <style lang="scss" scoped>
 .profile {
   height: 100vh;
+  min-height: fit-content;
   z-index: 10;
   position: relative;
+
+  @media only screen and (max-width: 600px) { 
+    margin: 30px 0;
+  }
 
   .profile-content {
     height: calc(94% - 100px);
@@ -86,15 +94,28 @@ export default defineComponent({
     top: 0%;
     min-height: fit-content;
 
+    @media only screen and (max-width: 600px) { 
+      width: 90%;
+      margin: auto;
+    }
+
     .profile-right {
       width: 35%;
       min-height: fit-content;
+
+      @media only screen and (max-width: 600px) { 
+        width: 100%;
+      }
     }
 
     .profile-left {
       width: 40%;
       height: 100%;
       min-height: fit-content;
+      
+      @media only screen and (max-width: 600px) { 
+        width: 100%;
+      }
     }
 
     .profile-form {

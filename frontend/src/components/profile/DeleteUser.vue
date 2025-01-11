@@ -12,7 +12,7 @@
             <div class="width--third">
                 <MainCheckbox @onClick="toggleCheck()" title="לחצו בשביל לאפשר מחיקה" />
             </div>
-            <div class="width--third">
+            <div class="width--third width--full-mobile">
                 <BaseButton :disabled="!canDelete" :loading="loading" textColor="white" color="pink" text="מחיקת משתמש" @onClick="submit()" />
             </div>
         </div>
