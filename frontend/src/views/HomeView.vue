@@ -233,7 +233,7 @@
               </router-link>
             </div>
           </div>
-          <div class="pricing-card bg--white height--full shadow--small brs--medium">
+          <div class="pricing-card premimum-card height--full shadow--small brs--medium">
             <h3 class="text--dark title--medium">
               מסלול פרימיום
             </h3>
@@ -282,6 +282,10 @@ export default defineComponent({
 .home-page-section {
   min-height: calc(100vh - 99px);
   position: relative;
+
+  @media only screen and (max-width: 600px) {
+    margin: 40px auto;
+  }
 
   h2 {
     font-weight: 700;
@@ -437,6 +441,10 @@ export default defineComponent({
     height: 60%;
     min-height: fit-content;
     width: 80%;
+
+    .premimum-card {
+      background: linear-gradient(white, white, #dbce8b);
+    }
 
     .pricing-card {
       width: calc(35% - 60px);

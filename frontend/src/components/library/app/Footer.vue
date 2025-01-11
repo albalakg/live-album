@@ -54,7 +54,7 @@
                         <p>שכחתי סיסמה</p>
                     </router-link>
                 </div>
-                <div>
+                <div v-if="isLoggedIn || hasActiveEvent">
                     <router-link v-if="isLoggedIn" to="/profile">
                         <p>פרופיל</p>
                     </router-link>
@@ -148,12 +148,17 @@ export default defineComponent({
         
         @media only screen and (max-width: 600px) { 
             width: 100%;
+            margin-top: 15px;
         }
          
         p {
             font-size: 1.2em;
             margin-bottom: 20px;
             font-weight: 500;
+            
+            @media only screen and (max-width: 600px) { 
+                font-size: .9em;
+            }
         }
     }
 

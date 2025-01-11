@@ -28,7 +28,7 @@
           אל תדאג, נעזור לך ליצור סיסמה חדש דרך המייל
         </p>
       </div>
-      <form @submit.prevent="submit()" class="center width--half margin--auto layer--one">
+      <form @submit.prevent="submit()" class="center width--half width--full-mobile margin--auto layer--one">
         <MainInput 
           v-model="form.email" 
           type="email" 
@@ -126,6 +126,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 .forgot-password {
   height: 100vh;
+
+  @media only screen and (max-width: 600px) {
+    height: fit-content;
+    padding: 15% 0;   
+  }
 }
 
 .forgot-password-content {
@@ -137,6 +142,10 @@ export default defineComponent({
   margin-top: 5%;
   padding: 2% 5%;
 
+  @media only screen and (max-width: 600px) {
+    width: 80%;   
+  }
+
   .top {
     p {
       letter-spacing: 2px;
@@ -144,6 +153,13 @@ export default defineComponent({
   }
 
   .center {
+    margin-top: 15px;
+
+    @media only screen and (max-width: 600px) {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
     p {
       margin-top: 15px;
     }

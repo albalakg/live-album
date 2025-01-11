@@ -1,5 +1,5 @@
 <template>
-    <div class="mobile-bar bg--light-green">
+    <div class="mobile-bar bg--pink">
         <div v-for="(link, index) in links" :key="index" class="mobile-bar-icon display--flex align--center justify--center" @click="iconAction(link)">
             <MainIcon size="1.9em" :background="false" :icon="link.icon" color="#222" />
         </div>
@@ -71,7 +71,7 @@ export default defineComponent({
                     color: 'dark',
                 },
                 {
-                    url: '/',
+                    url: '/event',
                     icon: 'event',
                     color: 'dark',
                 },
@@ -143,7 +143,7 @@ export default defineComponent({
     align-items: center;
     z-index: 10000;
     padding: 0 10px;
-    border-top: 2px solid var(--green);
+    border-top: 2px solid var(--lightPink);
 
     .mobile-bar-icon {
         width: 31px;

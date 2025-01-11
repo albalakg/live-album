@@ -21,7 +21,7 @@
     <MainLine color="light-green" left="820px" width="small" height="full" />
     <MainLine color="light-green" left="830px" width="xx-large" height="full" />
 
-    <div class="order-content height--full display--flex justify--space-around margin--auto">
+    <div class="order-content height--full display--flex flex--wrap justify--space-around margin--auto">
       <template v-if="hasPaymentLink">
         <iframe frameBorder="0" :src="orderResponse?.payment_page_link" title="עמוד תשלום"></iframe>
       </template>
@@ -140,7 +140,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .order {
-  height: 100vh;
+  height: fit-content;
+  min-height: 100vh;
+
+  @media only screen and (max-width: 600px) { 
+    margin-top: 30px;
+  }
 
   .line-height-full {
     height: 130vh;
@@ -157,6 +162,10 @@ export default defineComponent({
     width: 40%;
     height: calc(40% - 16px);
     min-height: fit-content;
+
+    @media only screen and (max-width: 600px) { 
+      width: 100%;
+    }
 
     .order-info-content {
       width: calc(97% - 30px);
@@ -184,8 +193,14 @@ export default defineComponent({
 
   .order-details {
     height: calc(40% - 40px);
-    min-height: fit-content;
+    min-height: 225px;
     width: 20%;
+    
+    @media only screen and (max-width: 600px) { 
+      width: 100%;
+      min-height: 250px;
+      margin-top: 20px;
+    }
 
     .separator {
       height: 2px;
@@ -193,6 +208,17 @@ export default defineComponent({
       margin: auto;
       margin-top: 10px;
       opacity: .7;
+    }
+  }
+}
+
+@media only screen and (max-width: 600px) { 
+  .order-content {
+    flex-wrap: wrap;
+    width: 90%;
+
+    > div {
+      width: 100%;
     }
   }
 }

@@ -1,5 +1,6 @@
 <template>
-    App Menu
+    <div></div>
+    <!-- App Menu -->
 </template>
 
 <script lang="ts">

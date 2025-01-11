@@ -11,8 +11,8 @@
     <MainCube left="22%" top="82%" width="large" height="large" />
     <MainCube right="0%" top="67%" width="small" height="large" />
 
-    <div class="login-content margin--auto shadow--small brs--x-large display--flex bg--white">
-      <form class="login-form display--flex direction--column justify--space-between" @submit.prevent="login()">
+    <div class="login-content margin--auto shadow--small brs--x-large display--flex flex--wrap bg--white">
+      <form class="login-form display--flex direction--column justify--space-between width--full-mobile" @submit.prevent="login()">
         <h3 class="text--dark title--x-large">
           התחברות
         </h3>
@@ -35,7 +35,7 @@
           <MainButton :loading="isLoading" text="כניסה למערכת" />
         </div>
       </form>
-      <div class="login-details width--half height--full bg--pink display--flex align--center justify--center">
+      <div class="login-details width--half height--full bg--pink display--flex align--center justify--center width--full-mobile">
         <div class="text--center">
           <h3 class="text--white title--x-large">
             SnapShare
@@ -157,7 +157,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .login {
-  height: 100vh;
+  height: 70vh;
+  min-height: 100vh;
 }
 
 .login-content {
@@ -168,15 +169,29 @@ export default defineComponent({
   height: 65%;
   margin-top: 5%;
 
+  @media only screen and (max-width: 600px) {
+    width: 90%;   
+  }
+
   .login-form {
     padding: 5% 8%;
     width: 34%;
     height: 80%;
     min-height: fit-content;
-  }
 
+    @media only screen and (max-width: 600px) {
+      height: 350px;
+      width: 90%;   
+    }
+  }
+  
   .login-details {
     border-radius: 40px 0 0 40px;
+    height: auto;
+
+    @media only screen and (max-width: 600px) {
+      height: 350px;
+    }
   }
 
   a {

@@ -28,7 +28,7 @@
           נאפס את הסיסמה ונעשה דאבל צ'אדק
         </p>
       </div>
-      <form class="center width--half margin--auto layer--one" @submit.prevent="submit()">
+      <form class="center width--half width--full-mobile margin--auto layer--one" @submit.prevent="submit()">
         <MainInput 
           v-model="form.password" 
           type="password" 
@@ -149,6 +149,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 .forgot-password {
   height: 100vh;
+
+  @media only screen and (max-width: 600px) {
+    height: fit-content;
+    padding: 15% 0;   
+  }
 }
 
 .forgot-password-content {
@@ -160,6 +165,10 @@ export default defineComponent({
   margin-top: 5%;
   padding: 2% 5%;
 
+  @media only screen and (max-width: 600px) {
+    width: 80%;   
+  }
+
   .top {
     p {
       letter-spacing: 2px;
@@ -168,6 +177,11 @@ export default defineComponent({
 
   .center {
     margin-top: 15px;
+
+    @media only screen and (max-width: 600px) {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
 
     p {
       margin-top: 15px;

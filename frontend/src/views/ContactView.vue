@@ -41,7 +41,7 @@
           <MainTextArea v-model="form.text" title="טקסט חופשי" />
         </div>
         <div class="contact-bottom">
-          <MainButton text="פנו אלינו עכשיו" />
+          <MainButton :loading="isLoading" text="פנו אלינו עכשיו" />
         </div>
       </form>
       <div class="bottom-background bg--white"></div>
