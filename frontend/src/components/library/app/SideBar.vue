@@ -36,40 +36,13 @@ export default defineComponent({
     },
 
     props: {
-
+        items: {
+            type: Array,
+            required: true
+        }
     },
 
     computed: {
-        items(): Array<any> {
-            const items = [
-                {
-                    text: 'פרטי האירוע',
-                    path: '/event',
-                    isActive: false,
-                },
-                {
-                    text: 'האלבום',
-                    path: '/event/gallery',
-                    isActive: false,
-                },
-                {
-                    text: 'כל הקבצים',
-                    path: '/event/assets',
-                    isActive: false,
-                },
-                {
-                    text: 'כרטיס QR',
-                    path: '/event/qr',
-                    isActive: false,
-                },
-            ];
-
-            return items.map(item => {
-                item.isActive = item.path === this.$route.path;
-                return item;
-            });
-        },
-
         eventImage(): string {
             return this.$store.getters['event/getEventImage'];
         },

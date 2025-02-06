@@ -78,7 +78,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .main-button {
-    width: 100%;
+    width: auto;
     z-index: 2;
     position: relative;
 }

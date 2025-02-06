@@ -129,6 +129,8 @@ export default defineComponent({
     .footer-logo {
         font-size: 2.8em;
         font-weight: 700;
+        z-index: 10;
+        position: relative;
     }
 
     h4 {

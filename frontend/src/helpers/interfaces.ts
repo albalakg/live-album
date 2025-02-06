@@ -94,6 +94,12 @@ export interface IMobileBarItem {
   color: string;
 }
 
+export interface IMobileScrollBarItem {
+  path: string;
+  text: string;
+  isActive: boolean;
+}
+
 // export interface IMediatorService {
 //   authenticate(client_id: number): Promise<boolean>;
 //   getScore(): Promise<boolean>;

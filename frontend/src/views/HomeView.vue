@@ -382,7 +382,8 @@ export default defineComponent({
       background-color: #F2A6A8CC;
       height: 50%;
       text-align: center;
-
+      min-height: 350px;
+   
       h3 {
         margin-bottom: 10%;
       }

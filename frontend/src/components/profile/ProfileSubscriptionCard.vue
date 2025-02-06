@@ -17,7 +17,7 @@
             </small>
             <br>
             <div class="display--flex justify--end">
-                <div class="width--half">
+                <div class="width--half width--full-mobile">
                     <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג חבילה" @onClick="submit()" />
                 </div>
             </div>

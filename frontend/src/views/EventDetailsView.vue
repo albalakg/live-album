@@ -1,15 +1,15 @@
 <template>
-  <div class="event-details display--flex justify--space-between height--full width--full">
+  <div class="event-details display--flex flex--wrap justify--space-between height--full width--full">
     <div class="event-right padding--medium display--flex direction--column justify--space-between">
       <EventDetailsForm />
-      <div class="display--flex justify--space-between align--center">
-        <div class="display--flex align--center">
+      <div class="display--flex flex--wrap justify--space-between align--center upload-page-wrapper padding--medium">
+        <div class="display--flex align--center width--full-mobile">
           <div class="icon-wrapper">
             <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
           </div>
           <small>{{ copyText }}</small>
         </div>
-        <div>
+        <div class="width--full-mobile upload-page-link">
           <router-link target="_blank" :to="`/event/uploads/${eventPath}`">
             <BaseButton text="צפייה בעמוד העלאות" />
           </router-link>
@@ -126,11 +126,28 @@ export default defineComponent({
   .event-right {
     width: 30%;
     min-height: 40%;
+      
+    @media only screen and (max-width: 600px) { 
+      width: 100%;
+  
+      .upload-page-wrapper {
+        margin-top: 20px;
+
+        .upload-page-link {
+          margin-top: 10px;
+        }
+      }
+    }
   }
 
   .event-left {
     width: 40%;
     min-height: 40%;
+
+    @media only screen and (max-width: 600px) { 
+      width: 100%;
+      margin-top: 30px;
+    }
 
     &>div {
       height: calc(50% - 40px);

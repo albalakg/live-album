@@ -19,7 +19,7 @@
             ניתן לעדכן את תאריך האירוע רק בסטטוס ממתין.
         </small>
         <div class="display--flex justify--end">
-            <div class="width--half">
+            <div class="width--half width--full-mobile">
                 <MainButton v-if="isReady" :loading="loading" color="pink" text="החזר להמתנה" @onClick="submit()" />
                 <MainButton v-else :disabled="!isPending" :loading="loading" text="האירוע מוכן" @onClick="submit()" />
             </div>

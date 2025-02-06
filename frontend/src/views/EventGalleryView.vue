@@ -1,12 +1,12 @@
 <template>
   <div class="event-gallery height--full">
     <div class="gallery-top display--flex justify--space-between align--center">
-      <div class="width--sixth">
+      <div class="width--sixth width--full-mobile">
         <router-link to="/event/gallery/full-screen">
           <MainButton text="צפה בגלרייה" class="gallery-button" />
         </router-link>
       </div>
-      <span class="title--small">סה"כ {{ totalAssets }} קבצים</span>
+      <span v-if="$bp.isMediumAndUp" class="title--small">סה"כ {{ totalAssets }} קבצים</span>
     </div>
     <div class="gallery-content brs--medium width--full bg--dark">
       <EventGallery rounded hideMenu />
@@ -45,7 +45,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.event-gallery {}
+.event-gallery {
+  height: 60vh;
+}
 
 .gallery-top {
   height: 50px;

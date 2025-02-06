@@ -157,8 +157,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .login {
-  height: 70vh;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: fit-content;
 }
 
 .login-content {
@@ -182,6 +182,7 @@ export default defineComponent({
     @media only screen and (max-width: 600px) {
       height: 350px;
       width: 90%;   
+      padding-bottom: 15%;
     }
   }
   
@@ -190,7 +191,7 @@ export default defineComponent({
     height: auto;
 
     @media only screen and (max-width: 600px) {
-      height: 350px;
+      height: 330px;
     }
   }
 

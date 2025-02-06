@@ -122,7 +122,7 @@ export default defineComponent({
             } else {
                 this.links.push({
                     url: '/login',
-                    icon: 'login',
+                    icon: 'account_circle',
                     color: 'pink',
                 })
             }

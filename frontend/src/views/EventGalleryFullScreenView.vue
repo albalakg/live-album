@@ -3,19 +3,17 @@
     <div class="gallery-header bg--white display--flex justify--space-between align--center">
       <div>
         <strong class="pointer" @click="toggleFullScreen()">
-          {{ screenText }}
+          <MainIcon :icon="screenIcon" />
         </strong>
       </div>
       <div>
-        <h1 class="title--large text--pink">
+        <h1 class="title--large text--pink text--center">
           {{ event.name }}
         </h1>
       </div>
       <div>
         <router-link to="/event/gallery">
-          <strong class="pointer">
-            יציאה
-          </strong>
+          <MainIcon icon="close" />
         </router-link>
       </div>
     </div>
@@ -29,12 +27,14 @@
 import { IEvent, IEventAsset } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
 import EventGallery from '@/components/event/EventGallery.vue';
+import MainIcon from '@/components/library/general/MainIcon.vue';
 
 export default defineComponent({
   name: 'GalleryView',
 
   components: {
     EventGallery,
+    MainIcon,
   },
 
   data() {
@@ -48,8 +48,8 @@ export default defineComponent({
       return this.$store.getters["event/getEvent"];
     },
 
-    screenText(): string {
-      return this.isFullScreen ? 'הורד מסך מלא' : 'מסך מלא';
+    screenIcon(): string {
+      return this.isFullScreen ? 'fullscreen_exit' : 'fullscreen';
     }
   },
 
