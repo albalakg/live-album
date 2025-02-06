@@ -1,6 +1,6 @@
 <template>
   <div class="event-assets height--full display--flex direction--column justify--space-between">
-    <div class="assets-top bg--white brs--medium padding--large display--flex justify--space-between">
+    <div class="assets-top bg--white brs--medium padding--large display--flex justify--space-between flex--wrap-mobile">
       <div class="details display--flex direction--column justify--space-between">
         <div>
           <h1 class="title--large">{{ totalAssets }} קבצים <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
@@ -31,7 +31,7 @@
               </div>
             </transition>
           </div>
-          <div class="width--half">
+          <div class="width--half download-button-wrapper">
             <a :href="downloadProcess.fullPath" :download="processFileName" v-if="isDownloadProcessFinished">
               <BaseButton :loading="loading" text="הורדת הקבצים" color="green" />
             </a>
@@ -55,7 +55,7 @@
         <div class="display--flex justify--space-between align--center">
           <MainCheckbox :disabled="loading" ref="downloadCheckbox" @onClick="toggleDownloadCheck()"
             title="לחצו בשביל לאפשר הורדה" :value="isDownloadMode" />
-          <div class="width--half">
+          <div class="width--half width--full-mobile action-button-wrapper">
             <BaseButton :loading="loading" :disabled="!canDownload" text="הכנת קבצים להורדה" color="green"
               @onClick="downloadFiles()" />
           </div>
@@ -64,7 +64,7 @@
         <div class="display--flex justify--space-between align--center">
           <MainCheckbox :disabled="loading" color="pink" ref="deleteCheckbox" @onClick="toggleDeleteCheck()"
             title="לחצו בשביל לאפשר מחיקה" :value="isDeleteMode" />
-          <div class="width--half">
+          <div class="width--half width--full-mobile action-button-wrapper">
             <BaseButton :loading="loading" :disabled="!canDelete" text="מחק קבצים" color="pink"
               @onClick="deleteFiles()" />
           </div>
@@ -291,17 +291,29 @@ export default defineComponent({
     margin-top: 20px;
     height: 72%;
     overflow-y: auto;
-
   }
 
   .choose-all-text {
     margin-inline-start: 10px;
   }
 
+  .download-button-wrapper {
+    margin: 10px 0;
+  }
+
   .actions {
     margin-inline-end: 10px;
     max-height: fit-content;
     width: 30%;
+
+    @media only screen and (max-width: 600px) { 
+      width: 100%;
+      margin-top: 10px;
+
+      .action-button-wrapper {
+        margin-right: 10px;
+      }
+    }
   }
 }
 

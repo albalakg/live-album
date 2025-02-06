@@ -1,7 +1,7 @@
 <template>
     <div class="gallery-asset-wrapper" :class="{
         'padding--small': true,
-        'padding--no-right': isFirstOfLine,
+        'padding--no-right': isFirstOfLine && !$bp.isMobile,
         assetIndex: true
     }">
         <div class="gallery-asset position--relative bg--dark height--full width--full brs--medium">
@@ -122,6 +122,12 @@ export default defineComponent({
     text-align: center;
     height: calc((70vw - 64px) / 5);
     width: calc(20% - 32px);
+
+    @media only screen and (max-width: 600px) { 
+        width: calc(50% - 12px);     
+        height: 150px;
+        padding: 6px;   
+    }
 
     .gallery-asset-chip {
         background-color: #222d;
