@@ -79,8 +79,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-main {
-  height: calc(100vh - 124px);
-  min-height: fit-content;
+  min-height: calc(100vh - 124px);
+  height: fit-content;
   width: calc(100% - 24px);
   position: relative;
   z-index: 11;

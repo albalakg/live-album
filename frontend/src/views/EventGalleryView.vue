@@ -55,6 +55,6 @@ export default defineComponent({
 }
 
 .gallery-content {
-  height: calc(100% - 70px);
+  height: 100%;
 }
 </style>

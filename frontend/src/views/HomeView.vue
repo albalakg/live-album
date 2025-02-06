@@ -319,8 +319,8 @@ export default defineComponent({
     z-index: 2;
 
     @media only screen and (max-width: 600px) {
-      width: 95%;
-      bottom: 10px;
+      width: 92%;
+      bottom: -55px;
       right: 0;
       margin: auto;
     }
