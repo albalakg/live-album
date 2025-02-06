@@ -1,6 +1,6 @@
 <template>
-  <div class="event-qr display--flex justify--space-between height--full brs--medium">
-    <div class="width--corner">
+  <div class="event-qr display--flex justify--space-between height--full brs--medium flex--wrap">
+    <div class="width--corner width--full-mobile">
       <h1 class="title--large">
         כרטיס QR
       </h1>
@@ -8,10 +8,10 @@
         הכנו בשבליכם כרטיס QR שתוכלו לשלוח ולהדפיס
       </h1>
       <br>
-      <MainButton text="הורדה של הכרטיס כתמונה" @onClick="downloadCard()"  />
+      <MainButton :text="downloadCardText" @onClick="downloadCard()"  />
       <br>
       <br>
-      <MainButton text="הורדה של ה QR בלבד" @onClick="downloadQRCode()"  />
+      <MainButton :text="downloadQRText" @onClick="downloadQRCode()"  />
       <qrcode-svg :value="QRLink" level="H" ref="qrSvg" class="display--none" />
     </div>
     <div
@@ -24,7 +24,7 @@
           ref="qrCode"
           :value="QRLink"
           :background="background"
-          :size="100"
+          :size="$bp.isMobile ? 85 : 100"
           level="H"
           render-as="svg"
         />
@@ -51,7 +51,8 @@ export default defineComponent({
 
   data() {
     return {
-      loading: false as boolean,
+      isDownloadingQR: false as boolean,
+      isDownloadingCard: false as boolean,
       background: '#dedfcf' as string,
     };
   },
@@ -64,6 +65,14 @@ export default defineComponent({
     QRLink(): string {
       return window.location.origin + `/event/uploads/${this.event.path}`;
     },
+
+    downloadCardText(): string {
+      return this.isDownloadingCard ? 'מוריד...' : 'הורדה של הכרטיס כתמונה';
+    },
+
+    downloadQRText(): string {
+      return this.isDownloadingQR ? 'מוריד...' : 'הורדה של ה QR בלבד';
+    },
   },
 
   methods: {
@@ -75,7 +84,8 @@ export default defineComponent({
           return;
         }
 
-        // Use html2canvas to generate the image
+        this.isDownloadingCard = true;
+        
         const canvas = await html2canvas(cardElement, { useCORS: true });
         const link = document.createElement('a');
         link.download = 'event-card.jpeg';
@@ -84,6 +94,7 @@ export default defineComponent({
       } catch (error) {
         console.error('Failed to download the event card as an image:', error);
       }
+      this.isDownloadingCard = false;
     },
 
     downloadQRCode() {
@@ -95,6 +106,7 @@ export default defineComponent({
           return;
         }
 
+        this.isDownloadingQR = true;
         const svgData = new XMLSerializer().serializeToString(svgElement);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -114,6 +126,8 @@ export default defineComponent({
       } catch (error) {
         console.error('Failed to download the QR code as an image:', error);
       }
+
+      this.isDownloadingQR = false;
     },
   },
 });
@@ -125,6 +139,12 @@ export default defineComponent({
   background-position: center;
   background-size: 100% 100%;
   position: relative;
+
+  @media only screen and (max-width: 600px) { 
+    width: 100%;
+    height: 500px;
+    margin-top: 15px;
+  }
 
   .qr-code {
     position: absolute;
