@@ -117,7 +117,6 @@ export default defineComponent({
 
         try {
           const response = await store.dispatch("event/uploadFile", target.files[0]);
-          console.log('response from vue', response);
           uploadSuccess.value = true;
           setTimeout(() => {
             uploadSuccess.value = false;
@@ -153,8 +152,6 @@ export default defineComponent({
 
   computed: {
     event(): IEvent {
-      console.log(this.$store.getters["event/getEvent"]);
-      
       return this.$store.getters["event/getEvent"];
     },
 

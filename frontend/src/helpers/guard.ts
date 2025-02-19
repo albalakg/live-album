@@ -13,6 +13,10 @@ class Guard {
   local(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
     process.env.VUE_APP_ENV === 'local' ? next() : next("/");
   }
+
+  hasEvent(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
+    !store.getters["event/hasActiveEvent"] ? next() : next("/");
+  }
 }
 
 export default new Guard();

@@ -2,16 +2,17 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Carbon\Carbon;
 use App\Models\Event;
 use Illuminate\Console\Command;
 use App\Services\Enums\LogsEnum;
+use App\Services\Enums\MailEnum;
 use App\Services\Enums\StatusEnum;
 use App\Services\Helpers\LogService;
 use App\Services\Helpers\MailService;
 use App\Services\Enums\SubscriptionEnum;
 use App\Mail\WarningBeforeEventDisabledMail;
-use App\Services\Enums\MailEnum;
 
 class EventsWarnings extends Command
 {
@@ -43,32 +44,32 @@ class EventsWarnings extends Command
             ->get();
 
         foreach ($events as $event) {
-            $shouldWarn = false;
-            $finishedAt = Carbon::parse($event->finished_at);
-            $days_diff = $finishedAt->diffInDays(Carbon::now()->endOfDay());
-            if (
-                $event->subscription_id === SubscriptionEnum::NORMAL_ID &&
-                $days_diff === 11
-            ) {
-                $shouldWarn = true;
-            }
-            else if (
-                $event->subscription_id === SubscriptionEnum::PREMIUM_ID &&
-                $days_diff === 27
-            ) {
-                $shouldWarn = true;
-            }
+            try {
+                $shouldWarn = false;
+                $finishedAt = Carbon::parse($event->finished_at);
+                $days_diff = $finishedAt->diffInDays(Carbon::now()->endOfDay());
+                if (
+                    ($event->subscription_id === SubscriptionEnum::NORMAL_ID &&
+                    $days_diff === 11) ||
+                    ($event->subscription_id === SubscriptionEnum::PREMIUM_ID &&
+                    $days_diff === 27)
+                ) {
+                    $shouldWarn = true;
+                } 
 
-            if ($shouldWarn) {
-                $data = [
-                    'event' => $event,
-                    'first_name' => $event->first_name ?? '',
-                    'download_url' => config('app.CLIENT_URL') . "/events/assets",
-                    'deactivation_date' => Carbon::now()->addDays(3),
-                    'days_remaining' => 3,
-                ];
-                $mail_service->send($event->email, MailEnum::EVENT_WARNING_BEFORE_DEACTIVATION, $data);
-                LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
+                if ($shouldWarn) {
+                    $data = [
+                        'event' => $event,
+                        'first_name' => $event->first_name ?? '',
+                        'download_url' => config('app.CLIENT_URL') . "/events/assets",
+                        'deactivation_date' => Carbon::now()->addDays(3),
+                        'days_remaining' => 3,
+                    ];
+                    $mail_service->send($event->email, MailEnum::EVENT_WARNING_BEFORE_DEACTIVATION, $data);
+                    LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
+                }
+            } catch(Exception $ex) {
+                // TODO: add log
             }
         }
     }

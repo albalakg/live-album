@@ -17,6 +17,7 @@
       <br>
       <div class="width--corner width--full-mobile">
         <router-link to="/order">
+          <!-- <MainButton animation text="הזמן עכשיו את האלבום שלך" /> -->
           <MainButton animation text="הזמן עכשיו את האלבום שלך" />
         </router-link>
       </div>

@@ -248,6 +248,7 @@ const UserModule = {
           context.dispatch("event/setEvent", res.data.data.event, {
             root: true,
           });
+          
           delete res.data.data.event;
           context.commit("SET_USER", res.data.data);
         })

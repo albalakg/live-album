@@ -115,7 +115,7 @@ const EventModule = {
 
     UPDATE_EVENT(state: IEventModuleState, event: any) {
       state.event.name = event?.name ?? "";
-      state.event.starts_at = event?.starts_at ?? "";
+      state.event.starts_at = event.starts_at ? Time.convertToLocalTime(event.starts_at) : "";
       state.event.image = event?.image ?? "";
     },
 

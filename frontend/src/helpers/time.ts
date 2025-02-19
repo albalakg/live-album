@@ -25,9 +25,9 @@ class Time {
   }
 
   countdownTimer(targetDate: string): string {
-    const targetTime = new Date(targetDate + "Z").getTime(); // UTC time
-    const currentTime = Date.now(); // Local time in milliseconds
-
+    const targetTime = new Date(targetDate).getTime();
+    const currentTime = Date.now();
+    
     const difference = targetTime - currentTime;
 
     if (difference <= 0) {

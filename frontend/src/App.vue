@@ -40,10 +40,6 @@ export default defineComponent({
       links: ['uploads', 'full-screen']
     }
   },
-  
-  mounted() {
-    console.log('Is mobile?', this.$bp.isMobile);
-  },
 
   computed: {
     isFullScreen(): boolean {

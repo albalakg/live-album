@@ -14,6 +14,7 @@ use App\Services\Helpers\LogService;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
 use App\Services\Enums\SubscriptionEnum;
+use Exception;
 
 class DisableEvents extends Command
 {
@@ -40,34 +41,22 @@ class DisableEvents extends Command
         $mail_service = new MailService();
 
         $events = Event::join('users', 'users.id', 'events.user_id')
-            ->where('finished_at', '<=', Carbon::now()->subDays(14)->endOfDay())
+            ->where('finished_at', '<=', Carbon::now()->subDays(30)->endOfDay())
             ->where('status', StatusEnum::ACTIVE)
             ->select('events.id', 'events.name', 'events.finished_at', 'users.first_name', 'users.email', 'events.status')
             ->get();
 
         foreach ($events as $event) {
-            $event_service->disable($event->id);
-            
-            $shouldWarn = false;
-            $finishedAt = Carbon::parse($event->finished_at);
-            $days_diff = $finishedAt->diffInDays(Carbon::now()->endOfDay());
-            if ($event->subscription_id === SubscriptionEnum::NORMAL_ID) {
-                $shouldWarn = true;
-            }
-            else if (
-                $event->subscription_id === SubscriptionEnum::PREMIUM_ID &&
-                $days_diff === 27
-            ) {
-                $shouldWarn = true;
-            }
-
-            if ($shouldWarn) {
+            try {
+                $event_service->disable($event->id);
                 $data = [
                     'event' => $event,
                     'first_name' => $event->first_name ?? '',
                 ];
                 $mail_service->send($event->email, MailEnum::EVENT_DISABLED, $data);
                 LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
+            } catch(Exception $ex) {
+                // TODO: add log
             }
         }
     }

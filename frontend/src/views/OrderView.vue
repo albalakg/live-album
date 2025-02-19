@@ -67,7 +67,11 @@
             <div class="separator bg--dark"></div>
           </div>
           <div>
-            <MainButton text="לתשלום" @onClick="submit()" />
+            <MainButton color="pink" readonly text="רכישה בקרוב" />
+            <br>
+            <br>
+            <p class="text--center">ניתן כרגע ליצור קשר איתנו</p>
+            <!-- <MainButton text="לתשלום" @onClick="submit()" /> -->
           </div>
         </div>
       </template>
@@ -155,7 +159,7 @@ export default defineComponent({
 .order-content {
   position: relative;
   z-index: 2;
-  top: 15%;
+  padding-top: 5%;
   width: 75%;
 
   .order-info {

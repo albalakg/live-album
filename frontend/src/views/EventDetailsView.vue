@@ -85,7 +85,6 @@ export default defineComponent({
             this.textCopied = false;
           }, 2000);
         }
-        console.log('Fallback: Copying text command was ' + msg);
       } catch (err) {
         console.error('Fallback: Oops, unable to copy', err);
       }
@@ -100,7 +99,6 @@ export default defineComponent({
       }
       
       navigator.clipboard.writeText(text).then(() => {
-        console.log('Async: Copying to clipboard was successful!');
         this.textCopied = true;
         setTimeout(() => {
           this.textCopied = false;

@@ -66,7 +66,6 @@ import MainCube from '@/components/library/background/MainCube.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import { defineComponent } from 'vue';
 import { ILoginRequest } from '@/helpers/interfaces';
-import ErrorsHandler from '@/helpers/errorsHandler';
 
 export default defineComponent({
   name: 'LoginView',
@@ -109,13 +108,13 @@ export default defineComponent({
       
       this.isLoading = true;
       const user = await this.$store.dispatch('user/login', this.form);
-      this.isLoading = false;
+      if(user?.email) {
+        await this.$store.dispatch('user/getProfile');
+      }
 
       if(!user) {
         return;
       }
-
-      await this.$store.dispatch('user/getProfile');
 
       if(this.$route.query.redirect) {
         this.$router.push(this.$route.query.redirect.toString());
@@ -127,6 +126,8 @@ export default defineComponent({
       } else {
         this.$router.push('/');
       }
+
+      this.isLoading = false;
     },
 
     validateForm() {
