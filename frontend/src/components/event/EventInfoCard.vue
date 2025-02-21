@@ -61,6 +61,10 @@ export default defineComponent({
                     value: this.$store.getters['event/getEventFinishTime'],
                 },
                 {
+                    text: 'תאריך מחיקת הקבצים',
+                    value: this.disabledTime,
+                },
+                {
                     text: 'סה"כ קבצים',
                     value: this.$store.getters['event/getTotalAssets'],
                 },
@@ -78,6 +82,10 @@ export default defineComponent({
         isPending(): boolean {
             return this.$store.getters['event/isEventRending'];
         },
+
+        disabledTime(): string {
+            return Time.addDays(this.$store.getters['event/getEventFinishTime'], this.$store.getters['user/getSubscriptionFilesStorageTime'])
+        }
     },
 
     methods: {

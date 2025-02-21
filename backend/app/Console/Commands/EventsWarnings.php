@@ -45,7 +45,7 @@ class EventsWarnings extends Command
 
         foreach ($events as $event) {
             try {
-                $shouldWarn = false;
+                $should_warn = false;
                 $finishedAt = Carbon::parse($event->finished_at);
                 $days_diff = $finishedAt->diffInDays(Carbon::now()->endOfDay());
                 if (
@@ -54,10 +54,10 @@ class EventsWarnings extends Command
                     ($event->subscription_id === SubscriptionEnum::PREMIUM_ID &&
                     $days_diff === 27)
                 ) {
-                    $shouldWarn = true;
+                    $should_warn = true;
                 } 
 
-                if ($shouldWarn) {
+                if ($should_warn) {
                     $data = [
                         'event' => $event,
                         'first_name' => $event->first_name ?? '',
@@ -69,7 +69,7 @@ class EventsWarnings extends Command
                     LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
                 }
             } catch(Exception $ex) {
-                // TODO: add log
+                LogService::init()->error($ex, ['id' => $event->id, 'method' => LogsEnum::EVENT_WARNED]);
             }
         }
     }

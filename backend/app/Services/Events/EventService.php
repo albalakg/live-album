@@ -55,8 +55,8 @@ class EventService
     public function getBaseInfo(string $event_path): ?Event
     {
         return Event::where('path', $event_path)
-            ->select('id', 'image', 'name', 'starts_at')
-            ->whereIn('status', [StatusEnum::ACTIVE, StatusEnum::READY, StatusEnum::PENDING])
+            ->select('id', 'image', 'name', 'starts_at', 'user_id', 'status')
+            ->where('status', [StatusEnum::ACTIVE, StatusEnum::READY, StatusEnum::PENDING])
             ->first();
     }
 
@@ -351,16 +351,17 @@ class EventService
     /**
      * @param int $event_id
      * @param UploadFileRequest $request
+     * @param ?int $user_id
      * @return EventAsset
      */
-    public function uploadFile(int $event_id, UploadFileRequest $request): EventAsset
+    public function uploadFile(int $event_id, UploadFileRequest $request, ?int $user_id = null): EventAsset
     {
         $event = Event::find($event_id);
         if (!$event) {
             throw new Exception(MessagesEnum::EVENT_NOT_FOUND);
         }
 
-        if (!$this->isAuthorizedToUploadAsset($event)) {
+        if (!$this->isAuthorizedToUploadAsset($event, $user_id)) {
             throw new Exception(MessagesEnum::EVENT_NOT_AUTHORIZED);
         }
 
@@ -448,13 +449,28 @@ class EventService
 
     /**
      * @param Event $event
+     * @param ?int $user_id
      * @return bool
      */
-    private function isAuthorizedToUploadAsset(Event $event): bool
+    private function isAuthorizedToUploadAsset(Event $event, ?int $user_id): bool
     {
         $order = $this->order_service->find($event->order_id);
-        return ($event->isActive() || $event->isReady() || $event->isPending()) &&
-            ($this->getEventTotalAssets($event->id) < $order->subscription->files_allowed);
+        $has_files_space = $this->getEventTotalAssets($event->id) < $order->subscription->files_allowed;
+        
+        if(!$has_files_space) {
+            return false;
+        }
+        
+        LogService::init()->info('test', ['user_id' => $user_id, 'event_id' => $event->user_id, 'is' => $event->isInactive()]);
+        if(($user_id && $user_id === $event->user_id) && !$event->isInactive()) {
+            return true;
+        }
+
+        if($event->isInProgress()) {
+            return true;
+        } 
+
+        return false;
     }
 
     /**

@@ -242,7 +242,8 @@ const UserModule = {
       commit: (arg0: string, arg1: any) => void;
       dispatch: (arg0: string, arg1: any, arg2: any) => void;
     }) {
-      axios
+      return new Promise((resolve) => {
+        axios
         .get("user/profile")
         .then((res) => {
           context.dispatch("event/setEvent", res.data.data.event, {
@@ -251,11 +252,13 @@ const UserModule = {
           
           delete res.data.data.event;
           context.commit("SET_USER", res.data.data);
+          resolve(res.data.data)
         })
         .catch((err) => {
           router.push('/logout')
           console.warn("get: ", err);
         });
+      })
     },
 
     updateProfile(

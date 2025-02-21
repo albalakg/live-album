@@ -6,6 +6,7 @@ use Exception;
 use App\Services\Enums\StatusEnum;
 use App\Services\Users\UserService;
 use App\Services\Enums\MessagesEnum;
+use App\Services\Helpers\LogService;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Events\EventService;
 use App\Services\Helpers\MailService;
@@ -36,6 +37,21 @@ class EventController extends Controller
                 new StoreService()
             );
             $response = $event_service->uploadFile($event_id, $request);
+            return $this->successResponse(MessagesEnum::EVENT_FILE_UPLOADED_SUCCESS, $response);
+
+        } catch (Exception $ex) {
+            return $this->errorResponse($ex);
+        }
+    }
+
+    public function authenticatedUploadFile(int $event_id, UploadFileRequest $request)
+    {
+        try {
+            $event_service = new EventService(
+                new UserService(),
+                new StoreService()
+            );
+            $response = $event_service->uploadFile($event_id, $request, Auth::user()->id);
             return $this->successResponse(MessagesEnum::EVENT_FILE_UPLOADED_SUCCESS, $response);
 
         } catch (Exception $ex) {

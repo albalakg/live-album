@@ -63,6 +63,7 @@ export interface IEvent {
   finished_at: string | null;
   assets: IEventAsset[];
   active_download_process: IEventDownloadAssetsProcess;
+  user_id?: number;
 }
 
 export interface IEventDownloadAssetsProcess {

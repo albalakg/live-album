@@ -33,7 +33,7 @@ return [
     |
     */
 
-    'status' => env('MAIL_STATUS', true),
+    'status' => env('MAIL_STATUS', 'active'),
 
     'mailers' => [
         'smtp' => [

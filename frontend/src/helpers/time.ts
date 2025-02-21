@@ -41,6 +41,25 @@ class Time {
 
     return `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
+  
+  addDays(date: string, days: number): string {
+    const [datePart, timePart] = date.split(' ');
+    const [year, month, day] = datePart.split('/').map(Number);
+    const [hour, minute, second] = timePart.split(':').map(Number);
+  
+    const originalDate = new Date(year, month - 1, day, hour, minute, second);
+    originalDate.setDate(originalDate.getDate() + days);
+  
+    const newYear = originalDate.getFullYear();
+    const newMonth = String(originalDate.getMonth() + 1).padStart(2, '0');
+    const newDay = String(originalDate.getDate()).padStart(2, '0');
+    const newHour = String(originalDate.getHours()).padStart(2, '0');
+    const newMinute = String(originalDate.getMinutes()).padStart(2, '0');
+    const newSecond = String(originalDate.getSeconds()).padStart(2, '0');
+  
+    return `${newYear}/${newMonth}/${newDay} ${newHour}:${newMinute}:${newSecond}`;
+  }
+  
 }
 
 export default new Time();

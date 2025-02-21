@@ -8,7 +8,7 @@
                 <span class="text--dark">{{ item.value }}</span>
             </div>
         </div>
-        <small class="padding--x-small">
+        <small class="padding--x-small" v-if="canUpgradeSubscription">
             <strong>שימו לב:</strong>
             שדרוג החבילה ניתן כאשר האירוע בסטטוס ממתין בלבד.
             <br>
@@ -43,7 +43,7 @@ export default defineComponent({
             return [
                 {
                     text: 'פרטי חבילה',
-                    value: 'חבילה בסיסי',
+                    value: this.$store.getters["user/getSubscriptionName"],
                 },
                 {
                     text: 'כמות קבצים',

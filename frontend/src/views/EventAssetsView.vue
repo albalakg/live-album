@@ -200,6 +200,10 @@ export default defineComponent({
     processFileName(): string {
       return this.$store.getters['event/getEventProcessFileName'];
     },
+
+    disabledTime(): string {
+      return Time.addDays(this.$store.getters['event/getEventFinishTime'], this.$store.getters['user/getSubscriptionFilesStorageTime'])
+    }
   },
 
   methods: {
@@ -208,7 +212,7 @@ export default defineComponent({
     },
 
     updateCounter() {
-      this.counter = Time.countdownTimer(this.$store.getters['event/getEventFinishTime']);
+      this.counter = Time.countdownTimer(this.disabledTime);
       if (this.counter === "00:00:00:00" && this.intervalId) {
         clearInterval(this.intervalId);
         this.intervalId = null;

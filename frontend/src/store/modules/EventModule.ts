@@ -410,12 +410,12 @@ const EventModule = {
         state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
-      file: any
+      data: any
     ) {
       return new Promise((resolve, reject) => {
-        const packageToSend = serialize({ file }, { indices: true });
+        const packageToSend = serialize({ file: data.file }, { indices: true });
         axios
-          .post(`events/${context.state.event.id}/upload`, packageToSend, {
+          .post(`events/${context.state.event.id}/${data.isAuth ? 'auth/' : ''}upload`, packageToSend, {
             headers: {
               "Content-Type": "multipart/form-data",
             },

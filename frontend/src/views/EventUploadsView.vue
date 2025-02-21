@@ -24,7 +24,7 @@
       </div>
     </template>
     <template v-else>
-      <template v-if="event">
+      <template v-if="canShow && event">
         <div class="overlay"></div>
         <div class="content-wrapper height--full display--flex direction--column justify--space-between">
           <h1 class="title text--white">
@@ -80,10 +80,12 @@
 </template>
 
 <script lang="ts">
-import { IEvent } from '@/helpers/interfaces';
+import { IUserInfo, IEvent } from '@/helpers/interfaces';
 import { defineComponent, ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import MainCube from '@/components/library/background/MainCube.vue';
+import { StatusEnum } from "@/helpers/enums";
+import Auth from '@/helpers/Auth';
 
 export default defineComponent({
   name: 'EventUploadsView',
@@ -116,7 +118,7 @@ export default defineComponent({
         uploadSuccess.value = false;
 
         try {
-          const response = await store.dispatch("event/uploadFile", target.files[0]);
+          await store.dispatch("event/uploadFile", {file: target.files[0], isAuth: Auth.isLogged()});
           uploadSuccess.value = true;
           setTimeout(() => {
             uploadSuccess.value = false;
@@ -151,12 +153,36 @@ export default defineComponent({
   },
 
   computed: {
-    event(): IEvent {
-      return this.$store.getters["event/getEvent"];
+    canShow(): boolean {
+      if(this.loading) {
+        return false;
+      }
+
+      if(this.event?.status === StatusEnum.IN_PROGRESS) {
+        return true;
+      }
+      
+      if(this.event?.status !== StatusEnum.IN_PROGRESS && this.event?.user_id === this.user?.id) {
+        return true;
+      }
+
+      return false
     },
 
     eventImage(): string {
-      return this.$store.getters["event/getEventImage"];
+      return this.canShow ? this.imagePath : ''
+    },
+
+    event(): IEvent | null {
+      return this.$store.getters["event/getEvent"];
+    },
+
+    user(): IUserInfo | null {
+      return this.$store.getters["user/getUser"];
+    },
+
+    imagePath(): string {
+      return process.env.VUE_APP_STORAGE_BASE_URL + "/" + this.event?.image;
     },
 
     eventDate(): string {
@@ -170,11 +196,6 @@ export default defineComponent({
 
   methods: {
     async getEventDetails() {
-      if (this.$store.getters["event/getEvent"]) {
-        this.loading = false;
-        return;
-      }
-
       await this.$store.dispatch("event/getEventBaseInfo", this.$route.params.event_path)
       this.loading = false;
     }

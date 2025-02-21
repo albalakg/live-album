@@ -10,6 +10,8 @@ class LogsEnum extends BaseEnum
     const EVENT_SET_ACTIVE = 'Event marked as active';
     const EVENT_WARNED = 'Event been warned';
     const EVENT_STARTED = 'Event started';
+    const EVENT_ENDED = 'Event ended';
+    const EVENT_DISABLED = 'Event disabled';
     const FAILED_TO_DELETE_EVENT_ASSET = 'Failed to delete event asset';
     const FAILED_TO_DELETE_EVENT = 'Failed to delete event';
     const FILE_SERVICE_ERROR = 'File service failed';

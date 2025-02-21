@@ -42,12 +42,14 @@ export default defineComponent({
                     return 'פעיל'
                 case StatusEnum.PENDING:
                     return 'ממתין'
+                case StatusEnum.IN_PROGRESS:
+                    return 'האירוע חי'
                 case StatusEnum.INACTIVE:
                     return 'לא פעיל'
                 case StatusEnum.READY:
                     return 'מוכן'
                 default:
-                    return 'אין חבילה'
+                    return 'אין אירוע'
             }
         },
     },

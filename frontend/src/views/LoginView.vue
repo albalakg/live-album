@@ -90,6 +90,12 @@ export default defineComponent({
     };
   },
 
+  computed: {
+    hasEvent(): boolean {
+      return (this.$store.getters["event/getEvent"])
+    }
+  },
+
   methods: {
     async login() {
       const errors = this.validateForm();   
@@ -121,7 +127,7 @@ export default defineComponent({
         return;
       }
 
-      if(user.subscription_name) {
+      if(user.subscription_name && hasEvent) {
         this.$router.push('/event');
       } else {
         this.$router.push('/');

@@ -78,7 +78,7 @@ class MailService
       // $this->info('Sending mail', ['email' => $email_class]);
 
       // If mail service is off skip
-      if (!config('mail.status') || $this->isMock) {
+      if (!$this->isActive() || $this->isMock) {
         $this->info('Mail service is not active');
         return true;
       }
@@ -119,6 +119,11 @@ class MailService
     }
 
     $this->info('Receivers are: ' . json_encode($this->receivers));
+  }
+
+  private function isActive(): bool
+  {
+    return config('mail.status') === 'active';
   }
 
   /**

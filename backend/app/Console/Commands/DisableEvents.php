@@ -41,22 +41,37 @@ class DisableEvents extends Command
         $mail_service = new MailService();
 
         $events = Event::join('users', 'users.id', 'events.user_id')
-            ->where('finished_at', '<=', Carbon::now()->subDays(30)->endOfDay())
-            ->where('status', StatusEnum::ACTIVE)
-            ->select('events.id', 'events.name', 'events.finished_at', 'users.first_name', 'users.email', 'events.status')
+            ->join('orders', 'orders.id', 'events.order_id')
+            ->where('events.status', StatusEnum::ACTIVE)
+            ->select('events.id', 'events.name', 'events.finished_at', 'users.first_name', 'users.email', 'events.status', 'orders.subscription_id')
             ->get();
 
         foreach ($events as $event) {
             try {
-                $event_service->disable($event->id);
-                $data = [
-                    'event' => $event,
-                    'first_name' => $event->first_name ?? '',
-                ];
-                $mail_service->send($event->email, MailEnum::EVENT_DISABLED, $data);
-                LogService::init()->info(LogsEnum::EVENT_WARNED, ['id' => $event->id]);
+                $should_disable = false;
+                $finishedAt = Carbon::parse($event->finished_at);
+                $days_diff = $finishedAt->diffInDays(Carbon::now()->endOfDay());
+                if (
+                    ($event->subscription_id === SubscriptionEnum::NORMAL_ID &&
+                    $days_diff === 14) ||
+                    ($event->subscription_id === SubscriptionEnum::PREMIUM_ID &&
+                    $days_diff === 30)
+                ) {
+                    $should_disable = true;
+                } 
+
+                if ($should_disable) {
+                    $event_service->disable($event->id);
+                    $data = [
+                        'event' => $event,
+                        'first_name' => $event->first_name ?? '',
+                    ];
+                    $mail_service->send($event->email, MailEnum::EVENT_DISABLED, $data);
+                    LogService::init()->info(LogsEnum::EVENT_DISABLED, ['id' => $event->id]);
+                }
+                
             } catch(Exception $ex) {
-                // TODO: add log
+                LogService::init()->error($ex, ['id' => $event->id, 'method' => LogsEnum::EVENT_DISABLED]);
             }
         }
     }
