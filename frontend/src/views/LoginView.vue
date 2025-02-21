@@ -92,7 +92,7 @@ export default defineComponent({
 
   computed: {
     hasEvent(): boolean {
-      return (this.$store.getters["event/getEvent"])
+      return Boolean(this.$store.getters["event/getEvent"])
     }
   },
 
@@ -127,7 +127,7 @@ export default defineComponent({
         return;
       }
 
-      if(user.subscription_name && hasEvent) {
+      if(user.subscription_name && this.hasEvent) {
         this.$router.push('/event');
       } else {
         this.$router.push('/');
