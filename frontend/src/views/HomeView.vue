@@ -172,13 +172,13 @@
       <template v-if="$bp.isMediumAndUp">
         <DisplayAssetCard :src="`/assets/upload_page${$bp.isMobile ? '_mobile' : ''}.jpg`" width="small" height="x-large" right="5%" title="עמוד העלאת קבצים" />
         <DisplayAssetCard :src="`/assets/event_manager${$bp.isMobile ? '_mobile' : ''}.jpg`" width="medium" height="large" bottom="10%" right="27%" title="ניהול האירוע" />
-        <DisplayAssetCard width="large" height="x-large" bottom="35%" right="60%" title="האלבום החי" />
+        <DisplayAssetCard :src="`/assets/gallery${$bp.isMobile ? '_mobile' : ''}.jpg`" width="large" height="x-large" bottom="35%" right="60%" title="האלבום החי" />
       </template>
       <template v-else>
         <div class="how-it-looks-mobile-wrapper">
           <DisplayAssetCard :src="`/assets/upload_page${$bp.isMobile ? '_mobile' : ''}.jpg`" :height="$bp.isMediumAndUp ? 'x-large': 'xxx-large'" title="עמוד העלאת קבצים" />
           <DisplayAssetCard :src="`/assets/event_manager${$bp.isMobile ? '_mobile' : ''}.jpg`" :height="$bp.isMediumAndUp ? 'x-large': 'xxx-large'" title="ניהול האירוע" />
-          <DisplayAssetCard :height="$bp.isMediumAndUp ? 'x-large': 'xxx-large'" title="האלבום החי" />
+          <DisplayAssetCard :src="`/assets/gallery${$bp.isMobile ? '_mobile' : ''}.jpg`" :height="$bp.isMediumAndUp ? 'x-large': 'xxx-large'" title="האלבום החי" />
         </div>
       </template>
       <!-- </div> -->
