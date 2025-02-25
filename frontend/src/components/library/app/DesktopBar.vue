@@ -106,12 +106,12 @@ export default defineComponent({
                     color: 'dark',
                     weight: '500'
                 },
-                // {
-                //     text: 'איך זה נראה',
-                //     url: '/#how-it-looks',
-                //     color: 'dark',
-                //     weight: '500'
-                // },
+                {
+                    text: 'איך זה נראה',
+                    url: '/#how-it-looks',
+                    color: 'dark',
+                    weight: '500'
+                },
                 {
                     text: 'המסלולים',
                     url: '/#pricing',

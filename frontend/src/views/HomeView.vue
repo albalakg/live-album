@@ -148,7 +148,7 @@
 
 
     <!-- How It Looks Section -->
-    <section style="display: none" class="home-page-section how-it-looks-section" id="how-it-looks">
+    <section class="home-page-section how-it-looks-section" id="how-it-looks">
       <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
       <MainCube color="pink" left="10%" top="10%" width="large" height="x-large" />
       <MainCube left="8%" top="3%" width="large" height="large" />
@@ -170,14 +170,16 @@
 
       <!-- <div class="height--full width--full"> -->
       <template v-if="$bp.isMediumAndUp">
-        <DisplayAssetCard width="small" height="x-large" right="5%" title="עמוד העלאת קבצים" />
-        <DisplayAssetCard width="medium" height="large" bottom="10%" right="27%" title="ניהול האירוע" />
+        <DisplayAssetCard :src="`/assets/upload_page${$bp.isMobile ? '_mobile' : ''}.jpg`" width="small" height="x-large" right="5%" title="עמוד העלאת קבצים" />
+        <DisplayAssetCard :src="`/assets/event_manager${$bp.isMobile ? '_mobile' : ''}.jpg`" width="medium" height="large" bottom="10%" right="27%" title="ניהול האירוע" />
         <DisplayAssetCard width="large" height="x-large" bottom="35%" right="60%" title="האלבום החי" />
       </template>
       <template v-else>
-        <DisplayAssetCard width="x-large" height="x-large" title="עמוד העלאת קבצים" />
-        <DisplayAssetCard height="x-large" title="ניהול האירוע" />
-        <DisplayAssetCard height="x-large" title="האלבום החי" />
+        <div class="how-it-looks-mobile-wrapper">
+          <DisplayAssetCard :src="`/assets/upload_page${$bp.isMobile ? '_mobile' : ''}.jpg`" :height="$bp.isMediumAndUp ? 'x-large': 'xxx-large'" title="עמוד העלאת קבצים" />
+          <DisplayAssetCard :src="`/assets/event_manager${$bp.isMobile ? '_mobile' : ''}.jpg`" :height="$bp.isMediumAndUp ? 'x-large': 'xxx-large'" title="ניהול האירוע" />
+          <DisplayAssetCard :height="$bp.isMediumAndUp ? 'x-large': 'xxx-large'" title="האלבום החי" />
+        </div>
       </template>
       <!-- </div> -->
     </section>
@@ -407,6 +409,10 @@ export default defineComponent({
   p {
     margin-bottom: 2%;
   }
+}
+
+.how-it-looks-mobile-wrapper {
+  padding-right: 10%;
 }
 
 .how-it-looks-content {

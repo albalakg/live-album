@@ -13,8 +13,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('event:start')->everyTenMinutes();
-        $schedule->command('event:end')->everyTenMinutes();
-        $schedule->command('event:disable')->dailyAt('08:00');
+        $schedule->command('event:end')->everyFifteenMinutes();
+        $schedule->command('event:disable')->dailyAt('20:00');
         $schedule->command('event:warning')->dailyAt('18:00');
     }
 

@@ -25,9 +25,9 @@
                     <router-link to="/#how-it-works">
                         <p>איך זה עובד</p>
                     </router-link>
-                    <!-- <router-link to="/#how-it-looks">
+                    <router-link to="/#how-it-looks">
                         <p>איך זה נראה</p>
-                    </router-link> -->
+                    </router-link>
                     <router-link to="/#pricing">
                         <p>המסלולים שלנו</p>
                     </router-link>

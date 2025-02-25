@@ -1,13 +1,13 @@
 <template>
     <div class="display-asset-card width--90-mobile"
-        :class="`${left || right || top || bottom ? 'position--absolute' : 'position--relative'}`"
+        :class="`${left || right || top || bottom ? 'position--absolute' : 'position--relative'} ${$bp.isMobile ? 'display-asset-card-mobile' : ''}`"
         :style="`${left ? `left: ${left};` : ''} ${top ? `top: ${top};` : ''} ${right ? `right: ${right};` : ''} ${bottom ? `bottom: ${bottom};` : ''}`">
         <p v-if="title">
             {{ title }}
         </p>
         <div class="asset-wrapper bg--dark brs--large shadow--small"
             :class="`display-asset-card-width-${width} display-asset-card-height-${height}`">
-            <!-- <img src="" alt=""> -->
+            <img class="width--full height--full brs--large" :src="src" alt="">
         </div>
     </div>
 </template>
@@ -51,6 +51,11 @@ export default defineComponent({
             type: String,
             default: ''
         },
+
+        src: {
+            type: String,
+            default: ''
+        },
     },
 
     methods: {
@@ -62,8 +67,16 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.display-asset-card-mobile {
+    margin-top: 20px;
+}
+
 .display-asset-card {
     z-index: 3;
+
+    img {
+        object-fit: cover;
+    }
 
     p {
         font-weight: 700;
@@ -100,6 +113,10 @@ export default defineComponent({
 
     .display-asset-card-height-x-large {
         height: 40vh;
+    }
+
+    .display-asset-card-height-xxx-large {
+        height: 80vh;
     }
 }
 </style>
