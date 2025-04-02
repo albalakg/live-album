@@ -118,6 +118,8 @@ export default defineComponent({
         await this.$store.dispatch('user/getProfile');
       }
 
+      this.isLoading = false;
+
       if(!user) {
         return;
       }
@@ -132,8 +134,6 @@ export default defineComponent({
       } else {
         this.$router.push('/');
       }
-
-      this.isLoading = false;
     },
 
     validateForm() {
