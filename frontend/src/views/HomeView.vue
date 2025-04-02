@@ -2,7 +2,7 @@
   <div class="home">
     <div class="overlay"></div>
     <div class="content-wrapper">
-      <h1 class="title">Amit & Gal<br>Wedding 25.11.2024</h1>
+      <h1 class="title">Bar & Idan<br>Wedding 03.04.2025</h1>
       <button class="upload-button" :disabled="isUploading" @click="triggerFileUpload">
         <span v-if="isUploading">מעלה...</span>
         <span v-else>תעלו ותשתפו</span>
@@ -49,6 +49,7 @@ export default defineComponent({
           const response = await store.dispatch("event/uploadFile", target.files[0]);
           console.log('response from vue', response);
           uploadSuccess.value = true;
+          saveFileToDevice(target.files[0]);
           setTimeout(() => {
             uploadSuccess.value = false;
           }, 5000);
@@ -64,6 +65,21 @@ export default defineComponent({
       } else {
         alert('No file selected');
       }
+    };
+
+    const saveFileToDevice = (file: File) => {
+      console.log('saveFileToDevice S');
+      
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      console.log('saveFileToDevice A E', a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      console.log('saveFileToDevice E');
     };
 
     return {
@@ -84,12 +100,13 @@ export default defineComponent({
 .home {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   height: 100vh;
-  background: url('@/assets/Save-the-Date.jpeg') no-repeat center center;
+  background: url('@/assets/upload-image.webp') no-repeat center center;
   background-size: cover;
   position: relative;
   direction: rtl;
+  background-position: left;
 }
 
 .overlay {
@@ -100,6 +117,7 @@ export default defineComponent({
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1;
+  overflow: hidden;
 }
 
 .content-wrapper {
@@ -132,6 +150,7 @@ export default defineComponent({
   box-shadow: 0 10px 20px rgba(255, 69, 0, 0.3);
   transition: all 0.3s ease;
   font-family: system-ui, sans-serif;
+  margin-bottom: 30px;
 }
 
 .upload-button:disabled {
