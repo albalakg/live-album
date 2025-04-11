@@ -3,7 +3,7 @@
     <div class="album-wrapper">
       <div class="title-container">
         <button class="arrow-button left-arrow" @click="previousFile">&#8592;</button>
-        <h1 class="gallery-title">Amit & Gal</h1>
+        <h1 class="gallery-title">Noam</h1>
         <button class="arrow-button right-arrow" @click="nextFile">&#8594;</button>
       </div>
       <div class="album" v-for="(file, index) in sessionFile" :key="index">
@@ -13,6 +13,8 @@
         <template v-else-if="file.type === 'video'">
           <video :src="file.path" class="album-file" autoplay muted @loadedmetadata="handleVideoDuration" @ended="nextFile"></video>
         </template>
+
+        <img class="QR" src="@/assets/qr-code-prod.jpeg">
       </div>
     </div>
   </div>
@@ -194,5 +196,13 @@ export default defineComponent({
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.QR {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 10%;
+  max-width: 150px;
 }
 </style>
