@@ -1,7 +1,7 @@
 <template>
     <div class="footer bg--pink width--full">
         <div class="footer-content height--full width--page-size margin--auto display--flex justify--space-between flex--wrap-mobile text--center-mobile">
-            <div>
+            <div class="footer-header">
                 <h3 class="footer-logo text--white">
                     SnapShare
                 </h3>
@@ -140,7 +140,11 @@ export default defineComponent({
 
     img {
         width: 40px;
-        margin-inline-end: 20px;
+        margin: 0 10px;
+    }
+
+    .footer-header {
+        margin: auto;
     }
 
     .footer-links {
