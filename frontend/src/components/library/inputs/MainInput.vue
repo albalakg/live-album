@@ -199,7 +199,7 @@ export default defineComponent({
         background-color: white;
 
         input {
-            font-size: .9em;
+            font-size: 1em;
             background-color: transparent
         }
 
