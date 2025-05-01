@@ -202,7 +202,7 @@ export default defineComponent({
     },
 
     disabledTime(): string {
-      return Time.addDays(this.$store.getters['event/getEventFinishTime'], this.$store.getters['user/getSubscriptionFilesStorageTime'])
+      return this.$store.getters['event/getEventFinishTime'] ? Time.addDays(this.$store.getters['event/getEventFinishTime'], this.$store.getters['user/getSubscriptionFilesStorageTime']) : ""
     }
   },
 

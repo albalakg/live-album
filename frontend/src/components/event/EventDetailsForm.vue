@@ -95,7 +95,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-::v-deep .dp__input_wrap {
+:deep(.dp__input_wrap) {
     border-radius: 8px;
     box-shadow: 0 2px 5px 1px var(--darkTransparent);
 

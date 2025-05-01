@@ -116,6 +116,7 @@ const EventModule = {
     UPDATE_EVENT(state: IEventModuleState, event: any) {
       state.event.name = event?.name ?? "";
       state.event.starts_at = event.starts_at ? Time.convertToLocalTime(event.starts_at) : "";
+      state.event.finished_at = event.finished_at ? Time.convertToLocalTime(event.finished_at) : "";
       state.event.image = event?.image ?? "";
     },
 
@@ -317,8 +318,8 @@ const EventModule = {
       event: IEvent
     ) {
       if (event) {
-        event.starts_at = Time.convertToLocalTime(event.starts_at ?? "");
-        event.finished_at = Time.convertToLocalTime(event.finished_at ?? "");
+        event.starts_at = event.starts_at ? Time.convertToLocalTime(event.starts_at) : '';
+        event.finished_at = event.finished_at ? Time.convertToLocalTime(event.finished_at) : '';
       }
       context.commit("SET_EVENT", event);
     },
@@ -330,7 +331,7 @@ const EventModule = {
       },
       data: UpdateEventRequest
     ) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const packageToSend = serialize(data, { indices: true });
         axios
           .post(`events/${context.state.event.id}/update`, packageToSend, {
