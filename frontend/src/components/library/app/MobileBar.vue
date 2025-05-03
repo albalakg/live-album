@@ -134,7 +134,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .mobile-bar {
     height: 60px;
-    width: calc(100% - 20px);
+    width: calc(100% - 40px);
+    padding: 0 20px;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -142,7 +143,6 @@ export default defineComponent({
     justify-content: space-between;
     align-items: center;
     z-index: 10000;
-    padding: 0 10px;
     border-top: 2px solid var(--lightPink);
 
     .mobile-bar-icon {
