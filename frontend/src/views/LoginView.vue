@@ -18,6 +18,7 @@
         </h3>
         <div>
           <MainInput 
+            autocomplete="email"
             v-model="form.email" 
             type="email" 
             title="כתובת מייל"
@@ -25,6 +26,7 @@
           />
           <br>
           <MainInput 
+            autocomplete="password"
             v-model="form.password" 
             type="password" 
             title="סיסמה"

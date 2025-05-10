@@ -42,7 +42,7 @@
         >
           <template v-if="$bp.isMobile">
             <div class="width--full padding--large">
-              <MainInput v-model="form.email" type="email" title="כתובת מייל" />
+              <MainInput autocomplete="email" v-model="form.email" type="email" title="כתובת מייל" />
               <br />
               <MainInput
                 v-model="form.password"
@@ -50,9 +50,9 @@
                 title="סיסמה"
               />
               <br />
-              <MainInput v-model="form.first_name" title="שם פרטי" />
+              <MainInput autocomplete="first_name" v-model="form.first_name" title="שם פרטי" />
               <br />
-              <MainInput v-model="form.last_name" title="שם משפחה" />
+              <MainInput autocomplete="last_name" v-model="form.last_name" title="שם משפחה" />
               <div class="signup-form-bottom">
                 <MainButton :loading="isLoading" text="הרשמה" />
               </div>
@@ -211,6 +211,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .signup {
   height: 100vh;
+  min-height: fit-content;
 }
 
 .signup-content {

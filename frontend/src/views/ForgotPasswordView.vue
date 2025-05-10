@@ -30,6 +30,7 @@
       </div>
       <form @submit.prevent="submit()" class="center width--half width--full-mobile margin--auto layer--one">
         <MainInput 
+          autocomplete="email"
           v-model="form.email" 
           type="email" 
           title="כתובת מייל"
@@ -126,7 +127,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .forgot-password {
   height: 100vh;
-
+  min-height: fit-content;
+  
   @media only screen and (max-width: 600px) {
     height: fit-content;
     padding: 15% 0;   

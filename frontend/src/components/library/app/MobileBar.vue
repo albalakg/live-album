@@ -31,7 +31,12 @@ export default defineComponent({
     watch: {
         user() {
             this.createLinks();
-        }
+        },
+        
+        isMenuOpen() {
+            this.createLinks();
+        },
+
     },
 
     computed: {
@@ -41,7 +46,15 @@ export default defineComponent({
 
         hasActiveEvent(): boolean {
             return this.$store.getters['event/hasActiveEvent'];
-        }
+        },
+        
+        isMenuOpen(): boolean {
+            return this.$store.getters['app/getMenuState'];
+        },
+        
+        menuIcon(): string {
+            return this.isMenuOpen ? "close" : "menu";
+        },
     },
 
     methods: {
@@ -62,7 +75,7 @@ export default defineComponent({
             this.links = [
                 {
                     url: '?menu',
-                    icon: 'menu',
+                    icon: this.menuIcon,
                     color: 'dark',
                 },
                 {

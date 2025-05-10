@@ -17,7 +17,7 @@
                 </div>
             </template>
             <template v-else>
-                <input :maxlength="maxLength" v-model="localValue" ref="input" :type="type" :readonly="readonly"
+                <input :autocomplete="autocomplete" :maxlength="maxLength" v-model="localValue" ref="input" :type="type" :readonly="readonly"
                     :placeholder="placeholder" class="width--full" :class="`input-size-${size}`"
                     @input="updateValue($event?.target?.value)">
             </template>
@@ -81,6 +81,11 @@ export default defineComponent({
 
         placeholder: {
             type: String
+        },
+
+        autocomplete: {
+            type: String,
+            default: ""
         },
 
         hasError: {

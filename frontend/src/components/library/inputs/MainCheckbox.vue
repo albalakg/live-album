@@ -79,6 +79,7 @@ export default defineComponent({
     clip: rect(0 0 0 0);
     color: transparent;
     user-select: none;
+    position: relative;
 }
 
 .switch-label::before,
@@ -101,8 +102,8 @@ export default defineComponent({
 .switch-label::after {
     top: 0;
     left: 0;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background-color: #fff;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.45);

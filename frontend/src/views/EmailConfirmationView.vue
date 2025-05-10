@@ -90,6 +90,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .email-confirmation {
   height: 100vh;
+  min-height: fit-content;
 }
 
 .email-confirmation-content {

@@ -58,4 +58,8 @@ export default defineComponent({
 .subscription-status {
     font-weight: bold;
 }
+
+.width--third {
+    min-width: fit-content;
+}
 </style>

@@ -149,6 +149,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .forgot-password {
   height: 100vh;
+  min-height: fit-content;
 
   @media only screen and (max-width: 600px) {
     height: fit-content;

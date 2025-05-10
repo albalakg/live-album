@@ -33,7 +33,7 @@
         <div class="line"></div>
       </div>
       <form @submit.prevent="submit()" class="contact-form display--flex justify--space-between direction--column">
-        <div>
+        <div class="contact-body">
           <MainInput type="email" v-model="form.email" title="כתובת מייל" />
           <br>
           <MainInput v-model="form.full_name" title="שם מלא" />
@@ -76,6 +76,11 @@ export default defineComponent({
         full_name: '' as string,
         text: '' as string,
       },
+      errors: {
+        email: '' as string,
+        full_name: '' as string,
+        text: '' as string,
+      },
       isLoading: false as boolean
     };
   },
@@ -108,7 +113,16 @@ export default defineComponent({
 
     async submit() {
       const errors = this.validateForm();
-      if (errors.length) {
+      if (Object.values(errors).some((error) => error !== "")) {
+        Object.values(errors).forEach((error) => {
+          if (error) {
+            this.$notify({
+              text: error,
+              type: "error",
+              duration: 5000,
+            });
+          }
+        });
         return;
       }
 
@@ -124,7 +138,34 @@ export default defineComponent({
     },
 
     validateForm() {
-      return [];
+      this.errors = {
+        email: "",
+        full_name: "",
+        text: "",
+      };
+
+      // Email validation
+      if (!this.form.email) {
+        this.errors.email = "מייל הינו שדה חובה";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = "כתובת אימייל לא תקינה";
+      }
+
+      // First Name validation
+      if (!this.form.full_name) {
+        this.errors.full_name = "שם מלא הינו שדה חובה";
+      } else if (!/^.{0,100}$/.test(this.form.full_name)) {
+        this.errors.full_name = "השם מלא הוא עד 100 תווים";
+      }
+
+      // Last Name validation
+      if (!this.form.text) {
+        this.errors.text = "שם משפחה הינו שדה חובה";
+      } else if (!/^.{0,1000}$/.test(this.form.text)) {
+        this.errors.text = "השם משפחה הוא עד 1000 תווים";
+      }
+
+      return this.errors;
     }
   }
 });
@@ -133,6 +174,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .contact {
   height: 100vh;
+  min-height: fit-content;
 
   .contact-content {
     min-height: 520px;
@@ -146,6 +188,10 @@ export default defineComponent({
       min-height: fit-content;
       height: calc(100% - 80px);
       margin: 10px;
+
+      .contact-body {
+        padding-bottom: 20px;
+      }
 
       .contact-bottom {
         margin-top: 50px;

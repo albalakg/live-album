@@ -125,6 +125,7 @@ export default defineComponent({
     @media only screen and (max-width: 600px) { 
         padding-bottom: 75px;
         margin-top: 15%;
+        bottom: 20px;
     }
 
     .footer-logo {
@@ -170,7 +171,7 @@ export default defineComponent({
     }
 
     .footer-bottom {
-        bottom: 10%;
+        margin-top: 5%;
         text-align: center;
         font-weight: 500;
         position: relative;

@@ -12,7 +12,7 @@
         </div>
         <form @submit.prevent="submit()">
             <br>
-            <MainInput v-model="form.current_password" size="medium" :type="inputType" title="סיסמה ישנה" />
+            <MainInput v-model="form.current_password" size="medium" :type="inputType" title="סיסמה נוכחית" />
             <br>
             <MainInput v-model="form.new_password" hasError size="medium" :type="inputType" title="סיסמה חדשה" />
             <br>
