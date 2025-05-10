@@ -213,7 +213,7 @@ export default defineComponent({
   top: 0;
   right: 0;
   left: 0;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
   max-width: 500px;
   margin: auto;

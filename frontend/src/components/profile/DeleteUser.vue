@@ -10,7 +10,7 @@
         <br>
         <div class="display--flex justify--space-between align--center">
             <div class="width--third">
-                <MainCheckbox @onClick="toggleCheck()" title="לחצו בשביל לאפשר מחיקה" />
+                <MainCheckbox :value="canDelete" @onClick="toggleCheck()" title="לחצו בשביל לאפשר מחיקה" />
             </div>
             <div class="width--third width--full-mobile">
                 <BaseButton :disabled="!canDelete" :loading="loading" textColor="white" color="pink" text="מחיקת משתמש" @onClick="submit()" />

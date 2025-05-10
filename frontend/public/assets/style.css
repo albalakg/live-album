@@ -444,4 +444,12 @@ a {
   .padding--large-mobile {
     padding: 20px; 
   }
+
+  .padding--none-mobile {
+    padding: 0; 
+  }
+
+  .title--small {
+    font-size: .9em;
+  }
 }

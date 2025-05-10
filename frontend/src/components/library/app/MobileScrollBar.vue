@@ -43,6 +43,10 @@ export default defineComponent({
 
     .mobile-scroll-bar-item {
         width: 40%;
+
+        span {
+            font-size: .9em;
+        }
     }
 }
 </style>

@@ -8,7 +8,7 @@
       <div class="event-mobile-bar" v-else>
         <MobileScrollBar :items="items" />
       </div>
-      <div class="event-content bg--gray padding--large brs--medium">
+      <div class="event-content bg--gray padding--large padding--none-mobile brs--medium">
         <router-view></router-view>
       </div>
     </div>
@@ -103,7 +103,7 @@ export default defineComponent({
     margin-inline-start: 40px;
 
     @media only screen and (max-width: 600px) { 
-      width: 90%;
+      width: 100%;
       margin: auto;
     }
   }

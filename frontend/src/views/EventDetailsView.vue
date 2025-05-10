@@ -1,8 +1,14 @@
 <template>
-  <div class="event-details display--flex flex--wrap justify--space-between height--full width--full">
-    <div class="event-right padding--medium display--flex direction--column justify--space-between">
+  <div
+    class="event-details display--flex flex--wrap justify--space-between height--full width--full"
+  >
+    <div
+      class="event-right padding--medium display--flex direction--column justify--space-between"
+    >
       <EventDetailsForm />
-      <div class="display--flex flex--wrap justify--space-between align--center upload-page-wrapper padding--medium">
+      <div
+        class="display--flex flex--wrap justify--space-between align--center upload-page-wrapper padding--medium"
+      >
         <div class="display--flex align--center width--full-mobile">
           <div class="icon-wrapper">
             <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
@@ -16,7 +22,9 @@
         </div>
       </div>
     </div>
-    <div class="event-left padding--medium brs--medium display--flex direction--column justify--space-between">
+    <div
+      class="event-left padding--medium brs--medium display--flex direction--column justify--space-between"
+    >
       <EventInfoCard />
       <EventSubscriptionCard />
     </div>
@@ -24,15 +32,15 @@
 </template>
 
 <script lang="ts">
-import EventDetailsForm from '@/components/event/EventDetailsForm.vue';
-import EventInfoCard from '@/components/event/EventInfoCard.vue';
-import EventSubscriptionCard from '@/components/event/EventSubscriptionCard.vue';
-import BaseButton from '@/components/library/buttons/BaseButton.vue';
-import MainIcon from '@/components/library/general/MainIcon.vue';
-import { defineComponent } from 'vue';
+import EventDetailsForm from "@/components/event/EventDetailsForm.vue";
+import EventInfoCard from "@/components/event/EventInfoCard.vue";
+import EventSubscriptionCard from "@/components/event/EventSubscriptionCard.vue";
+import BaseButton from "@/components/library/buttons/BaseButton.vue";
+import MainIcon from "@/components/library/general/MainIcon.vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'EventDetailsView',
+  name: "EventDetailsView",
 
   components: {
     EventDetailsForm,
@@ -45,22 +53,24 @@ export default defineComponent({
   data() {
     return {
       textCopied: false as boolean,
-    }
+    };
   },
 
   computed: {
     eventPath(): string {
-      return this.$store.getters['event/getEventPath']
+      return this.$store.getters["event/getEventPath"];
     },
-    
+
     copyText(): string {
-      return this.textCopied ? 'הקישור הועתק' : 'לחצו להעתקת הקישור';
+      return this.textCopied ? "הקישור הועתק" : "לחצו להעתקת הקישור";
     },
   },
 
   methods: {
-    copyUrl() {      
-      this.copyTextToClipboard(window.location.origin + `/event/uploads/${this.eventPath}`);
+    copyUrl() {
+      this.copyTextToClipboard(
+        window.location.origin + `/event/uploads/${this.eventPath}`
+      );
     },
 
     fallbackCopyTextToClipboard(text: string) {
@@ -77,16 +87,16 @@ export default defineComponent({
       textArea.select();
 
       try {
-        var successful = document.execCommand('copy');
-        var msg = successful ? 'successful' : 'unsuccessful';
-        if(successful) {
+        var successful = document.execCommand("copy");
+        var msg = successful ? "successful" : "unsuccessful";
+        if (successful) {
           this.textCopied = true;
           setTimeout(() => {
             this.textCopied = false;
           }, 2000);
         }
       } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
+        console.error("Fallback: Oops, unable to copy", err);
       }
 
       document.body.removeChild(textArea);
@@ -97,24 +107,26 @@ export default defineComponent({
         this.fallbackCopyTextToClipboard(text);
         return;
       }
-      
-      navigator.clipboard.writeText(text).then(() => {
-        this.textCopied = true;
-        setTimeout(() => {
-          this.textCopied = false;
-        }, 2000);
-      }, (err) => {
-        console.error('Async: Could not copy text: ', err);
-        this.fallbackCopyTextToClipboard(text);
-      });
-    }
-  }
+
+      navigator.clipboard.writeText(text).then(
+        () => {
+          this.textCopied = true;
+          setTimeout(() => {
+            this.textCopied = false;
+          }, 2000);
+        },
+        (err) => {
+          console.error("Async: Could not copy text: ", err);
+          this.fallbackCopyTextToClipboard(text);
+        }
+      );
+    },
+  },
 });
 </script>
 
 <style lang="scss" scoped>
 .event-details {
-
   .icon-wrapper {
     width: 30px;
     height: 30px;
@@ -124,10 +136,10 @@ export default defineComponent({
   .event-right {
     width: 30%;
     min-height: 40%;
-      
-    @media only screen and (max-width: 600px) { 
+
+    @media only screen and (max-width: 600px) {
       width: 100%;
-  
+
       .upload-page-wrapper {
         margin-top: 20px;
 
@@ -142,13 +154,17 @@ export default defineComponent({
     width: 40%;
     min-height: 40%;
 
-    @media only screen and (max-width: 600px) { 
+    @media only screen and (max-width: 600px) {
       width: 100%;
       margin-top: 30px;
     }
 
-    &>div {
+    & > div {
       height: calc(50% - 40px);
+      
+      @media only screen and (max-width: 600px) {
+        height: fit-content;
+      }
     }
   }
 }

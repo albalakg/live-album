@@ -47,6 +47,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .event-gallery {
   height: 60vh;
+
+  @media only screen and (max-width: 600px) { 
+    height: 100%;
+  }
 }
 
 .gallery-top {

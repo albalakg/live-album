@@ -1,8 +1,14 @@
 <template>
-    <div class="switch" :class="{ disabled }">
+    <div v-if="$bp.isMediumAndUp" class="switch" :class="{ disabled }">
         <input ref="input" :id="`switch-${uniqueId}`" type="checkbox" class="switch-input"
             :class="`switch-input-${color}`" @click="submit()" />
         <label :for="`switch-${uniqueId}`" class="switch-label">Switch</label>
+    </div>
+    <div v-else class="switch-mobile" @click="submit()">
+        <input ref="input" type="checkbox" class="switch-input-mobile" />
+        <div class="switch-light-mobile" :class="{
+            'switch-light-on-mobile': value
+        }"></div>
     </div>
 </template>
 
@@ -36,7 +42,7 @@ export default defineComponent({
     computed: {
         uniqueId(): number {
             return Math.random()
-        }
+        },
     },
 
     mounted() {
@@ -121,5 +127,35 @@ export default defineComponent({
 
 .switch-input:checked+.switch-label::after {
     left: 24px;
+}
+
+.switch-mobile {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    border: 1px solid var(--green);
+    display: block;
+    position: relative;
+    box-shadow: inset 0 0 5px 1px #0003;
+    padding: 2px;
+    cursor: pointer;
+    
+    .switch-input-mobile {
+        display: none;
+    }
+    
+    .switch-light-mobile {
+        border-radius: 50%;
+        height: 100%;
+        width: 100%;
+        background-color: #fff;
+        transition: .2s background-color linear;
+    }
+
+    .switch-light-on-mobile {
+        background-color: var(--green);
+    }
 }
 </style>
