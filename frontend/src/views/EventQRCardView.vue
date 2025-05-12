@@ -15,7 +15,7 @@
     <div
       ref="eventCard"
       class="event-qr-card height--full bg--white brs--medium"
-      :style="`background-image: url('http://localhost:8080/assets/qr-card-background-with-text.webp')`"
+      :style="`background-image: url('/assets/qr-card-background-with-text.webp')`"
     >
       <div class="qr-code">
         <qrcode-vue
