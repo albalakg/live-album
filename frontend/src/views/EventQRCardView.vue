@@ -1,10 +1,14 @@
 <template>
   <div
-    class="event-qr display--flex justify--space-between height--full brs--medium flex--wrap"
+    class="event-qr display--flex justify--space-between height--full brs--medium flex--wrap padding--medium-mobile"
   >
     <div class="width--corner width--full-mobile">
       <h1 class="title--large">כרטיס QR</h1>
       <h1 class="title--small">הכנו בשבליכם כרטיס QR שתוכלו לשלוח ולהדפיס</h1>
+      <template v-if="$bp.isMobile">
+        <br />
+        <p class="text--center">מומלץ להוריד מהמחשב</p>
+      </template>
       <br />
       <MainButton :text="downloadCardText" @onClick="downloadCard()" />
       <br />
