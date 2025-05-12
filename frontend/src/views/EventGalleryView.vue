@@ -1,5 +1,5 @@
 <template>
-  <div class="event-gallery height--full">
+  <div class="event-gallery">
     <div class="gallery-top display--flex justify--space-between align--center">
       <div class="width--sixth width--full-mobile">
         <router-link to="/event/gallery/full-screen">
@@ -49,7 +49,9 @@ export default defineComponent({
   height: 60vh;
 
   @media only screen and (max-width: 600px) { 
-    height: 100%;
+    // height: 100%;
+    margin: 10px;
+    min-height: fit-content;
   }
 }
 
@@ -60,5 +62,6 @@ export default defineComponent({
 
 .gallery-content {
   height: 100%;
+  min-height: fit-content;
 }
 </style>

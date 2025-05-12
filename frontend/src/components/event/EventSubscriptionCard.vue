@@ -20,7 +20,8 @@
         </small>
         <div class="display--flex justify--end">
             <div class="width--half width--full-mobile">
-                <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג חבילה" @onClick="submit()" />
+                <MainButton disabled color="pink" text="שדרג חבילה (בקרוב)" @onClick="submit()" />
+                <!-- <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג חבילה" @onClick="submit()" /> -->
             </div>
         </div>
     </div>

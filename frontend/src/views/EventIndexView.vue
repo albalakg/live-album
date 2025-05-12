@@ -104,7 +104,8 @@ export default defineComponent({
 
     @media only screen and (max-width: 600px) { 
       width: 100%;
-      margin: auto;
+      margin: 0 auto;
+      min-height: fit-content;
     }
   }
 }
