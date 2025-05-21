@@ -15,6 +15,10 @@ class Guard {
   }
 
   hasEvent(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
+    store.getters["event/hasActiveEvent"] ? next() : next("/");
+  }
+
+  hasNoEvent(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
     !store.getters["event/hasActiveEvent"] ? next() : next("/");
   }
 }

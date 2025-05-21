@@ -137,6 +137,10 @@ export default defineComponent({
     width: 30%;
     min-height: 40%;
 
+    @media only screen and (max-width: 1600px) {
+      width: 40%;
+    }
+
     @media only screen and (max-width: 600px) {
       width: 100%;
 

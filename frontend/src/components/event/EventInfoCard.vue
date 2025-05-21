@@ -7,14 +7,12 @@
         <span class="text--dark title--small">סטטוס</span>
         <SubscriptionStatus :status="status" />
       </div>
-      <div
-        class="padding--x-small display--flex justify--space-between"
-        v-for="(item, index) in items"
-        :key="index"
-      >
-        <span class="text--dark title--small">{{ item.text }}</span>
-        <span class="text--dark">{{ item.value }}</span>
-      </div>
+      <template v-for="(item, index) in items" :key="index">
+        <div v-if="item.isVisible" class="padding--x-small display--flex justify--space-between">
+          <span class="text--dark title--small">{{ item.text }}</span>
+          <span class="text--dark">{{ item.value }}</span>
+        </div>
+      </template>
     </div>
     <small class="padding--x-small">
       <strong>שימו לב:</strong>
@@ -72,18 +70,22 @@ export default defineComponent({
         {
           text: "שעון לאירוע",
           value: this.startsAtCounter, // Updated to use the reactive counter
+          isVisible: true,
         },
         {
           text: "סיום האירוע",
           value: this.$store.getters["event/getEventFinishTime"],
+          isVisible: this.isReady || this.isPending,
         },
         {
           text: "תאריך מחיקת הקבצים",
           value: this.disabledTime,
+          isVisible: !this.isReady && !this.isPending,
         },
         {
           text: 'סה"כ קבצים',
           value: this.$store.getters["event/getTotalAssets"],
+          isVisible: true,
         },
       ];
     },
@@ -100,6 +102,10 @@ export default defineComponent({
       return this.$store.getters["event/isEventRending"];
     },
 
+    isInProgress(): boolean {
+      return this.$store.getters["event/isEventInProgress"];
+    },
+
     eventStartTime(): string {
       return this.$store.getters["event/getEventStartTime"];
     },
@@ -114,6 +120,14 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    eventStartTime() {
+      if(!this.intervalId) {
+        this.intervalId = setInterval(this.updateCounter, 1000);
+      }
+    }
+  },
+
   methods: {
     async submit() {
       this.loading = true;
@@ -124,14 +138,17 @@ export default defineComponent({
     },
 
     updateCounter() {
-        if (!this.eventStartTime) {
-            return;
-        }
-        
-        this.startsAtCounter = Time.countdownTimer(this.eventStartTime);
+      if (!this.eventStartTime) {
+        return;
+      }
+
+      this.startsAtCounter = Time.countdownTimer(this.eventStartTime);
       if (this.startsAtCounter === "00:00:00:00" && this.intervalId) {
         clearInterval(this.intervalId);
         this.intervalId = null;
+        if(this.isReady) {
+          this.checkForStatusUpdate();
+        }
       }
     },
 
@@ -140,6 +157,16 @@ export default defineComponent({
         clearInterval(this.intervalId);
       }
     },
+    
+    async checkForStatusUpdate() {
+      for(let index = 0; index < 3; index++) {
+        if(this.isInProgress) {
+          return;
+        }
+
+        await this.$store.dispatch('user/getProfile');
+      }
+    }
   },
 
   mounted() {

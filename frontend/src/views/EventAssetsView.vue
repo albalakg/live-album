@@ -121,6 +121,10 @@ export default defineComponent({
     };
   },
 
+  created() {
+    this.$store.dispatch("event/getEventAssets");
+  },
+  
   watch: {
     totalManagedAssetsIds() {
       this.pickedAll = this.totalManagedAssetsIds === this.totalAssets;

@@ -49,6 +49,10 @@ const EventModule = {
       return state.event?.status === StatusEnum.PENDING;
     },
 
+    isEventInProgress(state: IEventModuleState): boolean {
+      return state.event?.status === StatusEnum.IN_PROGRESS;
+    },
+
     getEventDate(state: IEventModuleState): string | null {
       return Time.extractDate(state.event?.starts_at ?? "");
     },
@@ -74,7 +78,7 @@ const EventModule = {
     },
 
     getEventImage(state: IEventModuleState): string {
-      return process.env.VUE_APP_STORAGE_BASE_URL + "/" + state.event?.image;
+      return `/${state.event?.image}`;
     },
 
     hasActiveEvent(state: IEventModuleState): boolean {

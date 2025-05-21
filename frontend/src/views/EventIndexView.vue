@@ -71,7 +71,7 @@ export default defineComponent({
         return;
       }
 
-      this.$store.dispatch("event/getEventBaseInfo")
+      this.$store.dispatch("user/getProfile")
     }
   }
 });

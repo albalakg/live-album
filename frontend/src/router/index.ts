@@ -51,7 +51,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/order',
     name: 'order',
-    beforeEnter: Guard.hasEvent,
+    beforeEnter: Guard.hasNoEvent,
     component: () => import('@/views/OrderView.vue')
   },
   {
@@ -62,7 +62,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/event',
     name: 'event',
-    beforeEnter: Guard.user,
+    beforeEnter: Guard.hasEvent,
     component: () => import('@/views/EventIndexView.vue'),
     children: [
       {
