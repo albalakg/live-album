@@ -15,12 +15,8 @@
             <!-- <div class="gallery-download-icon pointer" @click="downloadAsset()">
                 <MainIcon icon="download" />
             </div> -->
-            <template v-if="asset.type === 'image'">
-                <img :src="asset.fullPath" alt="image" class="album-asset brs--medium" />
-            </template>
-            <template v-else-if="asset.type === 'video'">
-                <video :src="asset.fullPath" class="album-asset" autoplay muted loop></video>
-            </template>
+            <img v-if="asset.type === 'image'" :src="asset.fullPath" alt="image" class="album-asset brs--medium" />
+            <video v-else-if="asset.type === 'video'" :src="asset.fullPath" class="album-asset" autoplay muted loop></video>
         </div>
     </div>
 </template>

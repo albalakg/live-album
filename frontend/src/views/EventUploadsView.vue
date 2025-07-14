@@ -182,7 +182,7 @@ export default defineComponent({
     },
 
     imagePath(): string {
-      return process.env.VUE_APP_STORAGE_BASE_URL + "/" + this.event?.image;
+      return window.location.origin + "/" + this.event?.image;
     },
 
     eventDate(): string {

@@ -114,10 +114,11 @@ export default defineComponent({
     return {
       counter: '' as string,
       intervalId: null as ReturnType<typeof setInterval> | null,
-      processPollingId: null as ReturnType<typeof setInterval> | null,
+      processPollingId: undefined as ReturnType<typeof setInterval> | undefined,
       pickedAll: false as boolean,
       loading: false as boolean,
       isOpen: false as boolean,
+      pollingCounter: 0 as number,
     };
   },
 
@@ -238,14 +239,18 @@ export default defineComponent({
 
     startPollingProcessStatus() {
       this.processPollingId = setInterval(async () => {
+        if(this.pollingCounter >= 15) {
+          this.stopPollingProcessStatus();
+          return;
+        } 
         await this.$store.dispatch("event/getDownloadAssetsProcess");
+        this.pollingCounter++
       }, 15000); // Poll every 15 seconds
     },
 
     stopPollingProcessStatus() {
       if (this.processPollingId) {
         clearInterval(this.processPollingId);
-        this.processPollingId = null;
       }
     },
 
@@ -253,6 +258,7 @@ export default defineComponent({
       this.loading = true;
       const success = await this.$store.dispatch("event/downloadAssets");
       if (success) {
+        this.resetPolling();
         this.startPollingProcessStatus();
       }
       this.loading = false;
@@ -263,7 +269,13 @@ export default defineComponent({
       await this.$store.dispatch("event/deleteAssets");
       this.loading = false;
     },
+
+    resetPolling() {
+      this.startPollingProcessStatus();
+      this.pollingCounter = 0;
+    },
   },
+
 
   mounted() {
     this.updateCounter();
@@ -291,7 +303,6 @@ export default defineComponent({
   }
 
   .assets-top {
-    height: 18%;
     min-height: fit-content;
   }
 
