@@ -7,13 +7,13 @@
         </p>
         <div class="asset-wrapper bg--dark brs--large shadow--small"
             :class="`display-asset-card-width-${width} display-asset-card-height-${height}`">
-            <img class="width--full height--full brs--large" :src="src" alt="">
+            <img class="width--full height--full brs--large" :src="currentImage" :alt="title">
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
     name: "DisplayAssetCard",
@@ -56,11 +56,49 @@ export default defineComponent({
             type: String,
             default: ''
         },
+        
+        multipleSrc: {
+            type: Array as PropType<string[]> | null,
+            default: null
+        },
+        
+        imageSwitchTime: {
+            type: Number,
+            default: 3000
+        },
+    },
+
+    data() {
+        return {
+            interval: undefined as ReturnType<typeof setInterval> | undefined,
+            newImageIndex: 0 as number
+        }
+    },
+
+    mounted() {
+        if(this.multipleSrc) {
+            this.switchImages();
+        } 
+    },
+
+    computed: {
+        currentImage() {
+            return this.multipleSrc ? this.multipleSrc[this.newImageIndex] : this.src;
+        }
     },
 
     methods: {
         clicked() {
             this.$emit('onClick')
+        },
+
+        switchImages() {
+            this.interval = setInterval(() => {
+                this.newImageIndex = this.newImageIndex + 1;
+                if(this.newImageIndex > this.multipleSrc.length - 1) {
+                    this.newImageIndex = 0;
+                }
+            }, this.imageSwitchTime);
         }
     },
 });

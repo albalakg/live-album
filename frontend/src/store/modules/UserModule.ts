@@ -13,6 +13,7 @@ import Auth from "@/helpers/Auth";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
 import router from "@/router";
+import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
 
 const UserModule = {
   namespaced: true,
@@ -36,7 +37,9 @@ const UserModule = {
     },
 
     getFullName(state: IUserModuleState): string {
-      return (state.user?.first_name ?? "") + " " + (state.user?.last_name ?? "");
+      return (
+        (state.user?.first_name ?? "") + " " + (state.user?.last_name ?? "")
+      );
     },
 
     getEmail(state: IUserModuleState): string | null {
@@ -64,6 +67,40 @@ const UserModule = {
     ): string | null | undefined {
       return state.user?.order?.created_at;
     },
+
+    // TODO: To fix this, not reactive
+    canUpgradeSubscription(
+      state: IUserModuleState,
+      getters: any,
+      rootState: any,
+      rootGetters: any
+    ): boolean {
+      console.log(
+        'rootGetters["EventModule/getEventStatus"]',
+        state.user?.order?.subscription?.name,
+        rootGetters["event/getEventStatus"]
+      );
+
+      console.log(
+        "2",
+        Boolean(
+          state.user?.order?.subscription?.name === SubscriptionTypesEnum.BASIC
+        )
+      );
+      console.log(
+        "3",
+        [StatusEnum.READY, StatusEnum.PENDING].includes(
+          rootGetters["EventModule/getEventStatus"]
+        )
+      );
+
+      return Boolean(
+        state.user?.order?.subscription?.name === SubscriptionTypesEnum.BASIC &&
+          [StatusEnum.READY, StatusEnum.PENDING].includes(
+            rootGetters["EventModule/getEventStatus"]
+          ) // ← replace with your actual module/getter
+      );
+    },
   },
 
   mutations: {
@@ -75,7 +112,10 @@ const UserModule = {
       state.isLoggedIn = isLoggedIn;
     },
 
-    SET_USER_PROFILE_UPDATED(state: IUserModuleState, user: IUpdateUserRequest) {
+    SET_USER_PROFILE_UPDATED(
+      state: IUserModuleState,
+      user: IUpdateUserRequest
+    ) {
       if (state.user) {
         state.user.first_name = user.first_name;
         state.user.last_name = user.last_name;
@@ -103,7 +143,7 @@ const UserModule = {
             notify({
               text: "התחברת בהצלחה",
               type: "success",
-              duration: 5000
+              duration: 5000,
             });
             resolve(user);
           })
@@ -112,7 +152,7 @@ const UserModule = {
             notify({
               text: "כתובת המייל או הסיסמה אינם תקינים",
               type: "error",
-              duration: 5000
+              duration: 5000,
             });
             resolve(null);
           });
@@ -130,17 +170,20 @@ const UserModule = {
           .post("auth/signup", payload)
           .then((res) => {
             notify({
-              text: "נרשמת בהצלחה, ברוכים הבאים! נשלח אליך מייל לאימות",
+              text: "נרשמת בהצלחה, ברוכים הבאים! נשלח מייל לאימות",
               type: "success",
-              duration: 10000
+              duration: 10000,
             });
             resolve(true);
           })
           .catch((err) => {
             notify({
-              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך ההרשמה נכשלה'),
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך ההרשמה נכשלה"
+              ),
               type: "error",
-              duration: 5000
+              duration: 5000,
             });
             console.warn("get: ", err);
             resolve(false);
@@ -160,10 +203,10 @@ const UserModule = {
         .catch((err) => {
           console.warn("get: ", err);
         });
-        Auth.deleteCookie();
-        context.commit("SET_USER", null);
-        context.commit("SET_LOGGED_IN", false);
-        context.dispatch("event/setEvent", null, { root: true });
+      Auth.deleteCookie();
+      context.commit("SET_USER", null);
+      context.commit("SET_LOGGED_IN", false);
+      context.dispatch("event/setEvent", null, { root: true });
     },
 
     forgotPassword(
@@ -179,7 +222,7 @@ const UserModule = {
             notify({
               text: "נשלח אימייל לכתובת המייל לאיפוס הסיסמה",
               type: "success",
-              duration: 5000
+              duration: 5000,
             });
             resolve(true);
           })
@@ -203,15 +246,18 @@ const UserModule = {
             notify({
               text: "איפסת את הסיסמה בהצלחה",
               type: "success",
-              duration: 5000
+              duration: 5000,
             });
             resolve(true);
           })
           .catch((err) => {
             notify({
-              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך האיפוס סיסמה נכשל'),
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך האיפוס סיסמה נכשל"
+              ),
               type: "error",
-              duration: 5000
+              duration: 5000,
             });
             console.warn("get: ", err);
             resolve(null);
@@ -244,21 +290,21 @@ const UserModule = {
     }) {
       return new Promise((resolve) => {
         axios
-        .get("user/profile")
-        .then((res) => {
-          context.dispatch("event/setEvent", res.data.data.event, {
-            root: true,
+          .get("user/profile")
+          .then((res) => {
+            context.dispatch("event/setEvent", res.data.data.event, {
+              root: true,
+            });
+
+            delete res.data.data.event;
+            context.commit("SET_USER", res.data.data);
+            resolve(res.data.data);
+          })
+          .catch((err) => {
+            router.push("/logout");
+            console.warn("get: ", err);
           });
-          
-          delete res.data.data.event;
-          context.commit("SET_USER", res.data.data);
-          resolve(res.data.data)
-        })
-        .catch((err) => {
-          router.push('/logout')
-          console.warn("get: ", err);
-        });
-      })
+      });
     },
 
     updateProfile(
@@ -272,16 +318,19 @@ const UserModule = {
             notify({
               text: "פרופיל המשתמש נערך בהצלחה",
               type: "success",
-              duration: 5000
+              duration: 5000,
             });
             context.commit("SET_USER_PROFILE_UPDATED", payload);
             resolve(res);
           })
           .catch((err) => {
             notify({
-              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך עריכת המשתמש נכשלה'),
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך עריכת המשתמש נכשלה"
+              ),
               type: "error",
-              duration: 5000
+              duration: 5000,
             });
             console.warn("get: ", err);
             resolve(null);
@@ -300,16 +349,19 @@ const UserModule = {
             notify({
               text: "הסיסמה עודכנה בהצלחה",
               type: "success",
-              duration: 5000
+              duration: 5000,
             });
             context.commit("SET_USER_PROFILE_UPDATED", payload);
             resolve(res);
           })
           .catch((err) => {
             notify({
-              text: ErrorsHandler.getErrorMessage(err, 'מצטערים אך עדכון הסיסמה נכשל'),
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך עדכון הסיסמה נכשל"
+              ),
               type: "error",
-              duration: 5000
+              duration: 5000,
             });
             console.warn("get: ", err);
             resolve(null);

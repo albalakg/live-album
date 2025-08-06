@@ -23,7 +23,7 @@
     <div class="contact-content width--corner width--80-mobile bg--pink margin--auto brs--medium padding--medium shadow--small">
       <h2 class="text--center text--white title--large">צרו איתנו קשר</h2>
       <p class="text--center title--small">
-        כל בקשה, הארה, תלונה או טיפ יתקבלו בברכה
+        כל בקשה, שאלה, תלונה או טיפ יתקבלו בברכה
       </p>
       <div>
         <div class="line"></div>

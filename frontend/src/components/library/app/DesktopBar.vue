@@ -23,7 +23,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import DesktopBarLink from './DesktopBarLink.vue';
-import { IDesktopBarItem } from '@/helpers/interfaces'
+import { IDesktopBarItem, IUserInfo } from '@/helpers/interfaces'
 
 export default defineComponent({
     name: 'DesktopBar',
@@ -49,7 +49,7 @@ export default defineComponent({
     },
 
     computed: {
-        user(): boolean {
+        user(): IUserInfo | null {
             return this.$store.getters['user/getUser'];
         },
         
@@ -101,8 +101,8 @@ export default defineComponent({
                     weight: '500'
                 },
                 {
-                    text: 'איך זה עובד',
-                    url: '/#how-it-works',
+                    text: 'למי זה מתאים',
+                    url: '/#who-is-it-for',
                     color: 'dark',
                     weight: '500'
                 },
@@ -160,7 +160,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .desktop-bar {
-    padding: 20px 0;
     position: fixed;
     z-index: 100;
 }

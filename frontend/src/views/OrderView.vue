@@ -43,11 +43,8 @@
               </p>
             </div>
             <div class="display--flex justify--space-between order-info-actions">
-              <div class="width--half padding--medium">
-                <BaseButton @onClick="setSubscription('בסיסי')" text="בסיסי" :color="isBasicSubscription ? 'green' : 'white'" :text-color="isBasicSubscription ? 'white' : 'dark'" />
-              </div>
-              <div class="width--half padding--medium">
-                <BaseButton @onClick="setSubscription('פרימיום')" :color="isBasicSubscription ? 'white' : 'green'" text="פרימיום" :text-color="isBasicSubscription ? 'dark' : 'white'"  />
+              <div class="width--half padding--medium" v-for="subscription in subscriptions" :key="subscription.name">
+                <BaseButton @onClick="setSubscription(subscription.name)" :text="subscription.name" :color="form.subscription === subscription.name  ? 'green' : 'white'" :text-color="form.subscription === subscription.name ? 'white' : 'dark'" />
               </div>
             </div>
           </div>
@@ -61,7 +58,7 @@
             <br>
             <div class="display--flex justify--space-between">
               <span class="title--small text--dark">מחיר ההזמנה</span>
-              <span class="title--small text--dark">₪170</span>
+              <span class="title--small text--dark">₪{{currentSubscription?.price}}</span>
             </div>
             <br>
             <div class="separator bg--dark"></div>
@@ -105,7 +102,17 @@ export default defineComponent({
       loading: false as boolean,
       form: {
         subscription: SubscriptionTypesEnum.BASIC as SubscriptionType
-      }
+      },
+      subscriptions: [
+        {
+          name: 'בסיסי',
+          price: 120
+        },
+        {
+          name: 'פרמיום',
+          price: 170
+        },
+      ] as Record<string, any>[]
     };
   },
 
@@ -114,13 +121,13 @@ export default defineComponent({
       return !!this.orderResponse?.payment_page_link;
     },
 
-    isBasicSubscription(): boolean {
-      return this.form.subscription === SubscriptionTypesEnum.BASIC;
-    },
-
     isLogged(): boolean {
       return this.$store.getters['user/isLoggedIn'];
     },
+
+    currentSubscription(): Record<string, any> | null {
+      return this.subscriptions.find(subscription => subscription.name === this.form.subscription) ?? null;
+    } 
   },
 
   methods: {

@@ -122,6 +122,11 @@ export default defineComponent({
     margin-top: 5%;
     padding-top: 5%;
 
+    .footer-content {
+        z-index: 1;
+        position: relative;
+    }
+
     @media only screen and (max-width: 600px) { 
         padding-bottom: 75px;
         margin-top: 15%;

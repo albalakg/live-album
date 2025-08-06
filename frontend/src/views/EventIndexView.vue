@@ -1,6 +1,10 @@
 <template>
   <template v-if="$store.getters['event/getEvent']">
-    <router-view v-if="isFullScreen"></router-view>
+    <template v-if="isFullScreen">
+        <transition name="fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
+      </template>
     <div class="event-main display--flex padding--medium" v-else>
       <div class="event-sidebar" v-if="$bp.isMediumAndUp">
         <Sidebar :items="items" />
@@ -9,7 +13,9 @@
         <MobileScrollBar :items="items" />
       </div>
       <div class="event-content bg--gray padding--large padding--none-mobile brs--medium">
-        <router-view></router-view>
+        <transition name="fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
       </div>
     </div>
   </template>
@@ -108,5 +114,14 @@ export default defineComponent({
       min-height: fit-content;
     }
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
