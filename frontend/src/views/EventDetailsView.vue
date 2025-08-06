@@ -7,7 +7,7 @@
     >
       <EventDetailsForm />
       <div
-        class="display--flex flex--wrap justify--space-between align--center upload-page-wrapper padding--medium"
+        class="display--flex flex--wrap justify--space-between align--center upload-page-wrapper padding--medium bg--white brs--medium"
       >
         <div class="display--flex align--center width--full-mobile">
           <div class="icon-wrapper">

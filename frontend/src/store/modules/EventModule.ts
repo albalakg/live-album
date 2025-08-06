@@ -78,7 +78,7 @@ const EventModule = {
     },
 
     getEventImage(state: IEventModuleState): string {
-      return `/${state.event?.image}`;
+      return state.event?.fullPath ?? "";
     },
 
     hasActiveEvent(state: IEventModuleState): boolean {
@@ -122,6 +122,7 @@ const EventModule = {
       state.event.starts_at = event.starts_at ? Time.convertToLocalTime(event.starts_at) : "";
       state.event.finished_at = event.finished_at ? Time.convertToLocalTime(event.finished_at) : "";
       state.event.image = event?.image ?? "";
+      state.event.fullPath = event?.fullPath ?? "";
     },
 
     SET_DOWNLOAD_ASSET_PROCESS(state: IEventModuleState, eventDownloadAssetsProcess: IEventDownloadAssetsProcess) {

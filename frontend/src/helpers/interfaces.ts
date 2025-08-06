@@ -59,6 +59,7 @@ export interface IEvent {
   name: string | null;
   path: string;
   image: string | null;
+  fullPath: string | null;
   starts_at: string | null;
   finished_at: string | null;
   assets: IEventAsset[];

@@ -170,7 +170,7 @@ export default defineComponent({
     },
 
     eventImage(): string {
-      return this.canShow ? this.imagePath : ''
+      return this.canShow ? this.$store.getters['event/getEventImage'] : ''
     },
 
     event(): IEvent | null {
@@ -179,10 +179,6 @@ export default defineComponent({
 
     user(): IUserInfo | null {
       return this.$store.getters["user/getUser"];
-    },
-
-    imagePath(): string {
-      return window.location.origin + "/" + this.event?.image;
     },
 
     eventDate(): string {
