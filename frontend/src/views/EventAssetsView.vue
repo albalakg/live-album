@@ -1,16 +1,22 @@
 <template>
-  <div class="event-assets height--full display--flex direction--column justify--space-between">
-    <div class="assets-top bg--white brs--medium padding--large display--flex justify--space-between flex--wrap-mobile">
-      <div class="details display--flex direction--column justify--space-between">
+  <div
+    class="event-assets height--full display--flex direction--column justify--space-between"
+  >
+    <div
+      class="assets-top bg--white brs--medium padding--large display--flex justify--space-between flex--wrap-mobile"
+    >
+      <div
+        class="details display--flex direction--column justify--space-between"
+      >
         <div>
-          <h1 class="title--large">{{ totalAssets }} קבצים <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
+          <h1 class="title--large">
+            {{ totalAssets }} קבצים
+            <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
           </h1>
-          <strong class="text--pink">
-            ממליצים להוריד ישר אחרי האירוע
-          </strong>
+          <strong class="text--pink"> ממליצים להוריד ישר אחרי האירוע </strong>
           <div class="collapse-container">
             <strong class="pointer" @click="toggleCollapse">
-              איך מורידים?
+              איך מורידים
               <MainIcon icon="info" size="1.1em" />
             </strong>
 
@@ -19,58 +25,115 @@
               <div v-if="isOpen">
                 <slot>
                   <small>
-                    בוחרים את הקבצים שרוצים להורדה, ולוחצים על הכפתור "הכנת קבצים להורדה".
-                    <br>
-                    לאחר מכן, אנחנו נכין את כל הקבצים להורדה ותוך כמה דקות יהיה מוכן.
-                    <br>
-                    כאשר מוכן, יופיע כאן למטה, כפתור להורדת הקובץ (זיפ שמכיל את כל התמונות והסרטונים).
-                    <br>
-                    מוזמנים לחכות בינתיים או שתחזרו לעיסוקכם ואנחנו כבר נדאג לעדכן אתכם.
+                    בוחרים את הקבצים שרוצים להורדה, ולוחצים על הכפתור "הכנת
+                    קבצים להורדה".
+                    <br />
+                    לאחר מכן, אנחנו נכין את כל הקבצים להורדה ותוך כמה דקות יהיה
+                    מוכן.
+                    <br />
+                    כאשר מוכן, יופיע כאן למטה, כפתור להורדת הקובץ (זיפ שמכיל את
+                    כל התמונות והסרטונים).
+                    <br />
+                    מוזמנים לחכות בינתיים או שתחזרו לעיסוקכם ואנחנו כבר נדאג
+                    לעדכן אתכם.
                   </small>
                 </slot>
               </div>
             </transition>
           </div>
-          <div class="width--half download-button-wrapper">
-            <a :href="downloadProcess.fullPath" :download="processFileName" v-if="isDownloadProcessFinished">
-              <BaseButton :loading="loading" text="הורדת הקבצים" color="green" />
-            </a>
-            <BaseButton v-if="isDownloadProcessPreparing" disabled text="מכין קבצים..." color="pink" />
-          </div>
+          <UploadMedia />
         </div>
         <div>
           <small>
             <template v-if="isEventActive">
-              <strong>
-                שימו לב:
-              </strong>
-              בעוד <strong>{{ counter }}</strong> כל קבצי האירוע יימחקו ולא יהיה ניתן להוריד/לשחזר
+              <strong> שימו לב: </strong>
+              בעוד <strong>{{ counter }}</strong> כל קבצי האירוע יימחקו ולא יהיה
+              ניתן להוריד/לשחזר
             </template>
           </small>
-          <br>
-
+          <br />
         </div>
       </div>
-      <div class="actions display--flex direction--column justify--space-between text--center">
+      <div
+        class="actions display--flex direction--column justify--space-between text--center"
+      >
         <div class="display--flex justify--space-between align--center">
-          <MainCheckbox :disabled="loading" ref="downloadCheckbox" @onClick="toggleDownloadCheck()"
-            title="לחצו בשביל לאפשר הורדה" :value="isDownloadMode" />
+          <MainCheckbox
+            :disabled="loading"
+            ref="downloadCheckbox"
+            @onClick="toggleDownloadCheck()"
+            title="לחצו בשביל לאפשר הורדה"
+            :value="isDownloadMode"
+          />
           <div class="width--half width--full-mobile action-button-wrapper">
-            <BaseButton :loading="loading" :disabled="!canDownload" text="הכנת קבצים להורדה" color="green"
-              @onClick="downloadFiles()" />
+            <BaseButton
+              :loading="loading"
+              :disabled="!canDownload"
+              text="הכנת קבצים להורדה"
+              color="green"
+              @onClick="downloadFiles()"
+            />
           </div>
         </div>
-        <br>
+        <br />
         <div class="display--flex justify--space-between align--center">
-          <MainCheckbox :disabled="loading" color="pink" ref="deleteCheckbox" @onClick="toggleDeleteCheck()"
-            title="לחצו בשביל לאפשר מחיקה" :value="isDeleteMode" />
+          <MainCheckbox
+            :disabled="loading"
+            color="pink"
+            ref="deleteCheckbox"
+            @onClick="toggleDeleteCheck()"
+            title="לחצו בשביל לאפשר מחיקה"
+            :value="isDeleteMode"
+          />
           <div class="width--half width--full-mobile action-button-wrapper">
-            <BaseButton :loading="loading" :disabled="!canDelete" text="מחק קבצים" color="pink"
-              @onClick="deleteFiles()" />
+            <BaseButton
+              :loading="loading"
+              :disabled="!canDelete"
+              text="מחק קבצים"
+              color="pink"
+              @onClick="deleteFiles()"
+            />
           </div>
         </div>
-        <br>
-        <div class="display--flex align--center" :class="{
+        <br />
+        <div class="display--flex justify--space-between align--center">
+          <div
+            class="display--flex align--center"
+            :class="{
+              disabled: !mode,
+            }"
+          >
+            <MainCheckbox
+              :disabled="loading"
+              ref="chooseAllCheckbox"
+              title="לחצו בשביל לבחור את כולם"
+              @onClick="toggleAllAssets()"
+              :value="pickedAll"
+            />
+            <small class="choose-all-text"> בחר את כולם </small>
+          </div>
+          <div class="width--half width--full-mobile action-button-wrapper">
+            <a
+              :href="downloadProcess.fullPath"
+              :download="processFileName"
+              v-if="isDownloadProcessFinished"
+            >
+              <BaseButton
+                :loading="loading"
+                text="הורדת הקבצים"
+                color="green"
+              />
+            </a>
+            <BaseButton
+              v-if="isDownloadProcessPreparing"
+              disabled
+              text="מכין קבצים..."
+              color="pink"
+            />
+          </div>
+        </div>
+        <br />
+        <!-- <div class="display--flex align--center" :class="{
           'disabled': !mode
         }">
           <MainCheckbox :disabled="loading" ref="chooseAllCheckbox" title="לחצו בשביל לבחור את כולם"
@@ -78,7 +141,7 @@
           <small class="choose-all-text">
             בחר את כולם
           </small>
-        </div>
+        </div> -->
       </div>
     </div>
     <div class="assets-content display--flex flex--wrap brs--medium">
@@ -90,29 +153,31 @@
 </template>
 
 <script lang="ts">
-import { EventAssetsManagementModesEnum, StatusEnum } from '@/helpers/enums';
-import { IEventAsset, IEventDownloadAssetsProcess } from '@/helpers/interfaces';
-import { defineComponent } from 'vue';
-import Time from '@/helpers/time';
-import MainCheckbox from '@/components/library/inputs/MainCheckbox.vue';
-import BaseButton from '@/components/library/buttons/BaseButton.vue';
-import EventAssetCard from '@/components/event/EventAssetCard.vue';
-import { EventAssetsManagementModesType } from '@/helpers/types';
-import MainIcon from '@/components/library/general/MainIcon.vue';
+import { EventAssetsManagementModesEnum, StatusEnum } from "@/helpers/enums";
+import { IEventAsset, IEventDownloadAssetsProcess } from "@/helpers/interfaces";
+import { defineComponent } from "vue";
+import Time from "@/helpers/time";
+import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
+import BaseButton from "@/components/library/buttons/BaseButton.vue";
+import EventAssetCard from "@/components/event/EventAssetCard.vue";
+import { EventAssetsManagementModesType } from "@/helpers/types";
+import MainIcon from "@/components/library/general/MainIcon.vue";
+import UploadMedia from "@/components/library/inputs/UploadMedia.vue";
 
 export default defineComponent({
-  name: 'EventAssetsView',
+  name: "EventAssetsView",
 
   components: {
     BaseButton,
     MainCheckbox,
     EventAssetCard,
     MainIcon,
+    UploadMedia,
   },
 
   data() {
     return {
-      counter: '' as string,
+      counter: "" as string,
       intervalId: null as ReturnType<typeof setInterval> | null,
       processPollingId: undefined as ReturnType<typeof setInterval> | undefined,
       pickedAll: false as boolean,
@@ -125,7 +190,7 @@ export default defineComponent({
   created() {
     this.$store.dispatch("event/getEventAssets");
   },
-  
+
   watch: {
     totalManagedAssetsIds() {
       this.pickedAll = this.totalManagedAssetsIds === this.totalAssets;
@@ -134,7 +199,7 @@ export default defineComponent({
     mode() {
       if (!this.mode) {
         this.pickedAll = false;
-        this.$store.dispatch("event/toggleAllAssetsInAssetsManagement", false)
+        this.$store.dispatch("event/toggleAllAssetsInAssetsManagement", false);
       }
     },
 
@@ -142,73 +207,86 @@ export default defineComponent({
       if (this.isDownloadProcessFinished && this.processPollingId) {
         this.stopPollingProcessStatus();
       }
-    }
+    },
   },
 
   computed: {
     assetToggleColor(): string {
-      return this.canDelete ? 'pink' : 'green';
+      return this.canDelete ? "pink" : "green";
     },
 
     totalAssets(): number {
-      return this.$store.getters['event/getTotalAssets']
+      return this.$store.getters["event/getTotalAssets"];
     },
 
     assets(): IEventAsset[] {
-      return this.$store.getters['event/getAssets']
+      return this.$store.getters["event/getAssets"];
     },
 
     isEventActive(): boolean {
-      return this.$store.getters['event/getEventStatus'] === StatusEnum.ACTIVE;
+      return this.$store.getters["event/getEventStatus"] === StatusEnum.ACTIVE;
     },
 
     mode(): EventAssetsManagementModesType | null {
-      return this.$store.getters['event/getManagedAssetsMode'];
+      return this.$store.getters["event/getManagedAssetsMode"];
     },
 
     isDownloadMode(): boolean {
-      return this.mode === EventAssetsManagementModesEnum.DOWNLOAD
+      return this.mode === EventAssetsManagementModesEnum.DOWNLOAD;
     },
 
     isDeleteMode(): boolean {
-      return this.mode === EventAssetsManagementModesEnum.DELETE
+      return this.mode === EventAssetsManagementModesEnum.DELETE;
     },
 
     totalManagedAssetsIds(): number {
-      return this.$store.getters['event/getTotalManagedAssetsIds'];
+      return this.$store.getters["event/getTotalManagedAssetsIds"];
     },
 
     managedAssetsIds(): number[] {
-      return this.$store.getters['event/getManagedAssetsIds'];
+      return this.$store.getters["event/getManagedAssetsIds"];
     },
 
     downloadProcess(): IEventDownloadAssetsProcess {
-      return this.$store.getters['event/getDownloadAssetsProcess'];
+      return this.$store.getters["event/getDownloadAssetsProcess"];
     },
 
     isDownloadProcessFinished(): boolean {
-      return this.downloadProcess?.status === StatusEnum.ACTIVE && !!this.downloadProcess?.fullPath;
+      return (
+        this.downloadProcess?.status === StatusEnum.ACTIVE &&
+        !!this.downloadProcess?.fullPath
+      );
     },
 
     isDownloadProcessPreparing(): boolean {
-      return this.downloadProcess && [StatusEnum.PENDING, StatusEnum.IN_PROGRESS].includes(this.downloadProcess.status);
+      return (
+        this.downloadProcess &&
+        [StatusEnum.PENDING, StatusEnum.IN_PROGRESS].includes(
+          this.downloadProcess.status
+        )
+      );
     },
 
     canDownload(): boolean {
-      return this.isDownloadMode && this.managedAssetsIds.length > 0
+      return this.isDownloadMode && this.managedAssetsIds.length > 0;
     },
 
     canDelete(): boolean {
-      return this.isDeleteMode && this.managedAssetsIds.length > 0
+      return this.isDeleteMode && this.managedAssetsIds.length > 0;
     },
 
     processFileName(): string {
-      return this.$store.getters['event/getEventProcessFileName'];
+      return this.$store.getters["event/getEventProcessFileName"];
     },
 
     disabledTime(): string {
-      return this.$store.getters['event/getEventFinishTime'] ? Time.addDays(this.$store.getters['event/getEventFinishTime'], this.$store.getters['user/getSubscriptionFilesStorageTime']) : ""
-    }
+      return this.$store.getters["event/getEventFinishTime"]
+        ? Time.addDays(
+            this.$store.getters["event/getEventFinishTime"],
+            this.$store.getters["user/getSubscriptionFilesStorageTime"]
+          )
+        : "";
+    },
   },
 
   methods: {
@@ -225,26 +303,35 @@ export default defineComponent({
     },
 
     toggleDownloadCheck() {
-      this.$store.dispatch("event/setModeForAssetsManagement", this.isDownloadMode ? null : EventAssetsManagementModesEnum.DOWNLOAD)
+      this.$store.dispatch(
+        "event/setModeForAssetsManagement",
+        this.isDownloadMode ? null : EventAssetsManagementModesEnum.DOWNLOAD
+      );
     },
 
     toggleDeleteCheck() {
-      this.$store.dispatch("event/setModeForAssetsManagement", this.isDeleteMode ? null : EventAssetsManagementModesEnum.DELETE)
+      this.$store.dispatch(
+        "event/setModeForAssetsManagement",
+        this.isDeleteMode ? null : EventAssetsManagementModesEnum.DELETE
+      );
     },
 
     toggleAllAssets() {
       this.pickedAll = !this.pickedAll;
-      this.$store.dispatch("event/toggleAllAssetsInAssetsManagement", this.pickedAll)
+      this.$store.dispatch(
+        "event/toggleAllAssetsInAssetsManagement",
+        this.pickedAll
+      );
     },
 
     startPollingProcessStatus() {
       this.processPollingId = setInterval(async () => {
-        if(this.pollingCounter >= 15) {
+        if (this.pollingCounter >= 15) {
           this.stopPollingProcessStatus();
           return;
-        } 
+        }
         await this.$store.dispatch("event/getDownloadAssetsProcess");
-        this.pollingCounter++
+        this.pollingCounter++;
       }, 15000); // Poll every 15 seconds
     },
 
@@ -276,7 +363,6 @@ export default defineComponent({
     },
   },
 
-
   mounted() {
     this.updateCounter();
     this.intervalId = setInterval(this.updateCounter, 1000);
@@ -291,15 +377,14 @@ export default defineComponent({
       clearInterval(this.intervalId);
     }
     this.stopPollingProcessStatus();
-  }
+  },
 });
 </script>
 
 <style lang="scss" scoped>
 .event-assets {
-
   h1 small {
-    font-size: .5em;
+    font-size: 0.5em;
   }
 
   .assets-top {
@@ -325,7 +410,7 @@ export default defineComponent({
     max-height: fit-content;
     width: 30%;
 
-    @media only screen and (max-width: 600px) { 
+    @media only screen and (max-width: 600px) {
       width: 100%;
       margin-top: 10px;
 

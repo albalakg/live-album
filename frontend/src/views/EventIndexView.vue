@@ -35,6 +35,12 @@ export default defineComponent({
     MobileScrollBar,
   },
 
+  mounted() {
+    if(!this.$store.getters['event/hasActiveEvent']) {
+      this.$router.push({ name: 'home' });
+    }
+  },
+
   computed: {
     isFullScreen(): boolean {
       return this.$route.path.includes('uploads') || this.$route.path.includes('full-screen');
@@ -70,16 +76,6 @@ export default defineComponent({
       });
     },
   },
-
-  methods: {
-    getEventDetails() {
-      if(this.$store.getters["event/getEvent"]) {
-        return;
-      }
-
-      this.$store.dispatch("user/getProfile")
-    }
-  }
 });
 </script>
 

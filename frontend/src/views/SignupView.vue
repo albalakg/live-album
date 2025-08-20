@@ -105,7 +105,6 @@ import MainCube from "@/components/library/background/MainCube.vue";
 import MainInput from "@/components/library/inputs/MainInput.vue";
 import { defineComponent } from "vue";
 import { ISignupRequest } from "@/helpers/interfaces";
-import ErrorsHandler from "@/helpers/errorsHandler";
 
 export default defineComponent({
   name: "SignupView",

@@ -36,7 +36,6 @@ import { defineComponent } from "vue";
 import MainButton from "../library/buttons/MainButton.vue";
 import MainInput from "../library/inputs/MainInput.vue";
 import { IEvent } from "@/helpers/interfaces";
-import { image } from "html2canvas/dist/types/css/types/image";
 
 export default defineComponent({
   name: "EventDetailsForm",

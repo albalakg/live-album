@@ -62,7 +62,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/event',
     name: 'event',
-    beforeEnter: Guard.hasEvent,
+    beforeEnter: Guard.user,
     component: () => import('@/views/EventIndexView.vue'),
     children: [
       {

@@ -67,16 +67,12 @@ export default defineComponent({
   methods: {
     async setInitialSettings() {
       if (Auth.isLogged()) {
-        console.log("start");
         await Promise.all([
           this.$store.dispatch("user/setUserAsLoggedIn"),
           this.$store.dispatch("user/getProfile"),
         ]);
-        this.loading = false;
-        console.log("finished");
-      } else {
-        this.loading = false;
       }
+      this.loading = false;
     },
   },
 });
