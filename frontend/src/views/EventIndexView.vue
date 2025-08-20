@@ -1,10 +1,10 @@
 <template>
   <template v-if="$store.getters['event/getEvent']">
     <template v-if="isFullScreen">
-        <transition name="fade" mode="out-in">
-          <router-view></router-view>
-        </transition>
-      </template>
+      <transition name="fade" mode="out-in">
+        <router-view></router-view>
+      </transition>
+    </template>
     <div class="event-main display--flex padding--medium" v-else>
       <div class="event-sidebar" v-if="$bp.isMediumAndUp">
         <Sidebar :items="items" />
@@ -12,7 +12,9 @@
       <div class="event-mobile-bar" v-else>
         <MobileScrollBar :items="items" />
       </div>
-      <div class="event-content bg--gray padding--large padding--none-mobile brs--medium">
+      <div
+        class="event-content bg--gray padding--large padding--none-mobile brs--medium"
+      >
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -22,13 +24,13 @@
 </template>
 
 <script lang="ts">
-import Sidebar from '@/components/library/app/SideBar.vue';
-import MobileScrollBar from '@/components/library/app/MobileScrollBar.vue';
-import { defineComponent } from 'vue';
-import { IMobileScrollBarItem } from '@/helpers/interfaces';
+import Sidebar from "@/components/library/app/SideBar.vue";
+import MobileScrollBar from "@/components/library/app/MobileScrollBar.vue";
+import { defineComponent } from "vue";
+import { IMobileScrollBarItem } from "@/helpers/interfaces";
 
 export default defineComponent({
-  name: 'EventIndexView',
+  name: "EventIndexView",
 
   components: {
     Sidebar,
@@ -36,43 +38,46 @@ export default defineComponent({
   },
 
   mounted() {
-    if(!this.$store.getters['event/hasActiveEvent']) {
-      this.$router.push({ name: 'home' });
+    if (!this.$store.getters["event/hasActiveEvent"]) {
+      this.$router.push({ name: "home" });
     }
   },
 
   computed: {
     isFullScreen(): boolean {
-      return this.$route.path.includes('uploads') || this.$route.path.includes('full-screen');
+      return (
+        this.$route.path.includes("uploads") ||
+        this.$route.path.includes("full-screen")
+      );
     },
 
     items(): IMobileScrollBarItem[] {
       const items = [
         {
-            text: 'פרטי האירוע',
-            path: '/event',
-            isActive: false,
+          text: "פרטי האירוע",
+          path: "/event",
+          isActive: false,
         },
         {
-            text: 'האלבום',
-            path: '/event/gallery',
-            isActive: false,
+          text: "האלבום",
+          path: "/event/gallery",
+          isActive: false,
         },
         {
-            text: 'כל הקבצים',
-            path: '/event/assets',
-            isActive: false,
+          text: "כל הקבצים",
+          path: "/event/assets",
+          isActive: false,
         },
         {
-            text: 'כרטיס QR',
-            path: '/event/qr',
-            isActive: false,
+          text: "כרטיס QR",
+          path: "/event/qr",
+          isActive: false,
         },
       ];
 
-      return items.map(item => {
-          item.isActive = item.path === this.$route.path;
-          return item;
+      return items.map((item) => {
+        item.isActive = item.path === this.$route.path;
+        return item;
       });
     },
   },
@@ -104,7 +109,7 @@ export default defineComponent({
     width: 78%;
     margin-inline-start: 40px;
 
-    @media only screen and (max-width: 600px) { 
+    @media only screen and (max-width: 600px) {
       width: 100%;
       margin: 0 auto;
       min-height: fit-content;

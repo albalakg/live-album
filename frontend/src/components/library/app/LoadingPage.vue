@@ -11,8 +11,8 @@
     <MainCube color="pink" right="0%" top="28%" width="xxx-large" height="medium" />
     <MainCube color="pink" right="12%" top="84%" width="large" height="xxx-large" />
     <div
-      class="loading-screen-box text--center text margin--auto shadow--small brs--x-large display--flex justify--center align--center bg--green">
-    <h1 class="text--white title--x-large">טוען... כבר מסיים</h1>
+      class="loading-screen-box text--center text margin--auto brs--x-large display--flex justify--center align--center">
+    <h1 class="text--green title--x-large">טוען... כבר מסיים</h1>
     </div>
   </div>
 </template>

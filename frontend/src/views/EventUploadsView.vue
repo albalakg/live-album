@@ -1,55 +1,95 @@
 <template>
-
-  <div class="home" :class="{
-    'event-image': event
-  }" :style="`background: url('${eventImage}') no-repeat center center`">
+  <div
+    class="home"
+    :class="{
+      'event-image': event,
+    }"
+    :style="`background: url('${eventImage}') no-repeat center center;`"
+  >
     <template v-if="loading">
       <div class="text--center">
         <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
-        <MainCube color="pink" left="10%" top="10%" width="large" height="x-large" />
+        <MainCube
+          color="pink"
+          left="10%"
+          top="10%"
+          width="large"
+          height="x-large"
+        />
         <MainCube left="8%" top="3%" width="large" height="large" />
         <MainCube left="11%" top="6%" width="medium" height="medium" />
         <MainCube left="60%" top="3%" width="large" height="large" />
-        <MainCube color="pink" left="63%" top="10%" width="medium" height="medium" />
-        <MainCube color="pink" left="30%" top="73%" width="large" height="large" />
-        <MainCube color="pink" left="33%" top="71%" width="large" height="medium" />
-        <MainCube color="pink" left="72%" top="80%" width="xx-large" height="large" />
-        <h1>
-          טוען את העמוד...
-        </h1>
-        <br>
-        <span class="title--x-large text--pink">
-          SnapShare
-        </span>
+        <MainCube
+          color="pink"
+          left="63%"
+          top="10%"
+          width="medium"
+          height="medium"
+        />
+        <MainCube
+          color="pink"
+          left="30%"
+          top="73%"
+          width="large"
+          height="large"
+        />
+        <MainCube
+          color="pink"
+          left="33%"
+          top="71%"
+          width="large"
+          height="medium"
+        />
+        <MainCube
+          color="pink"
+          left="72%"
+          top="80%"
+          width="xx-large"
+          height="large"
+        />
+        <h1>טוען את העמוד...</h1>
+        <br />
+        <span class="title--x-large text--pink"> SnapShare </span>
       </div>
     </template>
     <template v-else>
       <template v-if="canShow && event">
         <div class="overlay"></div>
-        <div class="content-wrapper height--full display--flex direction--column justify--space-between">
+        <div
+          class="content-wrapper height--full display--flex direction--column justify--space-between"
+        >
           <h1 class="title text--white">
-            {{
-              event.name
-            }}
+            <span v-if="displayName">
+              {{ event.name }}
+            </span>
             <!-- <br>Wedding 25.11.2024   -->
           </h1>
 
           <div class="display--flex align--end">
             <div>
-              <button class="upload-button" :disabled="isUploading" @click="triggerFileUpload">
+              <button
+                class="upload-button"
+                :disabled="isUploading"
+                @click="triggerFileUpload"
+              >
                 <span v-if="isUploading">מעלה...</span>
                 <span v-else>תעלו ותשתפו</span>
               </button>
-              <input type="file" ref="fileInput" accept="image/*,video/*" @change="handleFileChange"
-                style="display:none;" />
-              <div :class="{ 'hidden': !showNotification }" class="notification">
+              <input
+                type="file"
+                ref="fileInput"
+                accept="image/*,video/*"
+                @change="handleFileChange"
+                style="display: none"
+              />
+              <div :class="{ hidden: !showNotification }" class="notification">
                 <span v-if="uploadSuccess">הקובץ עלה בהצלחה!</span>
                 <span v-else>נכשל לעלות את הקובץ</span>
               </div>
               <h2 class="event-date text--white">
-                {{
-                  eventDate
-                }}
+                <span v-if="displayDate">
+                  {{ eventDate }}
+                </span>
               </h2>
             </div>
           </div>
@@ -57,22 +97,48 @@
       </template>
       <div v-else class="upload-not-available text--center">
         <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
-        <MainCube color="pink" left="10%" top="10%" width="large" height="x-large" />
+        <MainCube
+          color="pink"
+          left="10%"
+          top="10%"
+          width="large"
+          height="x-large"
+        />
         <MainCube left="8%" top="3%" width="large" height="large" />
         <MainCube left="11%" top="6%" width="medium" height="medium" />
         <MainCube left="60%" top="3%" width="large" height="large" />
-        <MainCube color="pink" left="63%" top="10%" width="medium" height="medium" />
-        <MainCube color="pink" left="30%" top="73%" width="large" height="large" />
-        <MainCube color="pink" left="33%" top="71%" width="large" height="medium" />
-        <MainCube color="pink" left="72%" top="80%" width="xx-large" height="large" />
+        <MainCube
+          color="pink"
+          left="63%"
+          top="10%"
+          width="medium"
+          height="medium"
+        />
+        <MainCube
+          color="pink"
+          left="30%"
+          top="73%"
+          width="large"
+          height="large"
+        />
+        <MainCube
+          color="pink"
+          left="33%"
+          top="71%"
+          width="large"
+          height="medium"
+        />
+        <MainCube
+          color="pink"
+          left="72%"
+          top="80%"
+          width="xx-large"
+          height="large"
+        />
         <div>
-          <h1>
-            מצטערים, אך האירוע אינו פעיל כרגע
-          </h1>
-          <br>
-          <span class="title--x-large text--pink">
-            SnapShare
-          </span>
+          <h1>מצטערים, אך האירוע אינו פעיל כרגע</h1>
+          <br />
+          <span class="title--x-large text--pink"> SnapShare </span>
         </div>
       </div>
     </template>
@@ -80,15 +146,15 @@
 </template>
 
 <script lang="ts">
-import { IUserInfo, IEvent } from '@/helpers/interfaces';
-import { defineComponent, ref, computed } from 'vue';
-import { useStore } from 'vuex';
-import MainCube from '@/components/library/background/MainCube.vue';
+import { IUserInfo, IEvent } from "@/helpers/interfaces";
+import { defineComponent, ref, computed } from "vue";
+import { useStore } from "vuex";
+import MainCube from "@/components/library/background/MainCube.vue";
 import { StatusEnum } from "@/helpers/enums";
-import Auth from '@/helpers/Auth';
+import Auth from "@/helpers/Auth";
 
 export default defineComponent({
-  name: 'EventUploadsView',
+  name: "EventUploadsView",
 
   components: {
     MainCube,
@@ -102,7 +168,9 @@ export default defineComponent({
     const uploadSuccess = ref(false);
     const uploadFailed = ref(false);
 
-    const showNotification = computed(() => uploadSuccess.value || uploadFailed.value);
+    const showNotification = computed(
+      () => uploadSuccess.value || uploadFailed.value
+    );
 
     const triggerFileUpload = () => {
       if (fileInput.value) {
@@ -118,13 +186,16 @@ export default defineComponent({
         uploadSuccess.value = false;
 
         try {
-          await store.dispatch("event/uploadFile", {file: target.files[0], isAuth: Auth.isLogged()});
+          await store.dispatch("event/uploadFile", {
+            file: target.files[0],
+            isAuth: Auth.isLogged(),
+          });
           uploadSuccess.value = true;
           setTimeout(() => {
             uploadSuccess.value = false;
           }, 5000);
         } catch (error: any) {
-          console.error('Upload failed', error);
+          console.error("Upload failed", error);
           uploadFailed.value = true;
           setTimeout(() => {
             uploadFailed.value = false;
@@ -149,32 +220,49 @@ export default defineComponent({
   data() {
     return {
       loading: true as boolean,
-    }
+    };
   },
 
   computed: {
     canShow(): boolean {
-      if(this.loading) {
+      if (this.loading) {
         return false;
       }
 
-      if(this.event?.status === StatusEnum.IN_PROGRESS) {
-        return true;
-      }
-      
-      if(this.event?.status !== StatusEnum.IN_PROGRESS && this.event?.user_id === this.user?.id) {
+      if (this.event?.status === StatusEnum.IN_PROGRESS) {
         return true;
       }
 
-      return false
+      if (
+        this.event?.status !== StatusEnum.IN_PROGRESS &&
+        this.event?.user_id === this.user?.id
+      ) {
+        return true;
+      }
+
+      return false;
     },
 
     eventImage(): string {
-      return this.canShow ? this.$store.getters['event/getEventImage'] : ''
+      return this.canShow && this.displayImage
+        ? this.$store.getters["event/getEventImage"]
+        : "/assets/upload-default-image.png";
     },
 
     event(): IEvent | null {
       return this.$store.getters["event/getEvent"];
+    },
+
+    displayName(): boolean {
+      return this.event?.config.preview_site_display_name ?? false;
+    },
+
+    displayImage(): boolean {
+      return this.event?.config.preview_site_display_image ?? false;
+    },
+
+    displayDate(): boolean {
+      return this.event?.config.preview_site_display_date ?? false;
     },
 
     user(): IUserInfo | null {
@@ -192,16 +280,19 @@ export default defineComponent({
 
   methods: {
     async getEventDetails() {
-      await this.$store.dispatch("event/getEventBaseInfo", this.$route.params.event_path)
+      await this.$store.dispatch(
+        "event/getEventBaseInfo",
+        this.$route.params.event_path
+      );
       this.loading = false;
-    }
-  }
+    },
+  },
 });
 </script>
 
-
 <style lang="scss">
-.upload-not-available {}
+.upload-not-available {
+}
 
 .home {
   position: absolute;
@@ -220,7 +311,7 @@ export default defineComponent({
 }
 
 .event-image {
-  background-size: cover;
+  background-size: cover !important;
 }
 
 .overlay {
@@ -251,13 +342,9 @@ export default defineComponent({
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 
-// .event-date {
-//   position: absolute;
-//   bottom: 10px;
-//   left: 0;
-//   right: 0;
-//   margin: auto;
-// }
+.event-date {
+  margin-bottom: 20px;
+}
 
 .upload-button {
   font-size: 2rem;
@@ -276,7 +363,7 @@ export default defineComponent({
 }
 
 .upload-button:disabled {
-  opacity: .9;
+  opacity: 0.9;
   cursor: not-allowed;
 }
 

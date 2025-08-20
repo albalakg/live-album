@@ -64,7 +64,16 @@ export interface IEvent {
   finished_at: string | null;
   assets: IEventAsset[];
   active_download_process: IEventDownloadAssetsProcess;
+  config: IEventConfig;
   user_id?: number;
+}
+
+export interface IEventConfig {
+  id: number;
+  preview_site_display_image: boolean;
+  preview_site_display_name: boolean;
+  preview_site_display_date: boolean;
+  event_id: number;
 }
 
 export interface IEventDownloadAssetsProcess {

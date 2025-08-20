@@ -54,7 +54,7 @@ const EventModule = {
     },
 
     getEventDate(state: IEventModuleState): string | null {
-      return Time.extractDate(state.event?.starts_at ?? "");
+      return state.event?.starts_at ? Time.extractDate(state.event?.starts_at ?? "") : "";
     },
 
     getEventStartTime(state: IEventModuleState): string | null {

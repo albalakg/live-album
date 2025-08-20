@@ -1,5 +1,5 @@
 <template>
-    <div class="main-icon" @click="clicked()" :class="{ disabled, 'pointer': clickable }" :style="` ${background ? 'background-color: #fff8;' : ''}`">
+    <div class="main-icon" @click="clicked" :class="{ disabled, 'pointer': clickable }" :style="` ${background ? 'background-color: #fff8;' : ''}`">
         <span class="material-symbols-outlined" :style="`${size ? 'font-size: ' + size + ';' : ''} color: ${color};`">
             {{ icon }}
         </span>
@@ -45,9 +45,9 @@ export default defineComponent({
     },
 
     methods: {
-        clicked() {
+        clicked(event: MouseEvent) {
             if(this.clickable) {
-                this.$emit('onClick')
+                this.$emit('onClick', event)
             }
         }
     },

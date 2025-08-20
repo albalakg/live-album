@@ -27,6 +27,34 @@
       @onChange="fileUploaded"
     />
     <br />
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_site_display_image = !form.config.preview_site_display_image"
+        title="להציג את תמונת החתונה בעמוד העלאות"
+        :value="form.config.preview_site_display_image"
+        class="checkbox"
+      />
+      <small> להציג את תמונת החתונה בעמוד העלאות </small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_site_display_name = !form.config.preview_site_display_name"
+        title="להציג את שם החתונה בעמוד העלאות"
+        :value="form.config.preview_site_display_name"
+        class="checkbox"
+      />
+      <small> להציג את שם החתונה בעמוד העלאות </small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_site_display_date = !form.config.preview_site_display_date"
+        title="להציג את תאריך החתונה בעמוד העלאות"
+        :value="form.config.preview_site_display_date"
+        class="checkbox"
+      />
+      <small> להציג את תאריך החתונה בעמוד העלאות </small>
+    </div>
+    <br>
     <MainButton :loading="loading" text="שמור" />
   </form>
 </template>
@@ -36,6 +64,8 @@ import { defineComponent } from "vue";
 import MainButton from "../library/buttons/MainButton.vue";
 import MainInput from "../library/inputs/MainInput.vue";
 import { IEvent } from "@/helpers/interfaces";
+import Time from "@/helpers/time";
+import MainCheckbox from "../library/inputs/MainCheckbox.vue";
 
 export default defineComponent({
   name: "EventDetailsForm",
@@ -43,6 +73,7 @@ export default defineComponent({
   components: {
     MainButton,
     MainInput,
+    MainCheckbox,
   },
 
   data() {
@@ -51,6 +82,11 @@ export default defineComponent({
         name: "" as string,
         starts_at: "" as string,
         image: null as File | null,
+        config: {
+          preview_site_display_image: false as boolean,
+          preview_site_display_name: false as boolean,
+          preview_site_display_date: false as boolean,
+        }
       },
       errors: {
         name: "" as string,
@@ -91,7 +127,15 @@ export default defineComponent({
     setEvent() {
       this.form.name = this.event?.name ?? "";
       this.form.starts_at = this.event?.starts_at ?? "";
+      this.form.config.preview_site_display_image = this.event?.config?.preview_site_display_image ?? false;
+      this.form.config.preview_site_display_name = this.event?.config?.preview_site_display_name ?? false;
+      this.form.config.preview_site_display_date = this.event?.config?.preview_site_display_date ?? false;
       this.imageExists = !!this.event?.image;
+    },
+
+    deleteImage() {
+      this.form.image = null;
+      this.imageExists = false;
     },
 
     fileUploaded(file: File) {
@@ -99,7 +143,6 @@ export default defineComponent({
     },
 
     async submit() {
-
       const errors = this.validateForm();
       if (Object.values(errors).some((error) => error !== "")) {
         Object.values(errors).forEach((error) => {
@@ -115,10 +158,15 @@ export default defineComponent({
       }
 
       this.loading = true;
+      console.log('config', this.form.config);
+      
       await this.$store.dispatch(
         "event/update",
         this.isPending
-          ? this.form
+          ? {
+              ...this.form,
+              starts_at: Time.toUTC(this.form.starts_at),
+            }
           : { name: this.form.name, image: this.form.image }
       );
       this.loading = false;
@@ -147,6 +195,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.event-form{
+  margin-bottom: 20px;
+}
+
 :deep(.dp__input_wrap) {
   border-radius: 8px;
   box-shadow: 0 2px 5px 1px var(--darkTransparent);
@@ -177,6 +229,15 @@ export default defineComponent({
 }
 
 :deep(.dp__menu) {
-    min-width: unset;
+  min-width: unset;
 }
+
+.checkbox-wrapper {
+  margin-bottom: 10px;
+  
+  .checkbox {
+    margin-inline-end: 10px;
+  }
+}
+
 </style>

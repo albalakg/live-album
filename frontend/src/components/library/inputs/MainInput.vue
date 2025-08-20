@@ -23,6 +23,7 @@
             </template>
             <div class="input-icon-wrapper pointer">
                 <MainIcon v-if="icon" :icon="icon"/>
+                <MainIcon clickable v-if="deleteable" icon="close" @onClick="deleteValue" />
             </div>
         </div>
         <small v-if="hint">
@@ -94,6 +95,11 @@ export default defineComponent({
         },
 
         fileExists: {
+            type: Boolean,
+            default: false
+        },
+
+        deleteable: {
             type: Boolean,
             default: false
         },
@@ -177,6 +183,13 @@ export default defineComponent({
             }
 
             (this.$refs as any).fileInput.click();
+        },
+
+        deleteValue(event: MouseEvent) {
+            event.stopPropagation();
+            this.file = null;
+            this.localValue = '';
+            this.$emit('onDelete');
         }
     }
 });

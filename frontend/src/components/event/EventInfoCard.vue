@@ -32,7 +32,7 @@
         />
         <MainButton
           v-else
-          :disabled="!isPending"
+          :disabled="!canUpdateToReady"
           :loading="loading"
           text="האירוע מוכן"
           @onClick="submit()"
@@ -98,6 +98,10 @@ export default defineComponent({
       return this.$store.getters["event/isEventReady"];
     },
 
+    canUpdateToReady(): boolean {
+      return this.isPending && this.$store.getters["event/getEventName"] && this.$store.getters["event/getEventDate"];
+    },
+
     isPending(): boolean {
       return this.$store.getters["event/isEventRending"];
     },
@@ -132,8 +136,8 @@ export default defineComponent({
     async submit() {
       this.loading = true;
       this.isReady
-        ? this.$store.dispatch("event/setPending")
-        : this.$store.dispatch("event/setReady");
+        ? await this.$store.dispatch("event/setPending")
+        : await this.$store.dispatch("event/setReady");
       this.loading = false;
     },
 
