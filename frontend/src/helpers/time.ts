@@ -15,7 +15,6 @@ class Time {
 
   extractDate(givenDate: string): string {
     const date = new Date(givenDate + "Z"); // Adding 'Z' ensures it's treated as UTC
-    console.log({ givenDate, date });
 
     // Extract the day, month, and year
     const day = String(date.getDate()).padStart(2, "0");
@@ -67,7 +66,6 @@ class Time {
   }
 
   toUTC(date: string | Date): string {
-    console.log({date});
     if(typeof date !== "string") {
       date = date.toISOString();
     }

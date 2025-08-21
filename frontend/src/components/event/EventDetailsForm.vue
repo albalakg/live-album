@@ -158,16 +158,17 @@ export default defineComponent({
       }
 
       this.loading = true;
-      console.log('config', this.form.config);
-      
+      let payload = {
+        ...this.form,
+      }
+
+      if(this.isPending) {
+        payload.starts_at = Time.toUTC(this.form.starts_at);
+      }
+
       await this.$store.dispatch(
         "event/update",
-        this.isPending
-          ? {
-              ...this.form,
-              starts_at: Time.toUTC(this.form.starts_at),
-            }
-          : { name: this.form.name, image: this.form.image }
+        payload
       );
       this.loading = false;
     },
