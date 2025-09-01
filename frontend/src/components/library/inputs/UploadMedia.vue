@@ -1,7 +1,7 @@
 <template>
   <div class="upload-media mt-4 text-right">
     <label class="font-semibold block mb-2">
-      העלה תמונות או סרטונים (עד 100MB כל אחד)
+      העלה תמונות או סרטונים (עד 250MB כל אחד)
     </label>
 
     <!-- Dropzone -->
@@ -87,7 +87,7 @@ export default defineComponent({
   data() {
     return {
       isDragging: false,
-      MAX_SIZE_MB: 100,
+      MAX_SIZE_MB: 250,
       uploads: [] as UploadItem[],
       progress: {
         total: 0,

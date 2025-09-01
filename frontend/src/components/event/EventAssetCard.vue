@@ -45,15 +45,16 @@
         @mouseenter="playVideo"
         @mouseleave="pauseVideo"
       >
-        <video ref="videoEl" class="album-asset brs--medium" muted loop></video>
+        <video
+          ref="videoEl"
+          :src="asset.fullPath"
+          class="album-asset brs--medium"
+          muted
+          loop
+        ></video>
         <div v-if="!isPlaying" class="video-overlay">
-          <MainIcon
-            icon="play_circle"
-            size="3em"
-            color="#ddd"
-            :background="false"
-          />
-        </div>
+            <MainIcon icon="play_circle" size="3em" color="#ddd" :background="false" />
+            </div>
       </div>
     </div>
   </div>
