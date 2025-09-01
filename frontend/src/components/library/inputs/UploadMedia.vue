@@ -1,7 +1,7 @@
 <template>
   <div class="upload-media mt-4 text-right">
     <label class="font-semibold block mb-2">
-      העלה תמונות או סרטונים (עד 250MB כל אחד)
+      העלה תמונות או סרטונים (עד 20MB כל אחד)
     </label>
 
     <!-- Dropzone -->
