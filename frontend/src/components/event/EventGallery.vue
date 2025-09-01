@@ -50,10 +50,12 @@ export default defineComponent({
     },
 
     created() {
-        this.$store.dispatch("event/getEventAssets");
-        this.interval = setInterval(() => {
-            this.$store.dispatch("event/getEventAssets");
-        }, 10000);
+        this.$store.dispatch("event/getEventGalleryAssets");
+        if(!this.interval) {
+            this.interval = setInterval(() => {
+                this.$store.dispatch("event/getEventGalleryAssets");
+            }, 10000);
+        }
     },
 
     mounted() {
@@ -82,7 +84,7 @@ export default defineComponent({
 
     computed: {
         assets(): IEventAsset[] {
-            return this.$store.getters['event/getAssets'] as IEventAsset[];
+            return this.$store.getters['event/getGalleryAssets'] as IEventAsset[];
         },
     },
 

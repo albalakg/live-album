@@ -9,7 +9,12 @@ import { EventFileType, SubscriptionType, EventAssetsManagementModesType } from 
 
 export interface IEventModuleState {
   event: IEvent;
-  assetsManagement: IEventAssetsManagement
+  assetsManagement: IEventAssetsManagement;
+  gallery: IEventGallery;
+}
+
+export interface IEventGallery {
+  assets: IEventAsset[];
 }
 
 export interface IEventAssetsManagement {
@@ -73,6 +78,8 @@ export interface IEventConfig {
   preview_site_display_image: boolean;
   preview_site_display_name: boolean;
   preview_site_display_date: boolean;
+  preview_guests_assets_in_gallery: boolean;
+  preview_owners_assets_in_gallery: boolean;
   event_id: number;
 }
 
@@ -87,6 +94,7 @@ export interface IEventDownloadAssetsProcess {
 export interface IEventAsset {
   id: number;
   event_id: number;
+  is_displayed: number;
   type: EventFileType;
   path: string;
   fullPath: string;

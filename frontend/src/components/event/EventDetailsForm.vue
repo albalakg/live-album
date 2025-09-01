@@ -8,6 +8,7 @@
     <VueDatePicker
       :disabled="!isPending"
       class="date-picker"
+      :class="{ 'disabled': !isPending }"
       :min-date="minDate"
       locale="he"
       :format="format"
@@ -16,6 +17,9 @@
       cancel-text="בטל"
       :day-names="days"
     ></VueDatePicker>
+    <small class="hint" v-show="!isPending">
+      ניתן לשנות את התאריך רק בסטטוס ממתין
+    </small>
     <br />
     <MainInput
       :fileExists="imageExists"
@@ -54,6 +58,24 @@
       />
       <small> להציג את תאריך החתונה בעמוד העלאות </small>
     </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_guests_assets_in_gallery = !form.config.preview_guests_assets_in_gallery"
+        title="להציג את תמונות האורחים בגלריה"
+        :value="form.config.preview_guests_assets_in_gallery"
+        class="checkbox"
+      />
+      <small>להציג את תמונות האורחים בגלריה</small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_owners_assets_in_gallery = !form.config.preview_owners_assets_in_gallery"
+        title="להציג את התמונות האישיות שלנו בגלריה"
+        :value="form.config.preview_owners_assets_in_gallery"
+        class="checkbox"
+      />
+      <small>להציג את התמונות האישיות שלנו בגלריה</small>
+    </div>
     <br>
     <MainButton :loading="loading" text="שמור" />
   </form>
@@ -86,6 +108,8 @@ export default defineComponent({
           preview_site_display_image: false as boolean,
           preview_site_display_name: false as boolean,
           preview_site_display_date: false as boolean,
+          preview_guests_assets_in_gallery: false as boolean,
+          preview_owners_assets_in_gallery: false as boolean,
         }
       },
       errors: {
@@ -130,6 +154,8 @@ export default defineComponent({
       this.form.config.preview_site_display_image = this.event?.config?.preview_site_display_image ?? false;
       this.form.config.preview_site_display_name = this.event?.config?.preview_site_display_name ?? false;
       this.form.config.preview_site_display_date = this.event?.config?.preview_site_display_date ?? false;
+      this.form.config.preview_guests_assets_in_gallery = this.event?.config?.preview_guests_assets_in_gallery ?? false;
+      this.form.config.preview_owners_assets_in_gallery = this.event?.config?.preview_owners_assets_in_gallery ?? false;
       this.imageExists = !!this.event?.image;
     },
 
@@ -160,10 +186,12 @@ export default defineComponent({
       this.loading = true;
       let payload = {
         ...this.form,
-      }
+      } as any;
 
       if(this.isPending) {
         payload.starts_at = Time.toUTC(this.form.starts_at);
+      } else {
+        delete payload.starts_at;
       }
 
       await this.$store.dispatch(

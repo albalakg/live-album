@@ -1,163 +1,210 @@
 <template>
-    <div class="gallery-asset-wrapper" :class="{
-        'padding--small': true,
-        'padding--no-right': isFirstOfLine && !$bp.isMobile,
-        assetIndex: true
-    }">
-        <div class="gallery-asset position--relative bg--dark height--full width--full brs--medium">
-            <div class="gallery-asset-chip padding--x-small brs--large" v-show="isToggleShown">
-                <MainCheckbox :disabled="loading" :ref="`asset-checkbox-${asset.id}`" :color="assetToggleColor"
-                    @onClick="togglePickedAssets(asset.id)" title="לחצו בשביל לסמן למחיקה" :value="isPicked" />
-            </div>
-            <a :href="asset.fullPath" target="_blank" class="gallery-view-icon">
-                <MainIcon icon="open_in_new" size="1.3em" />
-            </a>
-            <!-- <div class="gallery-download-icon pointer" @click="downloadAsset()">
-                <MainIcon icon="download" />
-            </div> -->
-            <img v-if="asset.type === 'image'" :src="asset.fullPath" alt="event image" class="album-asset brs--medium" />
-            <video v-else-if="asset.type === 'video'" :src="asset.fullPath" class="album-asset brs--medium" alt="event video" autoplay muted loop></video>
+  <div
+    class="gallery-asset-wrapper"
+    :class="{
+      'padding--small': true,
+      'padding--no-right': isFirstOfLine && !$bp.isMobile,
+      assetIndex: true,
+    }"
+  >
+    <div
+      class="gallery-asset position--relative bg--dark height--full width--full brs--medium"
+    >
+      <div class="gallery-asset-chip padding--x-small brs--large">
+        <MainCheckbox
+          :disabled="loading || !mode"
+          :ref="`asset-checkbox-${asset.id}`"
+          @onClick="togglePickedAssets(asset.id)"
+          title="לחצו בשביל לבחור"
+          :value="isPicked"
+        />
+      </div>
+      <a :href="asset.fullPath" target="_blank" class="gallery-view-icon">
+        <MainIcon icon="open_in_new" size="1.3em" />
+      </a>
+      <span class="gallery-visible-icon">
+        <MainIcon
+          :icon="asset.is_displayed ? 'visibility' : 'visibility_off'"
+          size="1.3em"
+        />
+      </span>
+
+      <!-- Image -->
+      <img
+        v-if="asset.type === 'image'"
+        :src="asset.fullPath"
+        alt="event image"
+        class="album-asset brs--medium"
+        loading="lazy"
+      />
+
+      <!-- Video -->
+      <div
+        v-else-if="asset.type === 'video'"
+        class="video-wrapper brs--medium"
+        @mouseenter="playVideo"
+        @mouseleave="pauseVideo"
+      >
+        <video ref="videoEl" class="album-asset brs--medium" muted loop></video>
+        <div v-if="!isPlaying" class="video-overlay">
+          <MainIcon
+            icon="play_circle"
+            size="3em"
+            color="#ddd"
+            :background="false"
+          />
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
-
 <script lang="ts">
-import { IEventAsset } from '@/helpers/interfaces';
-import { EventAssetsManagementModesType } from '@/helpers/types';
-import { defineComponent, PropType } from 'vue';
-import MainCheckbox from '@/components/library/inputs/MainCheckbox.vue';
-import MainIcon from '../library/general/MainIcon.vue';
+import { IEventAsset } from "@/helpers/interfaces";
+import { defineComponent, PropType } from "vue";
+import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
+import MainIcon from "../library/general/MainIcon.vue";
+import { EventAssetsManagementModesType } from "@/helpers/types";
 
 export default defineComponent({
-    name: 'EventAssetsView',
+  name: "EventAssetsView",
 
-    components: {
-        MainCheckbox,
-        MainIcon,
+  components: {
+    MainCheckbox,
+    MainIcon,
+  },
+
+  props: {
+    loading: {
+      type: Boolean,
+      required: true,
     },
 
-    props: {
-        loading: {
-            type: Boolean,
-            required: true
-        },
-
-        assetIndex: {
-            type: Number,
-            default: 1
-        },
-
-        asset: {
-            type: Object as PropType<IEventAsset>,
-            required: true
-        },
+    assetIndex: {
+      type: Number,
+      default: 1,
     },
 
-    data() {
-        return {
-            counter: '' as string,
-            intervalId: null as ReturnType<typeof setInterval> | null,
-            canDelete: false as boolean,
-            canDownload: false as boolean,
-            pickedAll: false as boolean,
-            pickedAssets: [] as number[],
-        };
+    asset: {
+      type: Object as PropType<IEventAsset>,
+      required: true,
+    },
+  },
+
+  data() {
+    return {
+      isPlaying: false,
+    };
+  },
+
+  computed: {
+    assetsIds(): number[] {
+      return this.$store.getters["event/getManagedAssetsIds"];
     },
 
-    computed: {
-        mode(): EventAssetsManagementModesType | null {
-            return this.$store.getters['event/getManagedAssetsMode'];
-        },
-
-        isToggleShown(): boolean {
-            return !!this.mode;
-        },
-
-        assetToggleColor(): string {
-            return this.mode === 'מחיקה' ? 'pink' : 'green';
-        },
-
-        assetsIds(): number[] {
-            return this.$store.getters['event/getManagedAssetsIds'];
-        },
-
-        isPicked(): boolean {
-            return this.assetsIds.includes(this.asset.id);
-        },
-
-        isFirstOfLine(): boolean {
-            return this.assetIndex % 5 == 0;
-        },
+    isPicked(): boolean {
+      return this.assetsIds.includes(this.asset.id);
     },
 
-    methods: {
-        togglePickedAssets(assetId: number) {
-            if (this.isPicked) {
-                this.$store.dispatch("event/removeAssetFromAssetsManagement", assetId)
-            } else {
-                this.$store.dispatch("event/addAssetForAssetsManagement", assetId)
-            }
-        },
+    isFirstOfLine(): boolean {
+      return this.assetIndex % 5 == 0;
+    },
 
-        downloadAsset() {
-            // const url = this.asset.fullPath;
-            // const link = document.createElement('a');
-            // link.href = 'https://s3.us-east-1.amazonaws.com/snapshare-live.com/events/1/gallery/Dk6CK1ueUsvj1KK9BYcEG0JISh0SDwCYQeBbQZyE.png';
-            // link.download = 'your-file.zip'; // Suggested filename
-            // document.body.appendChild(link);
-            // link.click();
-            // document.body.removeChild(link);
+    mode(): EventAssetsManagementModesType | null {
+      return this.$store.getters["event/getManagedAssetsMode"];
+    },
+  },
+
+  methods: {
+    togglePickedAssets(assetId: number) {
+      if (this.isPicked) {
+        this.$store.dispatch("event/removeAssetFromAssetsManagement", assetId);
+      } else {
+        this.$store.dispatch("event/addAssetForAssetsManagement", assetId);
+      }
+    },
+
+    async playVideo() {
+      const video = this.$refs.videoEl as HTMLVideoElement;
+      if (video && !this.isPlaying) {
+        try {
+          await video.play();
+          this.isPlaying = true;
+        } catch (e) {
+          console.warn("בעיה בהפעלת וידאו:", e);
         }
+      }
     },
+
+    pauseVideo() {
+      const video = this.$refs.videoEl as HTMLVideoElement;
+      if (video && this.isPlaying) {
+        video.pause();
+        video.currentTime = 0;
+        this.isPlaying = false;
+      }
+    },
+  },
 });
 </script>
 
 <style lang="scss" scoped>
 .gallery-asset-wrapper {
+  text-align: center;
+  height: calc((70vw - 64px) / 5);
+  width: calc(20% - 32px);
+
+  @media only screen and (max-width: 600px) {
+    width: calc(50% - 12px);
+    height: 150px;
+    padding: 6px;
+  }
+
+  .gallery-asset-chip {
+    background-color: #222d;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 1;
+  }
+
+  .album-asset {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gallery-view-icon,
+  .gallery-visible-icon {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 2;
     text-align: center;
-    height: calc((70vw - 64px) / 5);
-    width: calc(20% - 32px);
+  }
 
-    @media only screen and (max-width: 600px) { 
-        width: calc(50% - 12px);     
-        height: 150px;
-        padding: 6px;   
-    }
+  .gallery-visible-icon {
+    left: 40px;
+  }
 
-    .gallery-asset-chip {
-        background-color: #222d;
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        z-index: 1;
-    }
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
 
-    .album-asset {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .gallery-view-icon {
-        position: absolute;
-        left: 10px;
-        top: 10px;
-        z-index: 1;
-        text-align: center;
-    }
-
-    // .gallery-download-icon {
-    //     position: absolute;
-    //     left: 10px;
-    //     top: 10px;
-    //     z-index: 1;
-    //     width: 30px;
-    //     text-align: center;
-    // }
-}
-
-.padding--no-right {
-    padding-right: 0;
+  .video-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background-color: #0008;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0.9;
+    border-radius: 50%;
+    padding: 1px 4px 4px 4px;
+  }
 }
 </style>

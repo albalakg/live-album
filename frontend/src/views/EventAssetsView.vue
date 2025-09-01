@@ -6,7 +6,7 @@
       class="assets-top bg--white brs--medium padding--large display--flex justify--space-between flex--wrap-mobile"
     >
       <div
-        class="details display--flex direction--column justify--space-between"
+        class="details display--flex direction--column justify--space-between width--full-mobile"
       >
         <div>
           <h1 class="title--large">
@@ -55,93 +55,39 @@
         </div>
       </div>
       <div
-        class="actions display--flex direction--column justify--space-between text--center"
+        class="actions display--flex direction--column align--center justify--space-between width--full-mobile"
       >
-        <div class="display--flex justify--space-between align--center">
+        <div
+          class="width--full display--flex align--center justify--space-between"
+        >
+          <div class="action-select-wrapper">
+            <MainSelect
+              :title="'בחר פעולה'"
+              :options="[
+                { label: 'הורדת קבצים', value: 'download' },
+                { label: 'הסתרת קבצים', value: 'hide' },
+                { label: 'מחיקת קבצים', value: 'delete' },
+              ]"
+              v-model="action"
+              ref="actionSelect"
+            />
+          </div>
           <MainCheckbox
-            :disabled="loading"
+            :disabled="loading || !mode"
             ref="downloadCheckbox"
-            @onClick="toggleDownloadCheck()"
-            title="לחצו בשביל לאפשר הורדה"
-            :value="isDownloadMode"
+            @onClick="toggleAllAssets()"
+            title="לחצו בשביל לבחור את כולם"
+            :value="pickedAll"
           />
-          <div class="width--half width--full-mobile action-button-wrapper">
-            <BaseButton
-              :loading="loading"
-              :disabled="!canDownload"
-              text="הכנת קבצים להורדה"
-              color="green"
-              @onClick="downloadFiles()"
-            />
-          </div>
         </div>
-        <br />
-        <div class="display--flex justify--space-between align--center">
-          <MainCheckbox
-            :disabled="loading"
-            color="pink"
-            ref="deleteCheckbox"
-            @onClick="toggleDeleteCheck()"
-            title="לחצו בשביל לאפשר מחיקה"
-            :value="isDeleteMode"
+        <div class="download-button-wrapper width--full">
+          <BaseButton
+            :loading="loading"
+            :disabled="!canSubmit"
+            text="בצע פעולה"
+            @onClick="submit()"
           />
-          <div class="width--half width--full-mobile action-button-wrapper">
-            <BaseButton
-              :loading="loading"
-              :disabled="!canDelete"
-              text="מחק קבצים"
-              color="pink"
-              @onClick="deleteFiles()"
-            />
-          </div>
         </div>
-        <br />
-        <div class="display--flex justify--space-between align--center">
-          <div
-            class="display--flex align--center"
-            :class="{
-              disabled: !mode,
-            }"
-          >
-            <MainCheckbox
-              :disabled="loading"
-              ref="chooseAllCheckbox"
-              title="לחצו בשביל לבחור את כולם"
-              @onClick="toggleAllAssets()"
-              :value="pickedAll"
-            />
-            <small class="choose-all-text"> בחר את כולם </small>
-          </div>
-          <div class="width--half width--full-mobile action-button-wrapper">
-            <a
-              :href="downloadProcess.fullPath"
-              :download="processFileName"
-              v-if="isDownloadProcessFinished"
-            >
-              <BaseButton
-                :loading="loading"
-                text="הורדת הקבצים"
-                color="green"
-              />
-            </a>
-            <BaseButton
-              v-if="isDownloadProcessPreparing"
-              disabled
-              text="מכין קבצים..."
-              color="pink"
-            />
-          </div>
-        </div>
-        <br />
-        <!-- <div class="display--flex align--center" :class="{
-          'disabled': !mode
-        }">
-          <MainCheckbox :disabled="loading" ref="chooseAllCheckbox" title="לחצו בשביל לבחור את כולם"
-            @onClick="toggleAllAssets()" :value="pickedAll" />
-          <small class="choose-all-text">
-            בחר את כולם
-          </small>
-        </div> -->
       </div>
     </div>
     <div class="assets-content display--flex flex--wrap brs--medium">
@@ -163,6 +109,7 @@ import EventAssetCard from "@/components/event/EventAssetCard.vue";
 import { EventAssetsManagementModesType } from "@/helpers/types";
 import MainIcon from "@/components/library/general/MainIcon.vue";
 import UploadMedia from "@/components/library/inputs/UploadMedia.vue";
+import MainSelect from "@/components/library/inputs/MainSelect.vue";
 
 export default defineComponent({
   name: "EventAssetsView",
@@ -173,11 +120,13 @@ export default defineComponent({
     EventAssetCard,
     MainIcon,
     UploadMedia,
+    MainSelect,
   },
 
   data() {
     return {
       counter: "" as string,
+      action: "" as string,
       intervalId: null as ReturnType<typeof setInterval> | null,
       processPollingId: undefined as ReturnType<typeof setInterval> | undefined,
       pickedAll: false as boolean,
@@ -194,6 +143,15 @@ export default defineComponent({
   watch: {
     totalManagedAssetsIds() {
       this.pickedAll = this.totalManagedAssetsIds === this.totalAssets;
+    },
+
+    action() {
+      console.log({setaction: this.action});
+      
+      this.$store.dispatch(
+        "event/setModeForAssetsManagement",
+        this.action
+      );
     },
 
     mode() {
@@ -225,6 +183,12 @@ export default defineComponent({
 
     isEventActive(): boolean {
       return this.$store.getters["event/getEventStatus"] === StatusEnum.ACTIVE;
+    },
+
+    canSubmit(): boolean {
+      return (
+        this.$store.getters["event/getTotalManagedAssetsIds"] && this.action
+      );
     },
 
     mode(): EventAssetsManagementModesType | null {
@@ -302,19 +266,39 @@ export default defineComponent({
       }
     },
 
-    toggleDownloadCheck() {
-      this.$store.dispatch(
-        "event/setModeForAssetsManagement",
-        this.isDownloadMode ? null : EventAssetsManagementModesEnum.DOWNLOAD
-      );
+    async submit() {
+      console.log({ action: this.action, mode: this.mode }, EventAssetsManagementModesEnum.DOWNLOAD);
+      
+      switch (this.mode) {
+        case EventAssetsManagementModesEnum.DOWNLOAD:
+          await this.startDownloadFilesProcess();
+          break;
+        case EventAssetsManagementModesEnum.DELETE:
+          await this.deleteAssets();
+          break;
+        case EventAssetsManagementModesEnum.HIDE:
+          await this.hideAssets();
+          break;
+        default:
+          break;
+      }
+
+      this.toggleAllAssets();
     },
 
-    toggleDeleteCheck() {
-      this.$store.dispatch(
-        "event/setModeForAssetsManagement",
-        this.isDeleteMode ? null : EventAssetsManagementModesEnum.DELETE
-      );
-    },
+    // toggleDownloadCheck() {
+    //   this.$store.dispatch(
+    //     "event/setModeForAssetsManagement",
+    //     this.isDownloadMode ? null : EventAssetsManagementModesEnum.DOWNLOAD
+    //   );
+    // },
+
+    // toggleDeleteCheck() {
+    //   this.$store.dispatch(
+    //     "event/setModeForAssetsManagement",
+    //     this.isDeleteMode ? null : EventAssetsManagementModesEnum.DELETE
+    //   );
+    // },
 
     toggleAllAssets() {
       this.pickedAll = !this.pickedAll;
@@ -326,7 +310,8 @@ export default defineComponent({
 
     startPollingProcessStatus() {
       this.processPollingId = setInterval(async () => {
-        if (this.pollingCounter >= 15) {
+        if (this.pollingCounter >= 30) {
+          // Stop after 30 attempts (7.5 minutes)
           this.stopPollingProcessStatus();
           return;
         }
@@ -341,7 +326,7 @@ export default defineComponent({
       }
     },
 
-    async downloadFiles() {
+    async startDownloadFilesProcess() {
       this.loading = true;
       const success = await this.$store.dispatch("event/downloadAssets");
       if (success) {
@@ -351,9 +336,15 @@ export default defineComponent({
       this.loading = false;
     },
 
-    async deleteFiles() {
+    async deleteAssets() {
       this.loading = true;
       await this.$store.dispatch("event/deleteAssets");
+      this.loading = false;
+    },
+
+    async hideAssets() {
+      this.loading = true;
+      await this.$store.dispatch("event/hideAssets");
       this.loading = false;
     },
 
@@ -369,6 +360,13 @@ export default defineComponent({
     // If there's an active download process, start polling
     if (this.isDownloadProcessPreparing) {
       this.startPollingProcessStatus();
+    }
+    this.action = this.mode as string;
+    console.log({ action: this.action, mode: this.mode });
+
+    if (this.action) {
+      this.$refs.actionSelect &&
+        (this.$refs.actionSelect as any).setValue(this.action);
     }
   },
 
@@ -394,6 +392,7 @@ export default defineComponent({
   .assets-content {
     margin-top: 20px;
     height: 72%;
+    max-height: 75vh;
     overflow-y: auto;
   }
 
@@ -410,9 +409,15 @@ export default defineComponent({
     max-height: fit-content;
     width: 30%;
 
+    .action-select-wrapper {
+      width: 100%;
+      margin-left: 10px;
+    }
+
     @media only screen and (max-width: 600px) {
       width: 100%;
       margin-top: 10px;
+      margin-inline-end: 0;
 
       .action-button-wrapper {
         margin-right: 10px;

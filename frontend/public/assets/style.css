@@ -259,6 +259,10 @@
   align-items: center;
 }
 
+.hint {
+  font-size: .7em;
+}
+
 .title--x-small {
   font-size: .8em;
   font-weight: 700; 

@@ -22,6 +22,9 @@ const EventModule = {
       mode: null,
       assetsIds: [],
     },
+    gallery: {
+      assets: [],
+    }
   } as IEventModuleState,
 
   getters: {
@@ -75,6 +78,10 @@ const EventModule = {
 
     getAssets(state: IEventModuleState): IEventAsset[] {
       return state.event?.assets ?? [];
+    },
+
+    getGalleryAssets(state: IEventModuleState): IEventAsset[] {
+      return state.gallery.assets ?? [];
     },
 
     getEventImage(state: IEventModuleState): string {
@@ -142,13 +149,11 @@ const EventModule = {
         return (state.event.assets = []);
       }
 
-      assets.forEach((asset: IEventAsset) => {
-        if (
-          !state.event.assets.map((asset: IEventAsset) => asset.path).includes(asset.path)
-        ) {
-          state.event.assets.push(asset);
-        }
-      });
+      state.event.assets = assets;
+    },
+
+    SET_GALLERY_FILES(state: IEventModuleState, assets: IEventAsset[]) {
+      state.gallery.assets = assets;
     },
 
     DELETE_FILES(state: IEventModuleState, deletedAssets: number[]) {
@@ -246,6 +251,26 @@ const EventModule = {
       });
     },
 
+    getEventGalleryAssets(
+      context: {
+        state: IEventModuleState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      path: string
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .get(`events/${context.state.event.id}/gallery-assets`)
+          .then((res) => {
+            context.commit("SET_GALLERY_FILES", res.data.data);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            resolve(null);
+          });
+      });
+    },
+
     deleteAssets(context: {
       state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
@@ -253,6 +278,42 @@ const EventModule = {
       return new Promise((resolve) => {
         axios
           .post(`events/${context.state.event.id}/assets/delete`, {
+            assets: context.state.assetsManagement.assetsIds,
+          })
+          .then((res) => {
+            notify({
+              text: "הקבצים נמחקו בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
+            context.commit(
+              "DELETE_FILES",
+              context.state.assetsManagement.assetsIds
+            );
+            context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך הייתה תקלה במחיקת הקבצים"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    hideAssets(context: {
+      state: IEventModuleState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/assets/hide`, {
             assets: context.state.assetsManagement.assetsIds,
           })
           .then((res) => {
@@ -427,7 +488,7 @@ const EventModule = {
             },
           })
           .then((res) => {
-            context.commit("ADD_FILE", res.data);
+            context.commit("ADD_FILE", res.data.data);
             resolve(res.data);
           })
           .catch((err) => {

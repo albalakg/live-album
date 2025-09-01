@@ -17,6 +17,7 @@ export enum StatusEnum {
 }
 
 export enum EventAssetsManagementModesEnum {
-  DOWNLOAD = 'הורדה',
-  DELETE = 'מחיקה',
+  DOWNLOAD = 'download',
+  DELETE = 'delete',
+  HIDE = 'hide',
 }
