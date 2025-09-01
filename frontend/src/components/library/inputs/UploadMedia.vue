@@ -87,7 +87,7 @@ export default defineComponent({
   data() {
     return {
       isDragging: false,
-      MAX_SIZE_MB: 250,
+      MAX_SIZE_MB: 20,
       uploads: [] as UploadItem[],
       progress: {
         total: 0,
