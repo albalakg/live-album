@@ -30,7 +30,7 @@ export default defineComponent({
       required: true,
     },
     modelValue: [String, Number],
-    placeholder: { type: String, default: "בחר..." },
+    placeholder: { type: String, default: "בחר פעולה" },
   },
   data() {
     return { isOpen: false };

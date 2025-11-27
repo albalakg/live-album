@@ -38,14 +38,14 @@
         class="social-media display--flex direction--column justify--space-between"
       >
         <div>
-          <router-link to="/" target="_blank">
+          <a href="https://www.facebook.com/share/1By1U5frDi/?mibextid=wwXIfr" target="_blank">
             <img src="/assets/icons/facebook-icon.png" alt="facebook" />
-          </router-link>
+          </a>
         </div>
         <div>
-          <router-link to="/" target="_blank">
+          <a href="https://www.instagram.com/snapshare_live?igsh=MXpudTBjMWhxeWw%3D&utm_source=qr" target="_blank">
             <img src="/assets/icons/instagram-icon.png" alt="instagram" />
-          </router-link>
+          </a>
         </div>
       </div>
 

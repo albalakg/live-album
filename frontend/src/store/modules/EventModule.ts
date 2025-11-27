@@ -251,12 +251,31 @@ const EventModule = {
       });
     },
 
-    getEventGalleryAssets(
+    getEventGuestGallery(
       context: {
         state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
       path: string
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .get(`events/${context.state.event.id}/gallery-assets`)
+          .then((res) => {
+            context.commit("SET_GALLERY_FILES", res.data.data);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            resolve(null);
+          });
+      });
+    },
+
+    getEventGalleryAssets(
+      context: {
+        state: IEventModuleState;
+        commit: (arg0: string, arg1: any) => void;
+      }
     ) {
       return new Promise((resolve) => {
         axios

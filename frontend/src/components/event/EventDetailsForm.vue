@@ -17,6 +17,9 @@
       cancel-text="בטל"
       :day-names="days"
     ></VueDatePicker>
+    <small class="hint" v-show="isPending">
+      בחרו תאריך ושעה מדוייקת של תחילת האירוע
+    </small>
     <small class="hint" v-show="!isPending">
       ניתן לשנות את התאריך רק בסטטוס ממתין
     </small>

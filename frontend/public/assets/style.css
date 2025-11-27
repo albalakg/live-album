@@ -146,6 +146,70 @@
   margin: auto;
 }
 
+.margin--top-small {
+  margin-top: 8px; 
+}
+
+.margin--top-medium {
+  margin-top: 12px; 
+}
+
+.margin--top-large {
+  margin-top: 20px; 
+}
+
+.margin--top-x-large {
+  margin-top: 40px; 
+}
+
+.margin--bottom-small {
+  margin-bottom: 8px; 
+}
+
+.margin--bottom-medium {
+  margin-bottom: 12px; 
+}
+
+.margin--bottom-large {
+  margin-bottom: 20px; 
+}
+
+.margin--bottom-x-large {
+  margin-bottom: 40px; 
+}
+
+.margin--right-small {
+  margin-right: 8px; 
+}
+
+.margin--right-medium {
+  margin-right: 12px; 
+}
+
+.margin--right-large {
+  margin-right: 20px; 
+}
+
+.margin--right-x-large {
+  margin-right: 40px; 
+}
+
+.margin--left-small {
+  margin-left: 8px; 
+}
+
+.margin--left-medium {
+  margin-left: 12px; 
+}
+
+.margin--left-large {
+  margin-left: 20px; 
+}
+
+.margin--left-x-large {
+  margin-left: 40px; 
+}
+
 .width--corner {
   width: 25%;
 }

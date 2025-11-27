@@ -62,7 +62,6 @@
         >
           <div class="action-select-wrapper">
             <MainSelect
-              :title="'בחר פעולה'"
               :options="[
                 { label: 'הורדת קבצים', value: 'download' },
                 { label: 'הסתרת קבצים', value: 'hide' },
@@ -87,6 +86,15 @@
             text="בצע פעולה"
             @onClick="submit()"
           />
+        </div>
+        <div class="download-button-wrapper width--full">
+          <a
+            :href="downloadProcess.fullPath"
+            :download="processFileName"
+            v-if="isDownloadProcessFinished"
+          >
+            <BaseButton :loading="loading" text="הורדת הקבצים" color="green" />
+          </a>
         </div>
       </div>
     </div>
@@ -146,12 +154,7 @@ export default defineComponent({
     },
 
     action() {
-      console.log({setaction: this.action});
-      
-      this.$store.dispatch(
-        "event/setModeForAssetsManagement",
-        this.action
-      );
+      this.$store.dispatch("event/setModeForAssetsManagement", this.action);
     },
 
     mode() {
@@ -267,8 +270,11 @@ export default defineComponent({
     },
 
     async submit() {
-      console.log({ action: this.action, mode: this.mode }, EventAssetsManagementModesEnum.DOWNLOAD);
-      
+      console.log(
+        { action: this.action, mode: this.mode },
+        EventAssetsManagementModesEnum.DOWNLOAD
+      );
+
       switch (this.mode) {
         case EventAssetsManagementModesEnum.DOWNLOAD:
           await this.startDownloadFilesProcess();
@@ -282,26 +288,10 @@ export default defineComponent({
         default:
           break;
       }
-
-      this.toggleAllAssets();
     },
 
-    // toggleDownloadCheck() {
-    //   this.$store.dispatch(
-    //     "event/setModeForAssetsManagement",
-    //     this.isDownloadMode ? null : EventAssetsManagementModesEnum.DOWNLOAD
-    //   );
-    // },
-
-    // toggleDeleteCheck() {
-    //   this.$store.dispatch(
-    //     "event/setModeForAssetsManagement",
-    //     this.isDeleteMode ? null : EventAssetsManagementModesEnum.DELETE
-    //   );
-    // },
-
-    toggleAllAssets() {
-      this.pickedAll = !this.pickedAll;
+    toggleAllAssets(val = null as boolean | null) {
+      this.pickedAll = val !== null ? val : !this.pickedAll;
       this.$store.dispatch(
         "event/toggleAllAssetsInAssetsManagement",
         this.pickedAll
@@ -310,6 +300,8 @@ export default defineComponent({
 
     startPollingProcessStatus() {
       this.processPollingId = setInterval(async () => {
+        console.log("this.pollingCounter", this.pollingCounter);
+
         if (this.pollingCounter >= 30) {
           // Stop after 30 attempts (7.5 minutes)
           this.stopPollingProcessStatus();
@@ -362,7 +354,6 @@ export default defineComponent({
       this.startPollingProcessStatus();
     }
     this.action = this.mode as string;
-    console.log({ action: this.action, mode: this.mode });
 
     if (this.action) {
       this.$refs.actionSelect &&

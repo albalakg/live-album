@@ -43,12 +43,17 @@
           <li v-for="u in uploads" :key="u.name">
             <div class="file-info">
               <span class="file-icon">{{ fileIcon(u.name) }}</span>
-              <span class="file-name" :title="u.name">{{ friendlyName(u.name) }}</span>
+              <span class="file-name" :title="u.name">{{
+                friendlyName(u.name)
+              }}</span>
             </div>
             <div class="file-bar">
               <div
                 class="progress"
-                :class="u.done ? 'done' : ''"
+                :class="{
+                  done: u.done,
+                  current: uploads.indexOf(u) === currentIndex,
+                }"
                 :style="{ width: u.done ? '100%' : '100%' }"
               ></div>
             </div>
@@ -57,7 +62,9 @@
         <div class="width--50">
           <BaseButton
             :loading="loading"
-            :text="uploads.length === progress.completed ? 'סגור' : 'בטל העלאות'"
+            :text="
+              uploads.length === progress.completed ? 'סגור' : 'בטל העלאות'
+            "
             @onClick="cancelUpload()"
             color="pink"
           />
@@ -92,7 +99,8 @@ export default defineComponent({
       progress: {
         total: 0,
         completed: 0,
-      }
+      },
+      currentIndex: -1, // <--- new
     };
   },
 
@@ -140,19 +148,24 @@ export default defineComponent({
       }
       this.uploads.push(...newUploads);
 
-      for (const upload of newUploads) {
+      for (let i = 0; i < newUploads.length; i++) {
+        const upload = newUploads[i];
         try {
-          if(this.uploads.length === 0) break; // אם המשתמש ביטל את כל ההעלאות באמצע
+          if (this.uploads.length === 0) break;
+
+          this.currentIndex = this.uploads.indexOf(upload); // <--- mark current file
+
           await this.$store.dispatch("event/uploadFile", {
-            file: files[Array.from(newUploads).indexOf(upload)],
+            file: files[i],
             isAuth: Auth.isLogged(),
           });
+
           upload.done = true;
-          if(this.progress.completed !== this.uploads.length) {
-            this.progress.completed += 1;
-          }
+          this.progress.completed += 1;
         } catch (e) {
           console.error("שגיאה בהעלאה", e);
+        } finally {
+          this.currentIndex = -1; // <--- reset after each file
         }
       }
 
@@ -288,5 +301,8 @@ export default defineComponent({
 }
 .file-bar .progress.done {
   background: #79ae60; /* ירוק לסיום */
+}
+.file-bar .progress.current {
+  background: #f68589; /* pink */
 }
 </style>

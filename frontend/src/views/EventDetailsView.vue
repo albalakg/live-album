@@ -6,19 +6,24 @@
       class="event-right padding--medium display--flex direction--column justify--space-between"
     >
       <EventDetailsForm />
-      <div
-        class="display--flex flex--wrap justify--space-between align--center upload-page-wrapper padding--medium bg--white brs--medium"
-      >
-        <div class="display--flex align--center width--full-mobile">
-          <div class="icon-wrapper">
-            <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
+      <div class="upload-page-wrapper padding--medium bg--white brs--medium">
+        <div
+          class="display--flex flex--wrap justify--space-between align--center"
+        >
+          <div class="display--flex align--center width--full-mobile">
+            <div class="icon-wrapper">
+              <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
+            </div>
+            <small>{{ copyText }}</small>
           </div>
-          <small>{{ copyText }}</small>
+          <div class="width--full-mobile upload-page-link">
+            <router-link target="_blank" :to="`/event/uploads/${eventPath}`">
+              <BaseButton text="צפייה בעמוד העלאות" />
+            </router-link>
+          </div>
         </div>
-        <div class="width--full-mobile upload-page-link">
-          <router-link target="_blank" :to="`/event/uploads/${eventPath}`">
-            <BaseButton text="צפייה בעמוד העלאות" />
-          </router-link>
+        <div class="margin--top-medium">
+          <small> ניתן לעלות קבצים דרך הקישור רק לאחר שהאירוע התחיל </small>
         </div>
       </div>
     </div>
@@ -165,7 +170,7 @@ export default defineComponent({
 
     & > div {
       height: calc(50% - 40px);
-      
+
       @media only screen and (max-width: 600px) {
         height: fit-content;
       }

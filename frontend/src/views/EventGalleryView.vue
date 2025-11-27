@@ -6,7 +6,9 @@
           <MainButton text="צפה בגלרייה" class="gallery-button" />
         </router-link>
       </div>
-      <span v-if="$bp.isMediumAndUp" class="title--small">סה"כ {{ totalAssets }} קבצים</span>
+      <span v-if="$bp.isMediumAndUp" class="title--small"
+        >סה"כ {{ totalAssets }} קבצים</span
+      >
     </div>
     <div class="gallery-content brs--medium width--full bg--dark">
       <EventGallery rounded hideMenu />
@@ -15,40 +17,37 @@
 </template>
 
 <script lang="ts">
-import MainButton from '@/components/library/buttons/MainButton.vue';
-import EventGallery from '@/components/event/EventGallery.vue';
-import { defineComponent } from 'vue';
+import MainButton from "@/components/library/buttons/MainButton.vue";
+import EventGallery from "@/components/event/EventGallery.vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'EventGalleryView',
+  name: "EventGalleryView",
 
   components: {
     MainButton,
     EventGallery,
   },
 
-  data() {
-    return {
-    };
+  created() {
+    this.$store.dispatch("event/getEventGalleryAssets");
   },
 
   computed: {
     totalAssets(): number {
-      return this.$store.getters['event/getTotalAssets']
-    }
+      return this.$store.getters["event/getTotalAssets"];
+    },
   },
 
-  methods: {
-   
-  }
 });
 </script>
 
 <style lang="scss" scoped>
 .event-gallery {
   height: 60vh;
+  width: 100%;
 
-  @media only screen and (max-width: 600px) { 
+  @media only screen and (max-width: 600px) {
     // height: 100%;
     margin: 10px;
     min-height: fit-content;
