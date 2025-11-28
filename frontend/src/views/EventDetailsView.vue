@@ -22,8 +22,8 @@
             </router-link>
           </div>
         </div>
-        <div class="margin--top-medium">
-          <small> ניתן לעלות קבצים דרך הקישור רק לאחר שהאירוע התחיל </small>
+        <div class="margin--top-small">
+          <small class="hint"> ניתן לעלות קבצים דרך הקישור רק לאחר שהאירוע התחיל </small>
         </div>
       </div>
     </div>

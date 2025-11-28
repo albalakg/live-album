@@ -1,5 +1,5 @@
 <template>
-  <div class="gallery bg--dark" v-if="event">
+  <div class="full-screen-gallery bg--dark" v-if="event">
     <div
       class="gallery-header bg--white display--flex justify--space-between align--center"
     >
@@ -91,7 +91,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.gallery {
+.full-screen-gallery {
   position: absolute;
   z-index: 1000;
   top: 0;
@@ -102,10 +102,11 @@ export default defineComponent({
 
   .gallery-content {
     height: calc(100vh - 70px);
+    width: 100%;
+    top: 70px;
     margin: auto;
     display: flex;
     position: relative;
-    top: 70px;
   }
 
   .gallery-header {

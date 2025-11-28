@@ -24,7 +24,7 @@ const EventModule = {
     },
     gallery: {
       assets: [],
-    }
+    },
   } as IEventModuleState,
 
   getters: {
@@ -57,7 +57,9 @@ const EventModule = {
     },
 
     getEventDate(state: IEventModuleState): string | null {
-      return state.event?.starts_at ? Time.extractDate(state.event?.starts_at ?? "") : "";
+      return state.event?.starts_at
+        ? Time.extractDate(state.event?.starts_at ?? "")
+        : "";
     },
 
     getEventStartTime(state: IEventModuleState): string | null {
@@ -106,12 +108,14 @@ const EventModule = {
       return state.assetsManagement.assetsIds.length;
     },
 
-    getDownloadAssetsProcess(state: IEventModuleState): null | IEventDownloadAssetsProcess {
+    getDownloadAssetsProcess(
+      state: IEventModuleState
+    ): null | IEventDownloadAssetsProcess {
       return state?.event?.active_download_process ?? null;
     },
 
     getEventProcessFileName(state: IEventModuleState): string {
-      return (state?.event?.name ?? 'קבצי האלבום') + '.zip';
+      return (state?.event?.name ?? "קבצי האלבום") + ".zip";
     },
   },
 
@@ -126,13 +130,20 @@ const EventModule = {
 
     UPDATE_EVENT(state: IEventModuleState, event: any) {
       state.event.name = event?.name ?? "";
-      state.event.starts_at = event.starts_at ? Time.convertToLocalTime(event.starts_at) : "";
-      state.event.finished_at = event.finished_at ? Time.convertToLocalTime(event.finished_at) : "";
+      state.event.starts_at = event.starts_at
+        ? Time.convertToLocalTime(event.starts_at)
+        : "";
+      state.event.finished_at = event.finished_at
+        ? Time.convertToLocalTime(event.finished_at)
+        : "";
       state.event.image = event?.image ?? "";
       state.event.fullPath = event?.fullPath ?? "";
     },
 
-    SET_DOWNLOAD_ASSET_PROCESS(state: IEventModuleState, eventDownloadAssetsProcess: IEventDownloadAssetsProcess) {
+    SET_DOWNLOAD_ASSET_PROCESS(
+      state: IEventModuleState,
+      eventDownloadAssetsProcess: IEventDownloadAssetsProcess
+    ) {
       state.event.active_download_process = eventDownloadAssetsProcess;
     },
 
@@ -168,6 +179,20 @@ const EventModule = {
         if (foundIndex >= 0) {
           state.event.assets.splice(foundIndex, 1);
         }
+      });
+    },
+
+    HIDE_FILES(state: IEventModuleState, hideAssets: number[]) {
+      if (!state.event.assets) {
+        return (state.event.assets = []);
+      }
+
+      hideAssets.forEach((hideAsset: number) => {
+        state.event.assets.map((asset: IEventAsset) => {
+          if (asset.id === hideAsset) {
+            asset.is_displayed = asset.is_displayed ? 0 : 1;
+          }
+        });
       });
     },
 
@@ -231,13 +256,31 @@ const EventModule = {
       });
     },
 
-    getEventAssets(
+    getEventGuestGallery(
       context: {
         state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
       path: string
     ) {
+      return new Promise((resolve) => {
+        axios
+          .get(`events/${path}/base-assets`)
+          .then((res) => {
+            res.data.data.assets = res.data.data.displayed_assets;
+            context.commit("SET_EVENT", res.data.data);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            resolve(null);
+          });
+      });
+    },
+
+    getEventAssets(context: {
+      state: IEventModuleState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
       return new Promise((resolve) => {
         axios
           .get(`events/${context.state.event.id}/assets`)
@@ -251,32 +294,10 @@ const EventModule = {
       });
     },
 
-    getEventGuestGallery(
-      context: {
-        state: IEventModuleState;
-        commit: (arg0: string, arg1: any) => void;
-      },
-      path: string
-    ) {
-      return new Promise((resolve) => {
-        axios
-          .get(`events/${context.state.event.id}/gallery-assets`)
-          .then((res) => {
-            context.commit("SET_GALLERY_FILES", res.data.data);
-            resolve(res.data);
-          })
-          .catch((err) => {
-            resolve(null);
-          });
-      });
-    },
-
-    getEventGalleryAssets(
-      context: {
-        state: IEventModuleState;
-        commit: (arg0: string, arg1: any) => void;
-      }
-    ) {
+    getEventGalleryAssets(context: {
+      state: IEventModuleState;
+      commit: (arg0: string, arg1: any) => void;
+    }) {
       return new Promise((resolve) => {
         axios
           .get(`events/${context.state.event.id}/gallery-assets`)
@@ -342,7 +363,7 @@ const EventModule = {
               duration: 5000,
             });
             context.commit(
-              "DELETE_FILES",
+              "HIDE_FILES",
               context.state.assetsManagement.assetsIds
             );
             context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
@@ -352,7 +373,7 @@ const EventModule = {
             notify({
               text: ErrorsHandler.getErrorMessage(
                 err,
-                "מצטערים אך הייתה תקלה במחיקת הקבצים"
+                "מצטערים אך הייתה תקלה בהסתרת הקבצים"
               ),
               type: "error",
               duration: 5000,
@@ -372,7 +393,7 @@ const EventModule = {
             assets: context.state.assetsManagement.assetsIds,
           })
           .then((res) => {
-            context.commit("SET_DOWNLOAD_ASSET_PROCESS", res.data.data)
+            context.commit("SET_DOWNLOAD_ASSET_PROCESS", res.data.data);
             resolve(true);
           })
           .catch((err) => {
@@ -403,8 +424,12 @@ const EventModule = {
       event: IEvent
     ) {
       if (event) {
-        event.starts_at = event.starts_at ? Time.convertToLocalTime(event.starts_at) : '';
-        event.finished_at = event.finished_at ? Time.convertToLocalTime(event.finished_at) : '';
+        event.starts_at = event.starts_at
+          ? Time.convertToLocalTime(event.starts_at)
+          : "";
+        event.finished_at = event.finished_at
+          ? Time.convertToLocalTime(event.finished_at)
+          : "";
       }
       context.commit("SET_EVENT", event);
     },
@@ -501,11 +526,17 @@ const EventModule = {
       return new Promise((resolve, reject) => {
         const packageToSend = serialize({ file: data.file }, { indices: true });
         axios
-          .post(`events/${context.state.event.id}/${data.isAuth ? 'auth/' : ''}upload`, packageToSend, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
+          .post(
+            `events/${context.state.event.id}/${
+              data.isAuth ? "auth/" : ""
+            }upload`,
+            packageToSend,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          )
           .then((res) => {
             context.commit("ADD_FILE", res.data.data);
             resolve(res.data);

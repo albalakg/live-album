@@ -1,193 +1,225 @@
 <template>
-  <div class="collage-container">
-    <transition-group name="fade" tag="div">
-      <div
-        v-for="item in items"
-        :key="item.id"
-        class="collage-item"
-        :style="item.style"
-      >
-        <img
-          v-if="item.asset?.type === 'image'"
-          :src="item.asset.fullPath"
-          class="collage-asset"
-        />
-        <video
-          v-else-if="item.asset?.type === 'video'"
-          :src="item.asset.fullPath"
-          autoplay
-          muted
-          loop
-          class="collage-asset"
-        ></video>
-      </div>
-    </transition-group>
-  </div>
+    <div class="gallery">
+        <div class="album-wrapper" :class="{
+            'brs--medium': rounded
+        }">
+            <div class="album" :class="{
+                'brs--medium': rounded,
+                'hide-menu': hideMenu
+            }" v-for="(asset, index) in sessionAsset" :key="index">
+                <template v-if="asset.type === 'image'">
+                    <img :src="asset.fullPath" alt="image" class="album-asset" />
+                </template>
+                <template v-else-if="asset.type === 'video'">
+                    <video :src="asset.fullPath" class="album-asset" autoplay muted @loadedmetadata="handleVideoDuration"
+                        @ended="nextAsset"></video>
+                </template>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { IEventAsset } from "@/helpers/interfaces";
-
-interface CollageItem {
-  id: number;
-  asset: IEventAsset | null;
-  style: Record<string, string>;
-}
+import { defineComponent } from 'vue';
+import { IEventAsset } from '@/helpers/interfaces';
 
 export default defineComponent({
-  name: "GalleryDynamicCollage",
+    name: 'GalleryView',
 
-  props: {
-    interval: { type: Number, default: 2000 }, // ms between new spawns
-    maxItems: { type: Number, default: 12 }, // how many on screen
-    lifespan: { type: Number, default: 8000 }, // ms each asset lives
-  },
+    props: {
+        rounded: {
+            type: Boolean,
+            default: false
+        },
 
-  data() {
-    return {
-      items: [] as CollageItem[],
-      timerId: null as ReturnType<typeof setInterval> | null,
-      counter: 0,
-    };
-  },
-
-  computed: {
-    assets(): IEventAsset[] {
-      return this.$store.getters["event/getGalleryAssets"] as IEventAsset[];
-    },
-  },
-
-  methods: {
-    getRandomAsset(): IEventAsset | null {
-      if (!this.assets.length) return null;
-      const index = Math.floor(Math.random() * this.assets.length);
-      return this.assets[index];
+        hideMenu: {
+            type: Boolean,
+            default: false
+        },
     },
 
-    getRandomStyle(
-      usedSlots: Set<string>,
-      zIndex: number
-    ): Record<string, string> {
-      const rows = 3; // split screen vertically
-      const cols = 4; // split screen horizontally
-      const cellW = 100 / cols; // width per slot in vw
-      const cellH = 50 / rows; // height per slot in vh (top half only)
-
-      // keep picking until we find a free slot
-      let row, col, slotKey;
-      do {
-        row = Math.floor(Math.random() * rows);
-        col = Math.floor(Math.random() * cols);
-        slotKey = `${row}-${col}`;
-      } while (usedSlots.has(slotKey));
-
-      // mark slot as used
-      usedSlots.add(slotKey);
-
-      // random offset inside the slot (so it doesn’t look too rigid)
-      const offsetX = Math.random() * (cellW * 0.4);
-      const offsetY = Math.random() * (cellH * 0.4);
-
-      const size = 15 + Math.random() * 15; // 15–30vw
-      const rotate = Math.floor(Math.random() * 20 - 10); // -10° to 10°
-      const z = Math.floor(Math.random() * 3);
-
-      return {
-        position: "absolute",
-        top: `${row * cellH + offsetY}vh`,
-        left: `${col * cellW + offsetX}vw`,
-        width: `${size}vw`,
-        transform: `rotate(${rotate}deg)`,
-        zIndex: zIndex.toString(),
-        animation: `float ${this.lifespan}ms ease-in-out forwards`,
-      };
+    data() {
+        return {
+            displayedIndexes: new Set<number>(),
+            sessionAsset: [] as IEventAsset[],
+            currentIndex: 0,
+            timeoutId: null as ReturnType<typeof setTimeout> | null,
+            intervalId: null as ReturnType<typeof setInterval> | null,
+            interval: undefined as undefined | any
+        };
     },
 
-    spawnItem() {
-      if (!this.assets.length) return;
-
-      // reset slot tracking
-      const usedSlots = new Set(this.items.map((i: any) => i.slot));
-      console.log({ usedSlots });
-
-      if (this.items.length >= this.maxItems) {
-        this.items.shift();
-      }
-
-      const newItem: CollageItem = {
-        id: this.counter++,
-        asset: this.getRandomAsset(),
-        style: this.getRandomStyle(usedSlots, this.counter),
-      };
-
-      this.items.push(newItem);
-
-      setTimeout(() => {
-        this.items = this.items.filter((i) => i.id !== newItem.id);
-      }, this.lifespan);
+    created() {
+        this.$store.dispatch("event/getEventGalleryAssets");
+        if(!this.interval) {
+            this.interval = setInterval(() => {
+                this.$store.dispatch("event/getEventGalleryAssets");
+            }, 10000);
+        }
     },
-  },
 
-  mounted() {
-    this.spawnItem(); // first
-    this.timerId = setInterval(this.spawnItem, this.interval);
-  },
+    mounted() {
+        this.updateSessionAsset();
+    },
 
-  beforeUnmount() {
-    if (this.timerId) clearInterval(this.timerId);
-  },
+    beforeUnmount() {
+        clearInterval(this.interval);
+    },
+
+    watch: {
+        sessionAsset: {
+            handler(newSessionAsset) {
+                if (newSessionAsset.length && newSessionAsset[0].type === 'video') {
+                    if (this.intervalId) {
+                        clearInterval(this.intervalId);
+                        this.intervalId = null;
+                    }
+                } else {
+                    this.resetInterval();
+                }
+            },
+            immediate: true,
+        },
+    },
+
+    computed: {
+        assets(): IEventAsset[] {
+            return this.$store.getters['event/getGalleryAssets'] as IEventAsset[];
+        },
+    },
+
+    methods: {
+        getRandomAssetIndexes(): number {
+            const availableIndexes = this.assets
+                .map((_, index) => index)
+                .filter((index) => !this.displayedIndexes.has(index));
+
+            if (availableIndexes.length === 0) {
+                this.displayedIndexes.clear();
+                return this.getRandomAssetIndexes();
+            }
+
+            const randomIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+            this.displayedIndexes.add(randomIndex);
+
+            return randomIndex;
+        },
+        updateSessionAsset(): void {
+            if (this.assets.length === 0) return;
+            const index = this.getRandomAssetIndexes();
+            this.sessionAsset = [this.assets[index]];
+            
+            this.currentIndex = index;
+        },
+        nextAsset(): void {
+            if (this.timeoutId) {
+                clearTimeout(this.timeoutId);
+                this.timeoutId = null;
+            }
+            this.currentIndex = (this.currentIndex + 1) % this.assets.length;
+            this.sessionAsset = [this.assets[this.currentIndex]];
+            this.resetInterval();
+        },
+        previousAsset(): void {
+            if (this.timeoutId) {
+                clearTimeout(this.timeoutId);
+                this.timeoutId = null;
+            }
+            this.currentIndex = (this.currentIndex - 1 + this.assets.length) % this.assets.length;
+            this.sessionAsset = [this.assets[this.currentIndex]];
+            this.resetInterval();
+        },
+        handleVideoDuration(event: Event): void {
+            const videoElement = event.target as HTMLVideoElement;
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
+                this.intervalId = null;
+            }
+            this.timeoutId = setTimeout(() => {
+                if (!videoElement.ended) {
+                    this.nextAsset();
+                }
+            }, 8000); // Move to next asset after 8 seconds if the video has not ended
+        },
+        resetInterval(): void {
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
+            }
+            this.intervalId = setInterval(this.updateSessionAsset, 3000); // Updates the displayed asset every 3 seconds
+        },
+    },
 });
 </script>
 
-<style scoped>
-.collage-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  overflow: hidden;
+<style lang="scss" scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Great+Vibes&display=swap');
+
+.gallery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    height: 100%;
+    width: 100%;
+    position: relative;
 }
 
-.collage-item {
-  pointer-events: none;
+.album-wrapper {
+    width: 100%;
+    height: 100%;
+    background-color: #222;
 }
 
-.collage-asset {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  opacity: 0.9;
+.title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 10;
+    padding: 10px;
 }
 
-/* entry/exit */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 1s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.gallery-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: 3rem;
+    color: #333;
 }
 
-/* float animation */
-@keyframes float {
-  0% {
-    transform: scale(1) translate(0, 0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  80% {
-    transform: scale(1.1) translate(-10px, -10px);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.2) translate(-20px, -20px);
-    opacity: 0;
-  }
+.arrow-button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0 20px;
+    transition: transform 0.2s;
+}
+
+.arrow-button:hover {
+    transform: scale(1.2);
+}
+
+.album {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.hide-menu {
+    height: 100%;
+    top: 0;
+}
+
+.album-asset {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 </style>
