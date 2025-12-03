@@ -10,6 +10,20 @@
         <p class="text--center">מומלץ להוריד מהמחשב</p>
       </template>
       <br />
+      <MainSelect
+        :options="QROptions"
+        v-model="selectedQR"
+        ref="actionSelect"
+        placeholder="בחר עיצוב כרטיס QR"
+        title="בחר עיצוב כרטיס QR"
+      />
+      <br />
+      <MainInput
+        v-model="cardText"
+        placeholder="הטקסט שיופיע בכרטיס"
+        title="הטקסט שיופיע בכרטיס"
+      />
+      <br />
       <MainButton :text="downloadCardText" @onClick="downloadCard()" />
       <br />
       <br />
@@ -19,7 +33,7 @@
     <div
       ref="eventCard"
       class="event-qr-card height--full bg--white brs--medium"
-      :style="`background-image: url('/assets/qr-card-background-with-text.webp')`"
+      :style="`background-image: url('/assets/${selectedQR}.webp')`"
     >
       <div class="qr-code">
         <qrcode-vue
@@ -31,6 +45,11 @@
           render-as="svg"
         />
       </div>
+      <div class="card-text">
+        <p class="title--large">
+          {{ cardText }}
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -41,6 +60,8 @@ import { defineComponent } from "vue";
 import QrcodeVue, { QrcodeSvg } from "qrcode.vue";
 import html2canvas from "html2canvas";
 import MainButton from "@/components/library/buttons/MainButton.vue";
+import MainSelect from "@/components/library/inputs/MainSelect.vue";
+import MainInput from "@/components/library/inputs/MainInput.vue";
 
 export default defineComponent({
   name: "EventQRCardView",
@@ -49,13 +70,23 @@ export default defineComponent({
     QrcodeVue,
     QrcodeSvg,
     MainButton,
+    MainSelect,
+    MainInput,
   },
 
   data() {
     return {
       isDownloadingQR: false as boolean,
       isDownloadingCard: false as boolean,
-      background: "#dedfcf" as string,
+      background: "transparent" as string,
+      selectedQR: "qr-card-flowers-classic" as string,
+      QROptions: [
+        { label: "פרחים", value: "qr-card-flowers-classic" },
+        { label: "פרחים 2", value: "qr-card-flowers-classic-2" },
+        { label: "פרחים 3", value: "qr-card-flowers-classic-3" },
+        { label: "פרחים 4", value: "qr-card-flowers-classic-4" },
+      ] as { label: string; value: string }[],
+      cardText: "סרקו, צלמו ותעלו בואו נחגוג ביחד" as string,
     };
   },
 
@@ -165,6 +196,20 @@ export default defineComponent({
     top: 25%;
     margin: auto;
     text-align: center;
+  }
+
+  .card-text {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 45%;
+    margin: auto;
+    text-align: center;
+
+    p {
+      max-width: 40%;
+      margin: auto;
+    }
   }
 }
 

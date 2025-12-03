@@ -1,4 +1,7 @@
 <template>
+  <p class="title--small">
+    {{ title }}
+  </p>
   <div class="custom-select" @click="toggleDropdown">
     <div class="selected">
       <span>{{ selectedLabel }}</span>
@@ -30,7 +33,14 @@ export default defineComponent({
       required: true,
     },
     modelValue: [String, Number],
-    placeholder: { type: String, default: "בחר פעולה" },
+    placeholder: {
+      type: String,
+      default: "בחר פעולה",
+    },
+    title: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return { isOpen: false };
@@ -85,7 +95,7 @@ export default defineComponent({
 
 .options {
   list-style: none;
-  margin: 6px 0 0 0; /* מרווח קטן */
+  margin: 6px 0 0 0;
   padding: 0;
   border: 1px solid #eee;
   border-radius: 6px;
