@@ -56,6 +56,10 @@ const EventModule = {
       return state.event?.status === StatusEnum.IN_PROGRESS;
     },
 
+    isEventAvailable(state: IEventModuleState): boolean {
+      return [StatusEnum.IN_PROGRESS, StatusEnum.ACTIVE].includes(state.event?.status);
+    },
+
     getEventDate(state: IEventModuleState): string | null {
       return state.event?.starts_at
         ? Time.extractDate(state.event?.starts_at ?? "")
@@ -273,6 +277,33 @@ const EventModule = {
           })
           .catch((err) => {
             resolve(null);
+          });
+      });
+    },
+
+    downloadAsset(
+      context: {
+        state: IEventModuleState;
+      },
+      data: { assetId: number; fileName: string }
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .get(`events/${context.state.event.id}/${data.assetId}/download`, {
+            responseType: "blob",
+          })
+          .then((res) => {
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            const fileExtension = res.headers["content-type"].split("/")[1];
+            link.setAttribute("download", data.fileName);
+            document.body.appendChild(link);
+            link.click();
+            resolve(true);
+          })
+          .catch((err) => {
+            resolve(false);
           });
       });
     },

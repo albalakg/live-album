@@ -7,7 +7,7 @@
     </div>
     <div class="assets-content display--flex flex--wrap brs--medium">
       <template v-for="(asset, index) in assets" :key="index">
-        <EventGuestCard :loading="loading" :assetIndex="index" :asset="asset" />
+        <EventGuestCard :loading="loading" :assetIndex="index" :asset="asset" :eventName="event.name" />
       </template>
     </div>
   </div>
@@ -65,7 +65,6 @@ export default defineComponent({
 .assets-content {
   margin-top: 20px;
   height: 72%;
-  max-height: 75vh;
   overflow-y: auto;
 }
 </style>

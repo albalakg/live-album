@@ -60,6 +60,16 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/TermsAndConditionsView.vue"),
   },
   {
+    path: "/event/uploads/:event_path",
+    name: "gallery",
+    component: () => import("@/views/EventUploadsView.vue"),
+  },
+  {
+    path: "/event/open-gallery/:event_path",
+    name: "guestGallery",
+    component: () => import("@/views/EventGuestGalleryView.vue"),
+  },
+  {
     path: "/event",
     name: "event",
     beforeEnter: Guard.user,
@@ -91,16 +101,6 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/EventQRCardView.vue"),
       },
     ],
-  },
-  {
-    path: "/event/uploads/:event_path",
-    name: "gallery",
-    component: () => import("@/views/EventUploadsView.vue"),
-  },
-  {
-    path: "/event/open-gallery/:event_path",
-    name: "gallery",
-    component: () => import("@/views/EventGuestGalleryView.vue"),
   },
   {
     path: "/profile",

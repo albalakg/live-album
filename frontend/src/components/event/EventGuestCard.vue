@@ -10,23 +10,20 @@
     <div
       class="gallery-asset position--relative bg--dark height--full width--full brs--medium"
     >
-      <div class="gallery-asset-chip padding--x-small brs--large">
-        <MainCheckbox
-          :disabled="loading || !mode"
-          :ref="`asset-checkbox-${asset.id}`"
-          @onClick="togglePickedAssets(asset.id)"
-          title="לחצו בשביל לבחור"
-          :value="isPicked"
-        />
-      </div>
-      <a :href="asset.fullPath" target="_blank" class="gallery-view-icon">
-        <MainIcon icon="open_in_new" size="1.3em" />
+      <a
+        :href="asset.fullPath"
+        :download="fileName"
+        class="gallery-download-icon"
+      >
+        <!-- <MainIcon icon="open_in_new" size="1.3em" /> -->
+        <MainIcon icon="download" size="1.3em" />
       </a>
-      <span class="gallery-visible-icon">
-        <MainIcon
-          :icon="asset.is_displayed ? 'visibility' : 'visibility_off'"
-          size="1.3em"
-        />
+      <span
+        @click="shareAsset()"
+        class="gallery-share-icon"
+      >
+        <!-- <MainIcon icon="open_in_new" size="1.3em" /> -->
+        <MainIcon icon="share" size="1.3em" />
       </span>
 
       <!-- Image -->
@@ -53,8 +50,13 @@
           loop
         ></video>
         <div v-if="!isPlaying" class="video-overlay">
-            <MainIcon icon="play_circle" size="3em" color="#ddd" :background="false" />
-            </div>
+          <MainIcon
+            icon="play_circle"
+            size="3em"
+            color="#ddd"
+            :background="false"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -63,7 +65,6 @@
 <script lang="ts">
 import { IEventAsset } from "@/helpers/interfaces";
 import { defineComponent, PropType } from "vue";
-import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
 import MainIcon from "../library/general/MainIcon.vue";
 import { EventAssetsManagementModesType } from "@/helpers/types";
 
@@ -71,7 +72,6 @@ export default defineComponent({
   name: "EventGuestCard",
 
   components: {
-    MainCheckbox,
     MainIcon,
   },
 
@@ -84,6 +84,11 @@ export default defineComponent({
     assetIndex: {
       type: Number,
       default: 1,
+    },
+
+    eventName: {
+      type: String,
+      required: true,
     },
 
     asset: {
@@ -114,9 +119,32 @@ export default defineComponent({
     mode(): EventAssetsManagementModesType | null {
       return this.$store.getters["event/getManagedAssetsMode"];
     },
+
+    fileName(): string {
+      const extension = this.asset.type === "image" ? "jpg" : "mp4";
+      return `${this.eventName}-${this.assetIndex}.${extension}`;
+    },
   },
 
   methods: {
+    async shareAsset() {
+      try {
+        if (!(navigator as any).share) return;
+
+        await (navigator as any).share({
+          title: "Share media",
+          url: this.asset.fullPath,
+        });
+      } catch (e) {
+        // user can cancel share; no need to treat as error
+        console.warn("Share canceled/failed:", e);
+      }
+    },
+
+    downloadAsset() {
+      this.$store.dispatch("event/downloadAsset", this.asset.id);
+    },
+
     togglePickedAssets(assetId: number) {
       if (this.isPicked) {
         this.$store.dispatch("event/removeAssetFromAssetsManagement", assetId);
@@ -175,16 +203,16 @@ export default defineComponent({
     object-fit: cover;
   }
 
-  .gallery-view-icon,
-  .gallery-visible-icon {
+  .gallery-download-icon,
+  .gallery-share-icon {
     position: absolute;
     left: 10px;
-    top: 10px;
+    top: 2px;
     z-index: 2;
     text-align: center;
   }
 
-  .gallery-visible-icon {
+  .gallery-share-icon {
     left: 40px;
   }
 

@@ -12,7 +12,7 @@
         >
           <div class="display--flex align--center width--full-mobile">
             <div class="icon-wrapper">
-              <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
+              <MainIcon clickable icon="content_copy" @onClick="copyUrl(`/event/uploads/${eventPath}`)" />
             </div>
             <small>{{ copyText }}</small>
           </div>
@@ -22,8 +22,24 @@
             </router-link>
           </div>
         </div>
+        <div
+          class="display--flex flex--wrap justify--space-between align--center margin--top-medium"
+        >
+          <div class="display--flex align--center width--full-mobile">
+            <div class="icon-wrapper">
+              <MainIcon clickable icon="content_copy" @onClick="copyUrl(`/event/open-gallery/${eventPath}`)" />
+            </div>
+            <small>{{ copyText }}</small>
+          </div>
+          <div class="width--full-mobile upload-page-link">
+            <router-link target="_blank" :to="`/event/open-gallery/${eventPath}`">
+              <BaseButton text="עמוד האלבום לאורחים" />
+            </router-link>
+          </div>
+        </div>
         <div class="margin--top-small">
-          <small class="hint"> ניתן לעלות קבצים דרך הקישור רק לאחר שהאירוע התחיל </small>
+          <small class="hint" v-if="isEventAvailable"> העמודים יהיו פעילים לאורחים רק לאחר שהאירוע יתחיל </small>
+          <small class="hint" v-else> העמודים פעילים לאורחים כעת </small>
         </div>
       </div>
     </div>
@@ -65,6 +81,10 @@ export default defineComponent({
     eventPath(): string {
       return this.$store.getters["event/getEventPath"];
     },
+    
+    isEventAvailable(): string {
+      return this.$store.getters["event/isEventAvailable"];
+    },
 
     copyText(): string {
       return this.textCopied ? "הקישור הועתק" : "לחצו להעתקת הקישור";
@@ -72,9 +92,9 @@ export default defineComponent({
   },
 
   methods: {
-    copyUrl() {
+    copyUrl(url: string) {
       this.copyTextToClipboard(
-        window.location.origin + `/event/uploads/${this.eventPath}`
+        window.location.origin + url
       );
     },
 
