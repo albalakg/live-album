@@ -22,6 +22,11 @@
             </router-link>
           </div>
         </div>
+        <div>
+          <small class="hint" v-if="isEventInProgress">העמוד פעיל לאורחים כעת</small>
+          <small class="hint" v-else-if="isEvenActive">העמוד כבר אינו זמין יותר</small>
+          <small class="hint" v-else> העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small>
+        </div>
         <div
           class="display--flex flex--wrap justify--space-between align--center margin--top-medium"
         >
@@ -37,9 +42,9 @@
             </router-link>
           </div>
         </div>
-        <div class="margin--top-small">
-          <small class="hint" v-if="isEventAvailable"> העמודים יהיו פעילים לאורחים רק לאחר שהאירוע יתחיל </small>
-          <small class="hint" v-else> העמודים פעילים לאורחים כעת </small>
+        <div>
+          <small class="hint" v-if="isEventAvailable">העמוד פעיל לאורחים כעת</small>
+          <small class="hint" v-else> העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small>
         </div>
       </div>
     </div>
@@ -84,6 +89,14 @@ export default defineComponent({
     
     isEventAvailable(): string {
       return this.$store.getters["event/isEventAvailable"];
+    },
+
+    isEvenActive(): string {
+      return this.$store.getters["event/isEvenActive"];
+    },
+
+    isEventInProgress(): string {
+      return this.$store.getters["event/isEventInProgress"];
     },
 
     copyText(): string {

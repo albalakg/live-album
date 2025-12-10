@@ -288,7 +288,7 @@ const UserModule = {
       commit: (arg0: string, arg1: any) => void;
       dispatch: (arg0: string, arg1: any, arg2: any) => void;
     }) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         axios
           .get("user/profile")
           .then((res) => {
@@ -303,6 +303,7 @@ const UserModule = {
           .catch((err) => {
             router.push("/logout");
             console.warn("get: ", err);
+            reject(err);
           });
       });
     },

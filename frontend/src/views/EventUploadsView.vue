@@ -54,11 +54,11 @@
     </template>
     <template v-else>
       <template v-if="canShow && event">
-        <div class="overlay"></div>
+        <div class="overlay" v-if="displayDate || displayName"></div>
         <div
-          class="content-wrapper height--full display--flex direction--column justify--space-between"
+          class="content-wrapper height--full display--flex direction--column justify--space-between align-top"
         >
-          <h1 class="title text--white">
+          <h1 class="title text--white width--two-thirds margin--top-medium event-name">
             <span v-if="displayName">
               {{ event.name }}
             </span>
@@ -87,7 +87,7 @@
                 <span v-else>נכשל לעלות את הקובץ</span>
               </div>
               <h2 class="event-date text--white">
-                <span v-if="displayDate">
+                <span v-if="displayDate" class="instrument-serif-regular title--large">
                   {{ eventDate }}
                 </span>
               </h2>
@@ -270,7 +270,7 @@ export default defineComponent({
     },
 
     eventDate(): string {
-      return this.$store.getters["event/getEventDate"];
+      return this.$store.getters["event/getEventDate"].replaceAll('/', '.');
     },
   },
 
@@ -338,12 +338,22 @@ export default defineComponent({
   // margin: auto;
   // top: 10px;
   // margin-bottom: 30px;
-  font-size: 2.5rem;
+font-size: 2.5rem;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+.event-name {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .event-date {
   margin-bottom: 20px;
+
+  span {
+    font-weight: 500
+  }
+
 }
 
 .upload-button {

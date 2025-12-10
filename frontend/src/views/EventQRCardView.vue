@@ -33,7 +33,7 @@
     <div
       ref="eventCard"
       class="event-qr-card height--full bg--white brs--medium"
-      :style="`background-image: url('/assets/${selectedQR}.webp')`"
+      :style="`background-image: url('/assets/${selectedQR}')`"
     >
       <div class="qr-code">
         <qrcode-vue
@@ -79,12 +79,19 @@ export default defineComponent({
       isDownloadingQR: false as boolean,
       isDownloadingCard: false as boolean,
       background: "transparent" as string,
-      selectedQR: "qr-card-flowers-classic" as string,
+      selectedQR: "qr-card-flowers.webp" as string,
       QROptions: [
-        { label: "פרחים", value: "qr-card-flowers-classic" },
-        { label: "פרחים 2", value: "qr-card-flowers-classic-2" },
-        { label: "פרחים 3", value: "qr-card-flowers-classic-3" },
-        { label: "פרחים 4", value: "qr-card-flowers-classic-4" },
+        { label: "פרחים", value: "qr-card-flowers.webp" },
+        { label: "פרחים 2", value: "qr-card-flowers-2.webp" },
+        { label: "פרחים 3", value: "qr-card-flowers-3.webp" },
+        { label: "פרחים 4", value: "qr-card-flowers-4.webp" },
+        { label: "5 פרחים", value: "qr-card-flowers-5.png" },
+        { label: "טבע", value: "qr-card-nature.png" },
+        { label: "זהב לבן", value: "qr-card-gold.png" },
+        { label: "זהב לבן 2", value: "qr-card-gold-2.png" },
+        { label: "זהב לבן 3", value: "qr-card-gold-3.png" },
+        { label: "שיש מוזהב", value: "qr-card-marble.png" },
+        { label: "שיש מוזהב 2", value: "qr-card-marble-2.png" },
       ] as { label: string; value: string }[],
       cardText: "סרקו, צלמו ותעלו בואו נחגוג ביחד" as string,
     };

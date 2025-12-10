@@ -56,6 +56,10 @@ const EventModule = {
       return state.event?.status === StatusEnum.IN_PROGRESS;
     },
 
+    isEvenActive(state: IEventModuleState): boolean {
+      return state.event?.status === StatusEnum.ACTIVE;
+    },
+
     isEventAvailable(state: IEventModuleState): boolean {
       return [StatusEnum.IN_PROGRESS, StatusEnum.ACTIVE].includes(state.event?.status);
     },
