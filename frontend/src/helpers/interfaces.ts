@@ -80,6 +80,7 @@ export interface IEventConfig {
   preview_site_display_date: boolean;
   preview_guests_assets_in_gallery: boolean;
   preview_owners_assets_in_gallery: boolean;
+  preview_qr_in_gallery: boolean;
   event_id: number;
 }
 

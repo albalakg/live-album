@@ -30,32 +30,41 @@
         />
       </span>
 
-      <!-- Image -->
-      <img
-        v-if="asset.type === 'image'"
-        :src="asset.fullPath"
-        alt="event image"
-        class="album-asset brs--medium"
-        loading="lazy"
-      />
+      <EventAssetModal />
 
-      <!-- Video -->
-      <div
-        v-else-if="asset.type === 'video'"
-        class="video-wrapper brs--medium"
-        @mouseenter="playVideo"
-        @mouseleave="pauseVideo"
-      >
-        <video
-          ref="videoEl"
+      <!-- Image -->
+      <div class="height--full width--full" @click="openAssetModal()">
+        <img
+          v-if="asset.type === 'image'"
           :src="asset.fullPath"
+          alt="event image"
           class="album-asset brs--medium"
-          muted
-          loop
-        ></video>
-        <div v-if="!isPlaying" class="video-overlay">
-            <MainIcon icon="play_circle" size="3em" color="#ddd" :background="false" />
-            </div>
+          loading="lazy"
+        />
+
+        <!-- Video -->
+        <div
+          v-else-if="asset.type === 'video'"
+          class="video-wrapper brs--medium"
+          @mouseenter="playVideo"
+          @mouseleave="pauseVideo"
+        >
+          <video
+            ref="videoEl"
+            :src="asset.fullPath"
+            class="album-asset brs--medium"
+            muted
+            loop
+          ></video>
+          <div v-if="!isPlaying" class="video-overlay">
+            <MainIcon
+              icon="play_circle"
+              size="3em"
+              color="#ddd"
+              :background="false"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -67,13 +76,15 @@ import { defineComponent, PropType } from "vue";
 import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
 import MainIcon from "../library/general/MainIcon.vue";
 import { EventAssetsManagementModesType } from "@/helpers/types";
+import EventAssetModal from "./EventAssetModal.vue";
 
 export default defineComponent({
-  name: "EventAssetsView",
+  name: "EventAssetCard",
 
   components: {
     MainCheckbox,
     MainIcon,
+    EventAssetModal,
   },
 
   props: {
@@ -145,6 +156,10 @@ export default defineComponent({
         video.currentTime = 0;
         this.isPlaying = false;
       }
+    },
+
+    openAssetModal() {
+      this.$emit("open-asset-modal", this.asset);
     },
   },
 });

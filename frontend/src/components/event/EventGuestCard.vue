@@ -18,12 +18,9 @@
         <!-- <MainIcon icon="open_in_new" size="1.3em" /> -->
         <MainIcon icon="download" size="1.3em" />
       </a>
-      <span
-        @click="shareAsset()"
-        class="gallery-share-icon"
-      >
+      <span @click="shareAsset()" class="gallery-share-icon">
         <!-- <MainIcon icon="open_in_new" size="1.3em" /> -->
-        <MainIcon icon="share" size="1.3em" />
+        <MainIcon clickable icon="share" size="1.3em" />
       </span>
 
       <!-- Image -->
@@ -129,14 +126,33 @@ export default defineComponent({
   methods: {
     async shareAsset() {
       try {
-        if (!(navigator as any).share) return;
+        const nav = navigator as any;
 
-        await (navigator as any).share({
-          title: "Share media",
-          url: this.asset.fullPath,
+        if (!nav.canShare || !nav.share) {
+          console.warn("Web Share API not supported");
+          return;
+        }
+
+        // Fetch the image
+        const response = await fetch(this.asset.fullPath);
+        const blob = await response.blob();
+
+        // Create a File object so iOS/Android recognize it as an image
+        const file = new File([blob], "image.jpg", { type: blob.type });
+
+        // Check if files can be shared
+        if (!nav.canShare({ files: [file] })) {
+          console.warn("Sharing files not supported");
+          return;
+        }
+
+        // Share the actual image file
+        await nav.share({
+          title: "",
+          text: "",
+          files: [file],
         });
       } catch (e) {
-        // user can cancel share; no need to treat as error
         console.warn("Share canceled/failed:", e);
       }
     },

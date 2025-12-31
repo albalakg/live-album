@@ -12,9 +12,13 @@
         >
           <div class="display--flex align--center width--full-mobile">
             <div class="icon-wrapper">
-              <MainIcon clickable icon="content_copy" @onClick="copyUrl(`/event/uploads/${eventPath}`)" />
+              <MainIcon
+                clickable
+                icon="content_copy"
+                @onClick="copyUrl(`/event/uploads/${eventPath}`, 'uploadPage')"
+              />
             </div>
-            <small>{{ copyText }}</small>
+            <small>{{ copyUploadText }}</small>
           </div>
           <div class="width--full-mobile upload-page-link">
             <router-link target="_blank" :to="`/event/uploads/${eventPath}`">
@@ -23,28 +27,45 @@
           </div>
         </div>
         <div>
-          <small class="hint" v-if="isEventInProgress">העמוד פעיל לאורחים כעת</small>
-          <small class="hint" v-else-if="isEvenActive">העמוד כבר אינו זמין יותר</small>
-          <small class="hint" v-else> העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small>
+          <small class="hint" v-if="isEventInProgress"
+            >העמוד פעיל לאורחים כעת</small
+          >
+          <small class="hint" v-else-if="isEvenActive"
+            >העמוד כבר אינו זמין יותר</small
+          >
+          <small class="hint" v-else>
+            העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small
+          >
         </div>
         <div
           class="display--flex flex--wrap justify--space-between align--center margin--top-medium"
         >
           <div class="display--flex align--center width--full-mobile">
             <div class="icon-wrapper">
-              <MainIcon clickable icon="content_copy" @onClick="copyUrl(`/event/open-gallery/${eventPath}`)" />
+              <MainIcon
+                clickable
+                icon="content_copy"
+                @onClick="copyUrl(`/event/open-gallery/${eventPath}`, 'galleryPage')"
+              />
             </div>
-            <small>{{ copyText }}</small>
+            <small>{{ copyGalleryText }}</small>
           </div>
           <div class="width--full-mobile upload-page-link">
-            <router-link target="_blank" :to="`/event/open-gallery/${eventPath}`">
+            <router-link
+              target="_blank"
+              :to="`/event/open-gallery/${eventPath}`"
+            >
               <BaseButton text="עמוד האלבום לאורחים" />
             </router-link>
           </div>
         </div>
         <div>
-          <small class="hint" v-if="isEventAvailable">העמוד פעיל לאורחים כעת</small>
-          <small class="hint" v-else> העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small>
+          <small class="hint" v-if="isEventAvailable"
+            >העמוד פעיל לאורחים כעת</small
+          >
+          <small class="hint" v-else>
+            העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small
+          >
         </div>
       </div>
     </div>
@@ -78,7 +99,10 @@ export default defineComponent({
 
   data() {
     return {
-      textCopied: false as boolean,
+      textCopied: {
+        uploadPage: false,
+        galleryPage: false,
+      } as Record<string, boolean>,
     };
   },
 
@@ -86,7 +110,7 @@ export default defineComponent({
     eventPath(): string {
       return this.$store.getters["event/getEventPath"];
     },
-    
+
     isEventAvailable(): string {
       return this.$store.getters["event/isEventAvailable"];
     },
@@ -99,20 +123,22 @@ export default defineComponent({
       return this.$store.getters["event/isEventInProgress"];
     },
 
-    copyText(): string {
-      return this.textCopied ? "הקישור הועתק" : "לחצו להעתקת הקישור";
+    copyUploadText(): string {
+      return this.textCopied.uploadPage ? "הקישור הועתק" : "לחצו להעתקת הקישור";
+    },
+
+    copyGalleryText(): string {
+      return this.textCopied.galleryPage ? "הקישור הועתק" : "לחצו להעתקת הקישור";
     },
   },
 
   methods: {
-    copyUrl(url: string) {
-      this.copyTextToClipboard(
-        window.location.origin + url
-      );
+    copyUrl(url: string, pageType: string) {
+      this.copyTextToClipboard(window.location.origin + url, pageType);
     },
 
-    fallbackCopyTextToClipboard(text: string) {
-      var textArea = document.createElement("textarea");
+    fallbackCopyTextToClipboard(text: string, pageType: string) {
+      const textArea = document.createElement("textarea");
       textArea.value = text;
 
       // Avoid scrolling to bottom
@@ -125,12 +151,11 @@ export default defineComponent({
       textArea.select();
 
       try {
-        var successful = document.execCommand("copy");
-        var msg = successful ? "successful" : "unsuccessful";
+        const successful = document.execCommand("copy");
         if (successful) {
-          this.textCopied = true;
+          this.textCopied[pageType] = true;
           setTimeout(() => {
-            this.textCopied = false;
+            this.textCopied[pageType] = false;
           }, 2000);
         }
       } catch (err) {
@@ -140,22 +165,22 @@ export default defineComponent({
       document.body.removeChild(textArea);
     },
 
-    copyTextToClipboard(text: string) {
+    copyTextToClipboard(text: string, pageType: string) {
       if (!navigator.clipboard) {
-        this.fallbackCopyTextToClipboard(text);
+        this.fallbackCopyTextToClipboard(text, pageType);
         return;
       }
 
       navigator.clipboard.writeText(text).then(
         () => {
-          this.textCopied = true;
+          this.textCopied[pageType] = true;
           setTimeout(() => {
-            this.textCopied = false;
+            this.textCopied[pageType] = false;
           }, 2000);
         },
         (err) => {
           console.error("Async: Could not copy text: ", err);
-          this.fallbackCopyTextToClipboard(text);
+          this.fallbackCopyTextToClipboard(text, pageType);
         }
       );
     },

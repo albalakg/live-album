@@ -1,160 +1,74 @@
 <template>
-    <div class="display-asset-card width--90-mobile"
-        :class="`${left || right || top || bottom ? 'position--absolute' : 'position--relative'} ${$bp.isMobile ? 'display-asset-card-mobile' : ''}`"
-        :style="`${left ? `left: ${left};` : ''} ${top ? `top: ${top};` : ''} ${right ? `right: ${right};` : ''} ${bottom ? `bottom: ${bottom};` : ''}`">
-        <p v-if="title">
-            {{ title }}
-        </p>
-        <div class="asset-wrapper bg--dark brs--large shadow--small"
-            :class="`display-asset-card-width-${width} display-asset-card-height-${height}`">
-            <img class="width--full height--full brs--large" :src="currentImage" :alt="title">
-        </div>
+  <div class="display-asset-card width--90-mobile">
+    <div class="asset-wrapper bg--dark brs--large">
+      <img class="width--full height--full brs--large" :src="currentImage" />
     </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
-    name: "DisplayAssetCard",
+  name: "DisplayAssetCard",
 
-    props: {
-        width: {
-            type: String,
-        },
-
-        height: {
-            type: String,
-        },
-
-        title: {
-            type: String,
-            default: ''
-        },
-
-        left: {
-            type: String,
-            default: ''
-        },
-
-        top: {
-            type: String,
-            default: ''
-        },
-
-        right: {
-            type: String,
-            default: ''
-        },
-
-        bottom: {
-            type: String,
-            default: ''
-        },
-
-        src: {
-            type: String,
-            default: ''
-        },
-        
-        multipleSrc: {
-            type: Array as PropType<string[]> | null,
-            default: null
-        },
-        
-        imageSwitchTime: {
-            type: Number,
-            default: 3000
-        },
+  props: {
+    src: {
+      type: String,
+      default: "",
     },
 
-    data() {
-        return {
-            interval: undefined as ReturnType<typeof setInterval> | undefined,
-            newImageIndex: 0 as number
+    multipleSrc: {
+      type: Array as PropType<string[]> | null,
+      default: null,
+    },
+
+    imageSwitchTime: {
+      type: Number,
+      default: 3000,
+    },
+  },
+
+  data() {
+    return {
+      interval: undefined as ReturnType<typeof setInterval> | undefined,
+      newImageIndex: 0 as number,
+    };
+  },
+
+  mounted() {
+    if (this.multipleSrc) {
+      this.switchImages();
+    }
+  },
+
+  computed: {
+    currentImage() {
+      return this.multipleSrc ? this.multipleSrc[this.newImageIndex] : this.src;
+    },
+  },
+
+  methods: {
+    clicked() {
+      this.$emit("onClick");
+    },
+
+    switchImages() {
+      this.interval = setInterval(() => {
+        this.newImageIndex = this.newImageIndex + 1;
+        if (this.newImageIndex > this.multipleSrc.length - 1) {
+          this.newImageIndex = 0;
         }
+      }, this.imageSwitchTime);
     },
-
-    mounted() {
-        if(this.multipleSrc) {
-            this.switchImages();
-        } 
-    },
-
-    computed: {
-        currentImage() {
-            return this.multipleSrc ? this.multipleSrc[this.newImageIndex] : this.src;
-        }
-    },
-
-    methods: {
-        clicked() {
-            this.$emit('onClick')
-        },
-
-        switchImages() {
-            this.interval = setInterval(() => {
-                this.newImageIndex = this.newImageIndex + 1;
-                if(this.newImageIndex > this.multipleSrc.length - 1) {
-                    this.newImageIndex = 0;
-                }
-            }, this.imageSwitchTime);
-        }
-    },
+  },
 });
 </script>
 
 <style scoped lang="scss">
-.display-asset-card-mobile {
-    margin-top: 20px;
-}
-
-.display-asset-card {
-    z-index: 3;
-
-    img {
-        object-fit: cover;
-    }
-
-    p {
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
-
-    .display-asset-card-width-small {
-        width: 10vw;
-    }
-
-    .display-asset-card-width-medium {
-        width: 20vw;
-    }
-
-    .display-asset-card-width-large {
-        width: 30vw;
-    }
-
-    .display-asset-card-width-x-large {
-        width: 40vw;
-    }
-
-    .display-asset-card-height-small {
-        height: 10vh;
-    }
-
-    .display-asset-card-height-medium {
-        height: 20vh;
-    }
-
-    .display-asset-card-height-large {
-        height: 30vh;
-    }
-
-    .display-asset-card-height-x-large {
-        height: 40vh;
-    }
-
-    .display-asset-card-height-xxx-large {
-        height: 80vh;
-    }
+img {
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
 }
 </style>

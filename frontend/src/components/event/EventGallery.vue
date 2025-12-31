@@ -50,10 +50,10 @@ export default defineComponent({
     },
 
     created() {
-        this.$store.dispatch("event/getEventGalleryAssets");
+        this.$store.dispatch("event/getEventGalleryAssets", this.$route.params.event_path);
         if(!this.interval) {
             this.interval = setInterval(() => {
-                this.$store.dispatch("event/getEventGalleryAssets");
+                this.$store.dispatch("event/getEventGalleryAssets", this.$route.params.event_path);
             }, 10000);
         }
     },

@@ -47,7 +47,8 @@
           width="xx-large"
           height="large"
         />
-        <h1>טוען את העמוד...</h1>
+        <h1>רק רגע,<br>
+           מסיים לטעון...</h1>
         <br />
         <span class="title--x-large text--pink"> SnapShare </span>
       </div>
@@ -135,7 +136,7 @@
           width="xx-large"
           height="large"
         />
-        <div>
+        <div class="not-available">
           <h1>מצטערים, אך האירוע אינו פעיל כרגע</h1>
           <br />
           <span class="title--x-large text--pink"> SnapShare </span>
@@ -244,6 +245,10 @@ export default defineComponent({
     },
 
     eventImage(): string {
+      if(this.loading) {
+        return "";
+      }
+
       return this.canShow && this.displayImage
         ? this.$store.getters["event/getEventImage"]
         : "/assets/upload-default-image.png";
@@ -408,6 +413,14 @@ span {
 
 .hidden {
   opacity: 0;
+}
+
+.not-available {
+  position: absolute;
+  bottom: 5%;
+  left: 0;
+  right: 0;
+  margin: auto;
 }
 
 @media (min-width: 768px) {

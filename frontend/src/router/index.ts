@@ -65,6 +65,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/EventUploadsView.vue"),
   },
   {
+    path: "/event/open-album/:event_path",
+    name: "guestAlbum",
+    component: () => import("@/views/EventGuestAlbumView.vue"),
+  },
+  {
     path: "/event/open-gallery/:event_path",
     name: "guestGallery",
     component: () => import("@/views/EventGuestGalleryView.vue"),

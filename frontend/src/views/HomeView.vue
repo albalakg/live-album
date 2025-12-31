@@ -27,7 +27,7 @@
           <MainButton v-else disabled animation text="הזמן את האלבום החי שלך" />
       </div> -->
       <div class="width--corner width--full-mobile">
-          <MainButton disabled animation text="הזמן את האלבום החי שלך (בקרוב)" />
+        <MainButton disabled animation text="הזמן את האלבום החי שלך (בקרוב)" />
       </div>
       <img
         class="header-image-gallery"
@@ -38,12 +38,18 @@
         class="social-media display--flex direction--column justify--space-between"
       >
         <div>
-          <a href="https://www.facebook.com/share/1By1U5frDi/?mibextid=wwXIfr" target="_blank">
+          <a
+            href="https://www.facebook.com/share/1By1U5frDi/?mibextid=wwXIfr"
+            target="_blank"
+          >
             <img src="/assets/icons/facebook-icon.png" alt="facebook" />
           </a>
         </div>
         <div>
-          <a href="https://www.instagram.com/snapshare_live?igsh=MXpudTBjMWhxeWw%3D&utm_source=qr" target="_blank">
+          <a
+            href="https://www.instagram.com/snapshare_live?igsh=MXpudTBjMWhxeWw%3D&utm_source=qr"
+            target="_blank"
+          >
             <img src="/assets/icons/instagram-icon.png" alt="instagram" />
           </a>
         </div>
@@ -87,329 +93,11 @@
       </div>
     </section>
 
-    <!-- What You Get Section -->
-    <section
-      class="home-page-section what-you-get-section bg--pink"
-      id="features"
-    >
-      <template v-if="$bp.isMediumAndUp">
-        <MainLine
-          :opacity="'0.7'"
-          top="0"
-          left="25%"
-          color="white"
-          width="x-large"
-        />
-        <MainLine
-          :opacity="'0.7'"
-          top="0"
-          left="calc(25% + 45px)"
-          color="white"
-          width="small"
-        />
-        <MainLine
-          :opacity="'0.7'"
-          top="0"
-          left="calc(25% + 56px)"
-          color="white"
-          width="medium"
-        />
-        <MainLine
-          :opacity="'0.7'"
-          top="0"
-          left="calc(25% + 71px)"
-          color="white"
-          width="xxx-large"
-        />
-        <MainLine
-          :opacity="'0.7'"
-          top="0"
-          left="calc(25% + 166px)"
-          color="white"
-          width="medium"
-        />
-        <MainLine
-          :opacity="'0.7'"
-          top="0"
-          left="calc(25% + 181px)"
-          color="white"
-          width="small"
-        />
-        <MainLine
-          :opacity="'0.7'"
-          top="0"
-          left="calc(25% + 192px)"
-          color="white"
-          width="x-large"
-        />
-      </template>
-      <div class="home-page-content width--page-size margin--auto height--full">
-        <h2 class="text--dark title--x-large text--center-mobile">
-          החבילת מוצרים שתקבלו
-        </h2>
+    <Features />
 
-        <div
-          class="display--flex justify--space-between height--full width--page-size margin--auto flex--wrap-mobile"
-        >
-          <div
-            class="what-you-get-card width--corner width--full-mobile brs--medium shadow--small padding--large"
-          >
-            <h3 class="text--white title--large">
-              אלבום דיגיטלי חי בזמן האירוע
-            </h3>
-            <ul class="padding--large text--right">
-              <li>
-                <p>האלבום יציג את רצף התמונות והסרטונים בסדר אקראי</p>
-              </li>
-              <li>
-                <p>כל קובץ חדש שמתווסף נכנס מיידית לסבב הפעיל</p>
-              </li>
-            </ul>
-          </div>
-          <div
-            class="what-you-get-card width--corner width--full-mobile brs--medium shadow--small padding--large"
-          >
-            <h3 class="text--white title--large">
-              כל קבצי האלבום להורדה וצבירת זכרונות
-            </h3>
-            <ul class="padding--large text--right">
-              <li>
-                <p>
-                  כל התמונות והסרטונים נשמרים במהלך האירוע עם שמירה מלאה על
-                  האיכות
-                </p>
-              </li>
-              <li>
-                <p>ניתן להוריד את כל הקבצים בכל רגע כל עוד האירוע פעיל</p>
-              </li>
-              <li>
-                <p>
-                  לאחר מספר ימים (בהתאם למסלול), האירוע נסגר והקבצים נמחקים
-                  לצמיתות – ללא אפשרות שחזור
-                </p>
-              </li>
-            </ul>
-          </div>
-          <div
-            class="what-you-get-card width--corner width--full-mobile brs--medium shadow--small padding--large"
-          >
-            <h3 class="text--white title--large">
-              כרטיס הזמנה דיגיטלי עם קוד QR
-            </h3>
-            <ul class="padding--large text--right">
-              <li>
-                <p>כל אירוע מקבל קישור ייחודי לעמוד שיתוף</p>
-              </li>
-              <li>
-                <p>
-                  האורחים יכולים להעלות את התמונות והסרטונים שלהם לעמוד זה עד 24
-                  שעות מתחילת האירוע
-                </p>
-              </li>
-              <li>
-                <p>
-                  תקבלו כרטיס מעוצב עם קוד QR לסריקה מהירה ונוחה ישירות לעמוד
-                </p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
+    <HowItLooks />
 
-    <!-- How It Works Section -->
-    <section class="home-page-section who-is-it-for-section" id="who-is-it-for">
-      <MainCube left="10%" top="10%" width="xxxx-large" height="large" />
-      <MainCube
-        v-if="$bp.isMediumAndUp"
-        color="pink"
-        left="29%"
-        top="4%"
-        width="large"
-        height="large"
-      />
-      <MainCube left="25%" bottom="10%" width="large" height="large" />
-      <MainCube left="55%" bottom="10%" width="xxxx-large" height="large" />
-      <MainCube
-        color="pink"
-        left="75%"
-        bottom="7%"
-        width="large"
-        height="xx-large"
-      />
-      <div
-        class="who-is-it-for-content text--center display--flex justify--center align--center"
-      >
-        <div>
-          <h2 class="text--green title--x-large">למי זה מתאים</h2>
-          <div
-            class="who-is-it-for-boxes-wrapper justify--center display--flex flex--wrap"
-          >
-            <div class="who-is-it-for-box">
-              <h3 class="">חתונות ואירוסין</h3>
-              <p>תיעוד מלא של כל החיוכים והריקודים – בזמן אמת.</p>
-            </div>
-
-            <div class="who-is-it-for-box">
-              <h3 class="">בר/בת מצווה</h3>
-              <p class="">תנו לאורחים לצלם ולשתף רגעים בלתי נשכחים.</p>
-            </div>
-
-            <div class="who-is-it-for-box">
-              <h3 class="">אירועי חברה</h3>
-              <p class="">שיתוף תכנים מהאירוע בצורה מהירה ונגישה לעובדים.</p>
-            </div>
-
-            <div class="who-is-it-for-box">
-              <h3 class="">מסיבות סיום</h3>
-              <p class="">הזדמנות לתעד את הרגעים האחרונים של שנה מיוחדת.</p>
-            </div>
-
-            <div class="who-is-it-for-box">
-              <h3 class="">ברית / בריתה</h3>
-              <p class="">שמרו זיכרונות מהרגעים הראשונים של המשפחה.</p>
-            </div>
-
-            <div class="who-is-it-for-box">
-              <h3 class="">כל חגיגה</h3>
-              <p class="">תכלס מתאים לכל אירוע</p>
-            </div>
-          </div>
-          <div class="width--corner width--two-thirds-mobile margin--auto">
-            <router-link
-              v-if="!hasActiveEvent"
-              :to="user ? '/order' : '/signup'"
-            >
-              <MainButton
-                animation
-                color="pink"
-                text="הצטרפו עכשיו"
-                size="small"
-              />
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- How It Looks Section -->
-    <section class="home-page-section how-it-looks-section" id="how-it-looks">
-      <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
-      <MainCube
-        color="pink"
-        left="10%"
-        top="10%"
-        width="large"
-        height="x-large"
-      />
-      <MainCube left="8%" top="3%" width="large" height="large" />
-      <MainCube left="11%" top="6%" width="medium" height="medium" />
-      <MainCube left="60%" top="3%" width="large" height="large" />
-      <MainCube
-        color="pink"
-        left="63%"
-        top="10%"
-        width="medium"
-        height="medium"
-      />
-      <MainCube
-        color="pink"
-        left="30%"
-        top="73%"
-        width="large"
-        height="large"
-      />
-      <MainCube
-        color="pink"
-        left="33%"
-        top="71%"
-        width="large"
-        height="medium"
-      />
-      <MainCube
-        color="pink"
-        left="72%"
-        top="80%"
-        width="xx-large"
-        height="large"
-      />
-      <MainCube
-        rounded
-        color="pink"
-        left="30%"
-        top="10%"
-        width="xxxxx-large"
-        height="xxxxx-large"
-      />
-      <MainCube
-        rounded
-        color="pink"
-        left="45%"
-        top="30%"
-        width="xxxxx-large"
-        height="xxxxx-large"
-      />
-      <!-- <MainCube left="55%" bottom="10%" width="xxxx-large" height="large" /> -->
-      <!-- <MainCube color="pink" left="75%" bottom="7%" width="large" height="xx-large" /> -->
-      <div class="how-it-looks-content width--page-size margin--auto">
-        <h2 class="text--pink title--x-large">בואו נראה איך זה נראה</h2>
-      </div>
-
-      <!-- <div class="height--full width--full"> -->
-      <template v-if="$bp.isMediumAndUp">
-        <DisplayAssetCard
-          :src="`/assets/upload_page.jpg`"
-          width="small"
-          height="x-large"
-          right="5%"
-          title="עמוד העלאת קבצים"
-        />
-        <DisplayAssetCard
-          :src="`/assets/event_manager.jpg`"
-          width="medium"
-          height="large"
-          bottom="10%"
-          right="27%"
-          title="ניהול האירוע"
-        />
-        <DisplayAssetCard
-          :multipleSrc="[
-            `/assets/gallery.jpg`,
-            `/assets/gallery2.jpg`,
-            `/assets/gallery3.jpg`,
-          ]"
-          width="large"
-          height="x-large"
-          bottom="35%"
-          right="60%"
-          title="האלבום החי"
-        />
-      </template>
-      <template v-else>
-        <div class="how-it-looks-mobile-wrapper">
-          <DisplayAssetCard
-            :src="`/assets/upload_page_mobile.jpg`"
-            :height="$bp.isMediumAndUp ? 'x-large' : 'xxx-large'"
-            title="עמוד העלאת קבצים"
-          />
-          <DisplayAssetCard
-            :src="`/assets/event_manager_mobile.jpg`"
-            :height="$bp.isMediumAndUp ? 'x-large' : 'xxx-large'"
-            title="ניהול האירוע"
-          />
-          <DisplayAssetCard
-            :multipleSrc="[
-              `/assets/gallery_mobile.jpg`,
-              `/assets/gallery2_mobile.jpg`,
-              `/assets/gallery3_mobile.jpg`,
-            ]"
-            :height="$bp.isMediumAndUp ? 'x-large' : 'xxx-large'"
-            title="האלבום החי"
-          />
-        </div>
-      </template>
-      <!-- </div> -->
-    </section>
+    <Clients />
 
     <!-- Pricing Section -->
     <section
@@ -554,16 +242,10 @@
           >
             <h3 class="text--dark title--medium">מסלול הבסיסי</h3>
             <p>המסלול הבסיסי מוגבל עד 300 קבצים</p>
-            <p>הקבצים נמחקים 14 יום מתחילת האירוע</p>
+            <p>הקבצים נמחקים לאחר 6 חודשים מתחילת האירוע</p>
             <div class="pricing-card-action">
-              <h4 class="title--large">₪120</h4>
-              <MainButton
-                disabled
-                animation
-                text="הצטרפו עכשיו (בקרוב)"
-                size="x-small"
-              />
-              <!-- <router-link
+              <h4 class="title--large">200</h4>
+              <router-link
                 v-if="!hasActiveEvent"
                 to="/order?subscription=basic"
               >
@@ -573,9 +255,9 @@
                 v-else
                 disabled
                 animation
-                text="הצטרפו עכשיו"
+                text="כבר יש לכם אירוע"
                 size="x-small"
-              /> -->
+              />
             </div>
           </div>
           <div
@@ -584,22 +266,23 @@
             <h3 class="text--dark title--medium">מסלול פרימיום</h3>
 
             <p>המסלול פרימיום אינו מוגבל בכמות קבצים</p>
-            <p>הקבצים נמחקים 30 יום מתחילת האירוע</p>
+            <p>הקבצים נמחקים לאחר 12 חודשים מתחילת האירוע</p>
             <div class="pricing-card-action">
-              <h4 class="title--large">₪170</h4>
-              <!-- <router-link
-                v-if="!canUpgradeSubscription"
+              <h4 class="title--large">₪300</h4>
+               <router-link v-if="canUpgradeSubscription" to="/order?subscription=premium">
+                <MainButton animation text="שדרגו עכשיו" size="x-small" />
+              </router-link>
+              <router-link
+                v-else-if="!hasActiveEvent"
                 to="/order?subscription=premium"
               >
                 <MainButton animation text="הצטרפו עכשיו" size="x-small" />
               </router-link>
-              <router-link v-else to="/order?subscription=premium">
-                <MainButton animation text="שדרגו עכשיו" size="x-small" />
-              </router-link> -->
               <MainButton
+                v-else
                 disabled
                 animation
-                text="הצטרפו עכשיו (בקרוב)"
+                text="כבר יש לכם אירוע"
                 size="x-small"
               />
             </div>
@@ -611,10 +294,12 @@
 </template>
 
 <script lang="ts">
+import Features from "@/components/home/features.vue";
+import HowItLooks from "@/components/home/howItLooks.vue";
+import Clients from "@/components/home/clients.vue";
 import MainCube from "@/components/library/background/MainCube.vue";
 import MainLine from "@/components/library/background/MainLine.vue";
 import MainButton from "@/components/library/buttons/MainButton.vue";
-import DisplayAssetCard from "@/components/library/cards/DisplayAssetCard.vue";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
 import { IUserInfo } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
@@ -626,7 +311,9 @@ export default defineComponent({
     MainButton,
     MainCube,
     MainLine,
-    DisplayAssetCard,
+    Features,
+    HowItLooks,
+    Clients,
   },
 
   computed: {
@@ -734,105 +421,6 @@ export default defineComponent({
   }
 }
 
-.what-you-get-section {
-  padding-top: 6%;
-  height: fit-content;
-  min-height: calc(94vh - 99px);
-  margin-top: 50px;
-
-  @media only screen and (max-width: 600px) {
-    padding: 10px 0;
-
-    .what-you-get-card {
-      margin: 10px 0;
-    }
-  }
-
-  .home-page-content {
-    z-index: 10;
-    position: relative;
-
-    h2 {
-      margin-bottom: 5%;
-    }
-
-    p {
-      font-weight: 500;
-    }
-
-    .what-you-get-card {
-      background-color: #f2a6a8cc;
-      height: 50%;
-      text-align: center;
-      min-height: 350px;
-
-      h3 {
-        margin-bottom: 10%;
-      }
-    }
-  }
-}
-
-.who-is-it-for-content {
-  background-color: #79ae6044;
-  min-height: 85vh;
-  width: calc(100% - 20px);
-  position: relative;
-  padding: 20px 10px;
-
-  .who-is-it-for-boxes-wrapper {
-    margin-bottom: 20px;
-
-    .who-is-it-for-box {
-      width: 25%;
-      background-color: #ffffffa0;
-      margin: 20px;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 5px #0002;
-      min-height: 83px;
-
-      h3 {
-        font-weight: 700;
-        margin-bottom: 10px;
-      }
-    }
-
-    @media only screen and (max-width: 600px) {
-      .who-is-it-for-box {
-        width: 75%;
-        padding: 15px;
-        margin: 5px;
-      }
-    }
-  }
-
-  h2 {
-    padding-top: 3%;
-    margin-bottom: 2%;
-  }
-
-  p {
-    margin-bottom: 2%;
-  }
-}
-
-.how-it-looks-mobile-wrapper {
-  padding-right: 10%;
-}
-
-.how-it-looks-content {
-  position: relative;
-
-  h2 {
-    padding-top: 8%;
-    margin-bottom: 2%;
-  }
-
-  p {
-    margin-bottom: 2%;
-  }
-}
 
 .pricing-section-content {
   width: 55%;

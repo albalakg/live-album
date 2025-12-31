@@ -146,6 +146,12 @@ const EventModule = {
         : "";
       state.event.image = event?.image ?? "";
       state.event.fullPath = event?.fullPath ?? "";
+
+      console.log({event});
+      
+      if(event?.config) {
+        state.event.config = event?.config;
+      }
     },
 
     SET_DOWNLOAD_ASSET_PROCESS(
@@ -332,10 +338,13 @@ const EventModule = {
     getEventGalleryAssets(context: {
       state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
-    }) {
+    }, guestToken: string|null = null) {
       return new Promise((resolve) => {
+        const queryString = guestToken ? "?token=" + guestToken : "";
+        const url = queryString ? `events/${context.state.event.id}/gallery-guests-assets${queryString}` : `events/${context.state.event.id}/gallery-assets`;
+        console.log("URL:", url);
         axios
-          .get(`events/${context.state.event.id}/gallery-assets`)
+          .get(url)
           .then((res) => {
             context.commit("SET_GALLERY_FILES", res.data.data);
             resolve(res.data);
@@ -577,6 +586,7 @@ const EventModule = {
             resolve(res.data);
           })
           .catch((err) => {
+            alert(JSON.stringify(err.response.data));
             reject(err);
           });
       });

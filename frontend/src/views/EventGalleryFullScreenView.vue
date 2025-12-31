@@ -42,18 +42,9 @@ export default defineComponent({
   data() {
     return {
       isFullScreen: false as boolean,
-      interval: undefined as undefined | any,
     };
   },
 
-  created() {
-    this.$store.dispatch("event/getEventGalleryAssets");
-    if (!this.interval) {
-      this.interval = setInterval(() => {
-        this.$store.dispatch("event/getEventGalleryAssets");
-      }, 10000);
-    }
-  },
   computed: {
     event(): IEvent | null {
       return this.$store.getters["event/getEvent"];
@@ -77,8 +68,6 @@ export default defineComponent({
   },
 
   beforeUnmount() {
-    clearInterval(this.interval);
-
     try {
       if (document.fullscreenElement) {
         document.exitFullscreen();

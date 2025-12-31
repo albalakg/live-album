@@ -79,6 +79,15 @@
       />
       <small>להציג את התמונות האישיות שלנו בגלריה</small>
     </div>
+    <!-- <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_qr_in_gallery = !form.config.preview_qr_in_gallery"
+        title="להציג QR בגלריה"
+        :value="form.config.preview_qr_in_gallery"
+        class="checkbox"
+      />
+      <small>להציג QR בגלריה</small>
+    </div> -->
     <br>
     <MainButton :loading="loading" text="שמור" />
   </form>
@@ -113,6 +122,7 @@ export default defineComponent({
           preview_site_display_date: false as boolean,
           preview_guests_assets_in_gallery: false as boolean,
           preview_owners_assets_in_gallery: false as boolean,
+          preview_qr_in_gallery: false as boolean,
         }
       },
       errors: {
@@ -159,6 +169,7 @@ export default defineComponent({
       this.form.config.preview_site_display_date = this.event?.config?.preview_site_display_date ?? false;
       this.form.config.preview_guests_assets_in_gallery = this.event?.config?.preview_guests_assets_in_gallery ?? false;
       this.form.config.preview_owners_assets_in_gallery = this.event?.config?.preview_owners_assets_in_gallery ?? false;
+      this.form.config.preview_qr_in_gallery = this.event?.config?.preview_qr_in_gallery ?? false;
       this.imageExists = !!this.event?.image;
     },
 
