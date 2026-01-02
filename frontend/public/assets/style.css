@@ -365,6 +365,11 @@
   font-weight: 700;
 }
 
+.title--xx-large {
+  font-size: 3.8em;
+  font-weight: 700;
+}
+
 .pointer {
   cursor: pointer;
 }
@@ -497,6 +502,10 @@ a {
 
   .title--x-large {
     font-size: 2.5em;
+  }
+
+  .title--xx-large {
+    font-size: 3.5em;
   }
 
   .width--80-mobile {

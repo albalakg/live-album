@@ -100,196 +100,7 @@
     <Clients />
 
     <!-- Pricing Section -->
-    <section
-      class="home-page-section pricing-section display--flex align--center"
-      id="pricing"
-    >
-      <MainCube left="5%" top="5%" width="large" height="large" />
-      <MainCube left="8%" top="8%" width="medium" height="medium" />
-      <MainCube
-        color="pink"
-        left="7%"
-        top="12%"
-        width="medium"
-        height="x-large"
-      />
-      <MainCube
-        color="pink"
-        left="75%"
-        top="5%"
-        width="medium"
-        height="medium"
-      />
-      <MainCube
-        color="pink"
-        left="85%"
-        top="55%"
-        width="xx-large"
-        height="large"
-      />
-      <MainCube left="82%" top="59%" width="xx-large" height="large" />
-      <MainCube left="12%" top="79%" width="large" height="xx-large" />
-      <MainCube
-        color="pink"
-        left="6%"
-        top="77%"
-        width="xxx-large"
-        height="medium"
-      />
-      <div class="pricing-section-content">
-        <template v-if="$bp.isMediumAndUp">
-          <MainLine
-            top="13%"
-            left="0"
-            color="white"
-            height="small"
-            width="full"
-          />
-          <MainLine
-            top="15%"
-            left="0"
-            color="white"
-            height="xx-large"
-            width="full"
-          />
-          <MainLine
-            top="28%"
-            left="0"
-            color="white"
-            height="small"
-            width="full"
-          />
-        </template>
-        <template v-else>
-          <MainLine
-            top="6%"
-            left="0"
-            color="white"
-            height="small"
-            width="full"
-          />
-          <MainLine
-            top="8%"
-            left="0"
-            color="white"
-            height="xx-large"
-            width="full"
-          />
-          <MainLine
-            top="17.5%"
-            left="0"
-            color="white"
-            height="small"
-            width="full"
-          />
-        </template>
-        <MainLine
-          top="58%"
-          left="0"
-          color="white"
-          height="medium"
-          width="full"
-        />
-        <MainLine
-          top="61%"
-          left="0"
-          color="white"
-          height="large"
-          width="full"
-        />
-        <MainLine
-          top="66%"
-          left="0"
-          color="white"
-          height="medium"
-          width="full"
-        />
-        <MainLine
-          top="69%"
-          left="0"
-          color="white"
-          height="small"
-          width="full"
-        />
-        <MainLine
-          top="71%"
-          left="0"
-          color="white"
-          height="medium"
-          width="full"
-        />
-        <MainLine
-          top="73.5%"
-          left="0"
-          color="white"
-          height="large"
-          width="full"
-        />
-        <MainLine
-          top="78.5%"
-          left="0"
-          color="white"
-          height="small"
-          width="full"
-        />
-        <h2 class="text--pink title--x-large">המסלולים שלנו</h2>
-
-        <div
-          class="pricing-cards display--flex justify--space-between margin--auto"
-        >
-          <div
-            class="pricing-card bg--white height--full shadow--small brs--medium"
-          >
-            <h3 class="text--dark title--medium">מסלול הבסיסי</h3>
-            <p>המסלול הבסיסי מוגבל עד 300 קבצים</p>
-            <p>הקבצים נמחקים לאחר 6 חודשים מתחילת האירוע</p>
-            <div class="pricing-card-action">
-              <h4 class="title--large">200</h4>
-              <router-link
-                v-if="!hasActiveEvent"
-                to="/order?subscription=basic"
-              >
-                <MainButton animation text="הצטרפו עכשיו" size="x-small" />
-              </router-link>
-              <MainButton
-                v-else
-                disabled
-                animation
-                text="כבר יש לכם אירוע"
-                size="x-small"
-              />
-            </div>
-          </div>
-          <div
-            class="pricing-card premimum-card height--full shadow--small brs--medium"
-          >
-            <h3 class="text--dark title--medium">מסלול פרימיום</h3>
-
-            <p>המסלול פרימיום אינו מוגבל בכמות קבצים</p>
-            <p>הקבצים נמחקים לאחר 12 חודשים מתחילת האירוע</p>
-            <div class="pricing-card-action">
-              <h4 class="title--large">₪300</h4>
-               <router-link v-if="canUpgradeSubscription" to="/order?subscription=premium">
-                <MainButton animation text="שדרגו עכשיו" size="x-small" />
-              </router-link>
-              <router-link
-                v-else-if="!hasActiveEvent"
-                to="/order?subscription=premium"
-              >
-                <MainButton animation text="הצטרפו עכשיו" size="x-small" />
-              </router-link>
-              <MainButton
-                v-else
-                disabled
-                animation
-                text="כבר יש לכם אירוע"
-                size="x-small"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <Pricing />
   </div>
 </template>
 
@@ -297,8 +108,8 @@
 import Features from "@/components/home/features.vue";
 import HowItLooks from "@/components/home/howItLooks.vue";
 import Clients from "@/components/home/clients.vue";
+import Pricing from "@/components/home/pricing.vue";
 import MainCube from "@/components/library/background/MainCube.vue";
-import MainLine from "@/components/library/background/MainLine.vue";
 import MainButton from "@/components/library/buttons/MainButton.vue";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
 import { IUserInfo } from "@/helpers/interfaces";
@@ -310,10 +121,10 @@ export default defineComponent({
   components: {
     MainButton,
     MainCube,
-    MainLine,
     Features,
     HowItLooks,
     Clients,
+    Pricing,
   },
 
   computed: {
@@ -418,82 +229,6 @@ export default defineComponent({
   .cube-2 {
     left: 50px;
     top: -130px;
-  }
-}
-
-
-.pricing-section-content {
-  width: 55%;
-  height: 75vh;
-  background-color: #79ae6088;
-  margin: auto;
-  position: relative;
-  border-radius: 50px 350px;
-  text-align: center;
-  z-index: 3;
-
-  h2 {
-    position: relative;
-    top: 15%;
-  }
-
-  .pricing-cards {
-    margin-top: 14%;
-    height: 60%;
-    min-height: fit-content;
-    width: 80%;
-
-    .premimum-card {
-      background: linear-gradient(white, white, #dbce8b);
-    }
-
-    .pricing-card {
-      width: calc(35% - 60px);
-      padding: 0 30px;
-      position: relative;
-
-      h3 {
-        margin-top: 10%;
-        margin-bottom: 15%;
-      }
-
-      p {
-        margin-bottom: 10px;
-      }
-
-      h4 {
-        margin-bottom: 5%;
-      }
-
-      .pricing-card-action {
-        position: absolute;
-        bottom: 20px;
-        width: 80%;
-      }
-    }
-  }
-}
-
-ul li {
-  margin-bottom: 10px;
-}
-
-@media only screen and (max-width: 600px) {
-  .pricing-section-content {
-    border-radius: 50px;
-    min-height: fit-content;
-    padding-bottom: 15px;
-    width: 90%;
-
-    .pricing-cards {
-      flex-wrap: wrap;
-      margin-top: 30%;
-
-      .pricing-card {
-        width: 80%;
-        margin-top: 20px;
-      }
-    }
   }
 }
 </style>

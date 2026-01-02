@@ -77,7 +77,7 @@ export default defineComponent({
             "האלבום יציג את רצף התמונות והסרטונים בסדר אקראי, ומומלץ להקרין על מסך גדול במהלך האירוע. כמובן בסוף האירוע כל הקבצים ניתנים להורדה",
         },
         {
-          title: "בת מצווה",
+          title: "בר/בת מצווה",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <path d="M32 10l4.5 8 9 1.2-6.6 6.1 1.8 8.8L32 29.9 23.3 34.1l1.8-8.8-6.6-6.1 9-1.2L32 10z"
         stroke="#1A1A1A" stroke-width="2.6" stroke-linejoin="round"/>
@@ -187,7 +187,7 @@ export default defineComponent({
 .who-is-it-for-section {
   background-repeat: no-repeat;
   background-position: center;
-  background-size: cover;
+  background-size: 100% 100%;
 }
 
 .who-is-it-for-content {

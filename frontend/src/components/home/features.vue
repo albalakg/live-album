@@ -190,6 +190,7 @@ export default defineComponent({
 
     h2 {
       margin-bottom: 5%;
+      margin-right: 5%;
     }
 
     p {

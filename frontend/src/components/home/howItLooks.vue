@@ -1,5 +1,56 @@
 <template>
-  <section class="home-page-section how-it-looks-section" id="how-it-looks">
+  <section class="home-page-section how-it-looks-section bg--pink" id="how-it-looks">
+    <template v-if="$bp.isMediumAndUp">
+      <MainLine
+        :opacity="'0.7'"
+        top="0"
+        left="25%"
+        color="white"
+        width="x-large"
+      />
+      <MainLine
+        :opacity="'0.7'"
+        top="0"
+        left="calc(25% + 45px)"
+        color="white"
+        width="small"
+      />
+      <MainLine
+        :opacity="'0.7'"
+        top="0"
+        left="calc(25% + 56px)"
+        color="white"
+        width="medium"
+      />
+      <MainLine
+        :opacity="'0.7'"
+        top="0"
+        left="calc(25% + 71px)"
+        color="white"
+        width="xxx-large"
+      />
+      <MainLine
+        :opacity="'0.7'"
+        top="0"
+        left="calc(25% + 166px)"
+        color="white"
+        width="medium"
+      />
+      <MainLine
+        :opacity="'0.7'"
+        top="0"
+        left="calc(25% + 181px)"
+        color="white"
+        width="small"
+      />
+      <MainLine
+        :opacity="'0.7'"
+        top="0"
+        left="calc(25% + 192px)"
+        color="white"
+        width="x-large"
+      />
+    </template>
     <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
     <MainCube color="pink" left="10%" top="10%" width="large" height="x-large" />
     <MainCube left="8%" top="3%" width="large" height="large" />
@@ -12,12 +63,12 @@
 
     <div class="how-it-looks-content width--page-size margin--auto">
       <div>
-        <h2 class="text--pink title--x-large">בואו נראה איך זה נראה</h2>
+        <h2 class="text--white title--x-large">בואו נראה איך זה נראה</h2>
 
-        <div class="video-wrapper brs--large" :data-state="state">
+        <div class="video-wrapper" :data-state="state">
           <!-- Fallback poster image (shows while loading / if error) -->
           <img
-            class="video-poster brs--large"
+            class="video-poster"
             :src="posterSrc"
             alt="Video preview"
             loading="lazy"
@@ -25,7 +76,7 @@
 
           <video
             ref="videoEl"
-            class="video-el brs--large"
+            class="video-el"
             :src="videoSrc"
             :poster="posterSrc"
             muted
@@ -57,13 +108,14 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import MainLine from "../library/background/MainLine.vue";
 import MainCube from "@/components/library/background/MainCube.vue";
 
 type VideoState = "loading" | "ready" | "playing" | "error";
 
 export default defineComponent({
   name: "HowItLooks",
-  components: { MainCube },
+  components: { MainCube, MainLine },
 
   data() {
     return {
@@ -157,6 +209,12 @@ export default defineComponent({
   min-height: calc(100vh - 99px);
   position: relative;
 
+  h2 {
+    position: absolute;
+    right: 10%;
+    top: 0;
+  }
+
   @media only screen and (max-width: 600px) {
     margin: 40px auto;
   }
@@ -172,17 +230,17 @@ export default defineComponent({
   justify-content: center;
   padding-top: 6%;
   text-align: center;
+  overflow: hidden;
 
   .video-wrapper {
-    outline: 5px solid #7772;
-    box-shadow: 0 0 15px #000;
+    box-shadow: 0 5px 8px #0008;
+    border-top: #3338 solid 2px;
     background-color: #000;
     position: relative;
-    width: 800px;
-    max-width: 90%; /* שלא יתפוצץ במסכים גדולים */
+    height: 850px;
+    max-height: 80vh;
     aspect-ratio: 16 / 9;
-    overflow: hidden;
-    border-radius: 18px;
+    // overflow: hidden;
     margin: auto;
     margin-top: 20px;
   }
