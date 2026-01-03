@@ -54,7 +54,7 @@
           class="display--flex justify--space-between width--two-thirds margin--auto flex--wrap-mobile pricing-cards"
         >
           <div class="pricing-card">
-            <div>
+            <div class="pricing-card-header">
               <h3 class="title--large">{{ cards[0].title }}</h3>
               <div class="icon" v-html="cards[0].icon"></div>
             </div>
@@ -83,17 +83,17 @@
             </div>
           </div>
           <div class="pricing-card premium-card">
-            <div class="premium-card-header">
+            <div class="pricing-card-header">
               <h3 class="title--large">{{ cards[1].title }}</h3>
               <div class="icon" v-html="cards[1].icon"></div>
             </div>
             <div class="pricing-card-footer">
               <div>
                 <p class="text--white" v-html="cards[1].description"></p>
-                <div
+                <!-- <div
                   v-if="cards[1].isPremium"
                   class="premium-card-footer-line"
-                ></div>
+                ></div> -->
                 <div>
                   <h4 class="text--white title--large">
                     {{ cards[1].price }} ₪
@@ -259,6 +259,11 @@ export default defineComponent({
   gap: 30px;
   width: 650px;
   max-width: 50%;
+
+  @media only screen and (max-width: 600px) {
+    max-width: 100%;
+    margin: auto;
+  }
 }
 
 .pricing-card {
@@ -275,6 +280,10 @@ export default defineComponent({
   flex-direction: column;
   justify-content: space-between;
   position: relative;
+
+  .pricing-card-header {
+    height: 50%;
+  }
 
   .pricing-card-footer {
     background-color: #222;
@@ -313,7 +322,7 @@ export default defineComponent({
   // background-color: #f0e68c;
   // box-shadow: inset 0 -5px 15px 2px #ffd70055;
 
-  .premium-card-header {
+  .pricing-card-header {
     background: linear-gradient(#fff, #f0e68caa, #ffd700aa);
   }
 
@@ -336,7 +345,7 @@ export default defineComponent({
 
     .pricing-cards {
       flex-wrap: wrap;
-      margin-top: 30%;
+      margin-top: 5%;
 
       .pricing-card {
         width: 80%;
@@ -346,7 +355,7 @@ export default defineComponent({
   }
 
   .pricing-card {
-    margin: 10px 0;
+    margin: 10px auto;
   }
 }
 </style>

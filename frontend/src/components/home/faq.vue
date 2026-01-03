@@ -52,7 +52,8 @@
       <div class="width--full">
         <h2 class="text--white title--x-large">שאלות נפוצות</h2>
         <div
-          class="display--flex justify--center width--two-thirds margin--auto flex--wrap-mobile faq-cards"
+          class="display--flex justify--center margin--auto flex--wrap-mobile faq-cards"
+          :class="$bp.isMobile ? 'width--full' : 'width--two-thirds'"
         >
           <div class="faq-list">
             <div
@@ -152,7 +153,9 @@ export default defineComponent({
 
       // smooth scroll into view when opening (nice UX)
       this.$nextTick(() => {
-        const el = this.$el.querySelectorAll(".faq-card")[idx] as HTMLElement | undefined;
+        const el = this.$el.querySelectorAll(".faq-card")[idx] as
+          | HTMLElement
+          | undefined;
         if (el && this.openIndex === idx) {
           el.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
@@ -161,7 +164,10 @@ export default defineComponent({
 
     measureAll() {
       // bodies refs are an array because v-for
-      const bodies = this.$refs.bodies as HTMLElement[] | HTMLElement | undefined;
+      const bodies = this.$refs.bodies as
+        | HTMLElement[]
+        | HTMLElement
+        | undefined;
       const list = Array.isArray(bodies) ? bodies : bodies ? [bodies] : [];
 
       list.forEach((bodyEl, i) => {
@@ -178,15 +184,14 @@ export default defineComponent({
 });
 </script>
 
-
 <style lang="scss" scoped>
 .home-page-section {
   min-height: calc(100vh - 99px);
   position: relative;
   // background-color: #79ae6088;
   // background-color: #79ae6044;
-// background-image: linear-gradient(18deg, rgba(206, 206, 206, 0.02) 0%, rgba(206, 206, 206, 0.02) 50%,rgba(21, 21, 21, 0.02) 50%, rgba(21, 21, 21, 0.02) 100%),linear-gradient(294deg, rgba(144, 144, 144, 0) 0%, rgba(144, 144, 144, 0) 50%,rgba(193, 193, 193, 0) 50%, rgba(193, 193, 193, 0) 100%),linear-gradient(212deg, rgba(43, 43, 43, 0.08) 0%, rgba(43, 43, 43, 0.08) 50%,rgba(193, 193, 193, 0.08) 50%, rgba(193, 193, 193, 0.08) 100%),linear-gradient(179deg, rgba(177, 177, 177, 0.04) 0%, rgba(177, 177, 177, 0.04) 50%,rgba(70, 70, 70, 0.04) 50%, rgba(70, 70, 70, 0.04) 100%),linear-gradient(22deg, rgba(149, 149, 149, 0.08) 0%, rgba(149, 149, 149, 0.08) 50%,rgba(123, 123, 123, 0.08) 50%, rgba(123, 123, 123, 0.08) 100%),linear-gradient(67deg, rgba(123, 123, 123, 0.01) 0%, rgba(123, 123, 123, 0.01) 50%,rgba(244, 244, 244, 0.01) 50%, rgba(244, 244, 244, 0.01) 100%),linear-gradient(90deg, rgb(246,133,137),rgb(121,174,96),rgb(163,209,141));
-background-size: cover;
+  // background-image: linear-gradient(18deg, rgba(206, 206, 206, 0.02) 0%, rgba(206, 206, 206, 0.02) 50%,rgba(21, 21, 21, 0.02) 50%, rgba(21, 21, 21, 0.02) 100%),linear-gradient(294deg, rgba(144, 144, 144, 0) 0%, rgba(144, 144, 144, 0) 50%,rgba(193, 193, 193, 0) 50%, rgba(193, 193, 193, 0) 100%),linear-gradient(212deg, rgba(43, 43, 43, 0.08) 0%, rgba(43, 43, 43, 0.08) 50%,rgba(193, 193, 193, 0.08) 50%, rgba(193, 193, 193, 0.08) 100%),linear-gradient(179deg, rgba(177, 177, 177, 0.04) 0%, rgba(177, 177, 177, 0.04) 50%,rgba(70, 70, 70, 0.04) 50%, rgba(70, 70, 70, 0.04) 100%),linear-gradient(22deg, rgba(149, 149, 149, 0.08) 0%, rgba(149, 149, 149, 0.08) 50%,rgba(123, 123, 123, 0.08) 50%, rgba(123, 123, 123, 0.08) 100%),linear-gradient(67deg, rgba(123, 123, 123, 0.01) 0%, rgba(123, 123, 123, 0.01) 50%,rgba(244, 244, 244, 0.01) 50%, rgba(244, 244, 244, 0.01) 100%),linear-gradient(90deg, rgb(246,133,137),rgb(121,174,96),rgb(163,209,141));
+  background-size: cover;
   @media only screen and (max-width: 600px) {
     margin: 40px auto;
   }
@@ -199,6 +204,8 @@ background-size: cover;
 .faq-section-content {
   width: 100%;
   height: 75vh;
+  padding: 30px 0;
+  min-height: fit-content;
   margin: auto;
   position: relative;
   text-align: center;
@@ -217,6 +224,11 @@ background-size: cover;
   display: grid;
   gap: 14px;
   scroll-behavior: smooth; /* smooth for in-container scroll */
+
+  @media only screen and (max-width: 600px) {
+    width: 90%;
+    margin: auto;
+  }
 }
 
 /* Glassmorphism card */

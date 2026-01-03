@@ -61,8 +61,8 @@
     <MainCube color="pink" left="33%" top="71%" width="large" height="medium" />
     <MainCube color="pink" left="72%" top="80%" width="xx-large" height="large" />
 
-    <div class="how-it-looks-content width--page-size margin--auto">
-      <div>
+    <div class="how-it-looks-content margin--auto" :class="$bp.isMobile ? 'width--full' : 'width--page-size'">
+      <div class="height--ful width--full">
         <h2 class="text--white title--x-large">בואו נראה איך זה נראה</h2>
 
         <div class="video-wrapper" :data-state="state">
@@ -208,19 +208,13 @@ export default defineComponent({
 .home-page-section {
   min-height: calc(100vh - 99px);
   position: relative;
-
+  text-align: center;
+  
   h2 {
-    position: absolute;
-    right: 10%;
-    top: 0;
-  }
-
-  @media only screen and (max-width: 600px) {
-    margin: 40px auto;
-  }
-
-  h2 {
+    width: 80%;
     font-weight: 700;
+    word-break: keep-all;
+    margin: auto;
   }
 }
 
@@ -252,6 +246,10 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     object-fit: cover;
+    
+    @media only screen and (max-width: 600px) {
+      width: 100vw;
+    }
   }
 
   .video-poster {

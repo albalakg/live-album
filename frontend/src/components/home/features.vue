@@ -63,15 +63,10 @@
       <div
         class="display--flex justify--space-between height--full width--two-thirds margin--auto flex--wrap-mobile"
       >
-        <div
-          v-for="card in cards"
-          :key="card.title"
-          class="features-card"
-        >
+        <div v-for="card in cards" :key="card.title" class="features-card">
           <h3 class="title--large">{{ card.title }}</h3>
           <div class="features-card-footer">
-            <div class="icon" v-html="card.icon">
-            </div>
+            <div class="icon" v-html="card.icon"></div>
             <p class="text--white">
               {{ card.description }}
             </p>
@@ -159,7 +154,7 @@ export default defineComponent({
   position: relative;
 
   @media only screen and (max-width: 600px) {
-    margin: 40px auto;
+    margin-top: 40px;
   }
 
   h2 {
@@ -188,6 +183,10 @@ export default defineComponent({
       width: 100%;
     }
 
+    @media only screen and (max-width: 600px) {
+      margin-top: 50px;
+    }
+
     h2 {
       margin-bottom: 5%;
       margin-right: 5%;
@@ -211,6 +210,14 @@ export default defineComponent({
       flex-direction: column;
       justify-content: space-between;
       position: relative;
+
+      @media only screen and (max-width: 600px) {
+        width: 100%;
+
+        h3 {
+          font-size: 1.6rem;
+        }
+      }
 
       .features-card-footer {
         background-color: #f68589cc;

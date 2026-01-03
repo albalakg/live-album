@@ -157,10 +157,6 @@ export default defineComponent({
   min-height: calc(100vh - 99px);
   position: relative;
 
-  @media only screen and (max-width: 600px) {
-    margin: 40px auto;
-  }
-
   h2 {
     font-weight: 700;
   }

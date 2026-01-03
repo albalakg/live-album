@@ -176,10 +176,6 @@ export default defineComponent({
   position: relative;
   background-color: #79ae6044;
 
-  @media only screen and (max-width: 600px) {
-    margin: 40px auto;
-  }
-
   h2 {
     font-weight: 700;
   }
@@ -208,6 +204,10 @@ export default defineComponent({
     max-width: 90%;
     margin: auto;
 
+    @media only screen and (max-width: 600px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .who-is-it-for-box {
       width: 75%;
       background-color: #ffffff77;
@@ -234,6 +234,10 @@ export default defineComponent({
         font-weight: 700;
         position: relative;
         top: 30px;
+
+        @media only screen and (max-width: 600px) {
+          top: 15px;
+        }
       }
     }
 
