@@ -79,7 +79,7 @@
       />
       <small>להציג את התמונות האישיות שלנו בגלריה</small>
     </div>
-    <!-- <div class="display--flex checkbox-wrapper">
+    <div class="display--flex checkbox-wrapper">
       <MainCheckbox
         @onClick="form.config.preview_qr_in_gallery = !form.config.preview_qr_in_gallery"
         title="להציג QR בגלריה"
@@ -87,7 +87,7 @@
         class="checkbox"
       />
       <small>להציג QR בגלריה</small>
-    </div> -->
+    </div>
     <br>
     <MainButton :loading="loading" text="שמור" />
   </form>

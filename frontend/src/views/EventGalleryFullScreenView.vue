@@ -21,15 +21,17 @@
     </div>
     <div class="gallery-content">
       <EventGallery />
+      <EventQR v-if="event.config.preview_qr_in_gallery" class="qr-code" :background="background" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { IEvent, IEventAsset } from "@/helpers/interfaces";
+import { IEvent } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
 import EventGallery from "@/components/event/EventGallery.vue";
 import MainIcon from "@/components/library/general/MainIcon.vue";
+import EventQR from "@/components/event/EventQR.vue";
 
 export default defineComponent({
   name: "GalleryView",
@@ -37,11 +39,13 @@ export default defineComponent({
   components: {
     EventGallery,
     MainIcon,
+    EventQR,
   },
 
   data() {
     return {
       isFullScreen: false as boolean,
+      background: "#fff" as string,
     };
   },
 
@@ -105,6 +109,14 @@ export default defineComponent({
     height: 70px;
     padding: 0 30px;
     z-index: 10000;
+  }
+
+  .qr-code {
+    position: absolute;
+    left: 30px;
+    bottom: 30px;
+    margin: auto;
+    text-align: center;
   }
 }
 </style>

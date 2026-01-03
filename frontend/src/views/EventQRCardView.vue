@@ -28,23 +28,13 @@
       <br />
       <br />
       <MainButton :text="downloadQRText" @onClick="downloadQRCode()" />
-      <qrcode-svg :value="QRLink" level="H" ref="qrSvg" class="display--none" />
     </div>
     <div
       ref="eventCard"
       class="event-qr-card height--full bg--white brs--medium"
       :style="`background-image: url('/assets/${selectedQR}')`"
     >
-      <div class="qr-code">
-        <qrcode-vue
-          ref="qrCode"
-          :value="QRLink"
-          :background="background"
-          :size="$bp.isMobile ? 75 : 100"
-          level="H"
-          render-as="svg"
-        />
-      </div>
+      <EventQR class="qr-code" :background="background" />
       <div class="card-text">
         <p class="title--large">
           {{ cardText }}
@@ -57,21 +47,20 @@
 <script lang="ts">
 import { IEvent } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
-import QrcodeVue, { QrcodeSvg } from "qrcode.vue";
 import html2canvas from "html2canvas";
 import MainButton from "@/components/library/buttons/MainButton.vue";
 import MainSelect from "@/components/library/inputs/MainSelect.vue";
 import MainInput from "@/components/library/inputs/MainInput.vue";
+import EventQR from "@/components/event/EventQR.vue";
 
 export default defineComponent({
   name: "EventQRCardView",
 
   components: {
-    QrcodeVue,
-    QrcodeSvg,
     MainButton,
     MainSelect,
     MainInput,
+    EventQR,
   },
 
   data() {
@@ -100,10 +89,6 @@ export default defineComponent({
   computed: {
     event(): IEvent {
       return this.$store.getters["event/getEvent"];
-    },
-
-    QRLink(): string {
-      return window.location.origin + `/event/uploads/${this.event.path}`;
     },
 
     downloadCardText(): string {
