@@ -66,12 +66,7 @@ export default defineComponent({
 
   computed: {
     items(): Array<any> {
-      return [
-        {
-          text: "שעון לאירוע",
-          value: this.startsAtCounter, // Updated to use the reactive counter
-          isVisible: true,
-        },
+      const data = [
         {
           text: "סיום האירוע",
           value: this.$store.getters["event/getEventFinishTime"],
@@ -88,6 +83,19 @@ export default defineComponent({
           isVisible: true,
         },
       ];
+
+      console.log('isActive', this.isActive);
+      
+
+      if(!this.isActive) {
+        data.splice(1, 0, {
+          text: "האירוע יתחיל בעוד",
+          value: this.startsAtCounter,
+          isVisible: true,
+        });
+      }
+
+      return data;
     },
 
     status(): number {
@@ -96,6 +104,10 @@ export default defineComponent({
 
     isReady(): boolean {
       return this.$store.getters["event/isEventReady"];
+    },
+
+    isActive(): boolean {
+      return this.$store.getters["event/isEventActive"];
     },
 
     canUpdateToReady(): boolean {
@@ -116,7 +128,7 @@ export default defineComponent({
 
     disabledTime(): string {
       return this.$store.getters["event/getEventFinishTime"]
-        ? Time.addDays(
+        ? Time.addMonths(
             this.$store.getters["event/getEventFinishTime"],
             this.$store.getters["user/getSubscriptionFilesStorageTime"]
           )

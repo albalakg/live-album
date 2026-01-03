@@ -20,10 +20,13 @@
         />
       </div>
       <a :href="asset.fullPath" target="_blank" class="gallery-view-icon">
-        <MainIcon icon="open_in_new" size="1.3em" title="פתיחה במסך מלא" />
+        <MainIcon
+          animation icon="open_in_new" size="1.3em" title="פתיחה במסך מלא" />
       </a>
       <span class="gallery-visible-icon">
         <MainIcon
+          animation
+          :bgColor="asset.is_displayed ? '#fff8' : '#f68589cc'"
           :icon="asset.is_displayed ? 'visibility' : 'visibility_off'"
           :title="asset.is_displayed ? 'מוצג בגלריה' : 'מוסתר מהגלריה'"
           size="1.3em"

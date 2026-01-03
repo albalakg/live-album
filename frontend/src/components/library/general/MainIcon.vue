@@ -1,5 +1,5 @@
 <template>
-    <div class="main-icon" @click="clicked" :class="{ disabled, 'pointer': clickable }" :style="` ${background ? 'background-color: #fff8;' : ''}`">
+    <div class="main-icon" @click="clicked" :class="{ disabled, 'pointer': clickable, 'animate': animation, 'colored': background }" :style="`background-color: ${bgColor};`">
         <span class="material-symbols-outlined" :style="`${size ? 'font-size: ' + size + ';' : ''} color: ${color};`">
             {{ icon }}
         </span>
@@ -22,6 +22,11 @@ export default defineComponent({
             type: String,
             default: 'black'
         },
+        
+        bgColor: {
+            type: String,
+            default: '#fff8'
+        },
 
         disabled: {
             type: Boolean,
@@ -36,6 +41,11 @@ export default defineComponent({
         background: {
             type: Boolean,
             default: true
+        },
+
+        animation: {
+            type: Boolean,
+            default: false
         },
 
         size: {
@@ -65,6 +75,18 @@ export default defineComponent({
     span {
         position: relative;
         top: 4px;
+    }
+}
+
+.colored {
+    background-color: #fff8;
+}
+
+.animate {
+    transition: background-color 0.2s;
+    
+    &:hover {
+        background-color: #fff !important;
     }
 }
 </style>

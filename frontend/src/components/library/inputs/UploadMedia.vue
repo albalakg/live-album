@@ -1,7 +1,7 @@
 <template>
   <div class="upload-media mt-4 text-right">
     <label class="font-semibold block mb-2">
-      העלה תמונות או סרטונים (עד 20MB כל אחד)
+      {{  isDisabled ? 'העלאת מדיה אינה זמינה כעת, האירוע נגמר' : 'לא      העלה תמונות או סרטונים (עד 20MB כל אחד)ירוע' }}
     </label>
 
     <!-- Dropzone -->
@@ -11,7 +11,7 @@
       @dragleave.prevent="isDragging = false"
       @drop.prevent="handleDrop"
       @click="triggerFilePicker"
-      :class="{ dragging: isDragging }"
+      :class="{ dragging: isDragging, 'disabled': isDisabled }"
     >
       <p class="text-gray-600">
         גרור ושחרר קבצים כאן<br />
@@ -109,6 +109,18 @@ export default defineComponent({
       if (!this.uploads.length) return 0;
       return Math.round((this.progress.completed / this.uploads.length) * 100);
     },
+
+    isDisabled(): boolean {
+      return this.isEvenActive || this.isEvenInactive;
+    },
+
+    isEvenActive() {
+      return this.$store.getters["event/isEvenActive"];
+    },
+
+    isEvenInactive() {
+      return this.$store.getters["event/isEvenInactive"];
+    },
   },
 
   methods: {
@@ -137,7 +149,11 @@ export default defineComponent({
         const fileSizeMB = file.size / (1024 * 1024);
 
         if (fileSizeMB > this.MAX_SIZE_MB) {
-          alert(`"${file.name}" חורג מהמגבלה של ${this.MAX_SIZE_MB}MB`);
+          this.$notify({
+              text: `"${file.name}" חורג מהמגבלה של ${this.MAX_SIZE_MB}MB`,
+              type: "error",
+              duration: 5000,
+          });
           continue;
         }
 

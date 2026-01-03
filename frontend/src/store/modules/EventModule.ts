@@ -56,8 +56,12 @@ const EventModule = {
       return state.event?.status === StatusEnum.IN_PROGRESS;
     },
 
-    isEvenActive(state: IEventModuleState): boolean {
+    isEventActive(state: IEventModuleState): boolean {
       return state.event?.status === StatusEnum.ACTIVE;
+    },
+
+    isEvenInactive(state: IEventModuleState): boolean {
+      return state.event?.status === StatusEnum.INACTIVE;
     },
 
     isEventAvailable(state: IEventModuleState): boolean {
@@ -586,7 +590,11 @@ const EventModule = {
             resolve(res.data);
           })
           .catch((err) => {
-            alert(JSON.stringify(err.response.data));
+            notify({
+              text: "מצטערים, אך יש כרגע שגיאה בהעלאת הקבצים, נסה שוב בקרוב",
+              type: "error",
+              duration: 5000,
+          });
             reject(err);
           });
       });

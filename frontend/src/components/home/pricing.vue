@@ -62,10 +62,22 @@
               <div>
                 <p class="text--white" v-html="cards[0].description"></p>
                 <div>
-                  <h4 class="text--white title--large">{{ cards[0].price }} ₪</h4>
-                  <router-link to="/order?subscription=basic">
-                    <MainButton color="pink" text="הצטרפו עכשיו" />
+                  <h4 class="text--white title--large">
+                    {{ cards[0].price }} ₪
+                  </h4>
+                  <router-link
+                    v-if="!hasActiveEvent"
+                    to="/order?subscription=premium"
+                  >
+                    <MainButton animation text="הצטרפו עכשיו" size="x-small" />
                   </router-link>
+                  <MainButton
+                    v-else
+                    disabled
+                    animation
+                    text="כבר יש לכם אירוע"
+                    size="x-small"
+                  />
                 </div>
               </div>
             </div>
@@ -83,10 +95,31 @@
                   class="premium-card-footer-line"
                 ></div>
                 <div>
-                  <h4 class="text--white title--large">{{ cards[1].price }} ₪</h4>
-                  <router-link to="/order?subscription=premium">
+                  <h4 class="text--white title--large">
+                    {{ cards[1].price }} ₪
+                  </h4>
+                  <!-- <router-link to="/order?subscription=premium">
                     <MainButton color="pink" text="הצטרפו עכשיו" />
+                  </router-link> -->
+                  <router-link
+                    v-if="canUpgradeSubscription"
+                    to="/order?subscription=premium"
+                  >
+                    <MainButton animation text="שדרגו עכשיו" size="x-small" />
                   </router-link>
+                  <router-link
+                    v-else-if="!hasActiveEvent"
+                    to="/order?subscription=premium"
+                  >
+                    <MainButton animation text="הצטרפו עכשיו" size="x-small" />
+                  </router-link>
+                  <MainButton
+                    v-else
+                    disabled
+                    animation
+                    text="כבר במסלול פרמיום"
+                    size="x-small"
+                  />
                 </div>
               </div>
             </div>

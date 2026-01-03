@@ -51,10 +51,21 @@ class Time {
     const [datePart, timePart] = date.split(" ");
     const [year, month, day] = datePart.split("/").map(Number);
     const [hour, minute, second] = timePart.split(":").map(Number);
-
     const originalDate = new Date(year, month - 1, day, hour, minute, second);
     originalDate.setDate(originalDate.getDate() + days);
+    return this.formatDate(originalDate);
+  }
 
+  addMonths(date: string, months: number): string {
+    const [datePart, timePart] = date.split(" ");
+    const [year, month, day] = datePart.split("/").map(Number);
+    const [hour, minute, second] = timePart.split(":").map(Number);
+    const originalDate = new Date(year, month - 1, day, hour, minute, second);
+    originalDate.setMonth(originalDate.getMonth() + months);
+    return this.formatDate(originalDate);
+  }
+
+  formatDate(originalDate: Date): string {
     const newYear = originalDate.getFullYear();
     const newMonth = String(originalDate.getMonth() + 1).padStart(2, "0");
     const newDay = String(originalDate.getDate()).padStart(2, "0");

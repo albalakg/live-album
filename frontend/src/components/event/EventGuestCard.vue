@@ -1,5 +1,6 @@
 <template>
   <div
+    @click.stop="$emit('onClick', assetIndex)"
     class="gallery-asset-wrapper"
     :class="{
       'padding--small': true,
@@ -15,12 +16,10 @@
         :download="fileName"
         class="gallery-download-icon"
       >
-        <!-- <MainIcon icon="open_in_new" size="1.3em" /> -->
-        <MainIcon icon="download" size="1.3em" />
+        <MainIcon icon="download" animation size="1.3em" />
       </a>
       <span @click="shareAsset()" class="gallery-share-icon">
-        <!-- <MainIcon icon="open_in_new" size="1.3em" /> -->
-        <MainIcon clickable icon="share" size="1.3em" />
+        <MainIcon clickable animation icon="share" size="1.3em" />
       </span>
 
       <!-- Image -->
@@ -44,9 +43,11 @@
           :src="asset.fullPath"
           class="album-asset brs--medium"
           muted
-          loop
+          :controls="controls"
+          :autoplay="autoplay"
+          @ended="onEnded"
         ></video>
-        <div v-if="!isPlaying" class="video-overlay">
+        <div v-if="!isPlaying && !controls" class="video-overlay">
           <MainIcon
             icon="play_circle"
             size="3em"
@@ -78,6 +79,16 @@ export default defineComponent({
       required: true,
     },
 
+    controls: {
+      type: Boolean,
+      required: false,
+    },
+
+    autoplay: {
+      type: Boolean,
+      required: false,
+    },
+
     assetIndex: {
       type: Number,
       default: 1,
@@ -98,6 +109,15 @@ export default defineComponent({
     return {
       isPlaying: false,
     };
+  },
+
+  watch: {
+    controls: {
+      immediate: true,
+      handler(newVal: boolean) {
+        this.isPlaying = newVal || false;
+      },
+    },
   },
 
   computed: {
@@ -170,6 +190,8 @@ export default defineComponent({
     },
 
     async playVideo() {
+      if (this.controls) return;
+
       const video = this.$refs.videoEl as HTMLVideoElement;
       if (video && !this.isPlaying) {
         try {
@@ -182,11 +204,24 @@ export default defineComponent({
     },
 
     pauseVideo() {
+      if (this.controls) return;
       const video = this.$refs.videoEl as HTMLVideoElement;
       if (video && this.isPlaying) {
         video.pause();
         video.currentTime = 0;
         this.isPlaying = false;
+      }
+    },
+
+    onEnded() {
+      console.log('ended');
+      
+      this.isPlaying = false;
+      const video = this.$refs.videoEl as HTMLVideoElement;
+      if (video) {
+        console.log({video});
+        video.currentTime = 0;
+        video.pause();
       }
     },
   },

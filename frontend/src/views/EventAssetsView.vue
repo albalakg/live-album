@@ -185,7 +185,7 @@ export default defineComponent({
     },
 
     isEventActive(): boolean {
-      return this.$store.getters["event/getEventStatus"] === StatusEnum.ACTIVE;
+      return this.$store.getters["event/isEventActive"];
     },
 
     canSubmit(): boolean {
@@ -248,7 +248,7 @@ export default defineComponent({
 
     disabledTime(): string {
       return this.$store.getters["event/getEventFinishTime"]
-        ? Time.addDays(
+        ? Time.addMonths(
             this.$store.getters["event/getEventFinishTime"],
             this.$store.getters["user/getSubscriptionFilesStorageTime"]
           )
