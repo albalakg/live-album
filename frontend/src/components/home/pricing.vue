@@ -49,7 +49,7 @@
     />
     <div class="pricing-section-content">
       <div class="width--full">
-        <h2 class="text--white title--x-large">המסלולים שלנו</h2>
+        <h2 class="title--x-large">המסלולים שלנו</h2>
         <div
           class="display--flex justify--space-between width--two-thirds margin--auto flex--wrap-mobile pricing-cards"
         >
@@ -61,9 +61,12 @@
             <div class="pricing-card-footer">
               <div>
                 <p class="text--white" v-html="cards[0].description"></p>
-                <router-link to="/order?subscription=basic">
-                  <MainButton color="pink" text="הצטרפו עכשיו" />
-                </router-link>
+                <div>
+                  <h4 class="text--white title--large">{{ cards[0].price }} ₪</h4>
+                  <router-link to="/order?subscription=basic">
+                    <MainButton color="pink" text="הצטרפו עכשיו" />
+                  </router-link>
+                </div>
               </div>
             </div>
           </div>
@@ -79,9 +82,12 @@
                   v-if="cards[1].isPremium"
                   class="premium-card-footer-line"
                 ></div>
-                <router-link to="/order?subscription=premium">
-                  <MainButton color="pink" text="הצטרפו עכשיו" />
-                </router-link>
+                <div>
+                  <h4 class="text--white title--large">{{ cards[1].price }} ₪</h4>
+                  <router-link to="/order?subscription=premium">
+                    <MainButton color="pink" text="הצטרפו עכשיו" />
+                  </router-link>
+                </div>
               </div>
             </div>
           </div>
@@ -109,7 +115,8 @@ export default defineComponent({
     return {
       cards: [
         {
-          title: "מסלול בסיסי",
+          title: "מסלול קלאסי",
+          price: 200,
           isPremium: false,
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <rect x="12" y="16" width="40" height="32" rx="7"
@@ -122,12 +129,13 @@ export default defineComponent({
         stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
           `,
-          description: `המסלול הבסיסי מוגבל עד 1000 קבצים.
+          description: `המסלול הקלאסי מוגבל עד 1000 קבצים.
           <br>
           הקבצים נמחקים לאחר 6 חודשים מתחילת האירוע.`,
         },
         {
           title: "מסלול פרמיום",
+          price: 300,
           isPremium: true,
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <path d="M14 26l10 8 8-14 8 14 10-8 2 22H12l2-22z"
@@ -180,6 +188,8 @@ export default defineComponent({
 .home-page-section {
   min-height: calc(100vh - 99px);
   position: relative;
+  // background-color: #79ae6088;
+  // background-color: #79ae6044;
 
   @media only screen and (max-width: 600px) {
     margin: 40px auto;
@@ -193,7 +203,6 @@ export default defineComponent({
 .pricing-section-content {
   width: 100%;
   height: 75vh;
-  background-color: #79ae6088;
   margin: auto;
   position: relative;
   // border-radius: 50px 350px;
@@ -205,7 +214,11 @@ export default defineComponent({
 
   h2 {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+  }
+
+  h4 {
+    margin-bottom: 5px;
   }
 }
 
@@ -218,10 +231,10 @@ export default defineComponent({
 .pricing-card {
   border-radius: 2px;
   //   border: 1px solid #0008;
-  background-color: #fff8;
+  background-color: #fffc;
   box-shadow: 0 3px 5px #0005;
   backdrop-filter: blur(20px);
-  height: 360px;
+  height: 415px;
   width: 300px;
   text-align: center;
   min-height: fit-content;
@@ -276,7 +289,7 @@ export default defineComponent({
     height: 2px;
     background: linear-gradient(to right, #ffd700, #ff8c00);
     box-shadow: 0 0 8px #ffd70066;
-    margin: 30px auto 0 auto;
+    margin: 20px auto 0 auto;
     border-radius: 2px;
   }
 }

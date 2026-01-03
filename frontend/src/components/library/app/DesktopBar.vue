@@ -101,20 +101,26 @@ export default defineComponent({
                     weight: '500'
                 },
                 {
-                    text: 'למי זה מתאים',
-                    url: '/#who-is-it-for',
-                    color: 'dark',
-                    weight: '500'
-                },
-                {
                     text: 'איך זה נראה',
                     url: '/#how-it-looks',
                     color: 'dark',
                     weight: '500'
                 },
                 {
+                    text: 'למי זה מתאים',
+                    url: '/#who-is-it-for',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
                     text: 'המסלולים',
                     url: '/#pricing',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
+                    text: 'שאלות',
+                    url: '/#faq',
                     color: 'dark',
                     weight: '500'
                 },

@@ -17,7 +17,7 @@
         וכל מה שנשאר זה להנות מהחוויות והזכרונות
       </p>
       <br />
-      <!-- <div class="width--corner width--full-mobile">
+      <div class="width--corner width--full-mobile">
         <router-link v-if="canUpgradeSubscription" to="/order?subscription=premium">
           <MainButton animation text="שדרג את המסלול שלך" />
         </router-link>
@@ -25,10 +25,10 @@
           <MainButton animation text="הזמן את האלבום החי שלך" />
         </router-link>
           <MainButton v-else disabled animation text="הזמן את האלבום החי שלך" />
-      </div> -->
-      <div class="width--corner width--full-mobile">
-        <MainButton disabled animation text="הזמן את האלבום החי שלך (בקרוב)" />
       </div>
+      <!-- <div class="width--corner width--full-mobile">
+        <MainButton disabled animation text="הזמן את האלבום החי שלך (בקרוב)" />
+      </div> -->
       <img
         class="header-image-gallery"
         src="/assets/home-gallery.png"
@@ -99,8 +99,9 @@
 
     <Clients />
 
-    <!-- Pricing Section -->
     <Pricing />
+
+    <Faq />
   </div>
 </template>
 
@@ -112,8 +113,8 @@ import Pricing from "@/components/home/pricing.vue";
 import MainCube from "@/components/library/background/MainCube.vue";
 import MainButton from "@/components/library/buttons/MainButton.vue";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
-import { IUserInfo } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
+import Faq from "@/components/home/faq.vue";
 
 export default defineComponent({
   name: "HomeView",
@@ -125,13 +126,10 @@ export default defineComponent({
     HowItLooks,
     Clients,
     Pricing,
+    Faq,
   },
 
   computed: {
-    user(): IUserInfo | null {
-      return this.$store.getters["user/getUser"];
-    },
-
     hasActiveEvent(): boolean {
       return this.$store.getters["event/hasActiveEvent"];
     },
@@ -149,10 +147,6 @@ export default defineComponent({
         [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) &&
         this.subscriptionName === SubscriptionTypesEnum.BASIC
       );
-    },
-
-    event(): boolean {
-      return this.$store.getters["event/getEvent"];
     },
   },
 });

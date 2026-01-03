@@ -174,6 +174,7 @@ export default defineComponent({
 .home-page-section {
   min-height: calc(100vh - 99px);
   position: relative;
+  background-color: #79ae6044;
 
   @media only screen and (max-width: 600px) {
     margin: 40px auto;
@@ -191,7 +192,6 @@ export default defineComponent({
 }
 
 .who-is-it-for-content {
-  background-color: #79ae6044;
   min-height: 85vh;
   width: calc(100% - 20px);
   position: relative;

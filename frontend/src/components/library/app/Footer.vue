@@ -119,7 +119,6 @@ export default defineComponent({
     position: relative;
     height: fit-content;
     min-height: 40vh;
-    margin-top: 5%;
     padding-top: 5%;
 
     .footer-content {
