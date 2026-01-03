@@ -21,7 +21,7 @@
       </div>
       <a :href="asset.fullPath" target="_blank" class="gallery-view-icon">
         <MainIcon
-          animation icon="open_in_new" size="1.3em" title="פתיחה במסך מלא" />
+          animation icon="open_in_new" size="1.3em" title="פתיחה במסך מלא" bgColor="#fff8" />
       </a>
       <span class="gallery-visible-icon">
         <MainIcon

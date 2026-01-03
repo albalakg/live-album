@@ -1,6 +1,6 @@
 <template>
   <section
-    class="home-page-section what-you-get-section"
+    class="home-page-section features-section"
     :style="`background-image: url('/assets/features_bg.png')`"
     id="features"
   >
@@ -66,10 +66,10 @@
         <div
           v-for="card in cards"
           :key="card.title"
-          class="what-you-get-card"
+          class="features-card"
         >
           <h3 class="title--large">{{ card.title }}</h3>
-          <div class="what-you-get-card-footer">
+          <div class="features-card-footer">
             <div class="icon" v-html="card.icon">
             </div>
             <p class="text--white">
@@ -167,7 +167,7 @@ export default defineComponent({
   }
 }
 
-.what-you-get-section {
+.features-section {
   height: fit-content;
   min-height: calc(94vh - 99px);
   background-size: cover;
@@ -175,7 +175,7 @@ export default defineComponent({
   @media only screen and (max-width: 600px) {
     padding: 10px 0;
 
-    .what-you-get-card {
+    .features-card {
       margin: 10px 0;
     }
   }
@@ -197,7 +197,7 @@ export default defineComponent({
       font-weight: 500;
     }
 
-    .what-you-get-card {
+    .features-card {
       border-radius: 25px;
       //   border: 1px solid #0008;
       background-color: #fff8;
@@ -212,7 +212,7 @@ export default defineComponent({
       justify-content: space-between;
       position: relative;
 
-      .what-you-get-card-footer {
+      .features-card-footer {
         background-color: #f68589cc;
         padding: 0 5%;
         border-radius: 0 0 23px 23px;

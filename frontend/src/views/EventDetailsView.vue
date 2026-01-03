@@ -1,6 +1,6 @@
 <template>
   <div
-    class="event-details display--flex flex--wrap justify--space-between height--full width--full"
+    class="event-details display--flex flex--wrap justify--space-between width--full"
   >
     <div
       class="event-right padding--medium display--flex direction--column justify--space-between"

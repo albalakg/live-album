@@ -25,7 +25,7 @@ export default defineComponent({
         
         bgColor: {
             type: String,
-            default: '#fff8'
+            default: 'transparent'
         },
 
         disabled: {

@@ -16,10 +16,10 @@
         :download="fileName"
         class="gallery-download-icon"
       >
-        <MainIcon icon="download" animation size="1.3em" />
+        <MainIcon bgColor="#fff8" icon="download" animation size="1.3em" />
       </a>
       <span @click="shareAsset()" class="gallery-share-icon">
-        <MainIcon clickable animation icon="share" size="1.3em" />
+        <MainIcon bgColor="#fff8" clickable animation icon="share" size="1.3em" />
       </span>
 
       <!-- Image -->
