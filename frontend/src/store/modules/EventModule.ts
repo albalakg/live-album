@@ -60,7 +60,7 @@ const EventModule = {
       return state.event?.status === StatusEnum.ACTIVE;
     },
 
-    isEvenInactive(state: IEventModuleState): boolean {
+    isEventInactive(state: IEventModuleState): boolean {
       return state.event?.status === StatusEnum.INACTIVE;
     },
 

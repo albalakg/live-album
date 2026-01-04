@@ -1,5 +1,6 @@
 <template>
   <div
+    @click.stop="$emit('onClick', assetIndex)"
     class="gallery-asset-wrapper"
     :class="{
       'padding--small': true,
@@ -19,9 +20,21 @@
           :value="isPicked"
         />
       </div>
+      <a
+        :href="asset.fullPath"
+        :download="fileName"
+        class="gallery-download-icon"
+      >
+        <MainIcon bgColor="#fff8" icon="download" animation size="1.3em" />
+      </a>
       <a :href="asset.fullPath" target="_blank" class="gallery-view-icon">
         <MainIcon
-          animation icon="open_in_new" size="1.3em" title="פתיחה במסך מלא" bgColor="#fff8" />
+          animation
+          icon="open_in_new"
+          size="1.3em"
+          title="פתיחה במסך מלא"
+          bgColor="#fff8"
+        />
       </a>
       <span class="gallery-visible-icon">
         <MainIcon
@@ -57,9 +70,10 @@
             :src="asset.fullPath"
             class="album-asset brs--medium"
             muted
-            loop
+            :controls="controls"
+            :autoplay="autoplay"
           ></video>
-          <div v-if="!isPlaying" class="video-overlay">
+          <div v-if="!isPlaying && !controls" class="video-overlay">
             <MainIcon
               icon="play_circle"
               size="3em"
@@ -74,7 +88,7 @@
 </template>
 
 <script lang="ts">
-import { IEventAsset } from "@/helpers/interfaces";
+import { IEvent, IEventAsset } from "@/helpers/interfaces";
 import { defineComponent, PropType } from "vue";
 import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
 import MainIcon from "../library/general/MainIcon.vue";
@@ -105,6 +119,16 @@ export default defineComponent({
       type: Object as PropType<IEventAsset>,
       required: true,
     },
+
+    controls: {
+      type: Boolean,
+      required: false,
+    },
+
+    autoplay: {
+      type: Boolean,
+      required: false,
+    },
   },
 
   data() {
@@ -129,6 +153,24 @@ export default defineComponent({
     mode(): EventAssetsManagementModesType | null {
       return this.$store.getters["event/getManagedAssetsMode"];
     },
+
+    event(): IEvent {
+      return this.$store.getters["event/getEvent"];
+    },
+
+    fileName(): string {
+      const extension = this.asset.type === "image" ? "jpg" : "mp4";
+      return `${this.event.name}-${this.assetIndex}.${extension}`;
+    },
+  },
+
+  watch: {
+    controls: {
+      immediate: true,
+      handler(newVal: boolean) {
+        this.isPlaying = newVal || false;
+      },
+    },
   },
 
   methods: {
@@ -141,6 +183,8 @@ export default defineComponent({
     },
 
     async playVideo() {
+      if (this.controls) return;
+
       const video = this.$refs.videoEl as HTMLVideoElement;
       if (video && !this.isPlaying) {
         try {
@@ -153,6 +197,8 @@ export default defineComponent({
     },
 
     pauseVideo() {
+      if (this.controls) return;
+
       const video = this.$refs.videoEl as HTMLVideoElement;
       if (video && this.isPlaying) {
         video.pause();
@@ -194,6 +240,7 @@ export default defineComponent({
     object-fit: cover;
   }
 
+  .gallery-download-icon,
   .gallery-view-icon,
   .gallery-visible-icon {
     position: absolute;
@@ -203,8 +250,12 @@ export default defineComponent({
     text-align: center;
   }
 
-  .gallery-visible-icon {
+  .gallery-view-icon {
     left: 40px;
+  }
+
+  .gallery-visible-icon {
+    left: 70px;
   }
 
   .video-wrapper {

@@ -30,7 +30,7 @@
           <small class="hint" v-if="isEventInProgress"
             >העמוד פעיל לאורחים כעת</small
           >
-          <small class="hint" v-else-if="isEvenActive"
+          <small class="hint" v-else-if="isEventActive"
             >העמוד כבר אינו זמין יותר</small
           >
           <small class="hint" v-else>
@@ -115,8 +115,8 @@ export default defineComponent({
       return this.$store.getters["event/isEventAvailable"];
     },
 
-    isEvenActive(): string {
-      return this.$store.getters["event/isEvenActive"];
+    isEventActive(): string {
+      return this.$store.getters["event/isEventActive"];
     },
 
     isEventInProgress(): string {

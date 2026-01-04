@@ -54,9 +54,6 @@ export default defineComponent({
     },
 
     currentAsset(): IEventAsset {
-      console.log('this.currentAssetIndex', this.currentAssetIndex);
-      console.log('this.assets[this.currentAssetIndex]', this.assets[this.currentAssetIndex]);
-      
       return this.assets[this.currentAssetIndex];
     },
   },
@@ -95,14 +92,16 @@ export default defineComponent({
 
     keysListen() {
       window.addEventListener("keydown", (e) => {
-        if (this.isModalOpened) {
-          if (e.key === "ArrowRight") {
-            this.changeAsset(this.currentAssetIndex - 1);
-          } else if (e.key === "ArrowLeft") {
-            this.changeAsset(this.currentAssetIndex + 1);
-          } else if (e.key === "Escape") {
-            this.isModalOpened = false;
-          }
+        if (!this.isModalOpened) {
+          return;
+        }
+        
+        if (e.key === "ArrowRight") {
+          this.changeAsset(this.currentAssetIndex - 1);
+        } else if (e.key === "ArrowLeft") {
+          this.changeAsset(this.currentAssetIndex + 1);
+        } else if (e.key === "Escape") {
+          this.isModalOpened = false;
         }
       });
     },

@@ -177,10 +177,6 @@ export default defineComponent({
       }
     },
 
-    downloadAsset() {
-      this.$store.dispatch("event/downloadAsset", this.asset.id);
-    },
-
     togglePickedAssets(assetId: number) {
       if (this.isPicked) {
         this.$store.dispatch("event/removeAssetFromAssetsManagement", assetId);

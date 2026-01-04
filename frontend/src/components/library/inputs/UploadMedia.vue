@@ -61,7 +61,6 @@
         </ul>
         <div class="width--50">
           <BaseButton
-            :loading="loading"
             :text="
               uploads.length === progress.completed ? 'סגור' : 'בטל העלאות'
             "
@@ -111,15 +110,15 @@ export default defineComponent({
     },
 
     isDisabled(): boolean {
-      return this.isEvenActive || this.isEvenInactive;
+      return this.isEventActive || this.isEventInactive;
     },
 
-    isEvenActive() {
-      return this.$store.getters["event/isEvenActive"];
+    isEventActive() {
+      return this.$store.getters["event/isEventActive"];
     },
 
-    isEvenInactive() {
-      return this.$store.getters["event/isEvenInactive"];
+    isEventInactive() {
+      return this.$store.getters["event/isEventInactive"];
     },
   },
 
