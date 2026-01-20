@@ -4,7 +4,8 @@
 // }
 
 export enum SubscriptionTypesEnum {
-  BASIC = 'בסיסי',
+  DEMO = 'נסיון',
+  CLASSIC = 'קלאסי',
   PREMIUM = 'פרימיום',
 }
 

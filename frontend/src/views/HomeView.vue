@@ -145,7 +145,7 @@ export default defineComponent({
     canUpgradeSubscription(): boolean {
       return (
         [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) &&
-        this.subscriptionName === SubscriptionTypesEnum.BASIC
+        this.subscriptionName === SubscriptionTypesEnum.CLASSIC
       );
     },
   },

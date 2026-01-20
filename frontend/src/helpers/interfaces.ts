@@ -1,4 +1,4 @@
-import { StatusEnum } from './enums';
+import { StatusEnum, SubscriptionTypesEnum } from './enums';
 import { EventFileType, SubscriptionType, EventAssetsManagementModesType } from './types';
 
 // ***** Base Interfaces *****
@@ -52,7 +52,7 @@ export interface ISubscription {
   events_allowed: number;
   files_allowed: number;
   id: number;
-  name: SubscriptionType;
+  name: SubscriptionTypesEnum;
   price: string;
   status: number;
   storage_time: number; 

@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 import EventModule from './modules/EventModule'
 import UserModule from './modules/UserModule'
 import ContactModule from './modules/ContactModule'
-import StoreModuleZ from './modules/StoreModule'
+import StoreModule from './modules/StoreModule'
 import AppModule from './modules/AppModule'
 
 // Create Vuex module
@@ -11,7 +11,7 @@ const module = createStore({
     event: EventModule,
     user: UserModule,
     contact: ContactModule,
-    module: StoreModuleZ,
+    store: StoreModule,
     app: AppModule,
   },
 })

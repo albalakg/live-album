@@ -67,7 +67,36 @@
                   </h4>
                   <router-link
                     v-if="!hasActiveEvent"
-                    to="/order?subscription=premium"
+                    to="/order?subscription=demo"
+                  >
+                    <MainButton animation text="הצטרפו עכשיו" size="x-small" />
+                  </router-link>
+                  <MainButton
+                    v-else
+                    disabled
+                    animation
+                    text="כבר יש לכם אירוע"
+                    size="x-small"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pricing-card classic-card">
+            <div class="pricing-card-header">
+              <h3 class="title--large">{{ cards[1].title }}</h3>
+              <div class="icon" v-html="cards[1].icon"></div>
+            </div>
+            <div class="pricing-card-footer">
+              <div>
+                <p class="text--white" v-html="cards[1].description"></p>
+                <div>
+                  <h4 class="text--white title--large">
+                    {{ cards[1].price }} ₪
+                  </h4>
+                  <router-link
+                    v-if="!hasActiveEvent"
+                    to="/order?subscription=classic"
                   >
                     <MainButton animation text="הצטרפו עכשיו" size="x-small" />
                   </router-link>
@@ -84,19 +113,19 @@
           </div>
           <div class="pricing-card premium-card">
             <div class="pricing-card-header">
-              <h3 class="title--large">{{ cards[1].title }}</h3>
-              <div class="icon" v-html="cards[1].icon"></div>
+              <h3 class="title--large">{{ cards[2].title }}</h3>
+              <div class="icon" v-html="cards[2].icon"></div>
             </div>
             <div class="pricing-card-footer">
               <div>
-                <p class="text--white" v-html="cards[1].description"></p>
+                <p class="text--white" v-html="cards[2].description"></p>
                 <!-- <div
-                  v-if="cards[1].isPremium"
+                  v-if="cards[2].isPremium"
                   class="premium-card-footer-line"
                 ></div> -->
                 <div>
                   <h4 class="text--white title--large">
-                    {{ cards[1].price }} ₪
+                    {{ cards[2].price }} ₪
                   </h4>
                   <!-- <router-link to="/order?subscription=premium">
                     <MainButton color="pink" text="הצטרפו עכשיו" />
@@ -147,6 +176,25 @@ export default defineComponent({
   data() {
     return {
       cards: [
+        {
+          title: "מסלול נסיון",
+          price: 0,
+          isPremium: false,
+          icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect x="12" y="16" width="40" height="32" rx="7"
+        stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
+  <path d="M12 24h40"
+        stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M22 38l6 6 14-14"
+        stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M54 28h-2.5c-1.4 0-2.5 1.1-2.5 2.5v3c0 1.4 1.1 2.5 2.5 2.5H54"
+        stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+          `,
+          description: `המסלול נסיון הוא לראות איך זה עובד ומוגבל עד 10 קבצים.
+          <br>
+          הקבצים נמחקים לאחר שעה.`,
+        },
         {
           title: "מסלול קלאסי",
           price: 200,
@@ -206,7 +254,7 @@ export default defineComponent({
     canUpgradeSubscription(): boolean {
       return (
         [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) &&
-        this.subscriptionName === SubscriptionTypesEnum.BASIC
+        this.subscriptionName === SubscriptionTypesEnum.CLASSIC
       );
     },
 
@@ -257,8 +305,8 @@ export default defineComponent({
 
 .pricing-cards {
   gap: 30px;
-  width: 650px;
-  max-width: 50%;
+  width: 950px;
+  max-width: 80%;
 
   @media only screen and (max-width: 600px) {
     max-width: 100%;
@@ -334,6 +382,10 @@ export default defineComponent({
     margin: 20px auto 0 auto;
     border-radius: 2px;
   }
+}
+
+.classic-card {
+  background: linear-gradient(#fff, #a3d18daa, #a3d18daa);
 }
 
 @media only screen and (max-width: 600px) {

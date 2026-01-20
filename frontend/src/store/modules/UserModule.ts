@@ -50,7 +50,7 @@ const UserModule = {
       return state.isLoggedIn;
     },
 
-    getSubscriptionName(state: IUserModuleState): SubscriptionType | null {
+    getSubscriptionName(state: IUserModuleState): SubscriptionTypesEnum | null {
       return state.user?.order?.subscription?.name ?? null;
     },
 
@@ -84,7 +84,7 @@ const UserModule = {
       console.log(
         "2",
         Boolean(
-          state.user?.order?.subscription?.name === SubscriptionTypesEnum.BASIC
+          state.user?.order?.subscription?.name === SubscriptionTypesEnum.CLASSIC
         )
       );
       console.log(
@@ -95,7 +95,7 @@ const UserModule = {
       );
 
       return Boolean(
-        state.user?.order?.subscription?.name === SubscriptionTypesEnum.BASIC &&
+        state.user?.order?.subscription?.name === SubscriptionTypesEnum.CLASSIC &&
           [StatusEnum.READY, StatusEnum.PENDING].includes(
             rootGetters["EventModule/getEventStatus"]
           ) // ← replace with your actual module/getter

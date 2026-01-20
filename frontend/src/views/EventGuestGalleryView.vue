@@ -150,6 +150,7 @@ export default defineComponent({
     color: white;
     transform: translateY(-50%);
     transition: background-color 0.3s;
+    z-index: 20;
 
     &:hover {
       color: var(--pink);

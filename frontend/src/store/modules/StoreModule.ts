@@ -35,6 +35,30 @@ const StoreModule = {
           });
       });
     },
+
+    orderDemo(
+      context: {
+        commit: (arg0: string, arg1: null) => void;
+      },
+      payload: any
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("store/demo", payload)
+          .then((res) => {
+            resolve(res.data.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err),
+              type: "error",
+              duration: 5000
+            });
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
+    },
   },
 
   modules: {},

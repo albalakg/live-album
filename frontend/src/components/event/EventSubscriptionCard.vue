@@ -66,7 +66,7 @@ export default defineComponent({
         },
 
         canUpgradeSubscription(): boolean {
-            return [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) && this.subscriptionName === SubscriptionTypesEnum.BASIC;
+            return [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) && this.subscriptionName === SubscriptionTypesEnum.CLASSIC;
         }
     },
    
