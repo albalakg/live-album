@@ -31,7 +31,7 @@
       </div> -->
       <img
         class="header-image-gallery"
-        src="/assets/home-gallery.png"
+        src="/assets/home-gallery.webp"
         alt="header-gallery-image"
       />
       <div
@@ -42,7 +42,7 @@
             href="https://www.facebook.com/share/1By1U5frDi/?mibextid=wwXIfr"
             target="_blank"
           >
-            <img src="/assets/icons/facebook-icon.png" alt="facebook" />
+            <img loading="lazy" src="/assets/icons/facebook-icon.webp" alt="facebook" />
           </a>
         </div>
         <div>
@@ -50,7 +50,7 @@
             href="https://www.instagram.com/snapshare_live?igsh=MXpudTBjMWhxeWw%3D&utm_source=qr"
             target="_blank"
           >
-            <img src="/assets/icons/instagram-icon.png" alt="instagram" />
+            <img loading="lazy" src="/assets/icons/instagram-icon.webp" alt="instagram" />
           </a>
         </div>
       </div>
@@ -127,6 +127,19 @@ export default defineComponent({
     Clients,
     Pricing,
     Faq,
+  },
+
+  mounted() {
+    // Scroll to the section by the hash in the URL
+    setTimeout(() => {
+      const hash = this.$route.hash;
+      if (hash) {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth",  block: "end" });
+        }
+      }
+    }, 100);  
   },
 
   computed: {

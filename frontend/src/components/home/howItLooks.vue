@@ -1,5 +1,8 @@
 <template>
-  <section class="home-page-section how-it-looks-section bg--pink" id="how-it-looks">
+  <section
+    class="home-page-section how-it-looks-section bg--pink"
+    id="how-it-looks"
+  >
     <template v-if="$bp.isMediumAndUp">
       <MainLine
         :opacity="'0.7'"
@@ -52,53 +55,74 @@
       />
     </template>
     <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
-    <MainCube color="pink" left="10%" top="10%" width="large" height="x-large" />
+    <MainCube
+      color="pink"
+      left="10%"
+      top="10%"
+      width="large"
+      height="x-large"
+    />
     <MainCube left="8%" top="3%" width="large" height="large" />
     <MainCube left="11%" top="6%" width="medium" height="medium" />
     <MainCube left="60%" top="3%" width="large" height="large" />
-    <MainCube color="pink" left="63%" top="10%" width="medium" height="medium" />
+    <MainCube
+      color="pink"
+      left="63%"
+      top="10%"
+      width="medium"
+      height="medium"
+    />
     <MainCube color="pink" left="30%" top="73%" width="large" height="large" />
     <MainCube color="pink" left="33%" top="71%" width="large" height="medium" />
-    <MainCube color="pink" left="72%" top="80%" width="xx-large" height="large" />
+    <MainCube
+      color="pink"
+      left="72%"
+      top="80%"
+      width="xx-large"
+      height="large"
+    />
 
-    <div class="how-it-looks-content margin--auto" :class="$bp.isMobile ? 'width--full' : 'width--page-size'">
+    <div
+      class="how-it-looks-content margin--auto"
+      :class="$bp.isMobile ? 'width--full' : 'width--page-size'"
+    >
       <div class="height--ful width--full">
         <h2 class="text--white title--x-large">בואו נראה איך זה נראה</h2>
 
         <div class="video-wrapper" :data-state="state">
           <!-- Fallback poster image (shows while loading / if error) -->
-          <img
+          <!-- <img
             class="video-poster"
             :src="posterSrc"
+            lazy
             alt="Video preview"
             loading="lazy"
-          />
+          /> -->
 
           <video
             ref="videoEl"
             class="video-el"
-            :src="videoSrc"
-            :poster="posterSrc"
+            :data-src="videoSrc"
             muted
             playsinline
-            autoplay
             loop
             controls
-            preload="metadata"
+            preload="none"
             @loadeddata="onLoadedData"
             @canplay="onCanPlay"
             @playing="onPlaying"
             @pause="onPause"
             @error="onError"
-          ></video>
+          />
 
           <!-- Overlay (clickable) -->
           <button
             class="video-overlay"
             type="button"
             aria-label="Play/Pause video"
+            @click="togglePlayback"
           >
-            <span class="play-icon" aria-hidden="true" @click="togglePlayback"></span>
+            <span class="play-icon" aria-hidden="true"></span>
           </button>
         </div>
       </div>
@@ -121,14 +145,17 @@ export default defineComponent({
     return {
       state: "loading" as VideoState,
       videoSrc: "/assets/Login to event.mp4",
-      posterSrc: "/assets/gallery.jpg",
-      autoplayAttempted: false,
+      io: null as IntersectionObserver | null,
+      srcAttached: false,
     };
   },
 
   mounted() {
-    // Try autoplay once component mounted (some browsers won't start it)
-    this.tryAutoplay();
+    this.setupLazyVideo();
+  },
+
+  beforeUnmount() {
+    this.teardownLazyVideo();
   },
 
   methods: {
@@ -136,44 +163,72 @@ export default defineComponent({
       return (this.$refs.videoEl as HTMLVideoElement) || null;
     },
 
-    async tryAutoplay() {
-      if (this.autoplayAttempted) return;
-      this.autoplayAttempted = true;
+    setupLazyVideo() {
+      const video = this.getVideo();
+      if (!video) return;
+
+      // אם אין IO (דפדפנים ישנים) – נטען מיד
+      if (!("IntersectionObserver" in window)) {
+        this.attachSrc();
+        return;
+      }
+
+      this.io = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry || !entry.isIntersecting) return;
+
+          this.attachSrc(); // נטען רק עכשיו
+          this.io?.disconnect();
+          this.io = null;
+        },
+        {
+          root: null,
+          rootMargin: "300px", // מתחיל לטעון קצת לפני שמגיעים לוידאו
+          threshold: 0.01,
+        }
+      );
+
+      this.io.observe(video);
+    },
+
+    teardownLazyVideo() {
+      this.io?.disconnect();
+      this.io = null;
+    },
+
+    attachSrc() {
+      if (this.srcAttached) return;
 
       const video = this.getVideo();
       if (!video) return;
 
-      try {
-        // Ensure these are set (some browsers need it set programmatically too)
-        video.muted = true;
-        (video as any).playsInline = true;
+      const ds = (video as any).dataset?.src;
+      if (!ds) return;
 
-        // Attempt to play
-        await video.play();
-        // "playing" event will set state
-      } catch (e) {
-        // Autoplay blocked -> keep poster visible and show play icon
-        if (this.state !== "error") this.state = "ready";
-      }
+      video.src = ds;
+      video.load(); // מתחיל fetching רק עכשיו
+      this.srcAttached = true;
+
+      if (this.state !== "error") this.state = "ready";
     },
 
     async togglePlayback() {
       const video = this.getVideo();
       if (!video) return;
 
+      // אם המשתמש לחץ לפני שהגענו ל-viewport — נטען עכשיו
+      if (!this.srcAttached) this.attachSrc();
+
       try {
         if (video.paused) {
-          // Ensure autoplay rules
           video.muted = true;
           (video as any).playsInline = true;
-
           await video.play();
-          // onPlaying will update state
         } else {
-          video.pause(); // onPause updates state
+          video.pause();
         }
-      } catch (e) {
-        // If play fails (blocked), keep ready state (poster stays until canplay)
+      } catch {
         if (this.state !== "error") this.state = "ready";
       }
     },
@@ -181,22 +236,16 @@ export default defineComponent({
     onLoadedData() {
       if (this.state !== "error") this.state = "ready";
     },
-
     onCanPlay() {
-      // Video can play, keep ready unless already playing
-      if (this.state !== "playing" && this.state !== "error") {
+      if (this.state !== "playing" && this.state !== "error")
         this.state = "ready";
-      }
     },
-
     onPlaying() {
       this.state = "playing";
     },
-
     onPause() {
       if (this.state !== "error") this.state = "ready";
     },
-
     onError() {
       this.state = "error";
     },
@@ -209,7 +258,7 @@ export default defineComponent({
   min-height: calc(100vh - 99px);
   position: relative;
   text-align: center;
-  
+
   h2 {
     width: 80%;
     font-weight: 700;
@@ -246,7 +295,7 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     object-fit: cover;
-    
+
     @media only screen and (max-width: 600px) {
       width: 100vw;
     }

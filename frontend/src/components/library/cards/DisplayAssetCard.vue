@@ -1,7 +1,7 @@
 <template>
   <div class="display-asset-card width--90-mobile">
     <div class="asset-wrapper bg--dark brs--large">
-      <img class="width--full height--full brs--large" :src="currentImage" />
+      <img lazy-loading class="width--full height--full brs--large" :src="currentImage" />
     </div>
   </div>
 </template>

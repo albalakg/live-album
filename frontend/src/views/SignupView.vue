@@ -55,6 +55,9 @@
               <MainInput autocomplete="last_name" v-model="form.last_name" title="שם משפחה" />
               <div class="signup-form-bottom">
                 <MainButton :loading="isLoading" text="הרשמה" />
+                <small class="signup-hint">
+                  בעת לחיצה על הרשמה, מאשר את <router-link to="/terms-and-conditions"><strong>תנאי השימוש</strong></router-link> של האתר
+                </small>
               </div>
               <div class="signup-form-bottom">
                 <p class="title--medium text--dark text--center">
@@ -77,6 +80,9 @@
 
               <div class="signup-form-bottom">
                 <MainButton :loading="isLoading" text="הרשמה" />
+                <small class="signup-hint">
+                  בעת לחיצה על הרשמה, מאשר את <router-link to="/terms-and-conditions"><strong>תנאי השימוש</strong></router-link> של האתר
+                </small>
               </div>
             </div>
             <div class="signup-form-content-side padding--large">
@@ -247,7 +253,14 @@ export default defineComponent({
 
     .signup-form-bottom {
       margin-top: 20%;
+      text-align: center;
     }
   }
+}
+
+.signup-hint {
+  text-align: center;
+  position: relative;
+  top: 5px;
 }
 </style>

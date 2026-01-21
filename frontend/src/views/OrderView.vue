@@ -294,7 +294,7 @@ export default defineComponent({
       if(this.orderResponse) {
         await this.$store.dispatch('user/getProfile');
         this.$notify({
-          text: "הזמנת הנסיון בוצעה בהצלחה! ניתן לגשת לאלבום דרך דשבורד המשתמש.",
+          text: "הזמנת הנסיון בוצעה בהצלחה! יכול לשחק עם זה עכשיו.",
           type: "success",
           duration: 7000,
         });

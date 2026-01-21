@@ -10,10 +10,10 @@
                 </h4>
                 <div class="social-media display--flex justify--center-mobile">
                     <a href="https://www.facebook.com/share/1By1U5frDi/?mibextid=wwXIfr" target="_blank">
-                        <img src="/assets/icons/facebook-icon.png" alt="facebook">
+                        <img loading="lazy" src="/assets/icons/facebook-icon.webp" alt="facebook">
                     </a>
                     <a href="https://www.instagram.com/snapshare_live?igsh=MXpudTBjMWhxeWw%3D&utm_source=qr" target="_blank">
-                        <img src="/assets/icons/instagram-icon.png" alt="instagram">
+                        <img loading="lazy" src="/assets/icons/instagram-icon.webp" alt="instagram">
                     </a>
                 </div>
             </div>
@@ -73,7 +73,7 @@
         <MainCube color="pink" left="45%" bottom="5%" width="x-large" height="xxx-large" />
 
         <p class="footer-bottom">
-            © 2024 SnapShare
+            © {{ currentYear }} SnapShare
         </p>
     </div>
 </template>
@@ -105,6 +105,10 @@ export default defineComponent({
         
         hasActiveEvent(): boolean {
             return this.$store.getters['event/hasActiveEvent'];
+        },
+
+        currentYear(): number {
+            return new Date().getFullYear();
         }
     },
 
