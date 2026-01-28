@@ -246,6 +246,11 @@
   width: 66.6667%;
 }
 
+
+.width--three-corner {
+  width: 75%;
+}
+
 .width--page-size {
   width: 85%;
 }

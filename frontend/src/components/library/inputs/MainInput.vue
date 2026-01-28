@@ -114,7 +114,7 @@ export default defineComponent({
         },
 
         modelValue: {
-            type: String,
+            type: [String, Number, File, null],
         },
     },
 

@@ -9,7 +9,10 @@ import {
   IEventDownloadAssetsProcess,
 } from "@/helpers/interfaces";
 import { StatusEnum } from "@/helpers/enums";
-import { EventAssetsManagementModesType } from "@/helpers/types";
+import {
+  EventAssetsManagementModesType,
+  EventGalleryType,
+} from "@/helpers/types";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
 
@@ -65,7 +68,9 @@ const EventModule = {
     },
 
     isEventAvailable(state: IEventModuleState): boolean {
-      return [StatusEnum.IN_PROGRESS, StatusEnum.ACTIVE].includes(state.event?.status);
+      return [StatusEnum.IN_PROGRESS, StatusEnum.ACTIVE].includes(
+        state.event?.status
+      );
     },
 
     getEventDate(state: IEventModuleState): string | null {
@@ -140,6 +145,13 @@ const EventModule = {
       state.event.status = status;
     },
 
+    UPDATE_GALLERY_SETTINGS(
+      state: IEventModuleState,
+      settings: { selectedAlbum: EventGalleryType }
+    ) {
+      state.event.config.displayed_gallery = settings.selectedAlbum;
+    },
+
     UPDATE_EVENT(state: IEventModuleState, event: any) {
       state.event.name = event?.name ?? "";
       state.event.starts_at = event.starts_at
@@ -151,9 +163,9 @@ const EventModule = {
       state.event.image = event?.image ?? "";
       state.event.fullPath = event?.fullPath ?? "";
 
-      console.log({event});
-      
-      if(event?.config) {
+      console.log({ event });
+
+      if (event?.config) {
         state.event.config = event?.config;
       }
     },
@@ -339,13 +351,18 @@ const EventModule = {
       });
     },
 
-    getEventGalleryAssets(context: {
-      state: IEventModuleState;
-      commit: (arg0: string, arg1: any) => void;
-    }, guestToken: string|null = null) {
+    getEventGalleryAssets(
+      context: {
+        state: IEventModuleState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      guestToken: string | null = null
+    ) {
       return new Promise((resolve) => {
         const queryString = guestToken ? "?token=" + guestToken : "";
-        const url = queryString ? `events/${context.state.event.id}/gallery-guests-assets${queryString}` : `events/${context.state.event.id}/gallery-assets`;
+        const url = queryString
+          ? `events/${context.state.event.id}/gallery-guests-assets${queryString}`
+          : `events/${context.state.event.id}/gallery-assets`;
         console.log("URL:", url);
         axios
           .get(url)
@@ -542,6 +559,39 @@ const EventModule = {
       });
     },
 
+    updateGallerySettings(
+      context: {
+        state: IEventModuleState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      data: { selectedAlbum: EventGalleryType }
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/gallery/settings`, data)
+          .then((res) => {
+            context.commit("UPDATE_GALLERY_SETTINGS", data);
+            notify({
+              text: "הגדרות גלריית התמונות עודכנו בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך הייתה תקלה בעדכון הגדרות גלריית התמונות"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
     setPending(context: {
       state: IEventModuleState;
       commit: (arg0: string, arg1: any) => void;
@@ -594,7 +644,7 @@ const EventModule = {
               text: "מצטערים, אך יש כרגע שגיאה בהעלאת הקבצים, נסה שוב בקרוב",
               type: "error",
               duration: 5000,
-          });
+            });
             reject(err);
           });
       });

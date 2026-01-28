@@ -92,7 +92,7 @@ export default defineComponent({
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   width: fit-content;
-  margin: 100px auto;
+  margin: auto;
 }
 
 .grid-cell {

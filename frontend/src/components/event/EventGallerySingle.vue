@@ -24,7 +24,7 @@ import { defineComponent } from 'vue';
 import { IEventAsset } from '@/helpers/interfaces';
 
 export default defineComponent({
-    name: 'GalleryView',
+    name: 'EventGallerySingle',
 
     props: {
         rounded: {

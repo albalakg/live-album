@@ -1,5 +1,5 @@
 <template>
-  <div class="collage-container">
+  <div ref="container" class="collage-container">
     <transition-group name="fade" tag="div">
       <div
         v-for="item in items"
@@ -33,6 +33,7 @@ interface CollageItem {
   id: number;
   asset: IEventAsset | null;
   style: Record<string, string>;
+  slot: string; // ✅ keep the slot key
 }
 
 export default defineComponent({
@@ -65,60 +66,95 @@ export default defineComponent({
       return this.assets[index];
     },
 
+    clamp(n: number, min: number, max: number) {
+      return Math.max(min, Math.min(max, n));
+    },
+
     getRandomStyle(
       usedSlots: Set<string>,
       zIndex: number
-    ): Record<string, string> {
-      const rows = 3; // split screen vertically
-      const cols = 4; // split screen horizontally
-      const cellW = 100 / cols; // width per slot in vw
-      const cellH = 50 / rows; // height per slot in vh (top half only)
+    ): { style: Record<string, string>; slot: string } {
+      const container = this.$refs.container as HTMLElement | undefined;
+      const W = container?.clientWidth ?? window.innerWidth;
+      const H = container?.clientHeight ?? window.innerHeight;
 
-      // keep picking until we find a free slot
-      let row, col, slotKey;
+      const rows = 3;
+      const cols = 4;
+      const cellW = W / cols;
+      const cellH = H / rows;
+
+      // ✅ pick free slot
+      let row = 0,
+        col = 0,
+        slotKey = "";
       do {
         row = Math.floor(Math.random() * rows);
         col = Math.floor(Math.random() * cols);
         slotKey = `${row}-${col}`;
       } while (usedSlots.has(slotKey));
 
-      // mark slot as used
       usedSlots.add(slotKey);
 
-      // random offset inside the slot (so it doesn’t look too rigid)
+      // ✅ size in px (square), so we can clamp correctly
+      const minSize = Math.min(W, H) * 0.30;
+      const maxSize = Math.min(W, H) * 0.52;
+      const size = minSize + Math.random() * (maxSize - minSize);
+
+      // base position inside the slot + some randomness
       const offsetX = Math.random() * (cellW * 0.4);
       const offsetY = Math.random() * (cellH * 0.4);
+      let x = col * cellW + offsetX;
+      let y = row * cellH + offsetY;
 
-      const size = 15 + Math.random() * 15; // 15–30vw
-      const rotate = Math.floor(Math.random() * 20 - 10); // -10° to 10°
-      const z = Math.floor(Math.random() * 3);
+      // ✅ ensure at least 80% visible
+      const visible = 0.8; // required visible portion
+      const allow = 1 - visible; // 0.2 allowed overflow
+
+      // also consider your float translate (-20px, -20px) as extra margin
+      const drift = 25;
+
+      const minX = -allow * size + drift;
+      const maxX = W - visible * size - drift;
+      const minY = -allow * size + drift;
+      const maxY = H - visible * size - drift;
+
+      x = this.clamp(x, minX, maxX);
+      y = this.clamp(y, minY, maxY);
+
+      const rotate = Math.floor(Math.random() * 20 - 10);
 
       return {
-        position: "absolute",
-        top: `${row * cellH + offsetY}vh`,
-        left: `${col * cellW + offsetX}vw`,
-        width: `${size}vw`,
-        transform: `rotate(${rotate}deg)`,
-        zIndex: zIndex.toString(),
-        animation: `float ${this.lifespan}ms ease-in-out forwards`,
+        slot: slotKey,
+        style: {
+          position: "absolute",
+          left: `${x}px`,
+          top: `${y}px`,
+          width: `${size}px`,
+          height: `${size}px`, // ✅ define height so bounding box is known
+          transform: `rotate(${rotate}deg)`,
+          zIndex: zIndex.toString(),
+          animation: `float ${this.lifespan}ms ease-in-out forwards`,
+        },
       };
     },
 
     spawnItem() {
       if (!this.assets.length) return;
 
-      // reset slot tracking
-      const usedSlots = new Set(this.items.map((i: any) => i.slot));
-      console.log({ usedSlots });
+      // ✅ track actual slots
+      const usedSlots = new Set(this.items.map((i) => i.slot));
 
       if (this.items.length >= this.maxItems) {
         this.items.shift();
       }
 
+      const res = this.getRandomStyle(usedSlots, this.counter);
+
       const newItem: CollageItem = {
         id: this.counter++,
         asset: this.getRandomAsset(),
-        style: this.getRandomStyle(usedSlots, this.counter),
+        style: res.style,
+        slot: res.slot,
       };
 
       this.items.push(newItem);
@@ -151,6 +187,7 @@ export default defineComponent({
 
 .collage-item {
   pointer-events: none;
+  overflow: hidden;
 }
 
 .collage-asset {

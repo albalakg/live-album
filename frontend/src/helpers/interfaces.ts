@@ -1,5 +1,5 @@
 import { StatusEnum, SubscriptionTypesEnum } from './enums';
-import { EventFileType, SubscriptionType, EventAssetsManagementModesType } from './types';
+import { EventFileType, SubscriptionType, EventAssetsManagementModesType, EventGalleryType } from './types';
 
 // ***** Base Interfaces *****
 // interface IBaseResponse {
@@ -82,6 +82,7 @@ export interface IEventConfig {
   preview_owners_assets_in_gallery: boolean;
   preview_qr_in_gallery: boolean;
   event_id: number;
+  displayed_gallery: EventGalleryType;
 }
 
 export interface IEventDownloadAssetsProcess {

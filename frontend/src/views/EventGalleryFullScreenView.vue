@@ -20,8 +20,12 @@
       </div>
     </div>
     <div class="gallery-content">
-      <EventGallery />
-      <EventQR v-if="event.config.preview_qr_in_gallery" class="qr-code" :background="background" />
+      <component :is="selectedAlbum"></component>
+      <EventQR
+        v-if="event.config.preview_qr_in_gallery"
+        class="qr-code"
+        :background="background"
+      />
     </div>
   </div>
 </template>
@@ -29,17 +33,23 @@
 <script lang="ts">
 import { IEvent } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
-import EventGallery from "@/components/event/EventGallery.vue";
+import EventGallerySingle from "@/components/event/EventGallerySingle.vue";
 import MainIcon from "@/components/library/general/MainIcon.vue";
 import EventQR from "@/components/event/EventQR.vue";
+import EventGallerySplitScreen from "@/components/event/EventGallerySplitScreen.vue";
+import EventGalleryRandom from "@/components/event/EventGalleryRandom.vue";
+import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
 
 export default defineComponent({
-  name: "GalleryView",
+  name: "EventGalleryFullScreenView",
 
   components: {
-    EventGallery,
+    EventGallerySingle,
     MainIcon,
     EventQR,
+    EventGalleryRandom,
+    EventGalleryGrid3X3,
+    EventGallerySplitScreen,
   },
 
   data() {
@@ -56,6 +66,13 @@ export default defineComponent({
 
     screenIcon(): string {
       return this.isFullScreen ? "fullscreen_exit" : "fullscreen";
+    },
+
+    selectedAlbum(): string {
+      return (
+        this.$store.getters["event/getEvent"].config.displayed_gallery ||
+        "EventGallerySingle"
+      );
     },
   },
 
