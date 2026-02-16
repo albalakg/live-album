@@ -622,26 +622,34 @@ const EventModule = {
       data: any
     ) {
       return new Promise((resolve, reject) => {
-        const packageToSend = serialize({ file: data.file }, { indices: true });
+        const formData = new FormData();
+        const file = data.file;
+        const fileName = file.name || `upload_${Date.now()}.png`;
+        // Many backends expect "file"; some expect "image". Try "file" first.
+        formData.append("file", file, fileName);
+        const url = `events/${context.state.event.id}/${
+          data.isAuth ? "auth/" : ""
+        }upload`;
         axios
-          .post(
-            `events/${context.state.event.id}/${
-              data.isAuth ? "auth/" : ""
-            }upload`,
-            packageToSend,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          )
+          .post(url, formData, {
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+          })
           .then((res) => {
             context.commit("ADD_FILE", res.data.data);
             resolve(res.data);
           })
           .catch((err) => {
+            if (process.env.NODE_ENV !== "production" && err.response?.data) {
+              console.error("Upload response:", err.response.data);
+            }
+            const msg = err.response?.data?.message;
+            const text =
+              msg && String(msg).toLowerCase().includes("not authorized")
+                ? "אין הרשאה להעלות לאירוע זה. ייתכן שהאירוע לא פעיל להעלאות כרגע."
+                : "מצטערים, אך יש כרגע שגיאה בהעלאת הקבצים, נסה שוב בקרוב";
             notify({
-              text: "מצטערים, אך יש כרגע שגיאה בהעלאת הקבצים, נסה שוב בקרוב",
+              text,
               type: "error",
               duration: 5000,
             });

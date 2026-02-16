@@ -26,6 +26,7 @@
         class="qr-code"
         :background="background"
       />
+      <strong class="logo text--pink">SnapShare</strong>
     </div>
   </div>
 </template>
@@ -132,6 +133,14 @@ export default defineComponent({
     position: absolute;
     left: 30px;
     bottom: 30px;
+    margin: auto;
+    text-align: center;
+  }
+
+  .logo {
+    position: absolute;
+    left: 35px;
+    bottom: 10px;
     margin: auto;
     text-align: center;
   }

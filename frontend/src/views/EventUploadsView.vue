@@ -6,6 +6,12 @@
     }"
     :style="`background: url('${eventImage}') no-repeat center center;`"
   >
+    <MediaEditorModal
+      :open="editorOpen"
+      :file="selectedFile"
+      @cancel="closeEditor"
+      @confirm="onEditorConfirm"
+    />
     <template v-if="loading">
       <div class="text--center">
         <MainCube left="20%" top="15%" width="xxxx-large" height="large" />
@@ -47,8 +53,10 @@
           width="xx-large"
           height="large"
         />
-        <h1>רק רגע,<br>
-           מסיים לטעון...</h1>
+        <h1>
+          רק רגע,<br />
+          מסיים לטעון...
+        </h1>
         <br />
         <span class="title--x-large text--pink"> SnapShare </span>
       </div>
@@ -59,7 +67,9 @@
         <div
           class="content-wrapper height--full display--flex direction--column justify--space-between align-top"
         >
-          <h1 class="title text--white width--two-thirds margin--top-medium event-name">
+          <h1
+            class="title text--white width--two-thirds margin--top-medium event-name"
+          >
             <span v-if="displayName">
               {{ event.name }}
             </span>
@@ -88,7 +98,10 @@
                 <span v-else>נכשל לעלות את הקובץ</span>
               </div>
               <h2 class="event-date text--white">
-                <span v-if="displayDate" class="instrument-serif-regular title--large">
+                <span
+                  v-if="displayDate"
+                  class="instrument-serif-regular title--large"
+                >
                   {{ eventDate }}
                 </span>
               </h2>
@@ -153,12 +166,14 @@ import { useStore } from "vuex";
 import MainCube from "@/components/library/background/MainCube.vue";
 import { StatusEnum } from "@/helpers/enums";
 import Auth from "@/helpers/Auth";
+import MediaEditorModal from "@/components/event/MediaEditorModal.vue";
 
 export default defineComponent({
   name: "EventUploadsView",
 
   components: {
     MainCube,
+    MediaEditorModal,
   },
 
   setup() {
@@ -179,31 +194,143 @@ export default defineComponent({
       }
     };
 
+    // const handleFileChange = async (event: Event) => {
+    //   const target = event.target as HTMLInputElement;
+    //   if (target.files && target.files[0]) {
+    //     isUploading.value = true;
+    //     uploadFailed.value = false;
+    //     uploadSuccess.value = false;
+
+    //     try {
+    //       await store.dispatch("event/uploadFile", {
+    //         file: target.files[0],
+    //         isAuth: Auth.isLogged(),
+    //       });
+    //       uploadSuccess.value = true;
+    //       setTimeout(() => {
+    //         uploadSuccess.value = false;
+    //       }, 5000);
+    //     } catch (error: any) {
+    //       console.error("Upload failed", error);
+    //       uploadFailed.value = true;
+    //       setTimeout(() => {
+    //         uploadFailed.value = false;
+    //       }, 5000);
+    //     } finally {
+    //       isUploading.value = false;
+    //     }
+    //   }
+    // };
+
+    // const handleFileChange = async (e: Event) => {
+    //   const input = e.target as HTMLInputElement;
+    //   const file = input.files?.[0];
+    //   if (!file) return;
+
+    //   // 1) אם זו תמונה - לפתוח עורך
+    //   if (file.type.startsWith("image/")) {
+    //     const editedBlob = await openImageEditorAndGetBlob(file); // מודאל אצלך
+    //     const editedFile = new File(
+    //       [editedBlob],
+    //       `snapshare_${Date.now()}.png`,
+    //       { type: "image/png" }
+    //     );
+
+    //     await uploadFile(editedFile);
+    //     return;
+    //   }
+
+    //   // 2) וידאו - נפרט בהמשך
+    //   await uploadFile(file);
+    // };
+
+    // async function uploadFile(file: File) {
+    //   isUploading.value = true;
+    //   uploadFailed.value = false;
+    //   uploadSuccess.value = false;
+
+    //   try {
+    //     await store.dispatch("event/uploadFile", {
+    //       file,
+    //       isAuth: Auth.isLogged(),
+    //     });
+    //     uploadSuccess.value = true;
+    //     setTimeout(() => (uploadSuccess.value = false), 5000);
+    //   } catch (err) {
+    //     uploadFailed.value = true;
+    //     setTimeout(() => (uploadFailed.value = false), 5000);
+    //   } finally {
+    //     isUploading.value = false;
+    //   }
+    // }
+
+    const editorOpen = ref(false);
+    const selectedFile = ref<File | null>(null);
+
     const handleFileChange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
-      if (target.files && target.files[0]) {
-        isUploading.value = true;
-        uploadFailed.value = false;
-        uploadSuccess.value = false;
+      const file = target.files?.[0];
+      if (!file) return;
 
-        try {
-          await store.dispatch("event/uploadFile", {
-            file: target.files[0],
-            isAuth: Auth.isLogged(),
-          });
-          uploadSuccess.value = true;
-          setTimeout(() => {
-            uploadSuccess.value = false;
-          }, 5000);
-        } catch (error: any) {
-          console.error("Upload failed", error);
-          uploadFailed.value = true;
-          setTimeout(() => {
-            uploadFailed.value = false;
-          }, 5000);
-        } finally {
-          isUploading.value = false;
-        }
+      // reset input כדי שאפשר יהיה לבחור שוב אותו קובץ
+      target.value = "";
+
+      // אם וידאו - מעלה רגיל (בלי עורך)
+      if (file.type.startsWith("video/")) {
+        await uploadOriginalOnly(file);
+        return;
+      }
+
+      // אם תמונה - פותח עורך
+      selectedFile.value = file;
+      editorOpen.value = true;
+    };
+
+    const closeEditor = () => {
+      editorOpen.value = false;
+      selectedFile.value = null;
+    };
+
+    const uploadOriginalOnly = async (file: File) => {
+      isUploading.value = true;
+      uploadFailed.value = false;
+      uploadSuccess.value = false;
+
+      try {
+        await store.dispatch("event/uploadFile", {
+          file,
+          isAuth: Auth.isLogged(),
+        });
+
+        uploadSuccess.value = true;
+        setTimeout(() => (uploadSuccess.value = false), 5000);
+      } catch (e) {
+        uploadFailed.value = true;
+        setTimeout(() => (uploadFailed.value = false), 5000);
+      } finally {
+        isUploading.value = false;
+      }
+    };
+
+    // תמונה ערוכה: מעלה קובץ אחד (התמונה הסופית מהעורך)
+    const onEditorConfirm = async (payload: { file: File }) => {
+      closeEditor();
+      isUploading.value = true;
+      uploadFailed.value = false;
+      uploadSuccess.value = false;
+
+      try {
+        await store.dispatch("event/uploadFile", {
+          file: payload.file,
+          isAuth: Auth.isLogged(),
+        });
+        uploadSuccess.value = true;
+        setTimeout(() => (uploadSuccess.value = false), 5000);
+      } catch (e) {
+        uploadFailed.value = true;
+        setTimeout(() => (uploadFailed.value = false), 5000);
+      } finally {
+        isUploading.value = false;
       }
     };
 
@@ -215,6 +342,11 @@ export default defineComponent({
       triggerFileUpload,
       handleFileChange,
       fileInput,
+      editorOpen,
+      selectedFile,
+      closeEditor,
+      onEditorConfirm,
+      // uploadFile,
     };
   },
 
@@ -245,7 +377,7 @@ export default defineComponent({
     },
 
     eventImage(): string {
-      if(this.loading) {
+      if (this.loading) {
         return "";
       }
 
@@ -275,7 +407,7 @@ export default defineComponent({
     },
 
     eventDate(): string {
-      return this.$store.getters["event/getEventDate"].replaceAll('/', '.');
+      return this.$store.getters["event/getEventDate"].replaceAll("/", ".");
     },
   },
 
@@ -296,9 +428,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.upload-not-available {
-}
-
 .home {
   position: absolute;
   z-index: 1000;
@@ -343,7 +472,7 @@ export default defineComponent({
   // margin: auto;
   // top: 10px;
   // margin-bottom: 30px;
-font-size: 2.5rem;
+  font-size: 2.5rem;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 
@@ -356,9 +485,8 @@ font-size: 2.5rem;
   margin-bottom: 20px;
 
   span {
-    font-weight: 500
+    font-weight: 500;
   }
-
 }
 
 .upload-button {

@@ -11,6 +11,7 @@
     "@kyvg/vue3-notification": "^3.4.1",
     "@vuepic/vue-datepicker": "^10.0.0",
     "axios": "^1.7.7",
+    "fabric": "^7.1.0",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
     "object-to-formdata": "^4.5.1",
