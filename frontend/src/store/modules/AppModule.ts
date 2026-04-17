@@ -7,19 +7,28 @@ const AppModule = {
   namespaced: true,
 
   state: {
-    menuState: false as boolean
+    menuState: false as boolean,
+    homeScrollSection: "" as string,
   },
 
   getters: {
     getMenuState(state: IAppModuleState): boolean {
       return state.menuState;
-    }
+    },
+
+    getHomeScrollSection(state: IAppModuleState): string {
+      return state.homeScrollSection;
+    },
   },
 
   mutations: {
     TOGGLE_MENU(state: IAppModuleState) {
       state.menuState = !state.menuState;
-    }
+    },
+
+    SET_HOME_SCROLL_SECTION(state: IAppModuleState, sectionId: string) {
+      state.homeScrollSection = sectionId;
+    },
   },
 
   actions: {

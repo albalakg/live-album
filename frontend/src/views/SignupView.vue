@@ -42,19 +42,21 @@
         >
           <template v-if="$bp.isMobile">
             <div class="width--full padding--large">
-              <MainInput autocomplete="email" v-model="form.email" type="email" title="כתובת מייל" />
+              <MainInput autocomplete="email" v-model="form.email" type="email" title="כתובת מייל" :tab-index="1" />
               <br />
               <MainInput
                 v-model="form.password"
                 type="password"
                 title="סיסמה"
+                autocomplete="new-password"
+                :tab-index="2"
               />
               <br />
-              <MainInput autocomplete="first_name" v-model="form.first_name" title="שם פרטי" />
+              <MainInput autocomplete="given-name" v-model="form.first_name" title="שם פרטי" :tab-index="3" />
               <br />
-              <MainInput autocomplete="last_name" v-model="form.last_name" title="שם משפחה" />
+              <MainInput autocomplete="family-name" v-model="form.last_name" title="שם משפחה" :tab-index="4" />
               <div class="signup-form-bottom">
-                <MainButton :loading="isLoading" text="הרשמה" />
+                <MainButton :loading="isLoading" text="הרשמה" :tab-index="5" />
                 <small class="signup-hint">
                   בעת לחיצה על הרשמה, מאשר את <router-link to="/terms-and-conditions"><strong>תנאי השימוש</strong></router-link> של האתר
                 </small>
@@ -69,28 +71,44 @@
             </div>
           </template>
           <template v-else>
-            <div class="signup-form-content-side padding--large">
-              <MainInput v-model="form.email" type="email" title="כתובת מייל" />
-              <br />
+            <div class="signup-desktop-grid padding--large">
               <MainInput
+                class="signup-cell-email"
+                autocomplete="email"
+                v-model="form.email"
+                type="email"
+                title="כתובת מייל"
+                :tab-index="1"
+              />
+              <MainInput
+                class="signup-cell-password"
+                autocomplete="new-password"
                 v-model="form.password"
                 type="password"
                 title="סיסמה"
+                :tab-index="2"
               />
-
-              <div class="signup-form-bottom">
-                <MainButton :loading="isLoading" text="הרשמה" />
+              <MainInput
+                class="signup-cell-first"
+                autocomplete="given-name"
+                v-model="form.first_name"
+                title="שם פרטי"
+                :tab-index="3"
+              />
+              <MainInput
+                class="signup-cell-last"
+                autocomplete="family-name"
+                v-model="form.last_name"
+                title="שם משפחה"
+                :tab-index="4"
+              />
+              <div class="signup-cell-submit signup-form-bottom">
+                <MainButton :loading="isLoading" text="הרשמה" :tab-index="5" />
                 <small class="signup-hint">
                   בעת לחיצה על הרשמה, מאשר את <router-link to="/terms-and-conditions"><strong>תנאי השימוש</strong></router-link> של האתר
                 </small>
               </div>
-            </div>
-            <div class="signup-form-content-side padding--large">
-              <MainInput v-model="form.first_name" title="שם פרטי" />
-              <br />
-              <MainInput v-model="form.last_name" title="שם משפחה" />
-
-              <div class="signup-form-bottom">
+              <div class="signup-cell-login signup-form-bottom">
                 <p class="title--small text--dark text--center">
                   כבר יש חשבון?
                   <br />
@@ -247,8 +265,40 @@ export default defineComponent({
       text-decoration: underline;
     }
 
-    .signup-form-content-side {
-      width: 40%;
+    .signup-desktop-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "email first"
+        "password last"
+        "submit login";
+      column-gap: 8%;
+      width: 100%;
+      align-items: start;
+    }
+
+    .signup-cell-email {
+      grid-area: email;
+    }
+
+    .signup-cell-password {
+      grid-area: password;
+    }
+
+    .signup-cell-first {
+      grid-area: first;
+    }
+
+    .signup-cell-last {
+      grid-area: last;
+    }
+
+    .signup-cell-submit {
+      grid-area: submit;
+    }
+
+    .signup-cell-login {
+      grid-area: login;
     }
 
     .signup-form-bottom {

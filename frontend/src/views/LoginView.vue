@@ -22,7 +22,8 @@
             v-model="form.email" 
             type="email" 
             title="כתובת מייל"
-            :error="errors.email" 
+            :error="errors.email"
+            :tab-index="1"
           />
           <br>
           <MainInput 
@@ -31,10 +32,11 @@
             type="password" 
             title="סיסמה"
             :error="errors.password"
+            :tab-index="2"
           />
         </div>
         <div>
-          <MainButton :loading="isLoading" text="כניסה למערכת" />
+          <MainButton :loading="isLoading" text="כניסה למערכת" :tab-index="3" />
         </div>
       </form>
       <div class="login-details width--half height--full bg--pink display--flex align--center justify--center width--full-mobile">

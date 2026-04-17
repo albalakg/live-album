@@ -29,6 +29,7 @@ export interface IUserModuleState {
 
 export interface IAppModuleState {
   menuState: boolean;
+  homeScrollSection: string;
 }
 
 export interface IUserInfo {
@@ -165,6 +166,32 @@ export interface IForgotPasswordRequest {
   email: string;
 }
 
+/** Public subscription plan from GET subscriptions (slug derived on FE if BE omits it). */
+export interface ISubscriptionPlan {
+  id: number;
+  slug: string;
+  name: string;
+  price: number;
+  status?: number;
+  events_allowed?: number;
+  files_allowed?: number;
+  /** Retention in hours (BE contract). */
+  storage_time?: number;
+  payment_page_link?: string | null;
+}
+
+/** Raw checkout-link payload from POST subscriptions/:id/checkout-link (normalized in store). */
+export interface ICheckoutLinkResponse {
+  paymentUrl: string;
+  expiresAt?: string;
+  providerRequestUid?: string;
+  provider?: string;
+}
+
+/** Iframe src; kept as payment_page_link for minimal template churn in OrderView. */
 export interface IOrderResponse {
   payment_page_link: string;
 }
+
+/** Result of `store/order`: either a checkout iframe URL or a user-facing error string. */
+export type IStoreOrderResult = IOrderResponse | { error: string };

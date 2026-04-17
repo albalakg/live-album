@@ -74,100 +74,158 @@
     <MainLine color="light-green" left="820px" width="small" height="full" />
     <MainLine color="light-green" left="830px" width="xx-large" height="full" />
 
-    <div
-      class="order-content height--full display--flex flex--wrap justify--space-around margin--auto"
-    >
-      <template v-if="hasPaymentLink">
-        <iframe
-          frameBorder="0"
-          :src="orderResponse?.payment_page_link"
-          title="עמוד תשלום"
-        ></iframe>
-      </template>
-      <template v-else>
-        <div
-          class="order-info shadow--small brs--medium bg--pink padding--small"
-        >
+    <div class="order-content margin--auto">
+      <div class="order-layout">
+        <div class="order-column order-column--panel">
           <div
-            class="order-info-content bg--light-pink brs--small display--flex direction--column justify--space-between"
+            class="order-info shadow--small brs--medium bg--pink padding--small"
           >
-            <div>
-              <h2 class="title--large text--white">הזמנת אלבום לאירוע</h2>
-              <MainLine
-                color="white"
-                right="15px"
-                width="xxx-large"
-                height="x-small"
-              />
-              <p class="text--dark">
-                אלבום דיגיטלי חי בזמן האירוע
-                <br />
-                כל קבצי האלבום להורדה
-                <br />
-                כרטיס הזמנה עם QR המוביל לעמוד ייחודי להעלאת הקבצים
-              </p>
-            </div>
             <div
-              class="display--flex justify--space-between order-info-actions"
+              class="order-info-content bg--light-pink brs--small display--flex direction--column"
             >
-              <div
-                class="width--half padding--medium"
-                v-for="subscription in subscriptions"
-                :key="subscription.value + currentSubscription?.id"
-              >
-                <router-link :to="`/order?subscription=${subscription.value}`">
-                  <BaseButton
-                    @onClick="setSubscription(subscription.value)"
-                    :text="subscription.name"
-                    :color="
-                      currentSubscription?.value === subscription.value
-                        ? 'green'
-                        : 'white'
-                    "
-                    :text-color="
-                      currentSubscription?.value === subscription.value ? 'white' : 'dark'
-                    "
+              <div>
+                <h2 class="title--large text--white">הזמנת אלבום לאירוע</h2>
+                <MainLine
+                  color="white"
+                  right="15px"
+                  width="xxx-large"
+                  height="x-small"
+                />
+                <p class="text--dark">
+                  אלבום דיגיטלי חי בזמן האירוע
+                  <br />
+                  כל קבצי האלבום להורדה
+                  <br />
+                  כרטיס הזמנה עם QR המוביל לעמוד ייחודי להעלאת הקבצים
+                </p>
+              </div>
+
+              <div class="order-checkout-box brs--small bg--white shadow--small">
+                <div class="order-price-row display--flex justify--center align--center">
+                  <span class="title--large text--dark"
+                    >₪{{ currentPlan?.price ?? "—" }}</span
+                  >
+                </div>
+                <div
+                  class="order-plan-switcher display--flex flex--wrap justify--center"
+                  role="tablist"
+                  aria-label="בחירת מסלול"
+                >
+                  <div
+                    v-for="plan in subscriptionPlans"
+                    :key="plan.slug + String(plan.id)"
+                    class="order-plan-switcher__item"
+                  >
+                    <BaseButton
+                      @onClick="selectPlan(plan.slug)"
+                      :text="plan.name"
+                      :color="
+                        currentPlan?.slug === plan.slug ? 'green' : 'white'
+                      "
+                      :text-color="
+                        currentPlan?.slug === plan.slug ? 'white' : 'dark'
+                      "
+                    />
+                  </div>
+                </div>
+                <div v-if="isDemo" class="order-demo-cta">
+                  <MainButton
+                    color="pink"
+                    @onClick="submitDemo()"
+                    :loading="demoLoading"
+                    text="נסה עכשיו"
                   />
-                </router-link>
+                </div>
+                <div v-else class="order-demo-cta">
+                  <MainButton
+                    color="green"
+                    @onClick="submitOrder()"
+                    :loading="paymentLoading"
+                    text="רכוש עכשיו"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
+
         <div
-          class="order-details shadow--small brs--medium bg--white width--corner padding--large position--relative display--flex direction--column justify--space-between"
+          v-if="showCheckoutPanel"
+          class="order-column order-column--pay"
         >
-          <div>
-            <h3 class="text--center title--large">סיכום הזמנה</h3>
-            <br />
-            <div class="display--flex justify--space-between">
-              <span class="title--small text--dark">מחיר ההזמנה</span>
-              <span class="title--small text--dark"
-                >₪{{ currentSubscription?.price }}</span
-              >
-            </div>
-            <br />
-            <div class="separator bg--dark"></div>
-          </div>
-          <div>
-            <MainButton
-              v-if="isDemo"
-              color="pink"
-              @onClick="submitDemo()"
-              :loading="loading"
-              text="נסה עכשיו"
-            />
-            <MainButton v-else color="pink" readonly text="רכישה בקרוב" />
-            <br />
-            <br />
-            <router-link to="/contact-us" v-if="!isDemo">
-              <p class="text--center">
-                ניתן כרגע <strong>ליצור קשר</strong> איתנו ונעדכן אתכם
+          <div
+            class="order-pay-card brs--medium bg--white shadow--small position--relative"
+          >
+            <template v-if="isDemo">
+              <p class="order-pay-placeholder text--dark text--center title--small">
+                מסלול הניסיון ללא תשלום — לחצו על &quot;נסה עכשיו&quot; בכרטיס
+                ליד.
               </p>
-            </router-link>
-            <!-- <MainButton text="לתשלום" @onClick="submit()" /> -->
+            </template>
+            <template v-else-if="!isLogged">
+              <div
+                class="order-pay-guest display--flex direction--column align--center justify--center"
+              >
+                <p class="text--dark text--center title--small margin--bottom-small">
+                  התחברו כדי לטעון את עמוד התשלום
+                </p>
+                <router-link class="order-pay-guest__link" :to="guestLoginTo">
+                  <MainButton color="pink" text="התחברות" />
+                </router-link>
+              </div>
+            </template>
+            <template v-else>
+              <p
+                v-if="!paymentRequested"
+                class="order-pay-placeholder text--dark text--center title--small"
+              >
+                לחצו על &quot;רכוש עכשיו&quot; בכרטיס ליד כדי לטעון את עמוד התשלום.
+              </p>
+              <template v-else>
+                <p
+                  v-if="paymentLoading"
+                  class="text--dark title--small text--center order-pay-state"
+                >
+                  טוען את עמוד התשלום…
+                </p>
+                <div
+                  v-else-if="loadError"
+                  class="order-pay-error display--flex direction--column align--center"
+                >
+                  <p class="text--dark text--center">{{ loadError }}</p>
+                  <MainButton
+                    color="pink"
+                    text="נסו שוב"
+                    @onClick="loadPaymentSrc"
+                  />
+                </div>
+                <div
+                  v-else-if="paymentSrc"
+                  class="order-pay-iframe-wrap position--relative"
+                >
+                  <div
+                    v-if="!paymentIframeReady"
+                    class="order-pay-iframe-loading display--flex align--center justify--center"
+                  >
+                    <p class="text--dark title--small text--center">
+                      טוען את עמוד התשלום…
+                    </p>
+                  </div>
+                  <iframe
+                    :key="`${form.subscription}-${paymentIframeKey}`"
+                    class="order-pay-iframe"
+                    :class="{ 'order-pay-iframe--invisible': !paymentIframeReady }"
+                    frameBorder="0"
+                    :src="paymentSrc"
+                    title="עמוד תשלום"
+                    @load="onPaymentIframeLoad"
+                  />
+                </div>
+              </template>
+            </template>
           </div>
         </div>
-      </template>
+      </div>
     </div>
   </div>
 </template>
@@ -178,8 +236,7 @@ import MainButton from "@/components/library/buttons/MainButton.vue";
 import MainCube from "@/components/library/background/MainCube.vue";
 import MainLine from "@/components/library/background/MainLine.vue";
 import { defineComponent } from "vue";
-import { SubscriptionTypesEnum } from "@/helpers/enums";
-import { IOrderResponse } from "@/helpers/interfaces";
+import { IStoreOrderResult, ISubscriptionPlan } from "@/helpers/interfaces";
 
 export default defineComponent({
   name: "OrderView",
@@ -193,52 +250,34 @@ export default defineComponent({
 
   data() {
     return {
-      orderResponse: null as IOrderResponse | null,
-      loading: false as boolean,
-      subscriptions: [
-        {
-          name: "נסיון",
-          value: "demo",
-          price: 0,
-        },
-        {
-          name: "קלאסי",
-          value: "classic",
-          price: 200,
-        },
-        {
-          name: "פרמיום",
-          value: "premium",
-          price: 300,
-        },
-      ] as Record<string, any>[],
+      demoLoading: false as boolean,
+      paymentLoading: false as boolean,
+      paymentSrc: "" as string,
+      loadError: "" as string,
+      /** Shown only after "רכוש עכשיו"; reset when switching plan. */
+      paymentRequested: false as boolean,
+      /** Bumps iframe key so switching plan + purchase remounts cleanly. */
+      paymentIframeKey: 0 as number,
+      paymentIframeReady: false as boolean,
       form: {
         subscription: "classic" as string,
       },
     };
   },
 
-  mounted() {
-    const foundSubscription = this.subscriptions.find(
-      (subscription) => (subscription.value === this.$route.query.subscription)
-    );
-
-    this.form.subscription = foundSubscription?.value ?? "classic";
-  },
-
   computed: {
-    hasPaymentLink(): boolean {
-      return !!this.orderResponse?.payment_page_link;
+    subscriptionPlans(): ISubscriptionPlan[] {
+      return this.$store.getters["subscriptions/plans"] as ISubscriptionPlan[];
     },
 
     isLogged(): boolean {
       return this.$store.getters["user/isLoggedIn"];
     },
 
-    currentSubscription(): Record<string, any> | null {
+    currentPlan(): ISubscriptionPlan | null {
       return (
-        this.subscriptions.find(
-          (subscription) => subscription.value === this.form.subscription
+        this.subscriptionPlans.find(
+          (p) => p.slug === this.form.subscription
         ) ?? null
       );
     },
@@ -248,7 +287,23 @@ export default defineComponent({
     },
 
     isDemo(): boolean {
-      return this.currentSubscription?.name === SubscriptionTypesEnum.DEMO;
+      return this.currentPlan?.slug === "demo";
+    },
+
+    guestLoginTo(): string {
+      const path = `/order?subscription=${encodeURIComponent(
+        this.form.subscription
+      )}`;
+      return `/login?redirect=${encodeURIComponent(path)}`;
+    },
+
+    /** Pay column: after “רכוש עכשיו”, or when an iframe URL is already loaded. */
+    showCheckoutPanel(): boolean {
+      return (
+        !this.isDemo &&
+        this.isLogged &&
+        (this.paymentRequested || Boolean(this.paymentSrc))
+      );
     },
   },
 
@@ -259,25 +314,129 @@ export default defineComponent({
         if (newValue) {
           this.$router.push("/event");
         }
-    }
+      },
+    },
+    "$route.query.subscription": {
+      handler() {
+        this.applyQuerySubscription();
+        this.resetPaymentUi();
+      },
+    },
+    isLogged(newVal: boolean) {
+      if (!newVal) {
+        this.resetPaymentUi();
+      }
     },
   },
 
+  async mounted() {
+    if (!this.$store.getters["subscriptions/plansLoaded"]) {
+      await this.$store.dispatch("subscriptions/fetchPlans");
+    }
+    this.applyQuerySubscription();
+  },
+
   methods: {
-    async submit() {
+    resetPaymentUi() {
+      this.paymentRequested = false;
+      this.paymentSrc = "";
+      this.loadError = "";
+      this.paymentLoading = false;
+      this.paymentIframeReady = false;
+    },
+
+    onPaymentIframeLoad() {
+      this.paymentIframeReady = true;
+    },
+
+    applyQuerySubscription() {
+      const q = this.$route.query.subscription as string | undefined;
+      const plans = this.subscriptionPlans;
+      const byQuery = q ? plans.find((p) => p.slug === q) : undefined;
+      const fallback =
+        plans.find((p) => p.slug === "classic") ?? plans[0] ?? null;
+      this.form.subscription = (byQuery ?? fallback)?.slug ?? "classic";
+    },
+
+    selectPlan(slug: string) {
+      if (slug === this.form.subscription) {
+        return;
+      }
+      void this.$router.replace({
+        path: "/order",
+        query: { subscription: slug },
+      });
+    },
+
+    async loadPaymentSrc() {
+      this.loadError = "";
+      this.paymentSrc = "";
+      this.paymentIframeReady = false;
+      this.paymentLoading = true;
+
       if (!this.isLogged) {
-        this.$router.push("/login?redirect=/order");
+        this.paymentLoading = false;
         return;
       }
 
-      this.loading = true;
-      this.orderResponse = await this.$store.dispatch("store/order", this.form);
-      this.loading = false;
+      if (this.form.subscription === "demo" || this.isDemo) {
+        this.paymentLoading = false;
+        return;
+      }
+
+      const plan = this.currentPlan;
+      if (!plan || plan.slug === "demo") {
+        this.loadError = "לא נמצא מסלול תשלום.";
+        this.paymentLoading = false;
+        return;
+      }
+
+      try {
+        const res = (await this.$store.dispatch("store/order", {
+          subscription: plan.name,
+        })) as IStoreOrderResult;
+
+        if ("error" in res && res.error) {
+          this.loadError = res.error;
+          this.$notify({
+            text: res.error,
+            type: "error",
+            duration: 7000,
+          });
+        } else if ("payment_page_link" in res && res.payment_page_link) {
+          this.paymentIframeKey += 1;
+          this.paymentSrc = res.payment_page_link;
+        } else {
+          this.loadError = "לא ניתן לטעון את עמוד התשלום.";
+        }
+      } finally {
+        this.paymentLoading = false;
+      }
+    },
+
+    async submitOrder() {
+      if (!this.isLogged) {
+        const path = `/order?subscription=${encodeURIComponent(
+          this.form.subscription
+        )}`;
+        this.$router.push(`/login?redirect=${encodeURIComponent(path)}`);
+        return;
+      }
+      if (this.isDemo) {
+        return;
+      }
+      if (this.paymentLoading) {
+        return;
+      }
+      this.paymentRequested = true;
+      await this.loadPaymentSrc();
     },
 
     async submitDemo() {
       if (!this.isLogged) {
-        this.$router.push("/login?redirect=/order");
+        this.$router.push(
+          `/login?redirect=${encodeURIComponent("/order?subscription=demo")}`
+        );
         this.$notify({
           text: "צריך להתחבר בשביל בשביל המסלול נסיון",
           type: "success",
@@ -286,27 +445,21 @@ export default defineComponent({
         return;
       }
 
-      this.loading = true;
-      this.orderResponse = await this.$store.dispatch("store/orderDemo", {
-        subscription: this.currentSubscription?.name,
+      this.demoLoading = true;
+      const orderResponse = await this.$store.dispatch("store/orderDemo", {
+        subscription: this.currentPlan?.name,
       });
-      
-      if(this.orderResponse) {
-        await this.$store.dispatch('user/getProfile');
+
+      if (orderResponse) {
+        await this.$store.dispatch("user/getProfile");
         this.$notify({
           text: "הזמנת הנסיון בוצעה בהצלחה! יכול לשחק עם זה עכשיו.",
           type: "success",
           duration: 7000,
         });
       }
-      
-      this.loading = false;
-    },
 
-    setSubscription(subscription: string) {
-      console.log({subscription});
-      
-      this.form.subscription = subscription;
+      this.demoLoading = false;
     },
   },
 });
@@ -330,70 +483,149 @@ export default defineComponent({
   position: relative;
   z-index: 2;
   padding-top: 5%;
-  width: 75%;
+  padding-bottom: 48px;
+  width: 92%;
+  max-width: 1200px;
+}
 
-  .order-info {
-    width: 40%;
-    height: calc(40% - 16px);
-    min-height: fit-content;
+.order-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: 28px;
+  align-items: start;
 
-    @media only screen and (max-width: 600px) {
-      width: 100%;
-    }
-
-    .order-info-content {
-      width: calc(97% - 30px);
-      height: calc(96% - 30px);
-      min-height: fit-content;
-      padding: 15px;
-      position: relative;
-      top: 2%;
-      margin: auto;
-
-      .title--large {
-        font-size: 2.6em;
-        margin-bottom: 10px;
-      }
-
-      p {
-        margin-top: 30px;
-      }
-
-      .order-info-actions {
-        margin-top: 10px;
-      }
-    }
+  @media only screen and (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 22px;
   }
+}
 
-  .order-details {
-    height: calc(40% - 40px);
-    min-height: 225px;
-    width: 20%;
+.order-column--panel {
+  min-width: 0;
+}
 
-    @media only screen and (max-width: 600px) {
-      width: 100%;
-      min-height: 250px;
-      margin-top: 20px;
+.order-column--pay {
+  min-width: 0;
+}
+
+.order-info {
+  width: 100%;
+  min-height: fit-content;
+
+  .order-info-content {
+    width: calc(97% - 30px);
+    min-height: fit-content;
+    padding: 15px;
+    position: relative;
+    top: 2%;
+    margin: auto;
+    gap: 20px;
+
+    .title--large {
+      font-size: 2.6em;
+      margin-bottom: 10px;
     }
 
-    .separator {
-      height: 2px;
-      width: 100%;
-      margin: auto;
-      margin-top: 10px;
-      opacity: 0.7;
+    p {
+      margin-top: 30px;
     }
   }
 }
 
-@media only screen and (max-width: 600px) {
-  .order-content {
-    flex-wrap: wrap;
-    width: 90%;
+.order-checkout-box {
+  margin-top: 8px;
+  padding: 18px 16px 20px;
+}
 
-    > div {
-      width: 100%;
-    }
+.order-price-row {
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.order-plan-switcher {
+  gap: 10px;
+
+  &__item {
+    flex: 1 1 auto;
+    min-width: 88px;
+    max-width: 140px;
+  }
+}
+
+.order-demo-cta {
+  margin-top: 18px;
+}
+
+.order-pay-card {
+  min-height: 200px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.order-pay-placeholder,
+.order-pay-state {
+  margin: auto;
+  padding: 24px 12px;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.order-pay-guest {
+  min-height: 280px;
+  gap: 16px;
+  padding: 16px;
+
+  &__link {
+    text-decoration: none;
+  }
+}
+
+.order-pay-error {
+  gap: 16px;
+  padding: 24px 12px;
+  margin: auto;
+}
+
+.order-pay-iframe-wrap {
+  width: 100%;
+  flex: 1;
+  min-height: 720px;
+}
+
+.order-pay-iframe-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #fff;
+  border-radius: 4px;
+  padding: 24px 12px;
+}
+
+.order-pay-iframe {
+  width: 100%;
+  min-height: 720px;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  flex: 1;
+}
+
+.order-pay-iframe--invisible {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media only screen and (max-width: 600px) {
+  .order-pay-iframe {
+    min-height: 600px;
+  }
+
+  .order-plan-switcher__item {
+    max-width: none;
   }
 }
 </style>

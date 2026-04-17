@@ -35,9 +35,10 @@
           type="email" 
           title="כתובת מייל"
           :error="errors.email"
+          :tab-index="1"
         />
         <br>
-        <MainButton :loading="isLoading" color="pink" text="שלח בקשה" />
+        <MainButton :loading="isLoading" color="pink" text="שלח בקשה" :tab-index="2" />
         <p class="text--center">
           נזכרת בסיסמה?
           <router-link to="/login">התחבר כאן</router-link>

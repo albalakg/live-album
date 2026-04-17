@@ -53,102 +53,65 @@
         <div
           class="display--flex justify--space-between width--two-thirds margin--auto flex--wrap-mobile pricing-cards"
         >
-          <div class="pricing-card">
+          <div
+            v-for="card in displayCards"
+            :key="card.slug"
+            class="pricing-card"
+            :class="card.cardClass"
+          >
             <div class="pricing-card-header">
-              <h3 class="title--large">{{ cards[0].title }}</h3>
-              <div class="icon" v-html="cards[0].icon"></div>
+              <h3 class="title--large">{{ card.title }}</h3>
+              <div class="icon" v-html="card.icon"></div>
             </div>
             <div class="pricing-card-footer">
               <div>
-                <p class="text--white" v-html="cards[0].description"></p>
+                <p class="text--white" v-html="card.description"></p>
                 <div>
                   <h4 class="text--white title--large">
-                    {{ cards[0].price }} ₪
+                    {{ card.displayPrice }} ₪
                   </h4>
-                  <router-link
-                    v-if="!hasActiveEvent"
-                    to="/order?subscription=demo"
-                  >
-                    <MainButton animation text="הצטרפו עכשיו" size="x-small" />
-                  </router-link>
-                  <MainButton
-                    v-else
-                    disabled
-                    animation
-                    text="כבר יש לכם אירוע"
-                    size="x-small"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="pricing-card classic-card">
-            <div class="pricing-card-header">
-              <h3 class="title--large">{{ cards[1].title }}</h3>
-              <div class="icon" v-html="cards[1].icon"></div>
-            </div>
-            <div class="pricing-card-footer">
-              <div>
-                <p class="text--white" v-html="cards[1].description"></p>
-                <div>
-                  <h4 class="text--white title--large">
-                    {{ cards[1].price }} ₪
-                  </h4>
-                  <router-link
-                    v-if="!hasActiveEvent"
-                    to="/order?subscription=classic"
-                  >
-                    <MainButton animation text="הצטרפו עכשיו" size="x-small" />
-                  </router-link>
-                  <MainButton
-                    v-else
-                    disabled
-                    animation
-                    text="כבר יש לכם אירוע"
-                    size="x-small"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="pricing-card premium-card">
-            <div class="pricing-card-header">
-              <h3 class="title--large">{{ cards[2].title }}</h3>
-              <div class="icon" v-html="cards[2].icon"></div>
-            </div>
-            <div class="pricing-card-footer">
-              <div>
-                <p class="text--white" v-html="cards[2].description"></p>
-                <!-- <div
-                  v-if="cards[2].isPremium"
-                  class="premium-card-footer-line"
-                ></div> -->
-                <div>
-                  <h4 class="text--white title--large">
-                    {{ cards[2].price }} ₪
-                  </h4>
-                  <!-- <router-link to="/order?subscription=premium">
-                    <MainButton color="pink" text="הצטרפו עכשיו" />
-                  </router-link> -->
-                  <router-link
-                    v-if="canUpgradeSubscription"
-                    to="/order?subscription=premium"
-                  >
-                    <MainButton animation text="שדרגו עכשיו" size="x-small" />
-                  </router-link>
-                  <router-link
-                    v-else-if="!hasActiveEvent"
-                    to="/order?subscription=premium"
-                  >
-                    <MainButton animation text="הצטרפו עכשיו" size="x-small" />
-                  </router-link>
-                  <MainButton
-                    v-else
-                    disabled
-                    animation
-                    text="כבר במסלול פרמיום"
-                    size="x-small"
-                  />
+                  <template v-if="card.slug === 'premium'">
+                    <router-link
+                      v-if="canUpgradeSubscription"
+                      :to="`/order?subscription=${card.slug}`"
+                    >
+                      <MainButton animation text="שדרגו עכשיו" size="x-small" />
+                    </router-link>
+                    <router-link
+                      v-else-if="!hasActiveEvent"
+                      :to="`/order?subscription=${card.slug}`"
+                    >
+                      <MainButton animation text="רכוש תוכנית" size="x-small" />
+                    </router-link>
+                    <MainButton
+                      v-else
+                      disabled
+                      animation
+                      text="כבר במסלול פרמיום"
+                      size="x-small"
+                    />
+                  </template>
+                  <template v-else>
+                    <router-link
+                      v-if="!hasActiveEvent"
+                      :to="`/order?subscription=${card.slug}`"
+                    >
+                      <MainButton
+                        animation
+                        :text="
+                          card.slug === 'demo' ? 'הצטרפו עכשיו' : 'רכוש תוכנית'
+                        "
+                        size="x-small"
+                      />
+                    </router-link>
+                    <MainButton
+                      v-else
+                      disabled
+                      animation
+                      text="כבר יש לכם אירוע"
+                      size="x-small"
+                    />
+                  </template>
                 </div>
               </div>
             </div>
@@ -162,25 +125,14 @@
 <script lang="ts">
 import MainCube from "@/components/library/background/MainCube.vue";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
+import { ISubscriptionPlan } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
 import MainButton from "../library/buttons/MainButton.vue";
 
-export default defineComponent({
-  name: "PricingSection",
+const SLUG_ORDER = ["demo", "classic", "premium"] as const;
 
-  components: {
-    MainCube,
-    MainButton,
-  },
-
-  data() {
-    return {
-      cards: [
-        {
-          title: "מסלול נסיון",
-          price: 0,
-          isPremium: false,
-          icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+const ICON_BY_SLUG: Record<string, string> = {
+  demo: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <rect x="12" y="16" width="40" height="32" rx="7"
         stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
   <path d="M12 24h40"
@@ -189,17 +141,8 @@ export default defineComponent({
         stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M54 28h-2.5c-1.4 0-2.5 1.1-2.5 2.5v3c0 1.4 1.1 2.5 2.5 2.5H54"
         stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-          `,
-          description: `המסלול נסיון הוא לראות איך זה עובד ומוגבל עד 10 קבצים.
-          <br>
-          הקבצים נמחקים לאחר שעה.`,
-        },
-        {
-          title: "מסלול קלאסי",
-          price: 200,
-          isPremium: false,
-          icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+</svg>`,
+  classic: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <rect x="12" y="16" width="40" height="32" rx="7"
         stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
   <path d="M12 24h40"
@@ -208,17 +151,8 @@ export default defineComponent({
         stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M54 28h-2.5c-1.4 0-2.5 1.1-2.5 2.5v3c0 1.4 1.1 2.5 2.5 2.5H54"
         stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-          `,
-          description: `המסלול הקלאסי מוגבל עד 1000 קבצים.
-          <br>
-          הקבצים נמחקים לאחר 6 חודשים מתחילת האירוע.`,
-        },
-        {
-          title: "מסלול פרמיום",
-          price: 300,
-          isPremium: true,
-          icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+</svg>`,
+  premium: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <path d="M14 26l10 8 8-14 8 14 10-8 2 22H12l2-22z"
         stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M18 48h28"
@@ -228,17 +162,76 @@ export default defineComponent({
   <circle cx="40" cy="34" r="2.2" stroke="currentColor" stroke-width="2.2"/>
   <path d="M10 18h4M12 16v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
   <path d="M50 16h4M52 14v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-</svg>
-          `,
-          description: `המסלול הבסיסי מוגבל עד 5000 קבצים.
-          <br>
-          הקבצים נמחקים לאחר 12 חודשים מתחילת האירוע.`,
-        },
-      ],
-    };
+</svg>`,
+};
+
+function retentionLabelHebrew(hours: number | undefined): string {
+  if (hours == null || !Number.isFinite(hours)) return "";
+  if (hours <= 1) return "לאחר שעה";
+  const months = Math.round(hours / (24 * 30.4375));
+  if (months >= 1) return `לאחר ${months} חודשים מתחילת האירוע`;
+  const days = Math.round(hours / 24);
+  return days <= 1 ? "לאחר יום" : `לאחר ${days} ימים מתחילת האירוע`;
+}
+
+function planDescription(plan: ISubscriptionPlan): string {
+  const parts: string[] = [];
+  if (plan.files_allowed != null && Number.isFinite(plan.files_allowed)) {
+    parts.push(`המסלול מוגבל עד ${plan.files_allowed} קבצים.`);
+  }
+  const ret = retentionLabelHebrew(plan.storage_time);
+  if (ret) {
+    parts.push(`הקבצים נמחקים ${ret}.`);
+  }
+  return parts.join("<br>");
+}
+
+type DisplayCard = {
+  slug: string;
+  title: string;
+  displayPrice: number;
+  description: string;
+  icon: string;
+  cardClass: string;
+};
+
+export default defineComponent({
+  name: "PricingSection",
+
+  components: {
+    MainCube,
+    MainButton,
   },
 
   computed: {
+    plans(): ISubscriptionPlan[] {
+      return this.$store.getters["subscriptions/plans"] as ISubscriptionPlan[];
+    },
+
+    displayCards(): DisplayCard[] {
+      const bySlug = Object.fromEntries(this.plans.map((p) => [p.slug, p]));
+      const out: DisplayCard[] = [];
+      for (const slug of SLUG_ORDER) {
+        const plan = bySlug[slug];
+        if (!plan) continue;
+        const cardClass =
+          slug === "classic"
+            ? "classic-card"
+            : slug === "premium"
+              ? "premium-card"
+              : "";
+        out.push({
+          slug,
+          title: `מסלול ${plan.name}`,
+          displayPrice: plan.price,
+          description: planDescription(plan),
+          icon: ICON_BY_SLUG[slug] ?? ICON_BY_SLUG.classic,
+          cardClass,
+        });
+      }
+      return out;
+    },
+
     hasActiveEvent(): boolean {
       return this.$store.getters["event/hasActiveEvent"];
     },
@@ -257,10 +250,12 @@ export default defineComponent({
         this.subscriptionName === SubscriptionTypesEnum.CLASSIC
       );
     },
+  },
 
-    event(): boolean {
-      return this.$store.getters["event/getEvent"];
-    },
+  mounted() {
+    if (!this.$store.getters["subscriptions/plansLoaded"]) {
+      void this.$store.dispatch("subscriptions/fetchPlans");
+    }
   },
 });
 </script>

@@ -11,5 +11,3 @@ IF FAIL NOT WORKING: FAKE CREDIT number
 
 Stage/dev/sandbox/test = SAME!
 https://docs.payplus.co.il/reference/post_paymentpages-generatelink
-
-`

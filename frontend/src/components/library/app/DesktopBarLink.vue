@@ -28,7 +28,21 @@ export default defineComponent({
     },
 
     isActive(): boolean {
-      return this.$route.fullPath.includes(this.link.url);
+      const url = this.link.url;
+      if (url.startsWith("/#")) {
+        if (this.$route.path !== "/") {
+          return false;
+        }
+        const sectionId = url.slice(2);
+        if (!sectionId) {
+          return false;
+        }
+        const fromHash = this.$route.hash === `#${sectionId}`;
+        const fromScroll =
+          this.$store.getters["app/getHomeScrollSection"] === sectionId;
+        return fromHash || fromScroll;
+      }
+      return this.$route.fullPath.includes(url);
     },
   },
 });

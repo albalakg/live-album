@@ -55,6 +55,24 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/OrderView.vue"),
   },
   {
+    path: "/order/pay",
+    name: "orderPay",
+    beforeEnter: Guard.hasNoEvent,
+    component: () => import("@/views/SubscriptionPaymentView.vue"),
+  },
+  {
+    path: "/order/success",
+    name: "OrderCallbackSuccess",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/OrderCallbackSuccess.vue"),
+  },
+  {
+    path: "/order/failure",
+    name: "OrderCallbackFailure",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/OrderCallbackFailure.vue"),
+  },
+  {
     path: "/terms-and-conditions",
     name: "termsAndConditions",
     component: () => import("@/views/TermsAndConditionsView.vue"),

@@ -23,7 +23,11 @@ class ErrorsHandler {
       responseMsg = error.message;
     }
 
-    return this.translateMessage(responseMsg) ?? fallbackMsg ?? this.getDefaultErrorMessage();
+    return (
+      (this.translateMessage(responseMsg) ?? responseMsg) ||
+      fallbackMsg ||
+      this.getDefaultErrorMessage()
+    );
   }
 
   translateMessage(message: string): string | null {

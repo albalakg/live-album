@@ -168,9 +168,17 @@ export default defineComponent({
       isModalOpen: false,
       activeImageIndex: 0,
       galleryImages: [
+      {
+          src: new URL(
+            "../../assets/home_gallery/how_it_looks_event_page.jpeg",
+            import.meta.url
+          ).href,
+          label: "עמוד האירוע",
+          alt: "עמוד האירוע",
+        },
         {
           src: new URL(
-            "../../assets/home_gallery/event_album.jpeg",
+            "../../assets/home_gallery/how_it_looks_event_gallery_page.jpeg",
             import.meta.url
           ).href,
           label: "אלבום האירוע",
@@ -178,7 +186,7 @@ export default defineComponent({
         },
         {
           src: new URL(
-            "../../assets/home_gallery/event_assets_manager.jpeg",
+            "../../assets/home_gallery/how_it_looks_event_assets_page.jpeg",
             import.meta.url
           ).href,
           label: "ניהול מדיה",
@@ -186,7 +194,29 @@ export default defineComponent({
         },
         {
           src: new URL(
-            "../../assets/home_gallery/event_info.jpeg",
+            "../../assets/home_gallery/how_it_looks_event_qr_page.jpeg",
+            import.meta.url
+          ).href,
+          label: "שיתוף מהיר ב-QR",
+          alt: "מסך QR לשיתוף מהיר לאורחים",
+        },
+        {
+          src: new URL("../../assets/home_gallery/how_it_looks_event_upload_page.jpeg", import.meta.url)
+            .href,
+            label: "עמוד העלאה",
+            alt: "עמוד העלאה",
+        },
+        {
+          src: new URL(
+            "../../assets/home_gallery/how_it_looks_event_upload2_page.jpeg",
+            import.meta.url
+          ).href,
+          label: "עמוד העלאה בעריכה",
+          alt: "עמוד העלאה עם עריכה",
+        },
+        {
+          src: new URL(
+            "../../assets/home_gallery/how_it_looks_event_guest_download_page.jpeg",
             import.meta.url
           ).href,
           label: "פרטי האירוע",
@@ -194,25 +224,11 @@ export default defineComponent({
         },
         {
           src: new URL(
-            "../../assets/home_gallery/event_qr.jpeg",
+            "../../assets/home_gallery/how_it_looks_profile_page.jpeg",
             import.meta.url
           ).href,
-          label: "שיתוף מהיר ב-QR",
-          alt: "מסך QR לשיתוף מהיר לאורחים",
-        },
-        {
-          src: new URL("../../assets/home_gallery/profile.jpeg", import.meta.url)
-            .href,
           label: "פרופיל אישי",
-          alt: "מסך פרופיל אישי",
-        },
-        {
-          src: new URL(
-            "../../assets/home_gallery/upload page.jpeg",
-            import.meta.url
-          ).href,
-          label: "עמוד העלאה",
-          alt: "מסך העלאת מדיה",
+          alt: "פרופיל אישי",
         },
       ] as GalleryImage[],
     };

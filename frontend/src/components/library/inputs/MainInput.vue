@@ -9,7 +9,8 @@
             :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''} ${isFile ? 'pointer' : ''}`" @click="uploadFile()">
             <template v-if="isFile">
                 <input v-model="localValue" ref="fileInput" :type="type" :readonly="readonly" :placeholder="placeholder"
-                    class="width--full" :hidden="isFile" @change="filePicked()" :accept="allowedFileTypes">
+                    class="width--full" :hidden="isFile" @change="filePicked()" :accept="allowedFileTypes"
+                    :tabindex="tabIndex">
                 <div class="input-filler" :class="`input-size-${size}`">
                     <span class="cut-text">
                         {{ uploadedFileName }}
@@ -19,6 +20,7 @@
             <template v-else>
                 <input :autocomplete="autocomplete" :maxlength="maxLength" v-model="localValue" ref="input" :type="type" :readonly="readonly"
                     :placeholder="placeholder" class="width--full" :class="`input-size-${size}`"
+                    :tabindex="tabIndex"
                     @input="updateValue($event?.target?.value)">
             </template>
             <div class="input-icon-wrapper pointer">
@@ -87,6 +89,11 @@ export default defineComponent({
         autocomplete: {
             type: String,
             default: ""
+        },
+
+        tabIndex: {
+            type: Number,
+            default: undefined
         },
 
         hasError: {

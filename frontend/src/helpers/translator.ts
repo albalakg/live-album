@@ -11,6 +11,7 @@ const errorsList = {
   "The image field must be a file of type: image/jpeg, image/png, image/webp.": "השדה תמונה חייב להיות מהבאים: jpeg/png/jpg/webp",
   "Can't update new password that matches the old password": "הסיסמה החדשה אינה יכולה להיות זהה לסיסמה הישנה",
   "Password is required and must be minimum 8 characters, at least one lowercase letter, uppercase letter and one number": "הסיסמה החדשה חייבת להכיל 8-40 תווים, אות גדולה, אות קטנה ומספר",
+  "Order already in progress": "כבר קיימת הזמנה בתהליך. השלימו את התשלום הקודם או המתינו לסיום העיבוד לפני פתיחת הזמנה חדשה.",
 } as Record<string, string>;
 
 

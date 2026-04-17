@@ -1,5 +1,5 @@
 <template>
-    <button class="main-button pointer shadow--small" :class="`padding--${size} bg--light-${color} brs--${borderRadius} ${animation ? 'main-button-animation' : ''} ${disabled ? 'disabled' : ''} ${loading ? 'main-button-loading' : ''} ${readonly ? 'main-button-readonly' : ''}`" @click="onClick()">
+    <button class="main-button pointer shadow--small" :class="`padding--${size} bg--light-${color} brs--${borderRadius} ${animation ? 'main-button-animation' : ''} ${disabled ? 'disabled' : ''} ${loading ? 'main-button-loading' : ''} ${readonly ? 'main-button-readonly' : ''}`" :tabindex="tabIndex" @click="onClick()">
         <div class="inner-button text--center" :class="`bg--${color} padding--${getInnerSize} brs--${getInnerBorderRadius}`">
             <span class="title--medium text--white" v-if="loading">
                 טוען...
@@ -56,6 +56,11 @@ export default defineComponent({
         size: {
             type: String,
             default: 'x-small'
+        },
+
+        tabIndex: {
+            type: Number,
+            default: undefined
         },
     },
 

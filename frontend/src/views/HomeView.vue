@@ -116,6 +116,16 @@ import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
 import { defineComponent } from "vue";
 import Faq from "@/components/home/faq.vue";
 
+/** DOM order — must match section `id`s on the home page (desktop topbar links). */
+const HOME_SECTION_IDS = [
+  "header",
+  "features",
+  "how-it-looks",
+  "who-is-it-for",
+  "pricing",
+  "faq",
+] as const;
+
 export default defineComponent({
   name: "HomeView",
 
@@ -129,17 +139,60 @@ export default defineComponent({
     Faq,
   },
 
+  data() {
+    return {
+      scrollRafId: null as number | null,
+      boundScroll: null as (() => void) | null,
+    };
+  },
+
   mounted() {
+    this.boundScroll = () => this.onWindowScroll();
+    window.addEventListener("scroll", this.boundScroll, { passive: true });
+    this.$nextTick(() => this.updateActiveSection());
+
     // Scroll to the section by the hash in the URL
     setTimeout(() => {
       const hash = this.$route.hash;
       if (hash) {
         const element = document.querySelector(hash);
         if (element) {
-          element.scrollIntoView({ behavior: "smooth",  block: "end" });
+          element.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+        const id = hash.replace(/^#/, "");
+        if ((HOME_SECTION_IDS as readonly string[]).includes(id)) {
+          this.$store.commit("app/SET_HOME_SCROLL_SECTION", id);
         }
       }
-    }, 100);  
+      this.updateActiveSection();
+    }, 100);
+  },
+
+  beforeUnmount() {
+    if (this.boundScroll) {
+      window.removeEventListener("scroll", this.boundScroll);
+    }
+    if (this.scrollRafId !== null) {
+      cancelAnimationFrame(this.scrollRafId);
+    }
+    this.$store.commit("app/SET_HOME_SCROLL_SECTION", "");
+  },
+
+  watch: {
+    "$route.hash"() {
+      if (this.$route.path !== "/") {
+        return;
+      }
+      const h = this.$route.hash;
+      if (h.startsWith("#")) {
+        const id = h.slice(1);
+        if ((HOME_SECTION_IDS as readonly string[]).includes(id)) {
+          this.$store.commit("app/SET_HOME_SCROLL_SECTION", id);
+          return;
+        }
+      }
+      this.updateActiveSection();
+    },
   },
 
   computed: {
@@ -160,6 +213,41 @@ export default defineComponent({
         [StatusEnum.READY, StatusEnum.PENDING].includes(this.eventStatus) &&
         this.subscriptionName === SubscriptionTypesEnum.CLASSIC
       );
+    },
+  },
+
+  methods: {
+    onWindowScroll() {
+      if (this.scrollRafId !== null) {
+        return;
+      }
+      this.scrollRafId = window.requestAnimationFrame(() => {
+        this.scrollRafId = null;
+        this.updateActiveSection();
+      });
+    },
+
+    updateActiveSection() {
+      if (this.$route.path !== "/") {
+        return;
+      }
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      const activationLine = scrollY + 120;
+      let current: string = HOME_SECTION_IDS[0];
+      for (const id of HOME_SECTION_IDS) {
+        const el = document.getElementById(id);
+        if (!el) {
+          continue;
+        }
+        const top = el.getBoundingClientRect().top + scrollY;
+        if (top <= activationLine) {
+          current = id;
+        }
+      }
+      const prev = this.$store.getters["app/getHomeScrollSection"] as string;
+      if (prev !== current) {
+        this.$store.commit("app/SET_HOME_SCROLL_SECTION", current);
+      }
     },
   },
 });
