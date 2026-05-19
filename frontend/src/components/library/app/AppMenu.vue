@@ -38,6 +38,9 @@ export default defineComponent({
     user() {
       this.createLinks();
     },
+    hasActiveEvent() {
+      this.createLinks();
+    },
   },
 
   computed: {

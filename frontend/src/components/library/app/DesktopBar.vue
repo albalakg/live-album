@@ -45,6 +45,9 @@ export default defineComponent({
     watch: {
         user() {
             this.createLinks();
+        },
+        hasActiveEvent() {
+            this.createLinks();
         }
     },
 

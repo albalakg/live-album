@@ -51,13 +51,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/order",
     name: "order",
-    beforeEnter: Guard.hasNoEvent,
     component: () => import("@/views/OrderView.vue"),
   },
   {
     path: "/order/pay",
     name: "orderPay",
-    beforeEnter: Guard.hasNoEvent,
+    beforeEnter: Guard.user,
     component: () => import("@/views/SubscriptionPaymentView.vue"),
   },
   {

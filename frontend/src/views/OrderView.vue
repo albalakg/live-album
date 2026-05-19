@@ -103,7 +103,7 @@
               <div class="order-checkout-box brs--small bg--white shadow--small">
                 <div class="order-price-row display--flex justify--center align--center">
                   <span class="title--large text--dark"
-                    >₪{{ currentPlan?.price ?? "—" }}</span
+                    >₪{{ currentPrice }}</span
                   >
                 </div>
                 <div
@@ -237,6 +237,7 @@ import MainCube from "@/components/library/background/MainCube.vue";
 import MainLine from "@/components/library/background/MainLine.vue";
 import { defineComponent } from "vue";
 import { IStoreOrderResult, ISubscriptionPlan } from "@/helpers/interfaces";
+import { SubscriptionTypesEnum } from "@/helpers/enums";
 
 export default defineComponent({
   name: "OrderView",
@@ -267,7 +268,24 @@ export default defineComponent({
 
   computed: {
     subscriptionPlans(): ISubscriptionPlan[] {
-      return this.$store.getters["subscriptions/plans"] as ISubscriptionPlan[];
+      const plans = this.$store.getters["subscriptions/plans"] as ISubscriptionPlan[];
+      if(this.userIsDemo) {
+        return plans.filter((p) => p.slug !== "demo");
+      }
+
+      if(this.userIsClassic) {
+        return plans.filter((p) => p.slug === "premium");
+      }
+
+      return plans;
+    },
+
+    userIsClassic(): boolean {
+      return SubscriptionTypesEnum.CLASSIC === this.userSubscriptionName;
+    },
+    
+    userIsDemo (): boolean {
+      return SubscriptionTypesEnum.DEMO === this.userSubscriptionName;
     },
 
     isLogged(): boolean {
@@ -284,6 +302,10 @@ export default defineComponent({
 
     userSubscriptionName(): string | null {
       return this.$store.getters["user/getSubscriptionName"];
+    },
+
+    userSubscriptionPrice(): number {
+      return this.$store.getters["user/getSubscriptionPrice"] ?? 0;
     },
 
     isDemo(): boolean {
@@ -305,22 +327,29 @@ export default defineComponent({
         (this.paymentRequested || Boolean(this.paymentSrc))
       );
     },
+
+    currentPrice(): number {
+      if(this.isDemo) {
+        return 0;
+      }
+
+      const price = this.currentPlan?.price ?? 0;
+      
+      if(this.userSubscriptionName) {
+        return price - this.userSubscriptionPrice;
+      }
+
+      return price;
+    },
   },
 
   watch: {
-    userSubscriptionName: {
-      immediate: true,
-      handler(newValue: string | null) {
-        if (newValue) {
-          this.$router.push("/event");
-        }
-      },
-    },
     "$route.query.subscription": {
       handler() {
         this.applyQuerySubscription();
         this.resetPaymentUi();
       },
+      immediate: true,
     },
     isLogged(newVal: boolean) {
       if (!newVal) {
@@ -353,6 +382,7 @@ export default defineComponent({
       const q = this.$route.query.subscription as string | undefined;
       const plans = this.subscriptionPlans;
       const byQuery = q ? plans.find((p) => p.slug === q) : undefined;
+      console.log("byQuery", byQuery, q, plans);
       const fallback =
         plans.find((p) => p.slug === "classic") ?? plans[0] ?? null;
       this.form.subscription = (byQuery ?? fallback)?.slug ?? "classic";

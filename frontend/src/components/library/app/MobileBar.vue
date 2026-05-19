@@ -37,6 +37,9 @@ export default defineComponent({
             this.createLinks();
         },
 
+        hasActiveEvent() {
+            this.createLinks();
+        },
     },
 
     computed: {

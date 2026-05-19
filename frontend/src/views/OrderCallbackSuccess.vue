@@ -21,10 +21,16 @@
             תודה שבחרתם אותנו באירוע שלכם
           </h4>
           <br>
-          <p class="title--small text--dark">
-            <span>
-              <router-link to="/event">לחץ כאן</router-link>
-            </span> למעבר לניהול האירוע שלך
+          <p class="title--small text--dark callback-status">
+            <template v-if="isLoading">
+              <span class="loading-dot"></span>
+              <span>מאשרים את ההזמנה ומכינים את האירוע שלך, זה יכול לקחת כמה רגעים...</span>
+            </template>
+            <template v-else>
+              <span>
+                <router-link to="/event">לחץ כאן</router-link>, למעבר לניהול האירוע שלך
+              </span>
+            </template>
           </p>
         </div>
       </div>
@@ -34,7 +40,11 @@
 
 <script lang="ts">
 import MainCube from '@/components/library/background/MainCube.vue';
+import { IEvent } from '@/helpers/interfaces';
 import { defineComponent } from 'vue';
+
+const POLLING_INTERVAL_MS = 7000;
+const MAX_POLLING_ATTEMPTS = 50;
 
 export default defineComponent({
   name: 'OrderCallbackSuccess',
@@ -45,17 +55,72 @@ export default defineComponent({
 
   data() {
     return {
-      
-      isLoading: false as boolean
+      isLoading: true as boolean,
+      pollTimer: null as number | null,
+      attempts: 0 as number,
     };
   },
 
   computed: {
-  
+    event(): IEvent | null {
+      return this.$store.getters['event/getEvent'];
+    },
+
+    hasActiveEvent(): boolean {
+      return this.$store.getters['event/hasActiveEvent'];
+    },
+  },
+
+  created() {
+    this.checkProfile();
+  },
+
+  beforeUnmount() {
+    this.stopPolling();
   },
 
   methods: {
-  }
+    isEventValid(event: IEvent | null): boolean {
+      return Boolean(event && event.id && event.path);
+    },
+
+    async checkProfile(): Promise<void> {
+      this.attempts += 1;
+      try {
+        await this.$store.dispatch('user/getProfile');
+      } catch (err) {
+        console.warn('getProfile failed during polling:', err);
+      }
+
+      if (this.isEventValid(this.event) && this.hasActiveEvent) {
+        this.isLoading = false;
+        this.stopPolling();
+        return;
+      }
+
+      if (this.attempts >= MAX_POLLING_ATTEMPTS) {
+        this.isLoading = false;
+        this.stopPolling();
+        return;
+      }
+
+      this.scheduleNextPoll();
+    },
+
+    scheduleNextPoll(): void {
+      this.stopPolling();
+      this.pollTimer = window.setTimeout(() => {
+        this.checkProfile();
+      }, POLLING_INTERVAL_MS);
+    },
+
+    stopPolling(): void {
+      if (this.pollTimer !== null) {
+        window.clearTimeout(this.pollTimer);
+        this.pollTimer = null;
+      }
+    },
+  },
 });
 </script>
 
@@ -101,6 +166,30 @@ export default defineComponent({
   a {
     font-weight: 700;
     text-decoration: underline;
+  }
+}
+
+.callback-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 24px;
+}
+
+.loading-dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: #222;
+  animation: callback-spin 0.8s linear infinite;
+}
+
+@keyframes callback-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

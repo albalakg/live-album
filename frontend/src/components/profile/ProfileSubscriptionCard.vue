@@ -16,10 +16,9 @@
                 <strong>שימו לב:</strong> שדרוג החבילה ניתן כאשר האירוע בסטטוס ממתין. עלות שדרוג החבילה הינו 50₪.
             </small>
             <br>
-            <div class="display--flex justify--end">
+            <div class="display--flex justify--end" v-if="canUpgradeSubscription">
                 <div class="width--half width--full-mobile">
-                    <MainButton disabled color="pink" text="שדרג חבילה (בקרוב)" @onClick="submit()" />
-                    <!-- <MainButton :disabled="!canUpgradeSubscription" color="pink" text="שדרג חבילה" @onClick="submit()" /> -->
+                    <MainButton color="pink" text="שדרג חבילה" @onClick="submit()" />
                 </div>
             </div>
         </template>

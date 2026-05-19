@@ -56,7 +56,7 @@ export interface ISubscription {
   name: SubscriptionTypesEnum;
   price: string;
   status: number;
-  storage_time: number; 
+  storage_time: number;
 }
 
 export interface IEvent {

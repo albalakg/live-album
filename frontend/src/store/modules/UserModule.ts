@@ -54,6 +54,10 @@ const UserModule = {
       return state.user?.order?.subscription?.name ?? null;
     },
 
+    getSubscriptionPrice(state: IUserModuleState): number {
+      return parseFloat(state.user?.order?.subscription?.price ?? "0");
+    },
+
     getSubscriptionFilesAllowed(state: IUserModuleState): number | null {
       return state.user?.order?.subscription?.files_allowed ?? null;
     },

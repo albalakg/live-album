@@ -41,7 +41,7 @@ export default defineComponent({
 
   props: {
     interval: { type: Number, default: 2000 }, // ms between new spawns
-    maxItems: { type: Number, default: 12 }, // how many on screen
+    maxItems: { type: Number, default: 36 }, // how many on screen
     lifespan: { type: Number, default: 8000 }, // ms each asset lives
   },
 
@@ -97,7 +97,7 @@ export default defineComponent({
 
       // ✅ size in px (square), so we can clamp correctly
       const minSize = Math.min(W, H) * 0.30;
-      const maxSize = Math.min(W, H) * 0.52;
+      const maxSize = Math.min(W, H) * 0.54;
       const size = minSize + Math.random() * (maxSize - minSize);
 
       // base position inside the slot + some randomness
