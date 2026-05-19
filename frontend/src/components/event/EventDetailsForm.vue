@@ -63,6 +63,15 @@
     </div>
     <div class="display--flex checkbox-wrapper">
       <MainCheckbox
+        @onClick="form.config.video_upload_enabled = !form.config.video_upload_enabled"
+        title="לאפשר העלאת סרטונים"
+        :value="form.config.video_upload_enabled"
+        class="checkbox"
+      />
+      <small>לאפשר לאורחים ולבעלי האירוע להעלות סרטונים</small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
         @onClick="form.config.preview_guests_assets_in_gallery = !form.config.preview_guests_assets_in_gallery"
         title="להציג את תמונות האורחים בגלריה"
         :value="form.config.preview_guests_assets_in_gallery"
@@ -123,6 +132,7 @@ export default defineComponent({
           preview_guests_assets_in_gallery: false as boolean,
           preview_owners_assets_in_gallery: false as boolean,
           preview_qr_in_gallery: false as boolean,
+          video_upload_enabled: true as boolean,
         }
       },
       errors: {
@@ -170,6 +180,7 @@ export default defineComponent({
       this.form.config.preview_guests_assets_in_gallery = this.event?.config?.preview_guests_assets_in_gallery ?? false;
       this.form.config.preview_owners_assets_in_gallery = this.event?.config?.preview_owners_assets_in_gallery ?? false;
       this.form.config.preview_qr_in_gallery = this.event?.config?.preview_qr_in_gallery ?? false;
+      this.form.config.video_upload_enabled = this.event?.config?.video_upload_enabled ?? true;
       this.imageExists = !!this.event?.image;
     },
 

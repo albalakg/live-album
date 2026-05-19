@@ -89,7 +89,7 @@
               <input
                 type="file"
                 ref="fileInput"
-                accept="image/*,video/*"
+                :accept="acceptFileTypes"
                 @change="handleFileChange"
                 style="display: none"
               />
@@ -167,6 +167,7 @@ import MainCube from "@/components/library/background/MainCube.vue";
 import { StatusEnum } from "@/helpers/enums";
 import Auth from "@/helpers/Auth";
 import MediaEditorModal from "@/components/event/MediaEditorModal.vue";
+import { notify } from "@kyvg/vue3-notification";
 
 export default defineComponent({
   name: "EventUploadsView",
@@ -186,6 +187,15 @@ export default defineComponent({
 
     const showNotification = computed(
       () => uploadSuccess.value || uploadFailed.value
+    );
+
+    const videoUploadEnabled = computed(() => {
+      const event = store.getters["event/getEvent"] as IEvent | null;
+      return event?.config?.video_upload_enabled ?? true;
+    });
+
+    const acceptFileTypes = computed(() =>
+      videoUploadEnabled.value ? "image/*,video/*" : "image/*"
     );
 
     const triggerFileUpload = () => {
@@ -277,6 +287,14 @@ export default defineComponent({
 
       // אם וידאו - מעלה רגיל (בלי עורך)
       if (file.type.startsWith("video/")) {
+        if (!videoUploadEnabled.value) {
+          notify({
+            text: "העלאת סרטונים אינה מופעלת עבור אירוע זה",
+            type: "error",
+            duration: 5000,
+          });
+          return;
+        }
         await uploadOriginalOnly(file);
         return;
       }
@@ -339,6 +357,7 @@ export default defineComponent({
       uploadSuccess,
       uploadFailed,
       showNotification,
+      acceptFileTypes,
       triggerFileUpload,
       handleFileChange,
       fileInput,

@@ -1,7 +1,13 @@
 <template>
   <div class="upload-media mt-4 text-right">
     <label class="font-semibold block mb-2">
-      {{  isDisabled ? 'העלאת מדיה אינה זמינה כעת, האירוע נגמר' : 'לא      העלה תמונות או סרטונים (עד 20MB כל אחד)ירוע' }}
+      {{
+        isDisabled
+          ? "העלאת מדיה אינה זמינה כעת, האירוע נגמר"
+          : videoUploadEnabled
+            ? "העלו תמונות או סרטונים (עד 20MB כל אחד)"
+            : "העלו תמונות (עד 20MB כל אחד)"
+      }}
     </label>
 
     <!-- Dropzone -->
@@ -21,7 +27,7 @@
         ref="fileInput"
         type="file"
         multiple
-        accept="image/*,video/*"
+        :accept="acceptFileTypes"
         class="display--none"
         @change="handleFileChange"
       />
@@ -120,6 +126,14 @@ export default defineComponent({
     isEventInactive() {
       return this.$store.getters["event/isEventInactive"];
     },
+
+    videoUploadEnabled(): boolean {
+      return this.$store.getters["event/getEvent"]?.config?.video_upload_enabled ?? true;
+    },
+
+    acceptFileTypes(): string {
+      return this.videoUploadEnabled ? "image/*,video/*" : "image/*";
+    },
   },
 
   methods: {
@@ -146,6 +160,15 @@ export default defineComponent({
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const fileSizeMB = file.size / (1024 * 1024);
+
+        if (file.type.startsWith("video/") && !this.videoUploadEnabled) {
+          this.$notify({
+            text: `"${file.name}" - העלאת סרטונים אינה מופעלת עבור אירוע זה`,
+            type: "error",
+            duration: 5000,
+          });
+          continue;
+        }
 
         if (fileSizeMB > this.MAX_SIZE_MB) {
           this.$notify({
