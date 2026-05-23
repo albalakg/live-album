@@ -1,4 +1,4 @@
-import { StatusEnum, SubscriptionTypesEnum } from './enums';
+import { AssetModerationStatusEnum, StatusEnum, SubscriptionTypesEnum } from './enums';
 import { EventFileType, SubscriptionType, EventAssetsManagementModesType, EventGalleryType } from './types';
 
 // ***** Base Interfaces *****
@@ -98,7 +98,10 @@ export interface IEventDownloadAssetsProcess {
 export interface IEventAsset {
   id: number;
   event_id: number;
-  is_displayed: number;
+  is_displayed: number | boolean;
+  status: AssetModerationStatusEnum | string | number;
+  moderation_status?: AssetModerationStatusEnum | string | number;
+  moderation_labels?: string[] | null;
   type: EventFileType;
   path: string;
   fullPath: string;

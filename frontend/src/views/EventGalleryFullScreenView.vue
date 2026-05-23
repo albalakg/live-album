@@ -57,7 +57,15 @@ export default defineComponent({
     return {
       isFullScreen: false as boolean,
       background: "#fff" as string,
+      galleryPollIntervalId: null as ReturnType<typeof setInterval> | null,
     };
+  },
+
+  created() {
+    this.$store.dispatch("event/getEventGalleryAssets");
+    this.galleryPollIntervalId = setInterval(() => {
+      this.$store.dispatch("event/getEventGalleryAssets");
+    }, 10000);
   },
 
   computed: {
@@ -90,6 +98,10 @@ export default defineComponent({
   },
 
   beforeUnmount() {
+    if (this.galleryPollIntervalId) {
+      clearInterval(this.galleryPollIntervalId);
+      this.galleryPollIntervalId = null;
+    }
     try {
       if (document.fullscreenElement) {
         document.exitFullscreen();

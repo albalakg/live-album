@@ -10,8 +10,9 @@
   >
     <div
       class="gallery-asset position--relative bg--dark height--full width--full brs--medium"
+      :class="{ 'gallery-asset--blocked': isBlocked }"
     >
-      <div class="gallery-asset-chip padding--x-small brs--large">
+      <div v-if="bulkSelectable" class="gallery-asset-chip padding--x-small brs--large">
         <MainCheckbox
           :disabled="loading || !mode"
           :ref="`asset-checkbox-${asset.id}`"
@@ -36,7 +37,7 @@
           bgColor="#fff8"
         />
       </a>
-      <span class="gallery-visible-icon">
+      <span v-if="showVisibilityIcon" class="gallery-visible-icon">
         <MainIcon
           animation
           :bgColor="asset.is_displayed ? '#fff8' : '#f68589cc'"
@@ -45,6 +46,17 @@
           size="1.3em"
         />
       </span>
+      <span
+        v-if="moderationBadgeText"
+        class="gallery-moderation-badge"
+        :class="moderationBadgeClass"
+        :title="moderationBadgeTitle"
+      >
+        {{ moderationBadgeText }}
+      </span>
+      <div v-if="isBlocked" class="gallery-blocked-overlay">
+        <MainIcon icon="block" size="2.5em" color="#fff" :background="false" />
+      </div>
 
       <EventAssetModal />
 
@@ -88,6 +100,10 @@
 </template>
 
 <script lang="ts">
+import {
+  AssetModerationStatusEnum,
+  getAssetModerationStatus,
+} from "@/helpers/enums";
 import { IEvent, IEventAsset } from "@/helpers/interfaces";
 import { defineComponent, PropType } from "vue";
 import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
@@ -129,6 +145,11 @@ export default defineComponent({
       type: Boolean,
       required: false,
     },
+
+    bulkSelectable: {
+      type: Boolean,
+      default: true,
+    },
   },
 
   data() {
@@ -161,6 +182,50 @@ export default defineComponent({
     fileName(): string {
       const extension = this.asset.type === "image" ? "jpg" : "mp4";
       return `${this.event.name}-${this.assetIndex}.${extension}`;
+    },
+
+    normalizedModerationStatus(): AssetModerationStatusEnum {
+      return getAssetModerationStatus(this.asset);
+    },
+
+    isBlocked(): boolean {
+      return this.normalizedModerationStatus === AssetModerationStatusEnum.BLOCKED;
+    },
+
+    isPending(): boolean {
+      return this.normalizedModerationStatus === AssetModerationStatusEnum.PENDING;
+    },
+
+    showVisibilityIcon(): boolean {
+      return (
+        this.bulkSelectable &&
+        this.normalizedModerationStatus === AssetModerationStatusEnum.ACTIVE
+      );
+    },
+
+    moderationBadgeText(): string {
+      if (this.isPending) return "בבדיקה";
+      if (this.isBlocked) return "חסום";
+      return "";
+    },
+
+    moderationBadgeClass(): string {
+      if (this.isPending) return "gallery-moderation-badge--pending";
+      if (this.isBlocked) return "gallery-moderation-badge--blocked";
+      return "";
+    },
+
+    moderationBadgeTitle(): string {
+      if (this.isBlocked && this.asset.moderation_labels?.length) {
+        return this.asset.moderation_labels.join(", ");
+      }
+      if (this.isBlocked) {
+        return "התמונה נחסמה אוטומטית ואינה מוצגת באלבום החי";
+      }
+      if (this.isPending) {
+        return "התמונה בבדיקת תוכן לפני הצגה באלבום";
+      }
+      return "";
     },
   },
 
@@ -256,6 +321,41 @@ export default defineComponent({
 
   .gallery-visible-icon {
     left: 70px;
+  }
+
+  .gallery-moderation-badge {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 3;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #fff;
+  }
+
+  .gallery-moderation-badge--pending {
+    background-color: #e6a817cc;
+  }
+
+  .gallery-moderation-badge--blocked {
+    background-color: #c62828cc;
+  }
+
+  .gallery-asset--blocked .album-asset {
+    filter: grayscale(0.35);
+  }
+
+  .gallery-blocked-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    pointer-events: none;
   }
 
   .video-wrapper {

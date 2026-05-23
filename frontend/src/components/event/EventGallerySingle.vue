@@ -49,21 +49,8 @@ export default defineComponent({
         };
     },
 
-    created() {
-        this.$store.dispatch("event/getEventGalleryAssets", this.$route.params.event_path);
-        if(!this.interval) {
-            this.interval = setInterval(() => {
-                this.$store.dispatch("event/getEventGalleryAssets", this.$route.params.event_path);
-            }, 10000);
-        }
-    },
-
     mounted() {
         this.updateSessionAsset();
-    },
-
-    beforeUnmount() {
-        clearInterval(this.interval);
     },
 
     watch: {
@@ -84,7 +71,7 @@ export default defineComponent({
 
     computed: {
         assets(): IEventAsset[] {
-            return this.$store.getters['event/getGalleryAssets'] as IEventAsset[];
+            return this.$store.getters['event/getActiveGalleryAssets'] as IEventAsset[];
         },
     },
 

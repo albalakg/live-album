@@ -99,9 +99,47 @@
       </div>
     </div>
     <div class="assets-content display--flex flex--wrap brs--medium">
-      <template v-for="(asset, index) in assets" :key="index">
-        <EventAssetCard class="pointer" :loading="loading" :assetIndex="index" :asset="asset" @onClick="openModal" />
+      <template v-for="(asset, index) in ownerVisibleAssets" :key="'asset-' + asset.id">
+        <EventAssetCard
+          class="pointer"
+          :loading="loading"
+          :assetIndex="index"
+          :asset="asset"
+          @onClick="openModal"
+        />
       </template>
+    </div>
+
+    <div v-if="hasBlockedAssets" class="blocked-assets-section margin--top-large width--full">
+      <div class="blocked-assets-header display--flex align--center justify--space-between flex--wrap-mobile margin--bottom-medium">
+        <strong class="text--pink">תמונות חסומות ({{ blockedAssets.length }})</strong>
+        <label class="blocked-toggle pointer display--flex align--center">
+          <input type="checkbox" v-model="showBlockedAssets" />
+          <span class="margin--right-small">הצג תמונות חסומות</span>
+        </label>
+      </div>
+      <div
+        v-if="showBlockedAssets"
+        class="blocked-warning bg--white brs--medium padding--medium margin--bottom-medium"
+      >
+        <strong>שימו לב:</strong>
+        תמונות אלו נחסמו אוטומטית בשל תוכן לא הולם ואינן מוצגות באלבום החי או בגלריית האורחים.
+      </div>
+      <div
+        v-if="showBlockedAssets"
+        class="assets-content display--flex flex--wrap brs--medium"
+      >
+        <template v-for="(asset, index) in blockedAssets" :key="'blocked-' + asset.id">
+          <EventAssetCard
+            class="pointer"
+            :loading="loading"
+            :assetIndex="index"
+            :asset="asset"
+            :bulkSelectable="false"
+            @onClick="openBlockedModal(index)"
+          />
+        </template>
+      </div>
     </div>
       <div v-if="isModalOpened" class="lightbox" @click="isModalOpened = false">
         <span class="lightbox-close lightbox-icon">&times;</span>
@@ -149,6 +187,8 @@ export default defineComponent({
       pollingCounter: 0 as number,
       isModalOpened: false as boolean,
       currentAssetIndex: 0 as number,
+      showBlockedAssets: false as boolean,
+      assetsPollIntervalId: null as ReturnType<typeof setInterval> | null,
     };
   },
 
@@ -157,6 +197,17 @@ export default defineComponent({
   },
 
   watch: {
+    hasPendingAssets: {
+      immediate: true,
+      handler(hasPending: boolean) {
+        if (hasPending) {
+          this.startAssetsPolling();
+        } else {
+          this.stopAssetsPolling();
+        }
+      },
+    },
+
     totalManagedAssetsIds() {
       this.pickedAll = this.totalManagedAssetsIds === this.totalAssets;
     },
@@ -188,8 +239,32 @@ export default defineComponent({
       return this.$store.getters["event/getTotalAssets"];
     },
 
+    ownerVisibleAssets(): IEventAsset[] {
+      return this.$store.getters["event/getOwnerVisibleAssets"];
+    },
+
+    blockedAssets(): IEventAsset[] {
+      return this.$store.getters["event/getBlockedAssets"];
+    },
+
+    hasBlockedAssets(): boolean {
+      return this.$store.getters["event/hasBlockedAssets"];
+    },
+
+    hasPendingAssets(): boolean {
+      return this.$store.getters["event/hasPendingAssets"];
+    },
+
+    modalAssets(): IEventAsset[] {
+      const assets = [...this.ownerVisibleAssets];
+      if (this.showBlockedAssets) {
+        assets.push(...this.blockedAssets);
+      }
+      return assets;
+    },
+
     assets(): IEventAsset[] {
-      return this.$store.getters["event/getAssets"];
+      return this.modalAssets;
     },
 
     isEventActive(): boolean {
@@ -363,16 +438,33 @@ export default defineComponent({
 
     
     openModal(assetIndex: number) {
-      console.log('test', {assetIndex});
-      
       this.isModalOpened = true;
       this.currentAssetIndex = assetIndex;
     },
 
+    openBlockedModal(blockedIndex: number) {
+      this.isModalOpened = true;
+      this.currentAssetIndex = this.ownerVisibleAssets.length + blockedIndex;
+    },
+
+    startAssetsPolling() {
+      if (this.assetsPollIntervalId) return;
+      this.assetsPollIntervalId = setInterval(() => {
+        this.$store.dispatch("event/getEventAssets");
+      }, 8000);
+    },
+
+    stopAssetsPolling() {
+      if (this.assetsPollIntervalId) {
+        clearInterval(this.assetsPollIntervalId);
+        this.assetsPollIntervalId = null;
+      }
+    },
+
     changeAsset(newIndex: number) {
       if (newIndex < 0) {
-        this.currentAssetIndex = this.assets.length - 1;
-      } else if (newIndex >= this.assets.length) {
+        this.currentAssetIndex = this.modalAssets.length - 1;
+      } else if (newIndex >= this.modalAssets.length) {
         this.currentAssetIndex = 0;
       } else {
         this.currentAssetIndex = newIndex;
@@ -422,6 +514,7 @@ export default defineComponent({
       clearInterval(this.intervalId);
     }
     this.stopPollingProcessStatus();
+    this.stopAssetsPolling();
   },
 });
 </script>
@@ -441,6 +534,21 @@ export default defineComponent({
     height: 72%;
     max-height: 75vh;
     overflow-y: auto;
+  }
+
+  .blocked-assets-section {
+    border-top: 1px solid #f0d4d6;
+    padding-top: 16px;
+  }
+
+  .blocked-warning {
+    border: 1px solid #f68589;
+    color: #8a2f35;
+    line-height: 1.5;
+  }
+
+  .blocked-toggle input {
+    margin-left: 8px;
   }
 
   .choose-all-text {

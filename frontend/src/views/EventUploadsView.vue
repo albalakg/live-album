@@ -94,7 +94,9 @@
                 style="display: none"
               />
               <div :class="{ hidden: !showNotification }" class="notification">
-                <span v-if="uploadSuccess">הקובץ עלה בהצלחה!</span>
+                <span v-if="uploadSuccess">
+                  הקובץ התקבל! הוא בבדיקת תוכן ויופיע באלבום לאחר אישור.
+                </span>
                 <span v-else>נכשל לעלות את הקובץ</span>
               </div>
               <h2 class="event-date text--white">

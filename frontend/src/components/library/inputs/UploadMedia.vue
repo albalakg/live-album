@@ -207,8 +207,12 @@ export default defineComponent({
         }
       }
 
-      // אפשרות לסגור כרטיס אחרי סיום
-      if (this.progress.completed === this.uploads.length) {
+      if (this.progress.completed === this.uploads.length && this.uploads.length > 0) {
+        this.$notify({
+          text: "הקבצים התקבלו ונמצאים בבדיקת תוכן. יופיעו באלבום לאחר אישור.",
+          type: "success",
+          duration: 5000,
+        });
         setTimeout(() => {
           this.uploads = [];
           this.progress = { total: 0, completed: 0 };

@@ -102,6 +102,7 @@ export default defineComponent({
 
   data() {
     return {
+      galleryPollIntervalId: null as ReturnType<typeof setInterval> | null,
       textCopied: false as boolean,
       albumsSelectOptions: [
         { value: "EventGallerySingle", label: "אלבום תמונות רגיל" },
@@ -120,7 +121,17 @@ export default defineComponent({
 
   created() {
     this.$store.dispatch("event/getEventGalleryAssets");
+    this.galleryPollIntervalId = setInterval(() => {
+      this.$store.dispatch("event/getEventGalleryAssets");
+    }, 10000);
     this.setForm();
+  },
+
+  beforeUnmount() {
+    if (this.galleryPollIntervalId) {
+      clearInterval(this.galleryPollIntervalId);
+      this.galleryPollIntervalId = null;
+    }
   },
 
   computed: {

@@ -8,13 +8,52 @@ import {
   IEvent,
   IEventDownloadAssetsProcess,
 } from "@/helpers/interfaces";
-import { StatusEnum } from "@/helpers/enums";
+import {
+  AssetModerationStatusEnum,
+  getAssetModerationStatus,
+  StatusEnum,
+} from "@/helpers/enums";
 import {
   EventAssetsManagementModesType,
   EventGalleryType,
 } from "@/helpers/types";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
+
+function asAssetArray(assets: unknown): IEventAsset[] {
+  if (Array.isArray(assets)) {
+    return assets.map(normalizeEventAsset);
+  }
+  return [];
+}
+
+function normalizeEventAsset(asset: IEventAsset): IEventAsset {
+  const moderationStatus = getAssetModerationStatus(asset);
+  return {
+    ...asset,
+    status: moderationStatus,
+    moderation_status: moderationStatus,
+  };
+}
+
+function extractAssetsPayload(payload: unknown): unknown {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  if (payload != null && typeof payload === "object" && "assets" in payload) {
+    return (payload as { assets: unknown }).assets;
+  }
+  return payload;
+}
+
+function filterAssetsByModeration(
+  assets: unknown,
+  statuses: AssetModerationStatusEnum[]
+): IEventAsset[] {
+  return asAssetArray(assets).filter((asset) =>
+    statuses.includes(getAssetModerationStatus(asset))
+  );
+}
 
 const EventModule = {
   namespaced: true,
@@ -92,15 +131,56 @@ const EventModule = {
     },
 
     getTotalAssets(state: IEventModuleState): number {
-      return state.event?.assets?.length ?? 0;
+      const assets = state.event?.assets ?? [];
+      return filterAssetsByModeration(assets, [
+        AssetModerationStatusEnum.ACTIVE,
+        AssetModerationStatusEnum.PENDING,
+      ]).length;
     },
 
     getAssets(state: IEventModuleState): IEventAsset[] {
-      return state.event?.assets ?? [];
+      return asAssetArray(state.event?.assets);
     },
 
     getGalleryAssets(state: IEventModuleState): IEventAsset[] {
       return state.gallery.assets ?? [];
+    },
+
+    getActiveGalleryAssets(state: IEventModuleState): IEventAsset[] {
+      return filterAssetsByModeration(state.gallery.assets ?? [], [
+        AssetModerationStatusEnum.ACTIVE,
+      ]);
+    },
+
+    getOwnerVisibleAssets(state: IEventModuleState): IEventAsset[] {
+      return filterAssetsByModeration(state.event?.assets ?? [], [
+        AssetModerationStatusEnum.ACTIVE,
+        AssetModerationStatusEnum.PENDING,
+      ]);
+    },
+
+    getBlockedAssets(state: IEventModuleState): IEventAsset[] {
+      return filterAssetsByModeration(state.event?.assets ?? [], [
+        AssetModerationStatusEnum.BLOCKED,
+      ]);
+    },
+
+    hasBlockedAssets(state: IEventModuleState): boolean {
+      return filterAssetsByModeration(state.event?.assets ?? [], [
+        AssetModerationStatusEnum.BLOCKED,
+      ]).length > 0;
+    },
+
+    hasPendingAssets(state: IEventModuleState): boolean {
+      return filterAssetsByModeration(state.event?.assets ?? [], [
+        AssetModerationStatusEnum.PENDING,
+      ]).length > 0;
+    },
+
+    getActiveGuestAssets(state: IEventModuleState): IEventAsset[] {
+      return filterAssetsByModeration(state.event?.assets ?? [], [
+        AssetModerationStatusEnum.ACTIVE,
+      ]);
     },
 
     getEventImage(state: IEventModuleState): string {
@@ -138,6 +218,9 @@ const EventModule = {
 
   mutations: {
     SET_EVENT(state: IEventModuleState, event: IEvent) {
+      if (event?.assets != null) {
+        event.assets = asAssetArray(event.assets);
+      }
       state.event = event;
     },
 
@@ -178,23 +261,30 @@ const EventModule = {
     },
 
     ADD_FILE(state: IEventModuleState, asset: IEventAsset) {
-      asset.path =
-        process.env.VUE_APP_STORAGE_BASE_URL + "/assets/" + asset.path;
+      const normalizedAsset = normalizeEventAsset({
+        ...asset,
+        path:
+          process.env.VUE_APP_STORAGE_BASE_URL + "/assets/" + asset.path,
+        status:
+          asset.status ??
+          asset.moderation_status ??
+          AssetModerationStatusEnum.PENDING,
+      });
       state.event.assets
-        ? state.event.assets.push(asset)
-        : (state.event.assets = [asset]);
+        ? state.event.assets.push(normalizedAsset)
+        : (state.event.assets = [normalizedAsset]);
     },
 
-    SET_FILES(state: IEventModuleState, assets: IEventAsset[]) {
-      if (!state.event.assets) {
-        return (state.event.assets = []);
+    SET_FILES(state: IEventModuleState, assets: unknown) {
+      if (!state.event) {
+        return;
       }
 
-      state.event.assets = assets;
+      state.event.assets = asAssetArray(assets);
     },
 
-    SET_GALLERY_FILES(state: IEventModuleState, assets: IEventAsset[]) {
-      state.gallery.assets = assets;
+    SET_GALLERY_FILES(state: IEventModuleState, assets: unknown) {
+      state.gallery.assets = asAssetArray(assets);
     },
 
     DELETE_FILES(state: IEventModuleState, deletedAssets: number[]) {
@@ -249,7 +339,11 @@ const EventModule = {
       mode: boolean
     ) {
       if (mode) {
-        state.assetsManagement.assetsIds = state.event.assets.map(
+        const manageable = filterAssetsByModeration(state.event?.assets ?? [], [
+          AssetModerationStatusEnum.ACTIVE,
+          AssetModerationStatusEnum.PENDING,
+        ]);
+        state.assetsManagement.assetsIds = manageable.map(
           (asset: IEventAsset) => asset.id
         );
       } else {
@@ -297,7 +391,7 @@ const EventModule = {
         axios
           .get(`events/${path}/base-assets`)
           .then((res) => {
-            res.data.data.assets = res.data.data.displayed_assets;
+            res.data.data.assets = asAssetArray(res.data.data.displayed_assets);
             context.commit("SET_EVENT", res.data.data);
             resolve(res.data);
           })
@@ -342,7 +436,10 @@ const EventModule = {
         axios
           .get(`events/${context.state.event.id}/assets`)
           .then((res) => {
-            context.commit("SET_FILES", res.data.data);
+            context.commit(
+              "SET_FILES",
+              extractAssetsPayload(res.data?.data ?? res.data)
+            );
             resolve(res.data);
           })
           .catch((err) => {
@@ -367,7 +464,10 @@ const EventModule = {
         axios
           .get(url)
           .then((res) => {
-            context.commit("SET_GALLERY_FILES", res.data.data);
+            context.commit(
+              "SET_GALLERY_FILES",
+              extractAssetsPayload(res.data?.data ?? res.data)
+            );
             resolve(res.data);
           })
           .catch((err) => {

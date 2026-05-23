@@ -26,7 +26,7 @@ export default defineComponent({
 
   computed: {
     assets(): IEventAsset[] {
-      return this.$store.getters["event/getAssets"];
+      return this.$store.getters["event/getActiveGuestAssets"];
     },
 
     event() {
