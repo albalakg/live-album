@@ -233,3 +233,136 @@ In [`EventAssetsView.vue`](frontend/src/views/EventAssetsView.vue) / asset manag
 ## Coordination note for backend team
 
 Share this FE contract: field name **`moderation_status`**, values **`pending` | `active` | `blocked`**, gallery endpoints return active-only, owner `/assets` returns all statuses for admin UI.
+
+---
+
+## Backend prompt (manual block / unblock)
+
+Copy/paste this to implement owner-initiated asset blocking in the **backend repo**:
+
+---
+
+**Task: Manual asset block & unblock (owner moderation) for LiveAlbums**
+
+### Context
+
+The frontend already supports **automatic** content moderation via AWS Rekognition (`moderation_status: pending → active | blocked`). Owners also need to **manually block** one or more assets from the event assets admin page (`/event/assets`), and **unblock** them later.
+
+Manual block is separate from **`is_displayed`** (hide/show in gallery). Blocking sets `moderation_status = blocked` and removes the asset from live album, guest gallery, and all public gallery endpoints — same as auto-blocked assets.
+
+### Existing FE integration (already wired)
+
+| Action | Method | Endpoint | Body |
+|--------|--------|----------|------|
+| Unblock (single or bulk) | `POST` | `events/{event_id}/assets/unblock` | `{ "assets": [1, 2, 3] }` |
+| Block (single or bulk) | `POST` | `events/{event_id}/assets/block` | `{ "assets": [1, 2, 3] }` |
+
+Both endpoints are called by authenticated event owners only. The FE expects the same auth/error envelope as existing asset actions (`hide`, `delete`, `download`).
+
+### Required behavior — `POST events/{id}/assets/block`
+
+**Authorization:** Only the event owner (same rules as `/assets/hide`, `/assets/delete`).
+
+**Request body:**
+
+```json
+{
+  "assets": [12, 15, 18]
+}
+```
+
+**Validation:**
+
+- All asset IDs must belong to the given event.
+- Only assets with `moderation_status` **`active`** or **`pending`** may be blocked. Reject already-`blocked` IDs with 422 (or skip silently — prefer 422 with message).
+- Empty `assets` array → 422.
+
+**On success:**
+
+- Set `moderation_status = 'blocked'` (and keep `status` in sync if you mirror that field).
+- Set `moderation_source = 'manual'` (new field — see schema below).
+- Clear Rekognition `moderation_labels` for manual blocks (or leave labels null).
+- Remove blocked assets from live/guest gallery responses immediately (same as auto-block).
+- Return updated asset payload(s) or `{ "message": "ok" }` — FE updates optimistically via Vuex; either shape works.
+
+**Side effects:**
+
+- If Rekognition scan is still `pending` for an asset, manual block should **win** — cancel/skip further auto-promotion to `active`.
+- Blocked assets must **not** appear on:
+  - `GET events/{id}/gallery-assets`
+  - `GET events/{path}/base-assets` (guest)
+  - Any live-screen polling endpoint
+
+### Required behavior — `POST events/{id}/assets/unblock`
+
+(Implement if not already present.)
+
+**Authorization:** Event owner only.
+
+**Request body:** `{ "assets": [12, 15] }`
+
+**On success:**
+
+- Set `moderation_status = 'active'`.
+- Clear `moderation_source`, `moderation_labels`, and `is_blocked` if used.
+- Asset becomes visible on gallery endpoints again (subject to existing `is_displayed` rules).
+
+**Note:** Unblocking a manually blocked asset does **not** re-run Rekognition unless you want that — default: restore to `active` directly.
+
+### Asset fields (extend upload/list responses)
+
+Add to each asset in `GET events/{id}/assets`, upload responses, etc.:
+
+```json
+{
+  "id": 12,
+  "moderation_status": "blocked",
+  "moderation_source": "manual",
+  "moderation_labels": null,
+  "is_displayed": 1
+}
+```
+
+| Field | Type | Values | Notes |
+|-------|------|--------|-------|
+| `moderation_status` | string | `pending`, `active`, `blocked` | Primary moderation state |
+| `moderation_source` | string \| null | `manual`, `auto` | Set `manual` for owner block; `auto` (or null) for Rekognition |
+| `moderation_labels` | string[] \| null | e.g. `["Explicit Nudity"]` | Rekognition labels for auto-block; null for manual |
+
+Optional legacy compat: FE also reads `is_blocked: 1` as blocked if present.
+
+### Auto vs manual blocked assets
+
+| Source | `moderation_source` | `moderation_labels` |
+|--------|---------------------|---------------------|
+| Rekognition | `auto` | AWS label names |
+| Owner block | `manual` | `null` |
+
+Both use `moderation_status = blocked` and are hidden from public galleries.
+
+### Database suggestion
+
+On `event_assets` (or equivalent):
+
+- `moderation_status` — enum/string
+- `moderation_source` — nullable enum: `manual` | `auto`
+- `moderation_labels` — nullable JSON array
+
+### Error responses
+
+Use existing API error format. Examples:
+
+- `403` — not event owner
+- `404` — event or asset not found
+- `422` — invalid asset IDs, asset already blocked, or empty list
+
+### Acceptance criteria
+
+1. Owner blocks one active asset → `moderation_status=blocked`, `moderation_source=manual`; asset disappears from live gallery within next FE poll.
+2. Owner blocks multiple pending assets in one request → all blocked.
+3. Owner unblocks a manually blocked asset → returns to `active`, visible on gallery again.
+4. Auto-blocked asset (Rekognition) can also be unblocked by owner via same unblock endpoint.
+5. Manual block on a `pending` asset prevents it from ever becoming `active` when Rekognition completes.
+6. Guest and gallery endpoints never return `blocked` assets (unless you add a dedicated owner-preview flag later — not required now).
+
+---

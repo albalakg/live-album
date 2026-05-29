@@ -60,6 +60,10 @@
                 <small class="signup-hint">
                   בעת לחיצה על הרשמה, מאשר את <router-link to="/terms-and-conditions"><strong>תנאי השימוש</strong></router-link> של האתר
                 </small>
+                <div class="auth-divider">
+                  <span>— או —</span>
+                </div>
+                <GoogleSignInButton :redirect="googleRedirect" />
               </div>
               <div class="signup-form-bottom">
                 <p class="title--medium text--dark text--center">
@@ -107,6 +111,10 @@
                 <small class="signup-hint">
                   בעת לחיצה על הרשמה, מאשר את <router-link to="/terms-and-conditions"><strong>תנאי השימוש</strong></router-link> של האתר
                 </small>
+                <div class="auth-divider">
+                  <span>— או —</span>
+                </div>
+                <GoogleSignInButton :redirect="googleRedirect" />
               </div>
               <div class="signup-cell-login signup-form-bottom">
                 <p class="title--small text--dark text--center">
@@ -127,6 +135,7 @@
 import MainButton from "@/components/library/buttons/MainButton.vue";
 import MainCube from "@/components/library/background/MainCube.vue";
 import MainInput from "@/components/library/inputs/MainInput.vue";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton.vue";
 import { defineComponent } from "vue";
 import { ISignupRequest } from "@/helpers/interfaces";
 
@@ -137,6 +146,7 @@ export default defineComponent({
     MainInput,
     MainCube,
     MainButton,
+    GoogleSignInButton,
   },
 
   data() {
@@ -155,6 +165,13 @@ export default defineComponent({
       },
       isLoading: false as boolean,
     };
+  },
+
+  computed: {
+    googleRedirect(): string {
+      const redirect = this.$route.query.redirect;
+      return typeof redirect === "string" ? redirect : "";
+    },
   },
 
   methods: {
@@ -312,5 +329,12 @@ export default defineComponent({
   text-align: center;
   position: relative;
   top: 5px;
+}
+
+.auth-divider {
+  margin: 16px 0;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
 }
 </style>

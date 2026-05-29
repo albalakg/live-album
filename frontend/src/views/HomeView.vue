@@ -16,6 +16,31 @@
         <br />
         וכל מה שנשאר זה להנות מהחוויות והזכרונות
       </p>
+      <!-- <div class="content-protection-callout" role="note">
+        
+        <span class="content-protection-callout__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 2L4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4z"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M9 12l2 2 4-4"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <p class="content-protection-callout__text">
+          <strong class="text--pink">הגנה על תוכן התמונות</strong>
+          — כל תמונה שמועלית נבדקת אוטומטית לתוכן לא הולם. סרטונים אינם נבדקים.
+          ניתן גם להגביל העלאות לתמונות בלבד.
+        </p>
+      </div> -->
       <br />
       <div class="width--corner width--full-mobile">
         <router-link v-if="canUpgradeSubscription" to="/order?subscription=premium">
@@ -279,6 +304,46 @@ export default defineComponent({
   p {
     font-size: 1.3em;
     letter-spacing: 0.8px;
+  }
+
+  .content-protection-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    max-width: 42rem;
+    margin: 1.25rem 0 1.5rem;
+    padding: 0.85rem 1.1rem;
+    border: 2px solid var(--pink);
+    border-radius: 999px;
+    background-color: #f6858915;
+    box-shadow: 0 2px 8px #0002;
+
+    @media only screen and (max-width: 600px) {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border-radius: 20px;
+      margin-inline: auto;
+    }
+  }
+
+  .content-protection-callout__icon {
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--pink);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .content-protection-callout__text {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.45;
+    letter-spacing: 0.3px;
   }
 
   .header-image-gallery {

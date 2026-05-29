@@ -40,9 +40,23 @@ function extractAssetsPayload(payload: unknown): unknown {
   if (Array.isArray(payload)) {
     return payload;
   }
-  if (payload != null && typeof payload === "object" && "assets" in payload) {
-    return (payload as { assets: unknown }).assets;
+
+  if (payload == null || typeof payload !== "object") {
+    return payload;
   }
+
+  const data = payload as Record<string, unknown>;
+  const primaryAssets = data.assets ?? data.displayed_assets;
+  const blockedAssets = data.blocked_assets;
+
+  if (Array.isArray(primaryAssets) && Array.isArray(blockedAssets)) {
+    return [...primaryAssets, ...blockedAssets];
+  }
+
+  if (primaryAssets != null) {
+    return primaryAssets;
+  }
+
   return payload;
 }
 
@@ -66,6 +80,7 @@ const EventModule = {
     },
     gallery: {
       assets: [],
+      showBlockedAssets: false,
     },
   } as IEventModuleState,
 
@@ -150,6 +165,22 @@ const EventModule = {
       return filterAssetsByModeration(state.gallery.assets ?? [], [
         AssetModerationStatusEnum.ACTIVE,
       ]);
+    },
+
+    getDisplayGalleryAssets(
+      state: IEventModuleState,
+      getters: { getActiveGalleryAssets: IEventAsset[]; getBlockedAssets: IEventAsset[] }
+    ): IEventAsset[] {
+      const activeAssets = getters.getActiveGalleryAssets;
+      if (!state.gallery.showBlockedAssets) {
+        return activeAssets;
+      }
+
+      return [...activeAssets, ...getters.getBlockedAssets];
+    },
+
+    showBlockedGalleryAssets(state: IEventModuleState): boolean {
+      return state.gallery.showBlockedAssets;
     },
 
     getOwnerVisibleAssets(state: IEventModuleState): IEventAsset[] {
@@ -285,6 +316,55 @@ const EventModule = {
 
     SET_GALLERY_FILES(state: IEventModuleState, assets: unknown) {
       state.gallery.assets = asAssetArray(assets);
+    },
+
+    SET_SHOW_BLOCKED_GALLERY_ASSETS(
+      state: IEventModuleState,
+      showBlockedAssets: boolean
+    ) {
+      state.gallery.showBlockedAssets = showBlockedAssets;
+    },
+
+    UNBLOCK_FILES(state: IEventModuleState, unblockedAssets: number[]) {
+      if (!state.event?.assets) {
+        return;
+      }
+
+      unblockedAssets.forEach((assetId: number) => {
+        const asset = state.event.assets.find(
+          (item: IEventAsset) => item.id === assetId
+        );
+        if (!asset) {
+          return;
+        }
+
+        asset.moderation_status = AssetModerationStatusEnum.ACTIVE;
+        asset.status = AssetModerationStatusEnum.ACTIVE;
+        asset.moderation_labels = null;
+        asset.moderation_source = undefined;
+        asset.is_blocked = 0;
+      });
+    },
+
+    BLOCK_FILES(state: IEventModuleState, blockedAssets: number[]) {
+      if (!state.event?.assets) {
+        return;
+      }
+
+      blockedAssets.forEach((assetId: number) => {
+        const asset = state.event.assets.find(
+          (item: IEventAsset) => item.id === assetId
+        );
+        if (!asset) {
+          return;
+        }
+
+        asset.moderation_status = AssetModerationStatusEnum.BLOCKED;
+        asset.status = AssetModerationStatusEnum.BLOCKED;
+        asset.moderation_labels = null;
+        asset.moderation_source = "manual";
+        asset.is_blocked = 1;
+      });
     },
 
     DELETE_FILES(state: IEventModuleState, deletedAssets: number[]) {
@@ -433,6 +513,11 @@ const EventModule = {
       commit: (arg0: string, arg1: any) => void;
     }) {
       return new Promise((resolve) => {
+        if (!context.state.event?.id) {
+          resolve(null);
+          return;
+        }
+
         axios
           .get(`events/${context.state.event.id}/assets`)
           .then((res) => {
@@ -443,6 +528,14 @@ const EventModule = {
             resolve(res.data);
           })
           .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך הייתה תקלה בטעינת הקבצים"
+              ),
+              type: "error",
+              duration: 5000,
+            });
             resolve(null);
           });
       });
@@ -539,6 +632,94 @@ const EventModule = {
               text: ErrorsHandler.getErrorMessage(
                 err,
                 "מצטערים אך הייתה תקלה בהסתרת הקבצים"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    unblockAssets(
+      context: {
+        state: IEventModuleState;
+        commit: (arg0: string, arg1: any) => void;
+        dispatch: (arg0: string) => Promise<unknown>;
+      },
+      assetIds: number[]
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/assets/unblock`, {
+            assets: assetIds,
+          })
+          .then(async (res) => {
+            notify({
+              text: "החסימה הוסרה והקובץ יוצג שוב באלבום",
+              type: "success",
+              duration: 5000,
+            });
+            context.commit("UNBLOCK_FILES", assetIds);
+            await context.dispatch("getEventGalleryAssets");
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך הייתה תקלה בביטול החסימה"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    blockAssets(
+      context: {
+        state: IEventModuleState;
+        commit: (arg0: string, arg1: any) => void;
+        dispatch: (arg0: string) => Promise<unknown>;
+      },
+      assetIds?: number[]
+    ) {
+      const ids =
+        assetIds && assetIds.length
+          ? assetIds
+          : context.state.assetsManagement.assetsIds;
+
+      return new Promise((resolve) => {
+        if (!ids.length) {
+          resolve(null);
+          return;
+        }
+
+        axios
+          .post(`events/${context.state.event.id}/assets/block`, {
+            assets: ids,
+          })
+          .then(async (res) => {
+            notify({
+              text:
+                ids.length === 1
+                  ? "הקובץ נחסם ולא יוצג באלבום החי"
+                  : "הקבצים נחסמו ולא יוצגו באלבום החי",
+              type: "success",
+              duration: 5000,
+            });
+            context.commit("BLOCK_FILES", ids);
+            context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
+            await context.dispatch("getEventGalleryAssets");
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך הייתה תקלה בחסימת הקבצים"
               ),
               type: "error",
               duration: 5000,
@@ -799,6 +980,13 @@ const EventModule = {
       mode: EventAssetsManagementModesType | null
     ) {
       context.commit("SET_MODE_FOR_ASSETS_MANAGEMENT", mode);
+    },
+
+    setShowBlockedGalleryAssets(
+      context: { commit: (arg0: string, arg1: boolean) => void },
+      showBlockedAssets: boolean
+    ) {
+      context.commit("SET_SHOW_BLOCKED_GALLERY_ASSETS", showBlockedAssets);
     },
   },
 

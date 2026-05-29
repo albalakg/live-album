@@ -73,6 +73,11 @@ export default defineComponent({
           path: "/event/qr",
           isActive: false,
         },
+        {
+          text: "WhatsApp",
+          path: "/event/whatsapp",
+          isActive: false,
+        },
       ];
 
       return items.map((item) => {
@@ -108,6 +113,8 @@ export default defineComponent({
   .event-content {
     width: 78%;
     margin-inline-start: 40px;
+    min-width: 0;
+    max-width: 100%;
 
     @media only screen and (max-width: 600px) {
       width: 100%;

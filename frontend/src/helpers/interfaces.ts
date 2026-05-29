@@ -1,4 +1,4 @@
-import { AssetModerationStatusEnum, StatusEnum, SubscriptionTypesEnum } from './enums';
+import { AssetModerationStatusEnum, StatusEnum, SubscriptionTypesEnum, WhatsAppCampaignStatusEnum } from './enums';
 import { EventFileType, SubscriptionType, EventAssetsManagementModesType, EventGalleryType } from './types';
 
 // ***** Base Interfaces *****
@@ -15,6 +15,7 @@ export interface IEventModuleState {
 
 export interface IEventGallery {
   assets: IEventAsset[];
+  showBlockedAssets: boolean;
 }
 
 export interface IEventAssetsManagement {
@@ -102,6 +103,8 @@ export interface IEventAsset {
   status: AssetModerationStatusEnum | string | number;
   moderation_status?: AssetModerationStatusEnum | string | number;
   moderation_labels?: string[] | null;
+  moderation_source?: 'manual' | 'auto';
+  is_blocked?: boolean | number;
   type: EventFileType;
   path: string;
   fullPath: string;
@@ -166,6 +169,10 @@ export interface ILoginRequest {
   password: string;
 }
 
+export interface IGoogleOAuthExchangeRequest {
+  code: string;
+}
+
 export interface IForgotPasswordRequest {
   email: string;
 }
@@ -199,3 +206,45 @@ export interface IOrderResponse {
 
 /** Result of `store/order`: either a checkout iframe URL or a user-facing error string. */
 export type IStoreOrderResult = IOrderResponse | { error: string };
+
+export interface IWhatsAppGuest {
+  id: number;
+  full_name: string;
+  phone: string;
+}
+
+export interface IWhatsAppQuota {
+  remaining_sends: number;
+  max_sends: number;
+}
+
+export interface IWhatsAppCampaign {
+  id: number;
+  message: string;
+  status: WhatsAppCampaignStatusEnum;
+  scheduled_at: string | null;
+  sent_at: string | null;
+  recipient_count: number;
+  sent_count: number;
+  failed_count: number;
+  created_at: string;
+}
+
+export interface IWhatsAppRecipientStatus {
+  guest_id: number;
+  full_name: string;
+  phone: string;
+  status: 'sent' | 'failed' | 'pending';
+  error_message?: string | null;
+}
+
+export interface IWhatsAppModuleState {
+  guests: IWhatsAppGuest[];
+  quota: IWhatsAppQuota | null;
+  campaigns: IWhatsAppCampaign[];
+  campaignDetail: {
+    campaign: IWhatsAppCampaign;
+    recipients: IWhatsAppRecipientStatus[];
+  } | null;
+  loading: boolean;
+}

@@ -35,8 +35,13 @@
             :tab-index="2"
           />
         </div>
+        <br v-if="$bp.isMobile">
         <div>
           <MainButton :loading="isLoading" text="כניסה למערכת" :tab-index="3" />
+          <div class="auth-divider">
+            <span>— או —</span>
+          </div>
+          <GoogleSignInButton :redirect="googleRedirect" />
         </div>
       </form>
       <div class="login-details width--half height--full bg--pink display--flex align--center justify--center width--full-mobile">
@@ -68,8 +73,10 @@
 import MainButton from '@/components/library/buttons/MainButton.vue';
 import MainCube from '@/components/library/background/MainCube.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue';
 import { defineComponent } from 'vue';
 import { ILoginRequest } from '@/helpers/interfaces';
+import { resolvePostLoginRoute } from '@/helpers/postLoginRedirect';
 
 export default defineComponent({
   name: 'LoginView',
@@ -78,6 +85,7 @@ export default defineComponent({
     MainInput,
     MainCube,
     MainButton,
+    GoogleSignInButton,
   },
 
   data() {
@@ -95,9 +103,10 @@ export default defineComponent({
   },
 
   computed: {
-    hasEvent(): boolean {
-      return Boolean(this.$store.getters["event/getEvent"])
-    }
+    googleRedirect(): string {
+      const redirect = this.$route.query.redirect;
+      return typeof redirect === "string" ? redirect : "";
+    },
   },
 
   methods: {
@@ -128,16 +137,9 @@ export default defineComponent({
         return;
       }
 
-      if(this.$route.query.redirect) {
-        this.$router.push(this.$route.query.redirect.toString());
-        return;
-      }
-
-      if(user.subscription_name && this.hasEvent) {
-        this.$router.push('/event');
-      } else {
-        this.$router.push('/');
-      }
+      this.$router.push(
+        resolvePostLoginRoute(user, this.$route.query, this.$store)
+      );
     },
 
     validateForm() {
@@ -209,6 +211,13 @@ export default defineComponent({
   a {
     font-weight: 700;
     text-decoration: underline;
+  }
+
+  .auth-divider {
+    margin: 16px 0;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
   }
 }
 </style>

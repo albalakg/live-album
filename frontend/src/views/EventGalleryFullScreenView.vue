@@ -4,6 +4,17 @@
       class="gallery-header bg--white display--flex justify--space-between align--center"
     >
       <div>
+        <label
+          v-if="hasBlockedAssets"
+          class="blocked-toggle pointer display--flex align--center"
+        >
+          <input
+            type="checkbox"
+            :checked="showBlockedGalleryAssets"
+            @change="toggleBlockedGalleryAssets"
+          />
+          <small class="margin--right-small">הצג חסומות</small>
+        </label>
         <strong class="pointer" @click="toggleFullScreen()">
           <MainIcon :icon="screenIcon" />
         </strong>
@@ -63,6 +74,7 @@ export default defineComponent({
 
   created() {
     this.$store.dispatch("event/getEventGalleryAssets");
+    this.$store.dispatch("event/getEventAssets");
     this.galleryPollIntervalId = setInterval(() => {
       this.$store.dispatch("event/getEventGalleryAssets");
     }, 10000);
@@ -83,6 +95,14 @@ export default defineComponent({
         "EventGallerySingle"
       );
     },
+
+    hasBlockedAssets(): boolean {
+      return this.$store.getters["event/hasBlockedAssets"];
+    },
+
+    showBlockedGalleryAssets(): boolean {
+      return this.$store.getters["event/showBlockedGalleryAssets"];
+    },
   },
 
   methods: {
@@ -94,6 +114,14 @@ export default defineComponent({
       } else {
         document.exitFullscreen();
       }
+    },
+
+    toggleBlockedGalleryAssets(event: Event) {
+      const target = event.target as HTMLInputElement;
+      this.$store.dispatch(
+        "event/setShowBlockedGalleryAssets",
+        target.checked
+      );
     },
   },
 
@@ -156,5 +184,9 @@ export default defineComponent({
     margin: auto;
     text-align: center;
   }
+}
+
+.blocked-toggle input {
+  margin-left: 8px;
 }
 </style>

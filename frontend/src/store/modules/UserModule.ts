@@ -7,6 +7,7 @@ import {
   IUpdateUserRequest,
   IUpdatePasswordRequest,
   IForgotPasswordRequest,
+  IGoogleOAuthExchangeRequest,
 } from "@/helpers/interfaces";
 import { SubscriptionType } from "@/helpers/types";
 import Auth from "@/helpers/Auth";
@@ -14,6 +15,24 @@ import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
 import router from "@/router";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
+
+function completeLogin(
+  context: {
+    commit: (arg0: string, arg1: IUserInfo | boolean) => void;
+  },
+  user: IUserInfo & { token?: string; expired_at?: string }
+) {
+  Auth.login(user);
+  delete user.token;
+  delete user.expired_at;
+  context.commit("SET_USER", user);
+  context.commit("SET_LOGGED_IN", true);
+  notify({
+    text: "התחברת בהצלחה",
+    type: "success",
+    duration: 5000,
+  });
+}
 
 const UserModule = {
   namespaced: true,
@@ -139,22 +158,42 @@ const UserModule = {
           .post("auth/login", payload)
           .then((res) => {
             const user = res.data.data.user;
-            Auth.login(user);
-            delete user.token;
-            delete user.expired_at;
-            context.commit("SET_USER", user);
-            context.commit("SET_LOGGED_IN", true);
-            notify({
-              text: "התחברת בהצלחה",
-              type: "success",
-              duration: 5000,
-            });
+            completeLogin(context, user);
             resolve(user);
           })
           .catch((err) => {
             console.warn("get: ", err);
             notify({
               text: "כתובת המייל או הסיסמה אינם תקינים",
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    exchangeOAuthCode(
+      context: {
+        commit: (arg0: string, arg1: IUserInfo | boolean) => void;
+      },
+      payload: IGoogleOAuthExchangeRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/google/callback", payload)
+          .then((res) => {
+            const user = res.data.data.user;
+            completeLogin(context, user);
+            resolve(user);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "ההתחברות עם Google נכשלה"
+              ),
               type: "error",
               duration: 5000,
             });

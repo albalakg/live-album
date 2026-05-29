@@ -5,6 +5,7 @@ import ContactModule from './modules/ContactModule'
 import StoreModule from './modules/StoreModule'
 import SubscriptionsModule from './modules/SubscriptionsModule'
 import AppModule from './modules/AppModule'
+import WhatsAppModule from './modules/WhatsAppModule'
 
 // Create Vuex module
 const module = createStore({
@@ -15,6 +16,7 @@ const module = createStore({
     store: StoreModule,
     subscriptions: SubscriptionsModule,
     app: AppModule,
+    whatsapp: WhatsAppModule,
   },
 })
 

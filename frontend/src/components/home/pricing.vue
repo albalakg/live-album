@@ -181,7 +181,7 @@ function planDescription(plan: ISubscriptionPlan): string {
   }
   const ret = retentionLabelHebrew(plan.storage_time);
   if (ret) {
-    parts.push(`הקבצים נמחקים ${ret}.`);
+    parts.push(`האירוע נסגר ${ret}.`);
   }
   return parts.join("<br>");
 }

@@ -47,15 +47,34 @@
         />
       </span>
       <span
-        v-if="moderationBadgeText"
+        v-if="moderationBadgeText && !showBlockedFooter"
         class="gallery-moderation-badge"
         :class="moderationBadgeClass"
         :title="moderationBadgeTitle"
       >
         {{ moderationBadgeText }}
       </span>
-      <div v-if="isBlocked" class="gallery-blocked-overlay">
-        <MainIcon icon="block" size="2.5em" color="#fff" :background="false" />
+      <div
+        v-if="isBlocked"
+        class="gallery-blocked-overlay"
+        :class="{ 'gallery-blocked-overlay--with-footer': showBlockedFooter }"
+      >
+        <MainIcon icon="block" size="2.2em" color="#fff" :background="false" />
+      </div>
+      <div v-if="showBlockedFooter" class="gallery-blocked-footer">
+        <span
+          class="gallery-blocked-label"
+          :title="moderationBadgeTitle"
+        >
+          חסום
+        </span>
+        <button
+          class="gallery-unblock-button"
+          :disabled="unblockLoading"
+          @click.stop="$emit('onUnblock', asset.id)"
+        >
+          {{ unblockLoading ? "מבטל..." : "בטל חסימה" }}
+        </button>
       </div>
 
       <EventAssetModal />
@@ -120,6 +139,8 @@ export default defineComponent({
     EventAssetModal,
   },
 
+  emits: ["onClick", "open-asset-modal", "onUnblock"],
+
   props: {
     loading: {
       type: Boolean,
@@ -149,6 +170,16 @@ export default defineComponent({
     bulkSelectable: {
       type: Boolean,
       default: true,
+    },
+
+    allowUnblock: {
+      type: Boolean,
+      default: false,
+    },
+
+    unblockLoading: {
+      type: Boolean,
+      default: false,
     },
   },
 
@@ -219,6 +250,9 @@ export default defineComponent({
       if (this.isBlocked && this.asset.moderation_labels?.length) {
         return this.asset.moderation_labels.join(", ");
       }
+      if (this.isBlocked && this.asset.moderation_source === "manual") {
+        return "התמונה נחסמה ידנית על ידי בעל האירוע";
+      }
       if (this.isBlocked) {
         return "התמונה נחסמה אוטומטית ואינה מוצגת באלבום החי";
       }
@@ -226,6 +260,10 @@ export default defineComponent({
         return "התמונה בבדיקת תוכן לפני הצגה באלבום";
       }
       return "";
+    },
+
+    showBlockedFooter(): boolean {
+      return this.allowUnblock && this.isBlocked;
     },
   },
 
@@ -344,7 +382,7 @@ export default defineComponent({
   }
 
   .gallery-asset--blocked .album-asset {
-    filter: grayscale(0.35);
+    filter: grayscale(0.45) brightness(0.85);
   }
 
   .gallery-blocked-overlay {
@@ -354,8 +392,73 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.35);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.45) 100%
+    );
     pointer-events: none;
+
+    &--with-footer {
+      align-items: flex-start;
+      padding-top: 28%;
+      background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.15) 0%,
+        rgba(0, 0, 0, 0.35) 55%,
+        rgba(0, 0, 0, 0.7) 100%
+      );
+    }
+  }
+
+  .gallery-blocked-footer {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    background: rgba(18, 18, 18, 0.82);
+    backdrop-filter: blur(4px);
+  }
+
+  .gallery-blocked-label {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: #fff;
+    background-color: #c62828;
+    white-space: nowrap;
+  }
+
+  .gallery-unblock-button {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+    background-color: #2e7d32;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #388e3c;
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
   }
 
   .video-wrapper {

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="event-assets height--full display--flex direction--column justify--space-between"
+    class="event-assets height--full display--flex direction--column"
   >
     <div
       class="assets-top bg--white brs--medium padding--large display--flex justify--space-between flex--wrap-mobile"
@@ -13,6 +13,24 @@
             {{ totalAssets }} קבצים
             <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
           </h1>
+          <label
+            v-if="blockedAssets.length"
+            class="blocked-toggle pointer margin--top-small"
+            :class="{ 'blocked-toggle--active': showBlockedAssets }"
+          >
+            <input
+              type="checkbox"
+              v-model="showBlockedAssets"
+              class="blocked-toggle-input"
+            />
+            <span class="blocked-toggle-chip display--flex align--center brs--large">
+              <span class="blocked-toggle-icon material-symbols-outlined" aria-hidden="true">
+                block
+              </span>
+              <span class="blocked-toggle-text">הצג תמונות חסומות</span>
+              <span class="blocked-toggle-badge">{{ blockedAssets.length }}</span>
+            </span>
+          </label>
           <strong class="text--pink"> ממליצים להוריד ישר אחרי האירוע </strong>
           <div class="collapse-container">
             <strong class="pointer" @click="toggleCollapse">
@@ -65,6 +83,7 @@
               :options="[
                 { label: 'הורדת קבצים', value: 'download' },
                 { label: 'הסתרת קבצים', value: 'hide' },
+                { label: 'חסימת קבצים', value: 'block' },
                 { label: 'מחיקת קבצים', value: 'delete' },
               ]"
               v-model="action"
@@ -98,47 +117,54 @@
         </div>
       </div>
     </div>
-    <div class="assets-content display--flex flex--wrap brs--medium">
-      <template v-for="(asset, index) in ownerVisibleAssets" :key="'asset-' + asset.id">
-        <EventAssetCard
-          class="pointer"
-          :loading="loading"
-          :assetIndex="index"
-          :asset="asset"
-          @onClick="openModal"
-        />
-      </template>
-    </div>
-
-    <div v-if="hasBlockedAssets" class="blocked-assets-section margin--top-large width--full">
-      <div class="blocked-assets-header display--flex align--center justify--space-between flex--wrap-mobile margin--bottom-medium">
-        <strong class="text--pink">תמונות חסומות ({{ blockedAssets.length }})</strong>
-        <label class="blocked-toggle pointer display--flex align--center">
-          <input type="checkbox" v-model="showBlockedAssets" />
-          <span class="margin--right-small">הצג תמונות חסומות</span>
-        </label>
-      </div>
-      <div
-        v-if="showBlockedAssets"
-        class="blocked-warning bg--white brs--medium padding--medium margin--bottom-medium"
-      >
-        <strong>שימו לב:</strong>
-        תמונות אלו נחסמו אוטומטית בשל תוכן לא הולם ואינן מוצגות באלבום החי או בגלריית האורחים.
-      </div>
-      <div
-        v-if="showBlockedAssets"
-        class="assets-content display--flex flex--wrap brs--medium"
-      >
-        <template v-for="(asset, index) in blockedAssets" :key="'blocked-' + asset.id">
+    <div class="assets-body">
+      <div class="assets-content display--flex flex--wrap brs--medium">
+        <template v-for="(asset, index) in ownerVisibleAssets" :key="'asset-' + asset.id">
           <EventAssetCard
             class="pointer"
             :loading="loading"
             :assetIndex="index"
             :asset="asset"
-            :bulkSelectable="false"
-            @onClick="openBlockedModal(index)"
+            @onClick="openModal"
           />
         </template>
+      </div>
+
+      <div v-if="showBlockedAssets" class="blocked-assets-section margin--top-large width--full">
+        <div class="blocked-assets-header margin--bottom-medium">
+          <strong class="text--pink">תמונות חסומות</strong>
+        </div>
+        <div
+          v-if="blockedAssets.length"
+          class="blocked-warning bg--white brs--medium padding--medium margin--bottom-medium"
+        >
+          <strong>שימו לב:</strong>
+          תמונות אלו חסומות (ידנית או אוטומטית) ואינן מוצגות באלבום החי או בגלריית האורחים.
+        </div>
+        <div
+          v-if="blockedAssets.length"
+          class="assets-content blocked-content display--flex flex--wrap brs--medium"
+        >
+          <template v-for="(asset, index) in blockedAssets" :key="'blocked-' + asset.id">
+            <EventAssetCard
+              class="pointer"
+              :loading="loading"
+              :assetIndex="index"
+              :asset="asset"
+              :bulkSelectable="false"
+              allowUnblock
+              :unblockLoading="unblockingAssetId === asset.id"
+              @onClick="openBlockedModal(index)"
+              @onUnblock="unblockAsset"
+            />
+          </template>
+        </div>
+        <div
+          v-else
+          class="blocked-empty bg--white brs--medium padding--medium"
+        >
+          לא נמצאו תמונות חסומות. אם ציפיתם לראות תמונה כאן, ייתכן שהבדיקה עדיין בתהליך.
+        </div>
       </div>
     </div>
       <div v-if="isModalOpened" class="lightbox" @click="isModalOpened = false">
@@ -146,12 +172,34 @@
         <button @click.stop="changeAsset(currentAssetIndex + 1)" class="lightbox-next lightbox-icon">&#10094;</button>
         <button @click.stop="changeAsset(currentAssetIndex - 1)" class="lightbox-prev lightbox-icon">&#10095;</button>
         <EventAssetCard class="lightbox-asset" :loading="loading" :assetIndex="0" :asset="currentAsset" :eventName="event.name" @onClick="doNone" controls autoplay />
+        <div
+          v-if="isCurrentAssetBlocked"
+          class="lightbox-unblock display--flex justify--center margin--top-medium"
+        >
+          <BaseButton
+            color="green"
+            text="בטל חסימה"
+            :loading="unblockingAssetId === currentAsset.id"
+            @onClick="unblockAsset(currentAsset.id)"
+          />
+        </div>
+        <div
+          v-else-if="canBlockCurrentAsset"
+          class="lightbox-unblock display--flex justify--center margin--top-medium"
+        >
+          <BaseButton
+            color="pink"
+            text="חסום קובץ"
+            :loading="blockingAssetId === currentAsset.id"
+            @onClick="blockAssets(currentAsset.id)"
+          />
+        </div>
       </div>
   </div>
 </template>
 
 <script lang="ts">
-import { EventAssetsManagementModesEnum, StatusEnum } from "@/helpers/enums";
+import { EventAssetsManagementModesEnum, StatusEnum, AssetModerationStatusEnum, getAssetModerationStatus } from "@/helpers/enums";
 import { IEventAsset, IEventDownloadAssetsProcess } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
 import Time from "@/helpers/time";
@@ -188,15 +236,23 @@ export default defineComponent({
       isModalOpened: false as boolean,
       currentAssetIndex: 0 as number,
       showBlockedAssets: false as boolean,
+      unblockingAssetId: null as number | null,
+      blockingAssetId: null as number | null,
       assetsPollIntervalId: null as ReturnType<typeof setInterval> | null,
     };
   },
 
   created() {
-    this.$store.dispatch("event/getEventAssets");
+    this.loadAssets();
   },
 
   watch: {
+    "$route.path"(path: string) {
+      if (path === "/event/assets") {
+        this.loadAssets();
+      }
+    },
+
     hasPendingAssets: {
       immediate: true,
       handler(hasPending: boolean) {
@@ -289,6 +345,10 @@ export default defineComponent({
       return this.mode === EventAssetsManagementModesEnum.DELETE;
     },
 
+    isBlockMode(): boolean {
+      return this.mode === EventAssetsManagementModesEnum.BLOCK;
+    },
+
     totalManagedAssetsIds(): number {
       return this.$store.getters["event/getTotalManagedAssetsIds"];
     },
@@ -345,9 +405,36 @@ export default defineComponent({
     currentAsset(): IEventAsset {
       return this.assets[this.currentAssetIndex];
     },
+
+    isCurrentAssetBlocked(): boolean {
+      if (!this.currentAsset) {
+        return false;
+      }
+
+      return (
+        getAssetModerationStatus(this.currentAsset) ===
+        AssetModerationStatusEnum.BLOCKED
+      );
+    },
+
+    canBlockCurrentAsset(): boolean {
+      if (!this.currentAsset || this.isCurrentAssetBlocked) {
+        return false;
+      }
+
+      const status = getAssetModerationStatus(this.currentAsset);
+      return (
+        status === AssetModerationStatusEnum.ACTIVE ||
+        status === AssetModerationStatusEnum.PENDING
+      );
+    },
   },
 
   methods: {
+    loadAssets() {
+      return this.$store.dispatch("event/getEventAssets");
+    },
+
     toggleCollapse() {
       this.isOpen = !this.isOpen;
     },
@@ -375,6 +462,9 @@ export default defineComponent({
           break;
         case EventAssetsManagementModesEnum.HIDE:
           await this.hideAssets();
+          break;
+        case EventAssetsManagementModesEnum.BLOCK:
+          await this.blockAssets();
           break;
         default:
           break;
@@ -431,6 +521,28 @@ export default defineComponent({
       this.loading = false;
     },
 
+    async blockAssets(assetId?: number) {
+      if (this.blockingAssetId) {
+        return;
+      }
+
+      this.loading = !assetId;
+      this.blockingAssetId = assetId ?? null;
+      const success = await this.$store.dispatch(
+        "event/blockAssets",
+        assetId ? [assetId] : undefined
+      );
+      this.blockingAssetId = null;
+      this.loading = false;
+
+      if (success && assetId) {
+        if (this.hasBlockedAssets) {
+          this.showBlockedAssets = true;
+        }
+        this.isModalOpened = false;
+      }
+    },
+
     resetPolling() {
       this.startPollingProcessStatus();
       this.pollingCounter = 0;
@@ -445,6 +557,22 @@ export default defineComponent({
     openBlockedModal(blockedIndex: number) {
       this.isModalOpened = true;
       this.currentAssetIndex = this.ownerVisibleAssets.length + blockedIndex;
+    },
+
+    async unblockAsset(assetId: number) {
+      if (this.unblockingAssetId) {
+        return;
+      }
+
+      this.unblockingAssetId = assetId;
+      const success = await this.$store.dispatch("event/unblockAssets", [
+        assetId,
+      ]);
+      this.unblockingAssetId = null;
+
+      if (success && this.blockedAssets.length === 0) {
+        this.showBlockedAssets = false;
+      }
     },
 
     startAssetsPolling() {
@@ -529,11 +657,16 @@ export default defineComponent({
     min-height: fit-content;
   }
 
-  .assets-content {
+  .assets-body {
+    flex: 1;
+    min-height: 0;
     margin-top: 20px;
-    height: 72%;
     max-height: 75vh;
     overflow-y: auto;
+  }
+
+  .assets-content {
+    min-height: fit-content;
   }
 
   .blocked-assets-section {
@@ -541,14 +674,79 @@ export default defineComponent({
     padding-top: 16px;
   }
 
-  .blocked-warning {
+  .blocked-warning,
+  .blocked-empty {
     border: 1px solid #f68589;
     color: #8a2f35;
     line-height: 1.5;
   }
 
-  .blocked-toggle input {
-    margin-left: 8px;
+  .blocked-empty {
+    text-align: center;
+  }
+
+  .blocked-toggle {
+    display: inline-block;
+  }
+
+  .blocked-toggle-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .blocked-toggle-chip {
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid #f0d4d6;
+    background: #fff;
+    color: #8a2f35;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+  }
+
+  .blocked-toggle:hover .blocked-toggle-chip {
+    border-color: #f68589;
+    box-shadow: 0 2px 8px rgba(246, 133, 137, 0.18);
+  }
+
+  .blocked-toggle--active .blocked-toggle-chip {
+    background: #fdf0f1;
+    border-color: #f68589;
+    box-shadow: 0 2px 10px rgba(246, 133, 137, 0.22);
+  }
+
+  .blocked-toggle-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+    color: #c62828;
+  }
+
+  .blocked-toggle--active .blocked-toggle-icon {
+    color: #a31515;
+  }
+
+  .blocked-toggle-badge {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: #c62828;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .blocked-toggle--active .blocked-toggle-badge {
+    background: #a31515;
   }
 
   .choose-all-text {
@@ -681,6 +879,15 @@ export default defineComponent({
     border: none;
     cursor: pointer;
     transform: translateY(-50%);
+  }
+
+  .lightbox-unblock {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 30;
+    width: 220px;
   }
 }
 </style>

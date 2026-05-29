@@ -1,10 +1,36 @@
 class Time {
-  convertToLocalTime(givenDate: string): string {
-    const utcDate = new Date(givenDate + "Z"); // Appending 'Z' makes it a UTC date
+  private parseUtcDateString(givenDate: string): Date | null {
+    if (!givenDate?.trim()) return null;
 
-    // Format the date to "YYYY-MM-DD HH:mm:ss" in the local timezone
+    const trimmed = givenDate.trim();
+
+    // Already formatted as local YYYY/MM/DD ...
+    if (/^\d{4}\/\d{2}\/\d{2}/.test(trimmed)) {
+      const normalized = trimmed.replace(/\//g, "-").replace(" ", "T");
+      const date = new Date(normalized);
+      return isNaN(date.getTime()) ? null : date;
+    }
+
+    // ISO string with explicit timezone (Z or offset)
+    if (/[Zz]$/.test(trimmed) || /[+-]\d{2}:?\d{2}$/.test(trimmed)) {
+      const date = new Date(trimmed);
+      return isNaN(date.getTime()) ? null : date;
+    }
+
+    // Naive datetime from API — treat as UTC
+    const isoLike = trimmed.includes("T")
+      ? trimmed
+      : trimmed.replace(" ", "T");
+    const date = new Date(`${isoLike}Z`);
+    return isNaN(date.getTime()) ? null : date;
+  }
+
+  convertToLocalTime(givenDate: string): string {
+    const utcDate = this.parseUtcDateString(givenDate);
+    if (!utcDate) return "";
+
     const year = utcDate.getFullYear();
-    const month = String(utcDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const month = String(utcDate.getMonth() + 1).padStart(2, "0");
     const day = String(utcDate.getDate()).padStart(2, "0");
     const hours = String(utcDate.getHours()).padStart(2, "0");
     const minutes = String(utcDate.getMinutes()).padStart(2, "0");
@@ -14,11 +40,11 @@ class Time {
   }
 
   extractDate(givenDate: string): string {
-    const date = new Date(givenDate + "Z"); // Adding 'Z' ensures it's treated as UTC
+    const date = this.parseUtcDateString(givenDate);
+    if (!date) return "";
 
-    // Extract the day, month, and year
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
 
     return `${day}/${month}/${year}`;

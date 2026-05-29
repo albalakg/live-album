@@ -31,9 +31,10 @@ export default defineComponent({
 .mobile-scroll-bar {
     height: 60px;
     width: 100%;
+    max-width: 100vw;
     overflow-x: auto;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     z-index: 10000;
     padding: 0 5px;
@@ -42,10 +43,12 @@ export default defineComponent({
     z-index: 100;
 
     .mobile-scroll-bar-item {
-        width: 40%;
+        flex: 0 0 auto;
+        padding: 0 10px;
 
         span {
             font-size: .9em;
+            white-space: nowrap;
         }
     }
 }

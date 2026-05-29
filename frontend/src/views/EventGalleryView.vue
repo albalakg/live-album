@@ -68,6 +68,22 @@
         />
         <br> -->
         <MainButton :loading="loading" text="שמור" @onClick="submit()" />
+        <div
+          v-if="hasBlockedAssets"
+          class="blocked-gallery-toggle margin--top-medium width--full"
+        >
+          <label class="blocked-toggle pointer display--flex align--center">
+            <input
+              type="checkbox"
+              :checked="showBlockedGalleryAssets"
+              @change="toggleBlockedGalleryAssets"
+            />
+            <span class="margin--right-small">הצג תמונות חסומות בתצוגה המקדימה</span>
+          </label>
+          <small class="blocked-toggle-note display--block margin--top-small">
+            לצפייה בלבד — תמונות חסומות לא מוצגות לאורחים עד שתבטלו את החסימה.
+          </small>
+        </div>
       </div>
     </div>
   </div>
@@ -121,6 +137,7 @@ export default defineComponent({
 
   created() {
     this.$store.dispatch("event/getEventGalleryAssets");
+    this.$store.dispatch("event/getEventAssets");
     this.galleryPollIntervalId = setInterval(() => {
       this.$store.dispatch("event/getEventGalleryAssets");
     }, 10000);
@@ -150,6 +167,14 @@ export default defineComponent({
     event(): IEvent {
       return this.$store.getters["event/getEvent"];
     },
+
+    hasBlockedAssets(): boolean {
+      return this.$store.getters["event/hasBlockedAssets"];
+    },
+
+    showBlockedGalleryAssets(): boolean {
+      return this.$store.getters["event/showBlockedGalleryAssets"];
+    },
   },
 
   methods: {
@@ -166,6 +191,14 @@ export default defineComponent({
     copyUrl() {
       this.copyTextToClipboard(
         window.location.origin + `/event/open-album/${this.eventPath}`
+      );
+    },
+
+    toggleBlockedGalleryAssets(event: Event) {
+      const target = event.target as HTMLInputElement;
+      this.$store.dispatch(
+        "event/setShowBlockedGalleryAssets",
+        target.checked
       );
     },
 
@@ -257,5 +290,18 @@ export default defineComponent({
       height: 200px;
     }
   }
+}
+
+.blocked-gallery-toggle {
+  text-align: start;
+}
+
+.blocked-toggle input {
+  margin-left: 8px;
+}
+
+.blocked-toggle-note {
+  color: #8a2f35;
+  line-height: 1.4;
 }
 </style>

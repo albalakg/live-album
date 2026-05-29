@@ -61,7 +61,7 @@
       </h2>
 
       <div
-        class="display--flex justify--space-between height--full width--two-thirds margin--auto flex--wrap-mobile"
+        class="features-cards display--flex justify--space-between height--full width--two-thirds margin--auto flex--wrap-mobile"
       >
         <div v-for="card in cards" :key="card.title" class="features-card">
           <h3 class="title--large">{{ card.title }}</h3>
@@ -142,6 +142,21 @@ export default defineComponent({
           description:
             "כל אירוע מקבל קישור ייחודי לעמוד שיתוף שיהיה ניתן לגשת אליו עם QR שניצור עבורכם שמגיע עם כרטיס מעוצב.",
         },
+        {
+          title: "הגנה חכמה על תמונות",
+          icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70" fill="none">
+            <path d="M32 8L12 18v14c0 14 8.5 27 20 32 11.5-5 20-18 20-32V18L32 8z"
+                  stroke="#1a1a1a" stroke-width="2.6"
+                  stroke-linejoin="round"/>
+            <path d="M24 32l6 6 12-14"
+                  stroke="#1a1a1a" stroke-width="2.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"/>
+          </svg>
+          `,
+          description:
+            "בדיקה אוטומטית של תמונות לא הולמות לפני הצגה באלבום. סרטונים אינם נבדקים — ובהגדרות האירוע אפשר להגביל העלאות לתמונות בלבד.",
+        },
       ],
     };
   },
@@ -194,6 +209,11 @@ export default defineComponent({
 
     p {
       font-weight: 500;
+    }
+
+    .features-cards {
+      justify-content: center;
+      gap: 1.5rem;
     }
 
     .features-card {

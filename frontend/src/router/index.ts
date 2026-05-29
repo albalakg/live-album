@@ -44,6 +44,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/EmailConfirmationView.vue"),
   },
   {
+    path: "/auth/google/callback",
+    name: "googleAuthCallback",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/GoogleAuthCallbackView.vue"),
+  },
+  {
     path: "/contact-us",
     name: "contact",
     component: () => import("@/views/ContactView.vue"),
@@ -121,6 +127,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "qr",
         name: "eventQRCard",
         component: () => import("../views/EventQRCardView.vue"),
+      },
+      {
+        path: "whatsapp",
+        name: "eventWhatsApp",
+        component: () => import("../views/EventWhatsAppView.vue"),
       },
     ],
   },

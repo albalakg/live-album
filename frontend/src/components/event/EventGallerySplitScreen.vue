@@ -48,7 +48,7 @@ export default defineComponent({
 
   computed: {
     assets(): IEventAsset[] {
-      return this.$store.getters["event/getActiveGalleryAssets"] as IEventAsset[];
+      return this.$store.getters["event/getDisplayGalleryAssets"] as IEventAsset[];
     },
     layout(): string {
       return this.direction === "horizontal"

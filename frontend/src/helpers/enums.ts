@@ -21,12 +21,27 @@ export enum EventAssetsManagementModesEnum {
   DOWNLOAD = 'download',
   DELETE = 'delete',
   HIDE = 'hide',
+  BLOCK = 'block',
 }
 
 export enum AssetModerationStatusEnum {
   ACTIVE = 1,
   PENDING = 2,
   BLOCKED = 6,
+}
+
+export enum WhatsAppCampaignStatusEnum {
+  PENDING = 'pending',
+  SCHEDULED = 'scheduled',
+  SENDING = 'sending',
+  SENT = 'sent',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+}
+
+export enum WhatsAppSendModeEnum {
+  IMMEDIATE = 'immediate',
+  SCHEDULED = 'scheduled',
 }
 
 const MODERATION_STRING_TO_ENUM: Record<string, AssetModerationStatusEnum> = {
@@ -53,6 +68,11 @@ export function normalizeModerationStatus(
 export function getAssetModerationStatus(asset: {
   status?: AssetModerationStatusEnum | string | number;
   moderation_status?: AssetModerationStatusEnum | string | number;
+  is_blocked?: boolean | number;
 }): AssetModerationStatusEnum {
-  return normalizeModerationStatus(asset.moderation_status ?? asset.status);
+  if (asset.is_blocked === true || asset.is_blocked === 1) {
+    return AssetModerationStatusEnum.BLOCKED;
+  }
+
+  return normalizeModerationStatus(asset.status ?? asset.moderation_status);
 }

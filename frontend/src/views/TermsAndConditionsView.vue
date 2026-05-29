@@ -59,7 +59,7 @@
         <h1 class="text--dark title--large tnc-title">
           תנאי שימוש והסכם התקשרות – Snapshare
         </h1>
-        <p class="text--dark tnc-updated">עדכון אחרון: אפריל 2026</p>
+        <p class="text--dark tnc-updated">עדכון אחרון: מאי 2026</p>
       </header>
 
       <section class="tnc-section" aria-labelledby="tnc-intro-heading">
@@ -175,7 +175,42 @@
       </section>
 
       <section class="tnc-section" aria-labelledby="tnc-s6">
-        <h3 id="tnc-s6" class="text--dark">6. מדיניות ביטולים והחזרים כספיים</h3>
+        <h3 id="tnc-s6" class="text--dark">6. סינון והגנה על תוכן תמונות</h3>
+        <ul class="text--dark tnc-list">
+          <li>
+            <strong>בדיקה אוטומטית (תמונות בלבד):</strong> הפלטפורמה מנתחת תמונות
+            המועלות לאירוע לצורך זיהוי תוכן שעלול להיחשב לא הולם (למשל תוכן מיני,
+            אלים או פוגעני). הבדיקה חלה על <strong>תמונות בלבד</strong> ואינה
+            מבוצעת על <strong>סרטונים</strong>.
+          </li>
+          <li>
+            <strong>סטטוסים והצגה:</strong> תמונה שעברה בדיקה ואושרה תוצג בגלריה
+            ובאלבום החי. תמונה שנחסמה או שנמצאת בבדיקה לא תוצג לציבור עד להחלטה
+            אחרת.
+          </li>
+          <li>
+            <strong>שליטת מארגן:</strong> מארגן האירוע רשאי לחסום או לשחרר תמונות
+            באופן ידני, בנוסף לסינון האוטומטי.
+          </li>
+          <li>
+            <strong>הגבלת סרטונים:</strong> מארגן האירוע רשאי, בהגדרות האירוע,
+            <strong>לבטל העלאת סרטונים</strong> — במקרה כזה האורחים יוכלו להעלות
+            <strong>תמונות בלבד</strong>.
+          </li>
+          <li>
+            <strong>דיוק המערכת:</strong> מנגנון הסינון מבוסס AI ואינו חסין
+            מטעויות (False Positive / False Negative). החברה אינה מתחייבת לזיהוי
+            מלא של כל תוכן בעייתי.
+          </li>
+          <li>
+            <strong>דיווח:</strong> ניתן לדווח על תוכן פוגעני בפנייה לכתובת
+            המייל בסוף מסמך זה.
+          </li>
+        </ul>
+      </section>
+
+      <section class="tnc-section" aria-labelledby="tnc-s7">
+        <h3 id="tnc-s7" class="text--dark">7. מדיניות ביטולים והחזרים כספיים</h3>
         <p class="text--dark">
           Snapshare פועלת תחת מודל &quot;סף שימוש הוגן&quot; (Fair Use Thresholds):
         </p>
@@ -195,8 +230,8 @@
         </ul>
       </section>
 
-      <section class="tnc-section" aria-labelledby="tnc-s7">
-        <h3 id="tnc-s7" class="text--dark">7. מדיניות שימוש הוגן (Fair Usage Policy)</h3>
+      <section class="tnc-section" aria-labelledby="tnc-s8">
+        <h3 id="tnc-s8" class="text--dark">8. מדיניות שימוש הוגן (Fair Usage Policy)</h3>
         <p class="text--dark">
           החברה מגבילה את השימוש בתוכניות ה&quot;ללא הגבלה&quot; לסף סביר של 10,000
           תמונות ו-5,000 משתתפים לאירוע בודד. שימוש מעבר לסף זה מחייב תיאום מראש
@@ -205,21 +240,22 @@
         </p>
       </section>
 
-      <section class="tnc-section" aria-labelledby="tnc-s8">
-        <h3 id="tnc-s8" class="text--dark">8. הגבלת אחריות (Disclaimer)</h3>
+      <section class="tnc-section" aria-labelledby="tnc-s9">
+        <h3 id="tnc-s9" class="text--dark">9. הגבלת אחריות (Disclaimer)</h3>
         <p class="text--dark">
           השירות ניתן כפי שהוא (AS-IS). החברה לא תהיה אחראית לכל נזק עקיף,
           תוצאתי או מקרי, לרבות אובדן רווחים או נתונים, הנובע משימוש או
           אי-יכולת להשתמש בפלטפורמה.
           <br>
-          החברה אינה אחראית לתוכן התמונות המועלות על ידי האורחים ואינה מבצעת ניטור
-          אקטיבי של כל תמונה, אלא אם הופעלו כלי ניטור AI (שגם הם אינם חסינים
-          מטעויות).
+          החברה אינה אחראית לתוכן המועלה על ידי האורחים. הפלטפורמה מפעילה מנגנון
+          סינון אוטומטי לתמונות (כמפורט בסעיף 6), אך מנגנון זה אינו מבטיח זיהוי
+          מלא של כל תוכן בעייתי ואינו חל על סרטונים. האחריות לתוכן שהועלה ולשימוש
+          בו נותרת בידי מארגן האירוע והמשתמשים.
         </p>
       </section>
 
-      <section class="tnc-section" aria-labelledby="tnc-s9">
-        <h3 id="tnc-s9" class="text--dark">9. שיפוי</h3>
+      <section class="tnc-section" aria-labelledby="tnc-s10">
+        <h3 id="tnc-s10" class="text--dark">10. שיפוי</h3>
         <p class="text--dark">
           המנפיק/מארגן האירוע מתחייב לשפות את החברה בגין כל תביעה, נזק או הוצאה
           (לרבות שכר טרחת עו&quot;ד) הנובעים מהפרת הצהרותיו לעניין זכויות יוצרים
@@ -227,16 +263,16 @@
         </p>
       </section>
 
-      <section class="tnc-section" aria-labelledby="tnc-s10">
-        <h3 id="tnc-s10" class="text--dark">10. סמכות שיפוט ודין חל</h3>
+      <section class="tnc-section" aria-labelledby="tnc-s11">
+        <h3 id="tnc-s11" class="text--dark">11. סמכות שיפוט ודין חל</h3>
         <p class="text--dark">
           על הסכם זה יחולו אך ורק דיני מדינת ישראל. סמכות השיפוט הבלעדית בכל עניין
           הנובע מהסכם זה תהיה לבתי המשפט המוסמכים במחוז תל אביב.
         </p>
       </section>
 
-      <section class="tnc-section" aria-labelledby="tnc-s11">
-        <h3 id="tnc-s11" class="text--dark">11. יצירת קשר</h3>
+      <section class="tnc-section" aria-labelledby="tnc-s12">
+        <h3 id="tnc-s12" class="text--dark">12. יצירת קשר</h3>
         <p class="text--dark">
           לכל שאלה, דיווח על תוכן פוגעני או בקשה לעיון במידע, ניתן לפנות אלינו
           בכתובת:
