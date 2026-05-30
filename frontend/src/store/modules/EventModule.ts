@@ -7,6 +7,7 @@ import {
   UpdateEventRequest,
   IEvent,
   IEventDownloadAssetsProcess,
+  IUpdateQrCardSettingsRequest,
 } from "@/helpers/interfaces";
 import {
   AssetModerationStatusEnum,
@@ -264,6 +265,14 @@ const EventModule = {
       settings: { selectedAlbum: EventGalleryType }
     ) {
       state.event.config.displayed_gallery = settings.selectedAlbum;
+    },
+
+    UPDATE_QR_CARD_SETTINGS(
+      state: IEventModuleState,
+      settings: IUpdateQrCardSettingsRequest
+    ) {
+      state.event.config.qr_card_design = settings.design;
+      state.event.config.qr_card_text = settings.text;
     },
 
     UPDATE_EVENT(state: IEventModuleState, event: any) {
@@ -864,6 +873,39 @@ const EventModule = {
               text: ErrorsHandler.getErrorMessage(
                 err,
                 "מצטערים אך הייתה תקלה בעדכון הגדרות גלריית התמונות"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    updateQrCardSettings(
+      context: {
+        state: IEventModuleState;
+        commit: (arg0: string, arg1: any) => void;
+      },
+      data: IUpdateQrCardSettingsRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/qr-card/settings`, data)
+          .then((res) => {
+            context.commit("UPDATE_QR_CARD_SETTINGS", data);
+            notify({
+              text: "הגדרות כרטיס ה-QR נשמרו בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך הייתה תקלה בשמירת הגדרות כרטיס ה-QR"
               ),
               type: "error",
               duration: 5000,

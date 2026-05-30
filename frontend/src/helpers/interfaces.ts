@@ -86,6 +86,13 @@ export interface IEventConfig {
   video_upload_enabled: boolean;
   event_id: number;
   displayed_gallery: EventGalleryType;
+  qr_card_design?: string | null;
+  qr_card_text?: string | null;
+}
+
+export interface IUpdateQrCardSettingsRequest {
+  design: string;
+  text: string;
 }
 
 export interface IEventDownloadAssetsProcess {

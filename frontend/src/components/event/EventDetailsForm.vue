@@ -68,7 +68,7 @@
         :value="form.config.video_upload_enabled"
         class="checkbox"
       />
-      <small>לאפשר לאורחים ולבעלי האירוע להעלות סרטונים</small>
+      <small>לאפשר לאורחים ולבעלי האירוע להעלות  סרטונים</small>
     </div>
     <div class="display--flex checkbox-wrapper">
       <MainCheckbox

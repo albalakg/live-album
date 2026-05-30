@@ -3,8 +3,9 @@
     @click.stop="$emit('onClick', assetIndex)"
     class="gallery-asset-wrapper"
     :class="{
-      'padding--small': true,
-      'padding--no-right': isFirstOfLine && !$bp.isMobile,
+      'padding--small': !modalView,
+      'padding--no-right': !modalView && isFirstOfLine && !$bp.isMobile,
+      'gallery-asset-wrapper--modal': modalView,
       assetIndex: true,
     }"
   >
@@ -102,6 +103,11 @@ export default defineComponent({
     asset: {
       type: Object as PropType<IEventAsset>,
       required: true,
+    },
+
+    modalView: {
+      type: Boolean,
+      default: false,
     },
   },
 
@@ -281,6 +287,39 @@ export default defineComponent({
     opacity: 0.9;
     border-radius: 50%;
     padding: 1px 4px 4px 4px;
+  }
+}
+
+.gallery-asset-wrapper--modal {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
+
+  .gallery-asset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .album-asset {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .video-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
   }
 }
 </style>

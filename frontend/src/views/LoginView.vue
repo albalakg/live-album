@@ -35,7 +35,7 @@
             :tab-index="2"
           />
         </div>
-        <br v-if="$bp.isMobile">
+        <br>
         <div>
           <MainButton :loading="isLoading" text="כניסה למערכת" :tab-index="3" />
           <div class="auth-divider">

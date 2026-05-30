@@ -91,20 +91,29 @@
                   width="xxx-large"
                   height="x-small"
                 />
-                <p class="text--dark">
-                  אלבום דיגיטלי חי בזמן האירוע
-                  <br />
-                  כל קבצי האלבום להורדה
-                  <br />
-                  כרטיס הזמנה עם QR המוביל לעמוד ייחודי להעלאת הקבצים
-                </p>
+                <p
+                  class="text--dark"
+                  v-html="currentPlanDescription"
+                ></p>
               </div>
 
               <div class="order-checkout-box brs--small bg--white shadow--small">
+                <span
+                  v-if="showOrderStrikePrice"
+                  class="order-launch-sale-tag"
+                  >{{ launchSaleLabel }}</span
+                >
                 <div class="order-price-row display--flex justify--center align--center">
-                  <span class="title--large text--dark"
-                    >₪{{ currentPrice }}</span
-                  >
+                  <div class="order-price-block display--flex flex--column align--center">
+                    <span
+                      v-if="showOrderStrikePrice"
+                      class="order-price-original text--dark"
+                      >₪{{ orderStrikePrice }}</span
+                    >
+                    <span class="title--large text--dark order-price-sale"
+                      >₪{{ currentPrice }}</span
+                    >
+                  </div>
                 </div>
                 <div
                   class="order-plan-switcher display--flex flex--wrap justify--center"
@@ -238,6 +247,12 @@ import MainLine from "@/components/library/background/MainLine.vue";
 import { defineComponent } from "vue";
 import { IStoreOrderResult, ISubscriptionPlan } from "@/helpers/interfaces";
 import { SubscriptionTypesEnum } from "@/helpers/enums";
+import {
+  SUBSCRIPTION_LAUNCH_SALE_LABEL,
+  showSubscriptionStrikePrice,
+  subscriptionPlanDescription,
+  subscriptionStrikePrice,
+} from "@/helpers/subscriptionPricing";
 
 export default defineComponent({
   name: "OrderView",
@@ -251,6 +266,7 @@ export default defineComponent({
 
   data() {
     return {
+      launchSaleLabel: SUBSCRIPTION_LAUNCH_SALE_LABEL,
       demoLoading: false as boolean,
       paymentLoading: false as boolean,
       paymentSrc: "" as string,
@@ -340,6 +356,18 @@ export default defineComponent({
       }
 
       return price;
+    },
+
+    orderStrikePrice(): number {
+      return subscriptionStrikePrice(this.currentPrice);
+    },
+
+    showOrderStrikePrice(): boolean {
+      return showSubscriptionStrikePrice(this.currentPrice);
+    },
+
+    currentPlanDescription(): string {
+      return subscriptionPlanDescription(this.currentPlan);
     },
   },
 
@@ -527,6 +555,7 @@ export default defineComponent({
   @media only screen and (max-width: 900px) {
     grid-template-columns: 1fr;
     gap: 22px;
+    width: 95%;
   }
 }
 
@@ -564,6 +593,7 @@ export default defineComponent({
 
 .order-checkout-box {
   margin-top: 8px;
+  text-align: center;
   padding: 18px 16px 20px;
 }
 
@@ -571,6 +601,33 @@ export default defineComponent({
   padding-bottom: 14px;
   margin-bottom: 14px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.order-price-block {
+  gap: 6px;
+}
+
+.order-launch-sale-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #222;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.order-price-original {
+  font-size: 1.35rem;
+  font-weight: 700;
+  opacity: 0.65;
+  text-decoration: line-through;
+}
+
+.order-price-sale {
+  line-height: 1.2;
 }
 
 .order-plan-switcher {

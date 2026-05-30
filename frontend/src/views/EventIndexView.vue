@@ -27,6 +27,7 @@
 import Sidebar from "@/components/library/app/SideBar.vue";
 import MobileScrollBar from "@/components/library/app/MobileScrollBar.vue";
 import { defineComponent } from "vue";
+import { isWhatsAppEnabled } from "@/helpers/features";
 import { IMobileScrollBarItem } from "@/helpers/interfaces";
 
 export default defineComponent({
@@ -73,11 +74,15 @@ export default defineComponent({
           path: "/event/qr",
           isActive: false,
         },
-        {
-          text: "WhatsApp",
-          path: "/event/whatsapp",
-          isActive: false,
-        },
+        ...(isWhatsAppEnabled()
+          ? [
+              {
+                text: "WhatsApp",
+                path: "/event/whatsapp",
+                isActive: false,
+              },
+            ]
+          : []),
       ];
 
       return items.map((item) => {

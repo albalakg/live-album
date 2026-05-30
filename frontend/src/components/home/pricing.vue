@@ -66,8 +66,28 @@
             <div class="pricing-card-footer">
               <div>
                 <p class="text--white" v-html="card.description"></p>
-                <div>
-                  <h4 class="text--white title--large">
+                <div class="pricing-price-block">
+                  <span
+                    v-if="card.showStrikePrice"
+                    class="pricing-launch-sale-tag"
+                  >
+                    {{ launchSaleLabel }}
+                  </span>
+                  <div
+                    v-if="card.showStrikePrice"
+                    class="pricing-price-row"
+                  >
+                    <p class="pricing-price-original text--white">
+                      {{ card.strikePrice }} ₪
+                    </p>
+                    <h4 class="text--white title--large pricing-price-sale">
+                      {{ card.displayPrice }} ₪
+                    </h4>
+                  </div>
+                  <h4
+                    v-else
+                    class="text--white title--large pricing-price-sale"
+                  >
                     {{ card.displayPrice }} ₪
                   </h4>
                   <template v-if="card.slug === 'premium'">
@@ -126,6 +146,12 @@
 import MainCube from "@/components/library/background/MainCube.vue";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
 import { ISubscriptionPlan } from "@/helpers/interfaces";
+import {
+  SUBSCRIPTION_LAUNCH_SALE_LABEL,
+  showSubscriptionStrikePrice,
+  subscriptionPlanDescription,
+  subscriptionStrikePrice,
+} from "@/helpers/subscriptionPricing";
 import { defineComponent } from "vue";
 import MainButton from "../library/buttons/MainButton.vue";
 
@@ -165,31 +191,12 @@ const ICON_BY_SLUG: Record<string, string> = {
 </svg>`,
 };
 
-function retentionLabelHebrew(hours: number | undefined): string {
-  if (hours == null || !Number.isFinite(hours)) return "";
-  if (hours <= 1) return "לאחר שעה";
-  const months = Math.round(hours / (24 * 30.4375));
-  if (months >= 1) return `לאחר ${months} חודשים מתחילת האירוע`;
-  const days = Math.round(hours / 24);
-  return days <= 1 ? "לאחר יום" : `לאחר ${days} ימים מתחילת האירוע`;
-}
-
-function planDescription(plan: ISubscriptionPlan): string {
-  const parts: string[] = [];
-  if (plan.files_allowed != null && Number.isFinite(plan.files_allowed)) {
-    parts.push(`המסלול מוגבל עד ${plan.files_allowed} קבצים.`);
-  }
-  const ret = retentionLabelHebrew(plan.storage_time);
-  if (ret) {
-    parts.push(`האירוע נסגר ${ret}.`);
-  }
-  return parts.join("<br>");
-}
-
 type DisplayCard = {
   slug: string;
   title: string;
   displayPrice: number;
+  strikePrice: number;
+  showStrikePrice: boolean;
   description: string;
   icon: string;
   cardClass: string;
@@ -201,6 +208,12 @@ export default defineComponent({
   components: {
     MainCube,
     MainButton,
+  },
+
+  data() {
+    return {
+      launchSaleLabel: SUBSCRIPTION_LAUNCH_SALE_LABEL,
+    };
   },
 
   computed: {
@@ -224,7 +237,9 @@ export default defineComponent({
           slug,
           title: `מסלול ${plan.name}`,
           displayPrice: plan.price,
-          description: planDescription(plan),
+          strikePrice: subscriptionStrikePrice(plan.price),
+          showStrikePrice: showSubscriptionStrikePrice(plan.price),
+          description: subscriptionPlanDescription(plan),
           icon: ICON_BY_SLUG[slug] ?? ICON_BY_SLUG.classic,
           cardClass,
         });
@@ -296,6 +311,49 @@ export default defineComponent({
   h4 {
     margin-bottom: 5px;
   }
+}
+
+.pricing-price-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pricing-launch-sale-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #222;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  line-height: 1.2;
+}
+
+.pricing-price-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.pricing-price-original {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  opacity: 0.65;
+  text-decoration: line-through;
+  line-height: 1.2;
+}
+
+.pricing-price-sale {
+  margin: 0 0 5px;
+  line-height: 1.2;
 }
 
 .pricing-cards {

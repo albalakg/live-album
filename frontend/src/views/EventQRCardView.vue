@@ -24,10 +24,25 @@
         title="הטקסט שיופיע בכרטיס"
       />
       <br />
+      <MainButton
+        :loading="isSaving"
+        text="שמור"
+        @onClick="saveSettings()"
+      />
+    
+      <br />
+      <br />
       <MainButton :text="downloadCardText" @onClick="downloadCard()" />
       <br />
       <br />
       <MainButton :text="downloadQRText" @onClick="downloadQRCode()" />
+      <br />
+      <br />
+      <MainButton
+        :disabled="isSaving || isDefaultSelection"
+        text="חזרה לברירת המחדל"
+        @onClick="resetToDefaults()"
+      />
     </div>
     <div
       ref="eventCard"
@@ -52,6 +67,12 @@ import MainButton from "@/components/library/buttons/MainButton.vue";
 import MainSelect from "@/components/library/inputs/MainSelect.vue";
 import MainInput from "@/components/library/inputs/MainInput.vue";
 import EventQR from "@/components/event/EventQR.vue";
+import {
+  DEFAULT_QR_CARD_DESIGN,
+  DEFAULT_QR_CARD_TEXT,
+  isValidQrCardDesign,
+  QR_CARD_OPTIONS,
+} from "@/helpers/qrCardOptions";
 
 export default defineComponent({
   name: "EventQRCardView",
@@ -67,23 +88,22 @@ export default defineComponent({
     return {
       isDownloadingQR: false as boolean,
       isDownloadingCard: false as boolean,
+      isSaving: false as boolean,
       background: "transparent" as string,
-      selectedQR: "qr-card-flowers.webp" as string,
-      QROptions: [
-        { label: "פרחים", value: "qr-card-flowers.webp" },
-        { label: "פרחים 2", value: "qr-card-flowers-2.webp" },
-        { label: "פרחים 3", value: "qr-card-flowers-3.webp" },
-        { label: "פרחים 4", value: "qr-card-flowers-4.webp" },
-        { label: "5 פרחים", value: "qr-card-flowers-5.png" },
-        { label: "טבע", value: "qr-card-nature.png" },
-        { label: "זהב לבן", value: "qr-card-gold.png" },
-        { label: "זהב לבן 2", value: "qr-card-gold-2.png" },
-        { label: "זהב לבן 3", value: "qr-card-gold-3.png" },
-        { label: "שיש מוזהב", value: "qr-card-marble.png" },
-        { label: "שיש מוזהב 2", value: "qr-card-marble-2.png" },
-      ] as { label: string; value: string }[],
-      cardText: "סרקו, צלמו ותעלו בואו נחגוג ביחד" as string,
+      selectedQR: DEFAULT_QR_CARD_DESIGN as string,
+      QROptions: QR_CARD_OPTIONS.map((option) => ({ ...option })),
+      cardText: DEFAULT_QR_CARD_TEXT as string,
     };
+  },
+
+  watch: {
+    event() {
+      this.setForm();
+    },
+  },
+
+  created() {
+    this.setForm();
   },
 
   computed: {
@@ -98,9 +118,40 @@ export default defineComponent({
     downloadQRText(): string {
       return this.isDownloadingQR ? "מוריד..." : "הורדה של ה QR בלבד";
     },
+
+    isDefaultSelection(): boolean {
+      return (
+        this.selectedQR === DEFAULT_QR_CARD_DESIGN &&
+        this.cardText.trim() === DEFAULT_QR_CARD_TEXT
+      );
+    },
   },
 
   methods: {
+    setForm() {
+      const savedDesign = this.event?.config?.qr_card_design;
+      this.selectedQR = isValidQrCardDesign(savedDesign)
+        ? savedDesign
+        : DEFAULT_QR_CARD_DESIGN;
+      const savedText = this.event?.config?.qr_card_text?.trim();
+      this.cardText = savedText || DEFAULT_QR_CARD_TEXT;
+    },
+
+    async saveSettings() {
+      this.isSaving = true;
+      await this.$store.dispatch("event/updateQrCardSettings", {
+        design: this.selectedQR,
+        text: this.cardText.trim(),
+      });
+      this.isSaving = false;
+    },
+
+    async resetToDefaults() {
+      this.selectedQR = DEFAULT_QR_CARD_DESIGN;
+      this.cardText = DEFAULT_QR_CARD_TEXT;
+      await this.saveSettings();
+    },
+
     async downloadCard() {
       try {
         const cardElement = this.$refs.eventCard as HTMLElement;

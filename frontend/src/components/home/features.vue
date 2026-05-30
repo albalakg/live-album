@@ -127,7 +127,7 @@ export default defineComponent({
             "גלריית תמונות ייחודית לכל אירוע, המאפשרת לאורחים לצפות ולהוריד את התמונות מהאירוע.",
         },
         {
-          title: "כרטיס הזמנה דיגיטלי עם קוד QR",
+          title: "כרטיס הזמנה דיגיטלי",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
             <rect x="20" y="10" width="24" height="44" rx="6"
                   stroke="#1a1a1a" stroke-width="2.8"/>

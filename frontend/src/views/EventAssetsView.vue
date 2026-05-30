@@ -43,15 +43,15 @@
               <div v-if="isOpen">
                 <slot>
                   <small>
-                    בוחרים את הקבצים שרוצים להורדה, ולוחצים על הכפתור "הכנת
-                    קבצים להורדה".
-                    <br />
-                    לאחר מכן, אנחנו נכין את כל הקבצים להורדה ותוך כמה דקות יהיה
-                    מוכן.
-                    <br />
-                    כאשר מוכן, יופיע כאן למטה, כפתור להורדת הקובץ (זיפ שמכיל את
-                    כל התמונות והסרטונים).
-                    <br />
+                   להורדה, בוחרים בפעולה "הורדת קבצים".
+                   <br />
+                   בוחרים את הקבצים שרוצים ולאחר מכן לוחצים על "בצע פעולה".
+                   <br />
+                   לאחר מכן, אנחנו נכין את כל הקבצים להורדה ותוך כמה דקות יהיה
+                   מוכן.
+                   <br />
+                   כאשר מוכן, יופיע כאן למטה, כפתור להורדת הקובץ
+                   <br />
                     מוזמנים לחכות בינתיים או שתחזרו לעיסוקכם ואנחנו כבר נדאג
                     לעדכן אתכם.
                   </small>
@@ -171,28 +171,41 @@
         <span class="lightbox-close lightbox-icon">&times;</span>
         <button @click.stop="changeAsset(currentAssetIndex + 1)" class="lightbox-next lightbox-icon">&#10094;</button>
         <button @click.stop="changeAsset(currentAssetIndex - 1)" class="lightbox-prev lightbox-icon">&#10095;</button>
-        <EventAssetCard class="lightbox-asset" :loading="loading" :assetIndex="0" :asset="currentAsset" :eventName="event.name" @onClick="doNone" controls autoplay />
-        <div
-          v-if="isCurrentAssetBlocked"
-          class="lightbox-unblock display--flex justify--center margin--top-medium"
-        >
-          <BaseButton
-            color="green"
-            text="בטל חסימה"
-            :loading="unblockingAssetId === currentAsset.id"
-            @onClick="unblockAsset(currentAsset.id)"
+        <div class="lightbox-content" @click.stop>
+          <EventAssetCard
+            class="lightbox-asset"
+            modalView
+            :bulkSelectable="false"
+            :loading="loading"
+            :assetIndex="0"
+            :asset="currentAsset"
+            :eventName="event.name"
+            @onClick="doNone"
+            controls
+            autoplay
           />
-        </div>
-        <div
-          v-else-if="canBlockCurrentAsset"
-          class="lightbox-unblock display--flex justify--center margin--top-medium"
-        >
-          <BaseButton
-            color="pink"
-            text="חסום קובץ"
-            :loading="blockingAssetId === currentAsset.id"
-            @onClick="blockAssets(currentAsset.id)"
-          />
+          <div
+            v-if="isCurrentAssetBlocked"
+            class="lightbox-actions display--flex justify--center"
+          >
+            <BaseButton
+              color="green"
+              text="בטל חסימה"
+              :loading="unblockingAssetId === currentAsset.id"
+              @onClick="unblockAsset(currentAsset.id)"
+            />
+          </div>
+          <div
+            v-else-if="canBlockCurrentAsset"
+            class="lightbox-actions display--flex justify--center"
+          >
+            <BaseButton
+              color="pink"
+              text="חסום קובץ"
+              :loading="blockingAssetId === currentAsset.id"
+              @onClick="blockAssets(currentAsset.id)"
+            />
+          </div>
         </div>
       </div>
   </div>
@@ -821,73 +834,8 @@ export default defineComponent({
   /* Adjust as needed for content */
   opacity: 1;
 }
+</style>
 
-.lightbox {
-  height: 100vh;
-  width: 100vw;
-  background-color: #000c;
-  position: fixed;
-  z-index: 1000;
-  top: 0;
-  right: 0;
-  
-  .lightbox-asset {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 850px;
-    max-width: 90%;
-    height: 600px;
-    max-height: 90%;
-    aspect-ratio: auto;
-    transform: translate(-50%, -50%);
-  }
-
-  .lightbox-icon {
-    position: absolute;
-    top: 50%;
-    font-size: 3rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: white;
-    transform: translateY(-50%);
-    transition: background-color 0.3s;
-    z-index: 20;
-
-    &:hover {
-      color: var(--pink);
-    }
-  }
-
-  .lightbox-next {
-    right: 20px;
-  }
-  
-  .lightbox-close {
-    top: 30px;
-    right: 20px;
-  }
-
-  .lightbox-prev {
-    position: absolute;
-    top: 50%;
-    left: 20px;
-    font-size: 3rem;
-    color: white;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transform: translateY(-50%);
-  }
-
-  .lightbox-unblock {
-    position: absolute;
-    left: 50%;
-    bottom: 24px;
-    transform: translateX(-50%);
-    z-index: 30;
-    width: 220px;
-  }
-}
+<style lang="scss">
+@import "@/styles/lightbox.scss";
 </style>

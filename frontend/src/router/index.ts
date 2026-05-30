@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Guard from "@/helpers/guard";
+import { isWhatsAppEnabled } from "@/helpers/features";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -128,11 +129,15 @@ const routes: Array<RouteRecordRaw> = [
         name: "eventQRCard",
         component: () => import("../views/EventQRCardView.vue"),
       },
-      {
-        path: "whatsapp",
-        name: "eventWhatsApp",
-        component: () => import("../views/EventWhatsAppView.vue"),
-      },
+      ...(isWhatsAppEnabled()
+        ? [
+            {
+              path: "whatsapp",
+              name: "eventWhatsApp",
+              component: () => import("../views/EventWhatsAppView.vue"),
+            },
+          ]
+        : []),
     ],
   },
   {
