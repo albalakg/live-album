@@ -1,5 +1,8 @@
 <template>
-    <div class="mobile-bar bg--pink">
+    <div
+        class="mobile-bar bg--pink"
+        :style="{ '--mobile-bar-bottom-offset': `${bottomOffset}px` }"
+    >
         <div v-for="(link, index) in links" :key="index" class="mobile-bar-icon display--flex align--center justify--center" @click="iconAction(link)">
             <MainIcon size="1.9em" :background="false" :icon="link.icon" color="#222" />
         </div>
@@ -20,12 +23,24 @@ export default defineComponent({
 
     data() {
         return {
-            links: [] as IMobileBarItem[]
+            links: [] as IMobileBarItem[],
+            bottomOffset: 0,
         }
     },
 
     created() {
         this.createLinks();
+    },
+
+    mounted() {
+        this.updateBottomOffset();
+        window.visualViewport?.addEventListener('resize', this.updateBottomOffset);
+        window.visualViewport?.addEventListener('scroll', this.updateBottomOffset);
+    },
+
+    beforeUnmount() {
+        window.visualViewport?.removeEventListener('resize', this.updateBottomOffset);
+        window.visualViewport?.removeEventListener('scroll', this.updateBottomOffset);
     },
 
     watch: {
@@ -61,6 +76,19 @@ export default defineComponent({
     },
 
     methods: {
+        updateBottomOffset() {
+            const viewport = window.visualViewport;
+            if (!viewport) {
+                this.bottomOffset = 0;
+                return;
+            }
+
+            this.bottomOffset = Math.max(
+                0,
+                window.innerHeight - viewport.height - viewport.offsetTop
+            );
+        },
+
         iconAction(link: IMobileBarItem) {
             if(link.url.includes('menu')) {
                 this.$store.dispatch("app/toggleMenu");
@@ -153,7 +181,7 @@ export default defineComponent({
     width: calc(100% - 40px);
     padding: 0 20px;
     position: fixed;
-    bottom: 0;
+    bottom: var(--mobile-bar-bottom-offset, 0px);
     left: 0;
     display: flex;
     justify-content: space-between;
