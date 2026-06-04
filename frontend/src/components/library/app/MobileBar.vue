@@ -1,8 +1,5 @@
 <template>
-    <div
-        class="mobile-bar bg--pink"
-        :style="{ '--mobile-bar-bottom-offset': `${bottomOffset}px` }"
-    >
+    <div class="mobile-bar bg--pink">
         <div v-for="(link, index) in links" :key="index" class="mobile-bar-icon display--flex align--center justify--center" @click="iconAction(link)">
             <MainIcon size="1.9em" :background="false" :icon="link.icon" color="#222" />
         </div>
@@ -24,23 +21,11 @@ export default defineComponent({
     data() {
         return {
             links: [] as IMobileBarItem[],
-            bottomOffset: 0,
         }
     },
 
     created() {
         this.createLinks();
-    },
-
-    mounted() {
-        this.updateBottomOffset();
-        window.visualViewport?.addEventListener('resize', this.updateBottomOffset);
-        window.visualViewport?.addEventListener('scroll', this.updateBottomOffset);
-    },
-
-    beforeUnmount() {
-        window.visualViewport?.removeEventListener('resize', this.updateBottomOffset);
-        window.visualViewport?.removeEventListener('scroll', this.updateBottomOffset);
     },
 
     watch: {
@@ -76,19 +61,6 @@ export default defineComponent({
     },
 
     methods: {
-        updateBottomOffset() {
-            const viewport = window.visualViewport;
-            if (!viewport) {
-                this.bottomOffset = 0;
-                return;
-            }
-
-            this.bottomOffset = Math.max(
-                0,
-                window.innerHeight - viewport.height - viewport.offsetTop
-            );
-        },
-
         iconAction(link: IMobileBarItem) {
             if(link.url.includes('menu')) {
                 this.$store.dispatch("app/toggleMenu");
@@ -177,11 +149,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .mobile-bar {
-    height: 60px;
-    width: calc(100% - 40px);
-    padding: 0 20px;
+    box-sizing: border-box;
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    width: 100%;
+    padding: 0 20px env(safe-area-inset-bottom, 0px);
     position: fixed;
-    bottom: var(--mobile-bar-bottom-offset, 0px);
+    bottom: 0;
     left: 0;
     display: flex;
     justify-content: space-between;

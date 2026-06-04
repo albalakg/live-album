@@ -11,8 +11,10 @@ import { useBreakpoints } from './composables/useBreakpoints';
 
 axios.defaults.baseURL = process.env.VUE_APP_SERVER_BASE_URL + "/api/";
 
-if (Auth.token()) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${Auth.token()}`;
+const session = Auth.get();
+if (session?.token) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${session.token}`;
+    store.commit("user/SET_LOGGED_IN", true);
 }
 
 

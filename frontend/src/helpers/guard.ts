@@ -1,13 +1,28 @@
 import store from "@/store/index";
+import Auth from "@/helpers/Auth";
 import { RouteLocationNormalized, NavigationGuardNext } from "vue-router";
+
+function isAuthenticated(): boolean {
+  return Auth.isLogged() || store.getters["user/isLoggedIn"];
+}
 
 class Guard {
   user(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
-    store.getters["user/isLoggedIn"] ? next() : next("/");
+    isAuthenticated() ? next() : next("/");
   }
 
   guest(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
-    !store.getters["user/isLoggedIn"] ? next() : next("/");
+    if (!isAuthenticated()) {
+      next();
+      return;
+    }
+
+    if (to.name === "googleAuthCallback") {
+      next();
+      return;
+    }
+
+    next("/");
   }
 
   local(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {

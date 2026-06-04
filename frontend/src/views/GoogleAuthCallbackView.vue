@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts">
+import Auth from "@/helpers/Auth";
 import { defineComponent } from "vue";
 import { resolvePostLoginRoute } from "@/helpers/postLoginRedirect";
 
@@ -43,13 +44,18 @@ export default defineComponent({
       return;
     }
 
+    Auth.clearSession();
     const user = await this.$store.dispatch("user/exchangeOAuthCode", { code });
     if (!user?.email) {
       this.$router.replace("/login");
       return;
     }
 
-    await this.$store.dispatch("user/getProfile");
+    try {
+      await this.$store.dispatch("user/getProfile");
+    } catch {
+      // OAuth login succeeded; keep session even if profile fetch fails transiently.
+    }
 
     this.$router.replace(
       resolvePostLoginRoute(user, this.$route.query, this.$store)

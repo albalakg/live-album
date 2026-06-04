@@ -44,7 +44,7 @@ export default defineComponent({
       const params = new URLSearchParams();
       params.set(
         "redirect",
-        `${process.env.VUE_APP_BASE_URL}/auth/google/callback`
+        `${process.env.VUE_APP_BASE_URL}/auth/google/callback/`
       );
 
       if (this.redirect) {

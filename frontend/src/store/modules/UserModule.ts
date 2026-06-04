@@ -246,7 +246,7 @@ const UserModule = {
         .catch((err) => {
           console.warn("get: ", err);
         });
-      Auth.deleteCookie();
+      Auth.clearSession();
       context.commit("SET_USER", null);
       context.commit("SET_LOGGED_IN", false);
       context.dispatch("event/setEvent", null, { root: true });
@@ -344,8 +344,14 @@ const UserModule = {
             resolve(res.data.data);
           })
           .catch((err) => {
-            router.push("/logout");
             console.warn("get: ", err);
+            if (err?.response?.status === 401) {
+              Auth.clearSession();
+              context.commit("SET_USER", null);
+              context.commit("SET_LOGGED_IN", false);
+              context.dispatch("event/setEvent", null, { root: true });
+              router.push("/");
+            }
             reject(err);
           });
       });

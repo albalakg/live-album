@@ -2,19 +2,49 @@ import router from '../router'
 import axios from "axios";
 
 const COOKIE_NAME = 'LiveAlbums';
+const STORAGE_KEY = 'LiveAlbumsAuth';
 
 class Auth {
     login(data: any) {
         try {
-            this.createCookie(data);
-            axios.defaults.headers.common["Authorization"] = `Bearer ${this.token()}`;
+            this.createSession(data);
+            const token = data?.token ?? this.readToken();
+            if (token) {
+                axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            }
         } catch(err) {
             console.error('err', err);
         }
     }
 
+    createSession(data: any) {
+        this.createStorage(data);
+        this.createCookie(data);
+    }
+
+    clearSession() {
+        this.deleteCookie();
+        this.deleteStorage();
+        delete axios.defaults.headers.common["Authorization"];
+    }
+
+    createStorage(data: any) {
+        try {
+            localStorage.setItem(STORAGE_KEY, this.encrypt(data));
+        } catch(err) {
+            console.warn('Failed to persist auth session', err);
+        }
+    }
+
     createCookie(data: any) {
-        document.cookie = `${COOKIE_NAME}=${this.encrypt(data)};SameSite=Lax;secure;expires=${new Date(data.expired_at)}`;
+        const secure =
+            window.location.protocol === "https:" ? ";secure" : "";
+        let expires = new Date(data.expired_at);
+        if (Number.isNaN(expires.getTime())) {
+            expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        }
+        const value = encodeURIComponent(this.encrypt(data));
+        document.cookie = `${COOKIE_NAME}=${value};path=/;SameSite=Lax${secure};expires=${expires.toUTCString()}`;
     }
 
     logout() {
@@ -22,9 +52,10 @@ class Auth {
     }
     
     get() {
-        const data =  this.decrypt();
-        if(!data) {
+        const data = this.decrypt();
+        if(!data || this.isExpired(data)) {
             this.deleteCookie();
+            this.deleteStorage();
             return null;
         }
 
@@ -32,23 +63,32 @@ class Auth {
     }
 
     id() {
-        return this.get() ? this.get().id : null;
+        const data = this.get();
+        return data ? data.id : null;
     }
 
     token() {
-        return this.get() ? this.get().token : '';
+        return this.readToken();
+    }
+
+    readToken() {
+        const data = this.get();
+        return data?.token ?? '';
     }
 
     firstName() {
-        return this.get() ? this.get().first_name : '';
+        const data = this.get();
+        return data ? data.first_name : '';
     }
 
     lastName() {
-        return this.get() ? this.get().last_name : '';
+        const data = this.get();
+        return data ? data.last_name : '';
     }
 
     role() {
-        return this.get() ? this.get().role : '';
+        const data = this.get();
+        return data ? data.role : '';
     }
 
     fullName() {
@@ -57,11 +97,11 @@ class Auth {
     }
     
     isLogged() {
-        return !!this.get();
+        return !!this.readToken();
     }
     
     isGuest() {
-        return !this.get();
+        return !this.isLogged();
     }
 
     encrypt(data: any) {
@@ -69,24 +109,76 @@ class Auth {
     }
 
     decrypt() {
+        const storageData = this.decryptStorage();
+        if (storageData) {
+            return storageData;
+        }
+
         const cookie = this.getCookie();
         if(!cookie) {
             return null;
         } 
 
-        return JSON.parse(decodeURIComponent(escape(atob(cookie))));
+        return this.decode(cookie);
+    }
+
+    decryptStorage() {
+        try {
+            const storedSession = localStorage.getItem(STORAGE_KEY);
+            return storedSession ? this.decode(storedSession) : null;
+        } catch(err) {
+            console.warn('Failed to read auth session', err);
+            return null;
+        }
+    }
+
+    decode(value: string) {
+        try {
+            return JSON.parse(decodeURIComponent(escape(atob(value))));
+        } catch(err) {
+            console.warn('Failed to decode auth session', err);
+            return null;
+        }
+    }
+
+    isExpired(data: any) {
+        if (!data?.expired_at) {
+            return false;
+        }
+
+        const expires = new Date(data.expired_at);
+        return !Number.isNaN(expires.getTime()) && expires.getTime() <= Date.now();
     }
 
     getCookie() {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${COOKIE_NAME}=`);
-        if (parts.length === 2) 
-            return parts?.pop()?.split(';').shift();
-        else '';
+        if (parts.length !== 2) {
+            return null;
+        }
+        const raw = parts.pop()?.split(";").shift();
+        if (!raw) {
+            return null;
+        }
+        try {
+            return decodeURIComponent(raw);
+        } catch {
+            return raw;
+        }
     }
 
     deleteCookie() {
-        document.cookie = `${COOKIE_NAME}=none;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+        const secure =
+            window.location.protocol === "https:" ? ";secure" : "";
+        document.cookie = `${COOKIE_NAME}=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`;
+    }
+
+    deleteStorage() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch(err) {
+            console.warn('Failed to clear auth session', err);
+        }
     }
 }
 
