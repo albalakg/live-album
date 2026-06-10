@@ -6,7 +6,7 @@
                     SnapShare
                 </h3>
                 <h4>
-                    האלבום שלך באירוע הקרוב
+                    האלבום שלכם באירוע הקרוב
                 </h4>
                 <div class="social-media display--flex justify--center-mobile">
                     <a href="https://www.facebook.com/share/1By1U5frDi/?mibextid=wwXIfr" target="_blank">

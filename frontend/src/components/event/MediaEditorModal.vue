@@ -8,6 +8,14 @@
 
         <div class="top-actions">
           <button
+            class="clear-btn"
+            @click="clearAll"
+            :disabled="!hasEdits"
+            type="button"
+          >
+            נקה
+          </button>
+          <button
             class="icon-btn"
             @click="undo"
             :disabled="!canUndo"
@@ -124,10 +132,6 @@
       </div>
 
       <footer class="editor-footer">
-        <button class="btn soft" @click="clearAll" :disabled="!hasEdits">
-          נקה
-        </button>
-
         <div class="footer-actions">
           <button class="btn ghost" @click="onCancel">ביטול</button>
           <button
@@ -266,6 +270,7 @@ import {
   onBeforeUnmount,
   nextTick,
 } from "vue";
+import { MAX_EXPORT_DIMENSION } from "@/helpers/uploadValidation";
 
 type Tool = "draw" | "select";
 
@@ -851,7 +856,34 @@ export default defineComponent({
       historyIndex.value = -1;
     }
 
-    /** Export full canvas (background + all edits) as a single PNG file. */
+    const EXPORT_JPEG_QUALITY = 0.85;
+
+    function canvasToBlob(
+      canvas: HTMLCanvasElement,
+      type: string,
+      quality: number
+    ): Promise<Blob> {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("Export failed"))),
+          type,
+          quality
+        );
+      });
+    }
+
+    function getExportMultiplier(): number {
+      let multiplier = exportMultiplier.value;
+      const longEdge = Math.max(baseW.value, baseH.value);
+
+      if (longEdge > MAX_EXPORT_DIMENSION) {
+        multiplier *= MAX_EXPORT_DIMENSION / longEdge;
+      }
+
+      return multiplier;
+    }
+
+    /** Export full canvas (background + all edits) as a compressed JPEG file. */
     async function exportFullImageBlob(): Promise<Blob> {
       const c: any = fabricCanvas.value;
       if (!c) throw new Error("Canvas not ready");
@@ -861,13 +893,34 @@ export default defineComponent({
       c.discardActiveObject?.();
       c.requestRenderAll?.();
 
-      // const multiplier = editorScale.value > 0 ? 1 / editorScale.value : 1;
-      // const dataUrl = c.toDataURL({ format: "png", multiplier });
-      const dataUrl = c.toDataURL({
-        format: "png",
-        multiplier: exportMultiplier.value,
-      });
+      const multiplier = getExportMultiplier();
+      const exportOptions = {
+        format: "jpeg",
+        quality: EXPORT_JPEG_QUALITY,
+        multiplier,
+      };
 
+      if (typeof c.toBlob === "function") {
+        const blob = await c.toBlob(exportOptions);
+        if (blob) return blob;
+      }
+
+      if (typeof c.toCanvasElement === "function") {
+        const exportCanvas: HTMLCanvasElement = c.toCanvasElement(multiplier);
+        if (exportCanvas.width > 0 && exportCanvas.height > 0) {
+          try {
+            return await canvasToBlob(
+              exportCanvas,
+              "image/jpeg",
+              EXPORT_JPEG_QUALITY
+            );
+          } catch {
+            // fall through to toDataURL
+          }
+        }
+      }
+
+      const dataUrl = c.toDataURL(exportOptions);
       const res = await fetch(dataUrl);
       return await res.blob();
     }
@@ -878,8 +931,8 @@ export default defineComponent({
       busy.value = true;
       try {
         const blob = await exportFullImageBlob();
-        const file = new File([blob], `snapshare_${Date.now()}.png`, {
-          type: "image/png",
+        const file = new File([blob], `snapshare_${Date.now()}.jpg`, {
+          type: "image/jpeg",
         });
         emit("confirm", { file });
       } finally {
@@ -989,7 +1042,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: max(10px, env(safe-area-inset-top, 0px)) 10px
+    max(10px, env(safe-area-inset-bottom, 0px));
   direction: rtl;
   overflow: auto;
   box-sizing: border-box;
@@ -1211,7 +1265,8 @@ export default defineComponent({
 .editor-modal {
   width: 100%;
   max-width: 980px;
-  max-height: min(90vh, 760px);
+  height: min(760px, calc(100dvh - 20px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+  max-height: calc(100dvh - 20px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   background: rgba(16, 16, 18, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
@@ -1220,6 +1275,7 @@ export default defineComponent({
   flex-direction: column;
   backdrop-filter: blur(14px);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  min-height: 0;
 }
 
 /* TOPBAR */
@@ -1230,6 +1286,7 @@ export default defineComponent({
   gap: 10px;
   padding: 12px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .editor-title {
@@ -1242,6 +1299,7 @@ export default defineComponent({
 
 .top-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
@@ -1253,6 +1311,7 @@ export default defineComponent({
   gap: 10px;
   padding: 10px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
 .editor-subtoolbar {
@@ -1262,6 +1321,7 @@ export default defineComponent({
   gap: 12px;
   padding: 10px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
 .tool-actions {
@@ -1366,6 +1426,27 @@ export default defineComponent({
   cursor: not-allowed;
 }
 
+.clear-btn {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.clear-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* Range + chip */
 .range {
   display: flex;
@@ -1413,7 +1494,7 @@ export default defineComponent({
 /* Stage */
 .editor-stage {
   flex: 1;
-  min-height: 320px;
+  min-height: 0;
   background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
@@ -1431,6 +1512,7 @@ export default defineComponent({
   padding: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(16, 16, 18, 0.7);
+  flex-shrink: 0;
 }
 
 .footer-actions {
@@ -1440,6 +1522,20 @@ export default defineComponent({
 
 /* Mobile tweaks */
 @media (max-width: 520px) {
+  .editor-backdrop {
+    align-items: stretch;
+  }
+
+  .editor-modal {
+    border-radius: 14px;
+  }
+
+  .editor-topbar,
+  .editor-toolbar,
+  .editor-subtoolbar {
+    padding: 8px;
+  }
+
   .editor-toolbar,
   .editor-subtoolbar {
     flex-direction: column;
@@ -1451,12 +1547,23 @@ export default defineComponent({
   }
 
   .editor-topbar {
-    grid-template-columns: 40px 1fr 88px;
+    grid-template-columns: 40px 1fr auto;
+    gap: 6px;
+  }
+
+  .top-actions {
+    gap: 6px;
+  }
+
+  .clear-btn {
+    height: 30px;
+    padding: 0 8px;
   }
 
   .editor-footer {
     flex-direction: column;
     align-items: stretch;
+    padding: 8px;
   }
 
   .footer-actions {

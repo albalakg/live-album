@@ -9,7 +9,7 @@ todos:
     content: "New subscriptions module: fetchPlans + createCheckoutLink; register store; remove store/order"
     status: completed
   - id: order-view
-    content: "OrderView: API-driven plans, רכוש תוכנית flow, iframe + loading/error CSS"
+    content: "OrderView: API-driven plans, רכשו תוכנית flow, iframe + loading/error CSS"
     status: completed
   - id: routes-polling
     content: Router + success/failure views with getProfile polling and timeout copy
@@ -45,7 +45,7 @@ sequenceDiagram
   participant OrderView
   participant API
   participant PayPlus
-  User->>OrderView: רכוש תוכנית
+  User->>OrderView: רכשו תוכנית
   OrderView->>API: POST subscriptions/id/checkout-link
   API->>PayPlus: generateLink server-side
   API-->>OrderView: paymentUrl
@@ -81,7 +81,7 @@ Remove `**store/order**` from [StoreModule.ts](c:\xampp\htdocs\LiveAlbums\fronte
 
 - **Load plans from API** on mount (or `created`): replace or merge the hardcoded `subscriptions` array so prices/names stay in sync with BE.
 - **Match `this.$route.query.subscription`** to the plan key from API (fallback if BE omits demo from list: keep local demo row or handle empty).
-- **Paid plans:** replace readonly **"רכישה בקרוב"** and the contact-only funnel with an actionable button (**"רכוש תוכנית"** per guide, or keep Hebrew tone consistent with the app).
+- **Paid plans:** replace readonly **"רכישה בקרוב"** and the contact-only funnel with an actionable button (**"רכשו תוכנית"** per guide, or keep Hebrew tone consistent with the app).
 - **Flow:** same as existing `submit()` guard — if not logged in, `push('/login?redirect=/order?subscription=...')`. Then set loading, call `createCheckoutLink(selectedPlan.id)`, assign response, show iframe.
 - **States:** `idle` / `loading` / `iframe` / optional `error` (failed link generation) with a retry path.
 - **Iframe:** use the normalized URL; add **explicit sizing** (min-height/width) in scoped CSS so the payment page is usable on desktop and mobile. Avoid an overly strict `sandbox` unless PayPlus docs require it — payment pages often need forms/scripts.
@@ -103,7 +103,7 @@ Implement as small views or one view with a `result` param. Behavior:
 
 ### 5. Home pricing section ([pricing.vue](c:\xampp\htdocs\LiveAlbums\frontend\src\components\home\pricing.vue))
 
-Already deep-links to `/order?subscription=…`. Optional: rename buttons to **"רכוש תוכנית"** for paid tiers only if you want parity with the guide; not strictly required if the order page carries the main CTA.
+Already deep-links to `/order?subscription=…`. Optional: rename buttons to **"רכשו תוכנית"** for paid tiers only if you want parity with the guide; not strictly required if the order page carries the main CTA.
 
 ### 6. Environment / hygiene
 

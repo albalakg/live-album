@@ -18,7 +18,7 @@
             <br>
             <div class="display--flex justify--end" v-if="canUpgradeSubscription">
                 <div class="width--half width--full-mobile">
-                    <MainButton color="pink" text="שדרג חבילה" @onClick="submit()" />
+                    <MainButton color="pink" text="שדרגו חבילה" @onClick="submit()" />
                 </div>
             </div>
         </template>
@@ -26,7 +26,7 @@
             <div class="display--flex justify--end">
                 <div class="width--half">
                     <router-link to="/order">
-                        <MainButton color="pink" text="רכוש עכשיו" @onClick="submit()" />
+                        <MainButton color="pink" text="רכשו עכשיו" @onClick="submit()" />
                     </router-link>
                 </div>
             </div>

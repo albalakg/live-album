@@ -66,7 +66,7 @@
         <h2 id="tnc-intro-heading" class="visually-hidden">מבוא</h2>
         <p class="text--dark">
           ברוכים הבאים לפלטפורמת Snapshare (להלן: &quot;הפלטפורמה&quot; או
-          &quot;השירות&quot;), המופעלת על ידי [שם החברה/הישות המשפטית שלך] (להלן:
+          &quot;השירות&quot;), המופעלת על ידי [שם החברה/הישות המשפטית שלכם] (להלן:
           &quot;החברה&quot;).
         </p>
         <p class="text--dark">

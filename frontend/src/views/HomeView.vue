@@ -6,15 +6,15 @@
       id="header"
     >
       <h1 class="title--x-large text--center-mobile">
-        ברוכים הבאים ל
+       ברוכים הבאים ל
         <strong class="text--pink">SnapShare</strong>
       </h1>
       <p>
-        שתפו רגעים חיים באירוע שלכם!
+        האורחים מצלמים, המסכים משדרים.
+        <br>
+         האלבום הדיגיטלי שמרים את האנרגיה באירוע שלכם.
         <br />
-        האורחים מעלים את הרגעים שלהם בזמן אמת וכמובן אתכם
-        <br />
-        וכל מה שנשאר זה להנות מהחוויות והזכרונות
+        בלי להוריד אפליקציה, פשוט סורקים QR!
       </p>
       <!-- <div class="content-protection-callout" role="note">
         
@@ -44,15 +44,15 @@
       <br />
       <div class="width--corner width--full-mobile">
         <router-link v-if="canUpgradeSubscription" to="/order?subscription=premium">
-          <MainButton animation text="שדרג את המסלול שלך" />
+          <MainButton animation text="שדרגו את המסלול שלכם" />
         </router-link>
         <router-link v-else-if="!hasActiveEvent" to="/order">
-          <MainButton animation text="הזמן את האלבום החי שלך" />
+          <MainButton animation text="נסו עכשיו בחינם" />
         </router-link>
-          <MainButton v-else disabled animation text="הזמן את האלבום החי שלך" />
+        <MainButton v-else disabled animation text="נסו עכשיו בחינם" />
       </div>
       <!-- <div class="width--corner width--full-mobile">
-        <MainButton disabled animation text="הזמן את האלבום החי שלך (בקרוב)" />
+        <MainButton disabled animation text="נסו עכשיו בחינם (בקרוב)" />
       </div> -->
       <img
         class="header-image-gallery"
@@ -293,12 +293,6 @@ export default defineComponent({
     margin-top: 10%;
     font-weight: 700;
     letter-spacing: 3px;
-
-    @media only screen and (min-width: 600px) {
-      strong {
-        margin-inline-start: 20px;
-      }
-    }
   }
 
   p {

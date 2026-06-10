@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { AxiosProgressEvent } from "axios";
 import { serialize } from "object-to-formdata";
 import Time from "@/helpers/time";
 import {
@@ -68,6 +69,13 @@ function filterAssetsByModeration(
   return asAssetArray(assets).filter((asset) =>
     statuses.includes(getAssetModerationStatus(asset))
   );
+}
+
+interface IUploadFilePayload {
+  file: File;
+  isAuth: boolean;
+  onUploadProgress?: (event: AxiosProgressEvent) => void;
+  signal?: AbortSignal;
 }
 
 const EventModule = {
@@ -452,7 +460,7 @@ const EventModule = {
     getEventBaseInfo(
       context: {
         state: IEventModuleState;
-        commit: (arg0: string, arg1: any) => void;
+        commit: (arg0: string, arg1: IEventAsset) => void;
       },
       path: string
     ) {
@@ -940,9 +948,9 @@ const EventModule = {
     uploadFile(
       context: {
         state: IEventModuleState;
-        commit: (arg0: string, arg1: any) => void;
+        commit: (arg0: string, arg1: IEventAsset) => void;
       },
-      data: any
+      data: IUploadFilePayload
     ) {
       return new Promise((resolve, reject) => {
         const formData = new FormData();
@@ -957,12 +965,18 @@ const EventModule = {
           .post(url, formData, {
             maxBodyLength: Infinity,
             maxContentLength: Infinity,
+            onUploadProgress: data.onUploadProgress,
+            signal: data.signal,
           })
           .then((res) => {
             context.commit("ADD_FILE", res.data.data);
             resolve(res.data);
           })
           .catch((err) => {
+            if (axios.isCancel(err)) {
+              reject(err);
+              return;
+            }
             if (process.env.NODE_ENV !== "production" && err.response?.data) {
               console.error("Upload response:", err.response.data);
             }

@@ -80,11 +80,19 @@
             <div>
               <button
                 class="upload-button"
+                :class="{ 'upload-button--uploading': isUploading }"
                 :disabled="isUploading"
                 @click="triggerFileUpload"
               >
-                <span v-if="isUploading">מעלה...</span>
-                <span v-else>תעלו ותשתפו</span>
+                <span
+                  class="upload-button-progress"
+                  :style="{ width: `${uploadProgress}%` }"
+                  aria-hidden="true"
+                ></span>
+                <span class="upload-button-text" v-if="isUploading">
+                  מעלה... {{ uploadProgress }}%
+                </span>
+                <span class="upload-button-text" v-else>תעלו ותשתפו</span>
               </button>
               <input
                 type="file"
@@ -94,9 +102,7 @@
                 style="display: none"
               />
               <div :class="{ hidden: !showNotification }" class="notification">
-                <span v-if="uploadSuccess">
-                  הקובץ התקבל! הוא בבדיקת תוכן ויופיע באלבום לאחר אישור.
-                </span>
+                <span v-if="uploadSuccess"> הקובץ עלה בהצלחה </span>
                 <span v-else>נכשל לעלות את הקובץ</span>
               </div>
               <h2 class="event-date text--white">
@@ -170,6 +176,7 @@ import { StatusEnum } from "@/helpers/enums";
 import Auth from "@/helpers/Auth";
 import MediaEditorModal from "@/components/event/MediaEditorModal.vue";
 import { notify } from "@kyvg/vue3-notification";
+import { validateUploadFile } from "@/helpers/uploadValidation";
 
 export default defineComponent({
   name: "EventUploadsView",
@@ -186,9 +193,10 @@ export default defineComponent({
     const isUploading = ref(false);
     const uploadSuccess = ref(false);
     const uploadFailed = ref(false);
+    const uploadProgress = ref(0);
 
     const showNotification = computed(
-      () => uploadSuccess.value || uploadFailed.value
+      () => uploadSuccess.value || uploadFailed.value,
     );
 
     const videoUploadEnabled = computed(() => {
@@ -197,7 +205,7 @@ export default defineComponent({
     });
 
     const acceptFileTypes = computed(() =>
-      videoUploadEnabled.value ? "image/*,video/*" : "image/*"
+      videoUploadEnabled.value ? "image/*,video/*" : "image/*",
     );
 
     const triggerFileUpload = () => {
@@ -287,16 +295,20 @@ export default defineComponent({
       // reset input כדי שאפשר יהיה לבחור שוב אותו קובץ
       target.value = "";
 
+      const validation = validateUploadFile(file, {
+        videoUploadEnabled: videoUploadEnabled.value,
+      });
+      if (!validation.valid) {
+        notify({
+          text: validation.error,
+          type: "error",
+          duration: 5000,
+        });
+        return;
+      }
+
       // אם וידאו - מעלה רגיל (בלי עורך)
       if (file.type.startsWith("video/")) {
-        if (!videoUploadEnabled.value) {
-          notify({
-            text: "העלאת סרטונים אינה מופעלת עבור אירוע זה",
-            type: "error",
-            duration: 5000,
-          });
-          return;
-        }
         await uploadOriginalOnly(file);
         return;
       }
@@ -311,17 +323,29 @@ export default defineComponent({
       selectedFile.value = null;
     };
 
-    const uploadOriginalOnly = async (file: File) => {
+    const updateUploadProgress = (event: ProgressEvent) => {
+      if (!event.total) return;
+
+      uploadProgress.value = Math.min(
+        100,
+        Math.round((event.loaded * 100) / event.total),
+      );
+    };
+
+    const uploadFileWithProgress = async (file: File) => {
       isUploading.value = true;
       uploadFailed.value = false;
       uploadSuccess.value = false;
+      uploadProgress.value = 0;
 
       try {
         await store.dispatch("event/uploadFile", {
           file,
           isAuth: Auth.isLogged(),
+          onUploadProgress: updateUploadProgress,
         });
 
+        uploadProgress.value = 100;
         uploadSuccess.value = true;
         setTimeout(() => (uploadSuccess.value = false), 5000);
       } catch (e) {
@@ -329,35 +353,25 @@ export default defineComponent({
         setTimeout(() => (uploadFailed.value = false), 5000);
       } finally {
         isUploading.value = false;
+        setTimeout(() => {
+          uploadProgress.value = 0;
+        }, 300);
       }
     };
+
+    const uploadOriginalOnly = uploadFileWithProgress;
 
     // תמונה ערוכה: מעלה קובץ אחד (התמונה הסופית מהעורך)
     const onEditorConfirm = async (payload: { file: File }) => {
       closeEditor();
-      isUploading.value = true;
-      uploadFailed.value = false;
-      uploadSuccess.value = false;
-
-      try {
-        await store.dispatch("event/uploadFile", {
-          file: payload.file,
-          isAuth: Auth.isLogged(),
-        });
-        uploadSuccess.value = true;
-        setTimeout(() => (uploadSuccess.value = false), 5000);
-      } catch (e) {
-        uploadFailed.value = true;
-        setTimeout(() => (uploadFailed.value = false), 5000);
-      } finally {
-        isUploading.value = false;
-      }
+      await uploadFileWithProgress(payload.file);
     };
 
     return {
       isUploading,
       uploadSuccess,
       uploadFailed,
+      uploadProgress,
       showNotification,
       acceptFileTypes,
       triggerFileUpload,
@@ -440,7 +454,7 @@ export default defineComponent({
     async getEventDetails() {
       await this.$store.dispatch(
         "event/getEventBaseInfo",
-        this.$route.params.event_path
+        this.$route.params.event_path,
       );
       this.loading = false;
     },
@@ -511,6 +525,8 @@ export default defineComponent({
 }
 
 .upload-button {
+  position: relative;
+  overflow: hidden;
   font-size: 2rem;
   padding: 25px 50px;
   width: calc(100% - 40px);
@@ -524,6 +540,24 @@ export default defineComponent({
   transition: all 0.3s ease;
   font-family: system-ui, sans-serif;
   margin: 0 20px;
+}
+
+.upload-button-progress {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0;
+  background: rgba(255, 255, 255, 0.28);
+  transition: width 0.2s ease;
+}
+
+.upload-button-text {
+  position: relative;
+  z-index: 1;
+}
+
+.upload-button--uploading {
+  background: linear-gradient(135deg, #e63e00, #b33000);
 }
 
 .upload-button:disabled {

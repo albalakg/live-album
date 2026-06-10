@@ -13,11 +13,11 @@
     <!-- Dropzone -->
     <div
       class="dropzone"
-      @dragover.prevent="isDragging = true"
+      @dragover.prevent="onDragOver"
       @dragleave.prevent="isDragging = false"
       @drop.prevent="handleDrop"
       @click="triggerFilePicker"
-      :class="{ dragging: isDragging, 'disabled': isDisabled }"
+      :class="{ dragging: isDragging, disabled: isDisabled }"
     >
       <p class="text-gray-600">
         גרור ושחרר קבצים כאן<br />
@@ -29,6 +29,7 @@
         multiple
         :accept="acceptFileTypes"
         class="display--none"
+        :disabled="isDisabled"
         @change="handleFileChange"
       />
     </div>
@@ -58,9 +59,10 @@
                 class="progress"
                 :class="{
                   done: u.done,
+                  error: u.error,
                   current: uploads.indexOf(u) === currentIndex,
                 }"
-                :style="{ width: u.done ? '100%' : '100%' }"
+                :style="{ width: fileProgressWidth(u) + '%' }"
               ></div>
             </div>
           </li>
@@ -80,13 +82,21 @@
 </template>
 
 <script lang="ts">
+import axios from "axios";
 import Auth from "@/helpers/Auth";
 import { defineComponent } from "vue";
 import BaseButton from "@/components/library/buttons/BaseButton.vue";
+import {
+  MAX_UPLOAD_SIZE_MB,
+  validateUploadFile,
+} from "@/helpers/uploadValidation";
 
 interface UploadItem {
   name: string;
   done: boolean;
+  file: File;
+  progress: number;
+  error: boolean;
 }
 
 export default defineComponent({
@@ -99,20 +109,26 @@ export default defineComponent({
   data() {
     return {
       isDragging: false,
-      MAX_SIZE_MB: 20,
+      MAX_SIZE_MB: MAX_UPLOAD_SIZE_MB,
       uploads: [] as UploadItem[],
       progress: {
         total: 0,
         completed: 0,
       },
-      currentIndex: -1, // <--- new
+      currentIndex: -1,
+      cancelled: false,
+      activeAbortController: null as AbortController | null,
     };
   },
 
   computed: {
     overallProgress(): number {
       if (!this.uploads.length) return 0;
-      return Math.round((this.progress.completed / this.uploads.length) * 100);
+      const total = this.uploads.reduce(
+        (sum, upload) => sum + (upload.done ? 100 : upload.progress),
+        0
+      );
+      return Math.round(total / this.uploads.length);
     },
 
     isDisabled(): boolean {
@@ -137,11 +153,24 @@ export default defineComponent({
   },
 
   methods: {
+    fileProgressWidth(upload: UploadItem): number {
+      if (upload.done) return 100;
+      if (upload.error) return upload.progress || 0;
+      return upload.progress;
+    },
+
+    onDragOver() {
+      if (this.isDisabled) return;
+      this.isDragging = true;
+    },
+
     triggerFilePicker() {
+      if (this.isDisabled) return;
       (this.$refs.fileInput as HTMLInputElement).click();
     },
 
     async handleFileChange(event: Event) {
+      if (this.isDisabled) return;
       const input = event.target as HTMLInputElement;
       if (!input.files) return;
       await this.processFiles(input.files);
@@ -150,31 +179,27 @@ export default defineComponent({
 
     async handleDrop(event: DragEvent) {
       this.isDragging = false;
-      if (!event.dataTransfer?.files) return;
+      if (this.isDisabled || !event.dataTransfer?.files) return;
       await this.processFiles(event.dataTransfer.files);
     },
 
     async processFiles(files: FileList) {
-      this.progress.total = files.length;
+      if (this.isDisabled) return;
+
+      this.cancelled = false;
       const newUploads: UploadItem[] = [];
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileSizeMB = file.size / (1024 * 1024);
+        const validation = validateUploadFile(file, {
+          videoUploadEnabled: this.videoUploadEnabled,
+        });
 
-        if (file.type.startsWith("video/") && !this.videoUploadEnabled) {
+        if (!validation.valid) {
           this.$notify({
-            text: `"${file.name}" - העלאת סרטונים אינה מופעלת עבור אירוע זה`,
+            text: validation.error,
             type: "error",
             duration: 5000,
-          });
-          continue;
-        }
-
-        if (fileSizeMB > this.MAX_SIZE_MB) {
-          this.$notify({
-              text: `"${file.name}" חורג מהמגבלה של ${this.MAX_SIZE_MB}MB`,
-              type: "error",
-              duration: 5000,
           });
           continue;
         }
@@ -182,32 +207,58 @@ export default defineComponent({
         newUploads.push({
           name: file.name,
           done: false,
+          file,
+          progress: 0,
+          error: false,
         });
       }
+
+      if (!newUploads.length) return;
+
       this.uploads.push(...newUploads);
+      this.progress.total = this.uploads.length;
 
-      for (let i = 0; i < newUploads.length; i++) {
-        const upload = newUploads[i];
+      for (const upload of newUploads) {
+        if (this.cancelled) break;
+
+        this.currentIndex = this.uploads.indexOf(upload);
+        const controller = new AbortController();
+        this.activeAbortController = controller;
+
         try {
-          if (this.uploads.length === 0) break;
-
-          this.currentIndex = this.uploads.indexOf(upload); // <--- mark current file
-
           await this.$store.dispatch("event/uploadFile", {
-            file: files[i],
+            file: upload.file,
             isAuth: Auth.isLogged(),
+            signal: controller.signal,
+            onUploadProgress: (event: ProgressEvent) => {
+              if (!event.total) return;
+              upload.progress = Math.min(
+                100,
+                Math.round((event.loaded * 100) / event.total)
+              );
+            },
           });
 
           upload.done = true;
+          upload.progress = 100;
           this.progress.completed += 1;
-        } catch (e) {
-          console.error("שגיאה בהעלאה", e);
+        } catch (error) {
+          if (axios.isCancel(error) || this.cancelled) {
+            break;
+          }
+          upload.error = true;
+          console.error("שגיאה בהעלאה", error);
         } finally {
-          this.currentIndex = -1; // <--- reset after each file
+          this.activeAbortController = null;
+          this.currentIndex = -1;
         }
       }
 
-      if (this.progress.completed === this.uploads.length && this.uploads.length > 0) {
+      if (
+        !this.cancelled &&
+        this.progress.completed === this.uploads.length &&
+        this.uploads.length > 0
+      ) {
         this.$notify({
           text: "הקבצים התקבלו ונמצאים בבדיקת תוכן. יופיעו באלבום לאחר אישור.",
           type: "success",
@@ -233,8 +284,12 @@ export default defineComponent({
     },
 
     cancelUpload() {
+      this.cancelled = true;
+      this.activeAbortController?.abort();
+      this.activeAbortController = null;
       this.uploads = [];
       this.progress = { total: 0, completed: 0 };
+      this.currentIndex = -1;
     },
   },
 });
@@ -263,6 +318,12 @@ export default defineComponent({
 .dropzone.dragging {
   border-color: #f68589;
   background: #ffeef0;
+}
+
+.dropzone.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .upload-card {
@@ -340,11 +401,15 @@ export default defineComponent({
   background: #bbb;
   height: 100%;
   border-radius: 6px;
+  transition: width 0.2s ease;
 }
 .file-bar .progress.done {
-  background: #79ae60; /* ירוק לסיום */
+  background: #79ae60;
+}
+.file-bar .progress.error {
+  background: #e74c3c;
 }
 .file-bar .progress.current {
-  background: #f68589; /* pink */
+  background: #f68589;
 }
 </style>

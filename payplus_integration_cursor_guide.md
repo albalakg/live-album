@@ -18,7 +18,7 @@ Goal:
 - Create payment links for the 2 paid subscription plans.
 - Store those links in the DB (`subscriptions` table or related payment config table).
 - Return them from the subscriptions API.
-- Show the payment page inside an iframe when the user clicks `רכוש תוכנית`.
+- Show the payment page inside an iframe when the user clicks `רכשו תוכנית`.
 - Replace the current `coming soon` button with a real purchase flow.
 - Handle callback / notification flow for success, failure, and cancel-like outcomes.
 - Enable invoice generation with `initial_invoice = true`.
@@ -360,7 +360,7 @@ Use only fields you truly need:
 ---
 
 ### Flow C — client checkout UI
-1. Replace `Coming Soon` with `Buy` button (`רכוש תוכנית`).
+1. Replace `Coming Soon` with `Buy` button (`רכשו תוכנית`).
 2. On click, call backend endpoint to get checkout data.
 3. Render payment link in iframe.
 4. Track UI states:
@@ -693,7 +693,7 @@ Before activating subscription, compare against internal state:
 - fetch invoice documents after success
 
 ### Manual QA
-- click `רכוש תוכנית`
+- click `רכשו תוכנית`
 - iframe opens
 - successful payment updates backend state
 - user sees success page

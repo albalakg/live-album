@@ -13,7 +13,11 @@
       class="gallery-asset position--relative bg--dark height--full width--full brs--medium"
       :class="{ 'gallery-asset--blocked': isBlocked }"
     >
-      <div v-if="bulkSelectable" class="gallery-asset-chip padding--x-small brs--large">
+      <div
+        v-if="bulkSelectable"
+        class="gallery-asset-chip padding--x-small brs--large"
+        @click.stop
+      >
         <MainCheckbox
           :disabled="loading || !mode"
           :ref="`asset-checkbox-${asset.id}`"

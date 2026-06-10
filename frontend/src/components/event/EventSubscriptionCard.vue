@@ -21,7 +21,7 @@
         <div class="display--flex justify--end">
             <div class="width--half width--full-mobile">
                 <router-link :to="'/order?subscription=' + subscriptionUpgradeName">
-                    <MainButton v-if="canUpgradeSubscription" color="pink" text="שדרג חבילה" />
+                    <MainButton v-if="canUpgradeSubscription" color="pink" text="שדרגו חבילה" />
                 </router-link>
             </div>
         </div>

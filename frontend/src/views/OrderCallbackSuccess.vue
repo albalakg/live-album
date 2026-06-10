@@ -24,11 +24,11 @@
           <p class="title--small text--dark callback-status">
             <template v-if="isLoading">
               <span class="loading-dot"></span>
-              <span>מאשרים את ההזמנה ומכינים את האירוע שלך, זה יכול לקחת כמה רגעים...</span>
+              <span>מאשרים את ההזמנה ומכינים את האירוע שלכם, זה יכול לקחת כמה רגעים...</span>
             </template>
             <template v-else>
               <span>
-                <router-link to="/event">לחץ כאן</router-link>, למעבר לניהול האירוע שלך
+                <router-link to="/event">לחץ כאן</router-link>, למעבר לניהול האירוע שלכם
               </span>
             </template>
           </p>

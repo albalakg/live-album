@@ -21,7 +21,7 @@ isProject: false
 
 ## Current behavior
 
-- [OrderView.vue](frontend/src/views/OrderView.vue): decorative background, pink “product” card with copy + plan buttons (`router-link` to `?subscription=`), and a white **סיכום הזמנה** column with price + **רכוש תוכנית** / **נסה עכשיו**.
+- [OrderView.vue](frontend/src/views/OrderView.vue): decorative background, pink “product” card with copy + plan buttons (`router-link` to `?subscription=`), and a white **סיכום הזמנה** column with price + **רכשו תוכנית** / **נסה עכשיו**.
 - [SubscriptionPaymentView.vue](frontend/src/views/SubscriptionPaymentView.vue) (`/order/pay`): loads `paymentSrc` from `plan.payment_page_link` or `subscriptions/createCheckoutLink`, renders iframe.
 
 ## Target UX
@@ -39,7 +39,7 @@ flowchart LR
 
 - **Remove** the white summary block (`order-details` / סיכום הזמנה) entirely.
 - **One checkout panel** (can sit inside or below the existing pink intro card): shows **current price** (e.g. `₪{{ currentPlan.price }}`), **plan switcher** (segmented control or pill row — not separate “summary” section), and **demo-only** `MainButton` for **נסה עכשיו**.
-- **Paid plans (logged in):** no separate “רכוש תוכשית” step — the **iframe loads automatically** for the selected slug (same logic as `loadPaymentSrc` in SubscriptionPaymentView).
+- **Paid plans (logged in):** no separate “רכשו תוכשית” step — the **iframe loads automatically** for the selected slug (same logic as `loadPaymentSrc` in SubscriptionPaymentView).
 - **Paid plans (guest):** keep gating: show a short message + link to login with `redirect` back to `/order?subscription=…` (update redirect target from `/order/pay` to `/order` in [OrderView.vue](frontend/src/views/OrderView.vue) `submitCheckout` / login paths — and **remove** the need for `submitCheckout` once iframe is primary; replace with inline login prompt in the iframe column).
 - **Layout:** CSS grid or flex wrapper, e.g. `order-layout` with `min-height` on the iframe column; **desktop:** two columns (side‑by‑side); **≤600px:** single column with **panel first, iframe beneath** (matches “beneath in mobile”).
 - **Iframe refresh on plan change:** when slug changes: clear `paymentSrc`, then re-run `loadPaymentSrc()` (reuse the same sequence as [SubscriptionPaymentView.vue lines 115–147](frontend/src/views/SubscriptionPaymentView.vue)). Optionally add `:key="form.subscription"` on the `<iframe>` so the element remounts when the URL changes (defensive against cached iframe state).

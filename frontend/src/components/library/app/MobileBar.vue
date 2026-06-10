@@ -1,5 +1,5 @@
 <template>
-    <div class="mobile-bar bg--pink">
+    <div class="mobile-bar bg--pink" :style="mobileBarStyle">
         <div v-for="(link, index) in links" :key="index" class="mobile-bar-icon display--flex align--center justify--center" @click="iconAction(link)">
             <MainIcon size="1.9em" :background="false" :icon="link.icon" color="#222" />
         </div>
@@ -21,11 +21,32 @@ export default defineComponent({
     data() {
         return {
             links: [] as IMobileBarItem[],
+            viewportTop: null as number | null,
+            positionFrame: 0,
         }
     },
 
     created() {
         this.createLinks();
+    },
+
+    mounted() {
+        this.scheduleMobileBarPositionUpdate();
+        window.addEventListener('resize', this.scheduleMobileBarPositionUpdate);
+        window.addEventListener('scroll', this.scheduleMobileBarPositionUpdate, { passive: true });
+        window.visualViewport?.addEventListener('resize', this.scheduleMobileBarPositionUpdate);
+        window.visualViewport?.addEventListener('scroll', this.scheduleMobileBarPositionUpdate);
+    },
+
+    beforeUnmount() {
+        window.removeEventListener('resize', this.scheduleMobileBarPositionUpdate);
+        window.removeEventListener('scroll', this.scheduleMobileBarPositionUpdate);
+        window.visualViewport?.removeEventListener('resize', this.scheduleMobileBarPositionUpdate);
+        window.visualViewport?.removeEventListener('scroll', this.scheduleMobileBarPositionUpdate);
+
+        if (this.positionFrame) {
+            cancelAnimationFrame(this.positionFrame);
+        }
     },
 
     watch: {
@@ -58,9 +79,43 @@ export default defineComponent({
         menuIcon(): string {
             return this.isMenuOpen ? "close" : "menu";
         },
+
+        mobileBarStyle(): Record<string, string> {
+            if (this.viewportTop === null) {
+                return {
+                    bottom: '0',
+                };
+            }
+
+            return {
+                top: `${this.viewportTop}px`,
+                bottom: 'auto',
+            };
+        },
     },
 
     methods: {
+        scheduleMobileBarPositionUpdate() {
+            if (this.positionFrame) {
+                cancelAnimationFrame(this.positionFrame);
+            }
+
+            this.positionFrame = requestAnimationFrame(this.updateMobileBarPosition);
+        },
+
+        updateMobileBarPosition() {
+            this.positionFrame = 0;
+
+            const viewport = window.visualViewport;
+            if (!viewport) {
+                this.viewportTop = null;
+                return;
+            }
+
+            const barHeight = (this.$el as HTMLElement)?.offsetHeight || 60;
+            this.viewportTop = Math.max(0, viewport.offsetTop + viewport.height - barHeight);
+        },
+
         iconAction(link: IMobileBarItem) {
             if(link.url.includes('menu')) {
                 this.$store.dispatch("app/toggleMenu");
@@ -156,11 +211,14 @@ export default defineComponent({
     position: fixed;
     bottom: 0;
     left: 0;
+    background-color: var(--pink);
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 10000;
     border-top: 2px solid var(--lightPink);
+    transform: translateZ(0);
+    will-change: top;
 
     .mobile-bar-icon {
         width: 31px;

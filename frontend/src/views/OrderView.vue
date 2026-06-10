@@ -49,7 +49,7 @@
                     animation
                     size="x-small"
                     :color="card.slug === 'demo' ? 'pink' : 'green'"
-                    :text="card.slug === 'demo' ? 'נסה עכשיו' : 'רכוש עכשיו'"
+                    :text="card.slug === 'demo' ? 'נסו עכשיו בחינם' : 'רכשו עכשיו'"
                     :loading="isCardActionLoading(card.slug)"
                     @onClick="onPlanAction(card.slug)"
                   />
