@@ -15,6 +15,7 @@ import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
 import router from "@/router";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
+import { effectiveSubscriptionStorageHours } from "@/helpers/subscriptionPricing";
 
 function completeLogin(
   context: {
@@ -82,7 +83,12 @@ const UserModule = {
     },
 
     getSubscriptionFilesStorageTime(state: IUserModuleState): number | null {
-      return state.user?.order?.subscription?.storage_time ?? null;
+      const subscription = state.user?.order?.subscription;
+      if (!subscription) return null;
+      return effectiveSubscriptionStorageHours(
+        subscription.name,
+        subscription.storage_time
+      );
     },
 
     getSubscriptionStartDate(

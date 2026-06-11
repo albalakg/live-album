@@ -116,6 +116,12 @@ export default defineComponent({
                     weight: '500'
                 },
                 {
+                    text: 'המלצות',
+                    url: '/#testimonials',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
                     text: 'המסלולים',
                     url: '/#pricing',
                     color: 'dark',

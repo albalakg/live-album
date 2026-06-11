@@ -9,11 +9,13 @@ import {
   IEvent,
   IEventDownloadAssetsProcess,
   IUpdateQrCardSettingsRequest,
+  EventGalleryAudience,
 } from "@/helpers/interfaces";
 import {
   AssetModerationStatusEnum,
   getAssetModerationStatus,
   StatusEnum,
+  SubscriptionTypesEnum,
 } from "@/helpers/enums";
 import {
   EventAssetsManagementModesType,
@@ -91,6 +93,7 @@ const EventModule = {
       assets: [],
       showBlockedAssets: false,
     },
+    galleryAudience: "owner",
   } as IEventModuleState,
 
   getters: {
@@ -114,7 +117,7 @@ const EventModule = {
       return state.event?.status === StatusEnum.READY;
     },
 
-    isEventRending(state: IEventModuleState): boolean {
+    isEventPending(state: IEventModuleState): boolean {
       return state.event?.status === StatusEnum.PENDING;
     },
 
@@ -254,14 +257,46 @@ const EventModule = {
     getEventProcessFileName(state: IEventModuleState): string {
       return (state?.event?.name ?? "קבצי האלבום") + ".zip";
     },
+
+    showTrialGalleryWatermark(
+      state: IEventModuleState,
+      _getters: unknown,
+      _rootState: unknown,
+      rootGetters: { "user/getSubscriptionName"?: SubscriptionTypesEnum | null }
+    ): boolean {
+      const eventSubscription = state.event?.subscription_name;
+      if (eventSubscription === SubscriptionTypesEnum.DEMO) {
+        return true;
+      }
+      if (state.galleryAudience === "guest") {
+        return false;
+      }
+      return (
+        rootGetters["user/getSubscriptionName"] === SubscriptionTypesEnum.DEMO
+      );
+    },
   },
 
   mutations: {
+    SET_GALLERY_AUDIENCE(
+      state: IEventModuleState,
+      audience: EventGalleryAudience
+    ) {
+      state.galleryAudience = audience;
+    },
+
     SET_EVENT(state: IEventModuleState, event: IEvent) {
       if (event?.assets != null) {
         event.assets = asAssetArray(event.assets);
       }
-      state.event = event;
+      const raw = event as IEvent & {
+        subscription?: { name?: SubscriptionTypesEnum | string };
+        subscription_name?: SubscriptionTypesEnum | string | null;
+      };
+      if (!raw.subscription_name && raw.subscription?.name) {
+        raw.subscription_name = raw.subscription.name;
+      }
+      state.event = raw;
     },
 
     UPDATE_EVENT_STATUS(state: IEventModuleState, status: StatusEnum) {
@@ -460,7 +495,7 @@ const EventModule = {
     getEventBaseInfo(
       context: {
         state: IEventModuleState;
-        commit: (arg0: string, arg1: IEventAsset) => void;
+        commit: (mutation: string, payload?: unknown) => void;
       },
       path: string
     ) {
@@ -468,6 +503,7 @@ const EventModule = {
         axios
           .get(`events/${path}/base-info`)
           .then((res) => {
+            context.commit("SET_GALLERY_AUDIENCE", "owner");
             context.commit("SET_EVENT", res.data.data);
             resolve(res.data);
           })
@@ -480,7 +516,7 @@ const EventModule = {
     getEventGuestGallery(
       context: {
         state: IEventModuleState;
-        commit: (arg0: string, arg1: any) => void;
+        commit: (mutation: string, payload?: unknown) => void;
       },
       path: string
     ) {
@@ -489,6 +525,7 @@ const EventModule = {
           .get(`events/${path}/base-assets`)
           .then((res) => {
             res.data.data.assets = asAssetArray(res.data.data.displayed_assets);
+            context.commit("SET_GALLERY_AUDIENCE", "guest");
             context.commit("SET_EVENT", res.data.data);
             resolve(res.data);
           })
@@ -794,6 +831,7 @@ const EventModule = {
           ? Time.convertToLocalTime(event.finished_at)
           : "";
       }
+      context.commit("SET_GALLERY_AUDIENCE", "owner");
       context.commit("SET_EVENT", event);
     },
 

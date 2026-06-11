@@ -115,7 +115,7 @@ export default defineComponent({
     },
 
     isPending(): boolean {
-      return this.$store.getters["event/isEventRending"];
+      return this.$store.getters["event/isEventPending"];
     },
 
     isInProgress(): boolean {
@@ -128,7 +128,7 @@ export default defineComponent({
 
     disabledTime(): string {
       return this.$store.getters["event/getEventFinishTime"]
-        ? Time.addMonths(
+        ? Time.addHours(
             this.$store.getters["event/getEventFinishTime"],
             this.$store.getters["user/getSubscriptionFilesStorageTime"]
           )

@@ -60,6 +60,7 @@ export default defineComponent({
 .main-cube {
     opacity: .4;
     position: absolute;
+    pointer-events: none;
 }
 
 .cube-width-small {

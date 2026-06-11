@@ -7,19 +7,21 @@
     >
       <transition :name="cell.animation" mode="out-in">
         <div :key="cell.asset?.fullPath" class="asset-wrapper">
-          <img
-            v-if="cell.asset?.type === 'image'"
-            :src="cell.asset.fullPath"
-            class="cell-asset"
-          />
-          <video
-            v-else-if="cell.asset?.type === 'video'"
-            :src="cell.asset.fullPath"
-            autoplay
-            muted
-            loop
-            class="cell-asset"
-          ></video>
+          <EventGalleryMediaFrame>
+            <img
+              v-if="cell.asset?.type === 'image'"
+              :src="cell.asset.fullPath"
+              class="cell-asset"
+            />
+            <video
+              v-else-if="cell.asset?.type === 'video'"
+              :src="cell.asset.fullPath"
+              autoplay
+              muted
+              loop
+              class="cell-asset"
+            ></video>
+          </EventGalleryMediaFrame>
         </div>
       </transition>
     </div>
@@ -29,9 +31,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { IEventAsset } from "@/helpers/interfaces";
+import EventGalleryMediaFrame from "@/components/event/EventGalleryMediaFrame.vue";
 
 export default defineComponent({
   name: "GallerySplitRotation",
+
+  components: {
+    EventGalleryMediaFrame,
+  },
 
   props: {
     interval: { type: Number, default: 4000 }, // ms between swaps

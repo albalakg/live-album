@@ -7,19 +7,21 @@
         class="collage-item"
         :style="item.style"
       >
-        <img
-          v-if="item.asset?.type === 'image'"
-          :src="item.asset.fullPath"
-          class="collage-asset"
-        />
-        <video
-          v-else-if="item.asset?.type === 'video'"
-          :src="item.asset.fullPath"
-          autoplay
-          muted
-          loop
-          class="collage-asset"
-        ></video>
+        <EventGalleryMediaFrame>
+          <img
+            v-if="item.asset?.type === 'image'"
+            :src="item.asset.fullPath"
+            class="collage-asset"
+          />
+          <video
+            v-else-if="item.asset?.type === 'video'"
+            :src="item.asset.fullPath"
+            autoplay
+            muted
+            loop
+            class="collage-asset"
+          ></video>
+        </EventGalleryMediaFrame>
       </div>
     </transition-group>
   </div>
@@ -28,6 +30,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { IEventAsset } from "@/helpers/interfaces";
+import EventGalleryMediaFrame from "@/components/event/EventGalleryMediaFrame.vue";
 
 interface CollageItem {
   id: number;
@@ -38,6 +41,10 @@ interface CollageItem {
 
 export default defineComponent({
   name: "GalleryDynamicCollage",
+
+  components: {
+    EventGalleryMediaFrame,
+  },
 
   props: {
     interval: { type: Number, default: 2000 }, // ms between new spawns

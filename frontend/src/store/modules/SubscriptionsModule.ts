@@ -17,6 +17,7 @@ import {
   ISubscriptionPlan,
 } from "@/helpers/interfaces";
 import { SubscriptionTypesEnum } from "@/helpers/enums";
+import { DEMO_SUBSCRIPTION_STORAGE_HOURS } from "@/helpers/subscriptionPricing";
 
 export interface ISubscriptionsState {
   plans: ISubscriptionPlan[];
@@ -82,6 +83,9 @@ function normalizePlan(raw: Record<string, unknown>): ISubscriptionPlan | null {
   const payment_page_link =
     (raw.payment_page_link as string | null | undefined) ?? undefined;
 
+  const resolvedStorageTime =
+    slug === "demo" ? DEMO_SUBSCRIPTION_STORAGE_HOURS : storage_time;
+
   return {
     id,
     slug,
@@ -90,7 +94,7 @@ function normalizePlan(raw: Record<string, unknown>): ISubscriptionPlan | null {
     status,
     events_allowed,
     files_allowed,
-    storage_time,
+    storage_time: resolvedStorageTime,
     payment_page_link,
   };
 }
@@ -132,7 +136,7 @@ const OFFLINE_FALLBACK_PLANS: ISubscriptionPlan[] = sortPlansBySlug([
     status: 1,
     events_allowed: 1,
     files_allowed: 10,
-    storage_time: 1,
+    storage_time: DEMO_SUBSCRIPTION_STORAGE_HOURS,
   },
   {
     id: 2,

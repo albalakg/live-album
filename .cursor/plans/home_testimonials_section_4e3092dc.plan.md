@@ -4,16 +4,16 @@ overview: Add a customer testimonials section ("המלצות") on the home page,
 todos:
   - id: create-testimonials-component
     content: Create testimonials.vue with section shell, 3 glass cards, MainCube decorations, and static Hebrew quote data
-    status: pending
+    status: completed
   - id: wire-homeview
     content: Import Testimonials in HomeView.vue, place above Pricing, add testimonials to HOME_SECTION_IDS
-    status: pending
+    status: completed
   - id: update-nav
     content: Add המלצות link to DesktopBar, AppMenu, and optionally Footer
-    status: pending
+    status: completed
   - id: fix-pricing-typo
     content: Remove stray שדרגו text from pricing.vue MainCube prop
-    status: pending
+    status: completed
 isProject: false
 ---
 

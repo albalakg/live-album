@@ -35,6 +35,7 @@ export function useBreakpoints() {
   };
 
   updateBreakpoints();
+  window.addEventListener("resize", updateBreakpoints, { passive: true });
 
   return breakpoints;
 }

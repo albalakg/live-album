@@ -124,6 +124,8 @@
 
     <Clients />
 
+    <Testimonials />
+
     <Pricing />
 
     <Faq />
@@ -135,6 +137,7 @@ import Features from "@/components/home/features.vue";
 import HowItLooks from "@/components/home/howItLooks.vue";
 import Clients from "@/components/home/clients.vue";
 import Pricing from "@/components/home/pricing.vue";
+import Testimonials from "@/components/home/testimonials.vue";
 import MainCube from "@/components/library/background/MainCube.vue";
 import MainButton from "@/components/library/buttons/MainButton.vue";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
@@ -147,6 +150,7 @@ const HOME_SECTION_IDS = [
   "features",
   "how-it-looks",
   "who-is-it-for",
+  "testimonials",
   "pricing",
   "faq",
 ] as const;
@@ -160,6 +164,7 @@ export default defineComponent({
     Features,
     HowItLooks,
     Clients,
+    Testimonials,
     Pricing,
     Faq,
   },

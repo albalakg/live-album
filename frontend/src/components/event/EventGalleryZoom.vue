@@ -7,13 +7,15 @@
                 'brs--medium': rounded,
                 'hide-menu': hideMenu
             }" v-for="(asset, index) in sessionAsset" :key="index">
-                <template v-if="asset.type === 'image'">
-                    <img :src="asset.fullPath" alt="image" class="album-asset" />
-                </template>
-                <template v-else-if="asset.type === 'video'">
-                    <video :src="asset.fullPath" class="album-asset" autoplay muted @loadedmetadata="handleVideoDuration"
-                        @ended="nextAsset"></video>
-                </template>
+                <EventGalleryMediaFrame>
+                    <template v-if="asset.type === 'image'">
+                        <img :src="asset.fullPath" alt="image" class="album-asset" />
+                    </template>
+                    <template v-else-if="asset.type === 'video'">
+                        <video :src="asset.fullPath" class="album-asset" autoplay muted @loadedmetadata="handleVideoDuration"
+                            @ended="nextAsset"></video>
+                    </template>
+                </EventGalleryMediaFrame>
             </div>
         </div>
     </div>
@@ -22,9 +24,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IEventAsset } from '@/helpers/interfaces';
+import EventGalleryMediaFrame from '@/components/event/EventGalleryMediaFrame.vue';
 
 export default defineComponent({
     name: 'GalleryView',
+
+    components: {
+        EventGalleryMediaFrame,
+    },
 
     props: {
         rounded: {

@@ -82,6 +82,15 @@ class Time {
     return this.formatDate(originalDate);
   }
 
+  addHours(date: string, hours: number): string {
+    const [datePart, timePart] = date.split(" ");
+    const [year, month, day] = datePart.split("/").map(Number);
+    const [hour, minute, second] = timePart.split(":").map(Number);
+    const originalDate = new Date(year, month - 1, day, hour, minute, second);
+    originalDate.setHours(originalDate.getHours() + hours);
+    return this.formatDate(originalDate);
+  }
+
   addMonths(date: string, months: number): string {
     const [datePart, timePart] = date.split(" ");
     const [year, month, day] = datePart.split("/").map(Number);

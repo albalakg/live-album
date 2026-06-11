@@ -73,7 +73,7 @@
       top="55%"
 
       width="xx-large"
-שדרגו
+
       height="large"
 
     />

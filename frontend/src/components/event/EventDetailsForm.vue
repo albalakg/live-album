@@ -166,7 +166,7 @@ export default defineComponent({
     },
 
     isPending(): boolean {
-      return this.$store.getters["event/isEventRending"];
+      return this.$store.getters["event/isEventPending"];
     },
   },
 

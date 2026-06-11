@@ -7,10 +7,13 @@ import { EventFileType, SubscriptionType, EventAssetsManagementModesType, EventG
 //   error_code?: number;
 // }
 
+export type EventGalleryAudience = "owner" | "guest";
+
 export interface IEventModuleState {
   event: IEvent;
   assetsManagement: IEventAssetsManagement;
   gallery: IEventGallery;
+  galleryAudience: EventGalleryAudience;
 }
 
 export interface IEventGallery {
@@ -73,6 +76,8 @@ export interface IEvent {
   active_download_process: IEventDownloadAssetsProcess;
   config: IEventConfig;
   user_id?: number;
+  /** Owner subscription name when provided by guest/public event APIs. */
+  subscription_name?: SubscriptionTypesEnum | string | null;
 }
 
 export interface IEventConfig {

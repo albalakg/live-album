@@ -28,6 +28,9 @@
                     <router-link to="/#how-it-looks">
                         <p>איך זה נראה</p>
                     </router-link>
+                    <router-link to="/#testimonials">
+                        <p>המלצות</p>
+                    </router-link>
                     <router-link to="/#pricing">
                         <p>המסלולים שלנו</p>
                     </router-link>

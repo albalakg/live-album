@@ -404,7 +404,7 @@ export default defineComponent({
 
     disabledTime(): string {
       return this.$store.getters["event/getEventFinishTime"]
-        ? Time.addMonths(
+        ? Time.addHours(
             this.$store.getters["event/getEventFinishTime"],
             this.$store.getters["user/getSubscriptionFilesStorageTime"]
           )
