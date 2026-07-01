@@ -181,7 +181,6 @@
               </template>
 
               <template v-else>
-
                 <router-link
 
                   v-if="!hasActiveEvent"
@@ -194,9 +193,11 @@
 
                     animation
 
+                    :color="card.slug === 'demo' ? 'pink' : 'green'"
+
                     :text="
 
-                      card.slug === 'demo' ? 'הצטרפו עכשיו' : 'רכשו תוכנית'
+                      card.slug === 'demo' ? 'נסו עכשיו בחינם' : 'רכשו תוכנית'
 
                     "
 

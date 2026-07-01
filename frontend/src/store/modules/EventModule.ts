@@ -285,8 +285,13 @@ const EventModule = {
       state.galleryAudience = audience;
     },
 
-    SET_EVENT(state: IEventModuleState, event: IEvent) {
-      if (event?.assets != null) {
+    SET_EVENT(state: IEventModuleState, event: IEvent | null) {
+      if (!event) {
+        state.event = null as unknown as IEvent;
+        return;
+      }
+
+      if (event.assets != null) {
         event.assets = asAssetArray(event.assets);
       }
       const raw = event as IEvent & {
@@ -821,7 +826,7 @@ const EventModule = {
 
     setEvent(
       context: { commit: (arg0: string, arg1: any) => void },
-      event: IEvent
+      event: IEvent | null
     ) {
       if (event) {
         event.starts_at = event.starts_at

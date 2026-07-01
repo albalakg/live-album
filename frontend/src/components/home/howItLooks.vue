@@ -146,91 +146,62 @@
             </template>
 
             <template v-else>
-              <button
-                class="gallery-carousel-nav gallery-carousel-nav--left"
-                type="button"
-                aria-label="הזזת הגלריה שמאלה"
-                :disabled="!canMobilePanLeft"
-                @click="panMobileGallery('left')"
-              >
-                <svg
-                  class="gallery-carousel-nav__icon"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M15 6l-6 6 6 6"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
-
-              <div
-                class="how-it-looks-gallery-3d"
-                :class="{ 'how-it-looks-gallery-3d--dragging': mobileIsDragging }"
-                @touchstart.passive="onMobileTouchStart"
-                @touchmove="onMobileTouchMove"
-                @touchend="onMobileTouchEnd"
-                @touchcancel="onMobileTouchEnd"
-                @mousedown="onMobileMouseDown"
-              >
+              <div class="gallery-mobile-carousel">
                 <div
-                  class="gallery-mobile-track"
-                  :class="{ 'gallery-mobile-track--dragging': mobileIsDragging }"
-                  :style="mobileTrackStyle"
+                  class="how-it-looks-gallery-3d"
+                  :class="{ 'how-it-looks-gallery-3d--dragging': mobileIsDragging }"
+                  @touchstart.passive="onMobileTouchStart"
+                  @touchmove="onMobileTouchMove"
+                  @touchend="onMobileTouchEnd"
+                  @touchcancel="onMobileTouchEnd"
+                  @mousedown="onMobileMouseDown"
                 >
-                  <figure
-                    v-for="(image, index) in galleryImages"
-                    :key="image.src"
-                    class="gallery-item"
-                    :data-gallery-index="index"
-                    :style="card3dStyle(index)"
-                    tabindex="0"
-                    role="button"
-                    :aria-label="`פתיחת ${image.label}`"
-                    @click.stop="onGalleryCardClick(index, $event)"
-                    @touchend="onGalleryCardTouchEnd($event)"
-                    @keydown.enter="onGalleryCardClick(index)"
-                    @keydown.space.prevent="onGalleryCardClick(index)"
+                  <div
+                    class="gallery-mobile-track"
+                    :class="{ 'gallery-mobile-track--dragging': mobileIsDragging }"
+                    :style="mobileTrackStyle"
                   >
-                    <img
-                      class="gallery-image"
-                      :src="image.src"
-                      :alt="image.alt"
-                      loading="lazy"
-                      draggable="false"
+                    <figure
+                      v-for="(image, index) in galleryImages"
+                      :key="image.src"
+                      class="gallery-item"
+                      :data-gallery-index="index"
+                      :style="card3dStyle(index)"
+                      tabindex="0"
+                      role="button"
+                      :aria-label="`פתיחת ${image.label}`"
+                      @click="onGalleryCardClick(index)"
+                      @keydown.enter="onGalleryCardClick(index)"
+                      @keydown.space.prevent="onGalleryCardClick(index)"
+                    >
+                      <img
+                        class="gallery-image"
+                        :src="image.src"
+                        :alt="image.alt"
+                        loading="lazy"
+                        draggable="false"
+                      />
+                      <figcaption class="gallery-caption">{{ image.label }}</figcaption>
+                    </figure>
+                  </div>
+                </div>
+
+                <div class="gallery-mobile-controls" aria-label="ניווט בגלריה">
+                  <div class="gallery-mobile-dots" role="tablist">
+                    <button
+                      v-for="(_, index) in mobileSnapPositions"
+                      :key="index"
+                      type="button"
+                      class="gallery-mobile-dot"
+                      :class="{ 'gallery-mobile-dot--active': index === mobileSnapIndex }"
+                      role="tab"
+                      :aria-selected="index === mobileSnapIndex"
+                      :aria-label="`מיקום ${index + 1} מתוך ${mobileSnapPositions}`"
+                      @click="goToMobileSnap(index)"
                     />
-                    <figcaption class="gallery-caption">{{ image.label }}</figcaption>
-                  </figure>
+                  </div>
                 </div>
               </div>
-
-              <button
-                class="gallery-carousel-nav gallery-carousel-nav--right"
-                type="button"
-                aria-label="הזזת הגלריה ימינה"
-                :disabled="!canMobilePanRight"
-                @click="panMobileGallery('right')"
-              >
-                <svg
-                  class="gallery-carousel-nav__icon"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M9 6l6 6-6 6"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
             </template>
           </div>
         </div>
@@ -321,7 +292,8 @@ interface GalleryImage {
 const MOBILE_CARD_WIDTH = 100;
 const MOBILE_CARD_GAP = 12;
 const MOBILE_CARD_STEP = MOBILE_CARD_WIDTH + MOBILE_CARD_GAP;
-const MOBILE_DRAG_THRESHOLD = 24;
+const MOBILE_DRAG_THRESHOLD = 12;
+const MOBILE_TAP_THRESHOLD = 10;
 
 export default defineComponent({
   name: "HowItLooks",
@@ -431,12 +403,12 @@ export default defineComponent({
       return Math.max(0, (this.galleryImages.length - 2) * MOBILE_CARD_STEP);
     },
 
-    canMobilePanLeft(): boolean {
-      return this.mobileScrollOffset < this.mobileMaxScrollOffset;
+    mobileSnapPositions(): number {
+      return this.galleryImages.length - 1;
     },
 
-    canMobilePanRight(): boolean {
-      return this.mobileScrollOffset > 0;
+    mobileSnapIndex(): number {
+      return Math.round(this.mobileScrollOffset / MOBILE_CARD_STEP);
     },
 
     mobileTrackStyle(): Record<string, string> {
@@ -498,18 +470,11 @@ export default defineComponent({
       return style;
     },
 
-    panMobileGallery(direction: "left" | "right") {
-      if (direction === "left") {
-        this.mobileScrollOffset = Math.min(
-          this.mobileScrollOffset + MOBILE_CARD_STEP,
-          this.mobileMaxScrollOffset
-        );
-      } else {
-        this.mobileScrollOffset = Math.max(
-          this.mobileScrollOffset - MOBILE_CARD_STEP,
-          0
-        );
-      }
+    goToMobileSnap(index: number) {
+      this.mobileScrollOffset = Math.max(
+        0,
+        Math.min(this.mobileMaxScrollOffset, index * MOBILE_CARD_STEP)
+      );
     },
 
     isMobileViewport(): boolean {
@@ -553,16 +518,6 @@ export default defineComponent({
 
     onMobileTouchEnd(event: TouchEvent) {
       if (!this.mobileGestureActive) return;
-      const touch = event.changedTouches[0];
-      if (touch) {
-        const index = this.getGalleryIndexFromTouchPoint(
-          touch.clientX,
-          touch.clientY
-        );
-        if (index !== null) {
-          this.pendingGalleryTapIndex = index;
-        }
-      }
       const wasPan = this.mobileIsDragging;
       this.finishMobileGesture();
       if (wasPan) {
@@ -639,6 +594,8 @@ export default defineComponent({
     finishMobileGesture() {
       const wasPan = this.mobileIsDragging;
       const tapIndex = this.pendingGalleryTapIndex;
+      const wasTap =
+        !wasPan && this.mobilePeakDragDistance <= MOBILE_TAP_THRESHOLD;
 
       if (wasPan) {
         const proposedScroll = this.mobileScrollOffset - this.mobileDragOffset;
@@ -647,7 +604,11 @@ export default defineComponent({
           Math.min(this.mobileMaxScrollOffset, proposedScroll)
         );
         this.blockGalleryTap(350);
-      } else if (tapIndex !== null && !this.suppressGalleryClick) {
+      } else if (
+        wasTap &&
+        tapIndex !== null &&
+        !this.suppressGalleryClick
+      ) {
         this.openModal(tapIndex);
         this.blockGalleryTap();
       }
@@ -658,35 +619,6 @@ export default defineComponent({
       this.mobilePeakDragDistance = 0;
       this.mobilePeakHorizontalDistance = 0;
       this.pendingGalleryTapIndex = null;
-    },
-
-    wasMobilePanGesture(): boolean {
-      return (
-        this.mobileIsDragging ||
-        this.mobilePeakHorizontalDistance >= MOBILE_DRAG_THRESHOLD
-      );
-    },
-
-    tryOpenGalleryFromTap(index: number) {
-      if (!this.isMobileViewport()) return false;
-      if (this.suppressGalleryClick || this.wasMobilePanGesture()) return false;
-      this.openModal(index);
-      this.blockGalleryTap();
-      return true;
-    },
-
-    onGalleryCardTouchEnd(event: TouchEvent) {
-      if (!this.isMobileViewport()) return;
-      const touch = event.changedTouches[0];
-      if (!touch) return;
-      const index = this.getGalleryIndexFromTouchPoint(
-        touch.clientX,
-        touch.clientY
-      );
-      if (index === null) return;
-      if (this.tryOpenGalleryFromTap(index)) {
-        event.preventDefault();
-      }
     },
 
     blockGalleryTap(durationMs = 350) {
@@ -713,7 +645,7 @@ export default defineComponent({
       if (!this.isMobileViewport()) return null;
 
       const root = this.$el as HTMLElement;
-      const viewport = root.querySelector(".how-it-looks-gallery-3d--mobile");
+      const viewport = root.querySelector(".how-it-looks-gallery-3d");
       if (!viewport) return null;
 
       const viewportRect = viewport.getBoundingClientRect();
@@ -750,21 +682,8 @@ export default defineComponent({
       return bestIndex;
     },
 
-    onGalleryCardClick(index: number, event?: MouseEvent) {
+    onGalleryCardClick(index: number) {
       if (this.suppressGalleryClick) return;
-      if (this.isMobileViewport()) {
-        if (this.wasMobilePanGesture()) return;
-        if (event) {
-          const resolved = this.getGalleryIndexFromTouchPoint(
-            event.clientX,
-            event.clientY
-          );
-          if (resolved !== null) {
-            this.openModal(resolved);
-            return;
-          }
-        }
-      }
       this.openModal(index);
     },
 
@@ -911,7 +830,7 @@ export default defineComponent({
 
   &--mobile {
     align-self: center;
-    width: min(325px, calc(100vw - 70px));
+    width: min(325px, calc(100vw - 32px));
     gap: 0;
     padding-inline: 0;
   }
@@ -1008,52 +927,49 @@ export default defineComponent({
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.gallery-carousel-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  flex-shrink: 0;
-  border: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.28);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-  cursor: pointer;
-  padding: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  display: inline-flex;
+.gallery-mobile-carousel {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  touch-action: manipulation;
-  transition: background 180ms ease, opacity 180ms ease;
+  width: 100%;
+  gap: 2px;
 
-  &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.4);
-  }
-
-  &:disabled {
-    opacity: 0.35;
-    cursor: default;
-  }
-
-  &--left {
-    left: -25px;
-  }
-
-  &--right {
-    right: -25px;
+  .how-it-looks-gallery-3d {
+    padding-bottom: 6px;
   }
 }
 
-.gallery-carousel-nav__icon {
-  width: 22px;
-  height: 22px;
-  display: block;
-  flex-shrink: 0;
+.gallery-mobile-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.gallery-mobile-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: min(220px, 60vw);
+}
+
+.gallery-mobile-dot {
+  border: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 180ms ease, background 180ms ease;
+
+  &--active {
+    background: #fff;
+    transform: scale(1.25);
+  }
 }
 
 .how-it-looks-gallery-3d {

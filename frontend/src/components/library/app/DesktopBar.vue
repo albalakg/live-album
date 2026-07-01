@@ -128,12 +128,6 @@ export default defineComponent({
                     weight: '500'
                 },
                 {
-                    text: 'שאלות',
-                    url: '/#faq',
-                    color: 'dark',
-                    weight: '500'
-                },
-                {
                     text: 'צור קשר',
                     url: '/contact-us',
                     color: 'dark',
