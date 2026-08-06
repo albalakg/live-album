@@ -94,6 +94,13 @@
                 </span>
                 <span class="upload-button-text" v-else>תעלו ותשתפו</span>
               </button>
+              <router-link
+                v-if="showAlbumPageLink"
+                class="album-link-button"
+                :to="albumPagePath"
+              >
+                צפו באלבום
+              </router-link>
               <input
                 type="file"
                 ref="fileInput"
@@ -437,6 +444,15 @@ export default defineComponent({
       return this.event?.config.preview_site_display_date ?? false;
     },
 
+    showAlbumPageLink(): boolean {
+      return this.event?.config?.preview_link_to_album_page_from_upload_page ?? false;
+    },
+
+    albumPagePath(): string {
+      const eventPath = this.event?.path ?? this.$route.params.event_path;
+      return `/event/open-gallery/${eventPath}`;
+    },
+
     user(): IUserInfo | null {
       return this.$store.getters["user/getUser"];
     },
@@ -571,6 +587,34 @@ export default defineComponent({
   transform: translateY(-5px);
 }
 
+.album-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  padding: 8px 18px;
+  width: fit-content;
+  max-width: none;
+  margin: 10px auto 0;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 50px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.9;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  font-family: system-ui, sans-serif;
+}
+
+.album-link-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+}
+
 .notification {
   font-family: serif;
   font-size: 1.5rem;
@@ -619,6 +663,11 @@ span {
   .upload-button {
     font-size: 2.2rem;
     padding: 30px 60px;
+  }
+
+  .album-link-button {
+    font-size: 1rem;
+    padding: 10px 22px;
   }
 }
 </style>

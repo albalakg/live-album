@@ -88,6 +88,7 @@ export interface IEventConfig {
   preview_guests_assets_in_gallery: boolean;
   preview_owners_assets_in_gallery: boolean;
   preview_qr_in_gallery: boolean;
+  preview_link_to_album_page_from_upload_page: boolean;
   video_upload_enabled: boolean;
   event_id: number;
   displayed_gallery: EventGalleryType;

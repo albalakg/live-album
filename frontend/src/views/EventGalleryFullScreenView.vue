@@ -1,7 +1,14 @@
 <template>
-  <div class="full-screen-gallery bg--dark" v-if="event">
+  <div
+    class="full-screen-gallery bg--dark"
+    v-if="event"
+    @mousemove="onMouseMove"
+  >
     <div
       class="gallery-header bg--white display--flex justify--space-between align--center"
+      :class="{ 'is-visible': showHeader }"
+      @mouseenter="onHeaderMouseEnter"
+      @mouseleave="onHeaderMouseLeave"
     >
       <div>
         <label
@@ -33,7 +40,6 @@
     <div class="gallery-content">
       <component :is="selectedAlbum"></component>
       <EventQR
-        v-if="event.config.preview_qr_in_gallery"
         class="qr-code"
         :background="background"
       />
@@ -52,6 +58,8 @@ import EventGallerySplitScreen from "@/components/event/EventGallerySplitScreen.
 import EventGalleryRandom from "@/components/event/EventGalleryRandom.vue";
 import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
 
+const HEADER_HIDE_DELAY_MS = 3000;
+
 export default defineComponent({
   name: "EventGalleryFullScreenView",
 
@@ -69,6 +77,9 @@ export default defineComponent({
       isFullScreen: false as boolean,
       background: "#fff" as string,
       galleryPollIntervalId: null as ReturnType<typeof setInterval> | null,
+      showHeader: true as boolean,
+      isHoveringHeader: false as boolean,
+      hideHeaderTimeoutId: null as ReturnType<typeof setTimeout> | null,
     };
   },
 
@@ -78,6 +89,7 @@ export default defineComponent({
     this.galleryPollIntervalId = setInterval(() => {
       this.$store.dispatch("event/getEventGalleryAssets");
     }, 10000);
+    this.scheduleHideHeader();
   },
 
   computed: {
@@ -106,6 +118,40 @@ export default defineComponent({
   },
 
   methods: {
+    onMouseMove() {
+      this.showHeader = true;
+      if (!this.isHoveringHeader) {
+        this.scheduleHideHeader();
+      }
+    },
+
+    onHeaderMouseEnter() {
+      this.isHoveringHeader = true;
+      this.showHeader = true;
+      this.clearHideHeaderTimeout();
+    },
+
+    onHeaderMouseLeave() {
+      this.isHoveringHeader = false;
+      this.scheduleHideHeader();
+    },
+
+    scheduleHideHeader() {
+      this.clearHideHeaderTimeout();
+      this.hideHeaderTimeoutId = setTimeout(() => {
+        if (!this.isHoveringHeader) {
+          this.showHeader = false;
+        }
+      }, HEADER_HIDE_DELAY_MS);
+    },
+
+    clearHideHeaderTimeout() {
+      if (this.hideHeaderTimeoutId) {
+        clearTimeout(this.hideHeaderTimeoutId);
+        this.hideHeaderTimeoutId = null;
+      }
+    },
+
     toggleFullScreen() {
       const elem = document.getElementsByTagName("body")[0];
       this.isFullScreen = !this.isFullScreen;
@@ -126,6 +172,7 @@ export default defineComponent({
   },
 
   beforeUnmount() {
+    this.clearHideHeaderTimeout();
     if (this.galleryPollIntervalId) {
       clearInterval(this.galleryPollIntervalId);
       this.galleryPollIntervalId = null;
@@ -152,9 +199,8 @@ export default defineComponent({
   width: 100vw;
 
   .gallery-content {
-    height: calc(100vh - 70px);
+    height: 100vh;
     width: 100%;
-    top: 70px;
     margin: auto;
     display: flex;
     position: relative;
@@ -167,6 +213,14 @@ export default defineComponent({
     height: 70px;
     padding: 0 30px;
     z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+
+    &.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   .qr-code {
@@ -190,3 +244,4 @@ export default defineComponent({
   margin-left: 8px;
 }
 </style>
+

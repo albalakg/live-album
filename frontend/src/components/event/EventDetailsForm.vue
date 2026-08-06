@@ -90,13 +90,22 @@
     </div>
     <div class="display--flex checkbox-wrapper">
       <MainCheckbox
+        @onClick="form.config.preview_link_to_album_page_from_upload_page = !form.config.preview_link_to_album_page_from_upload_page"
+        title="קישור לאלבום מעמוד העלאות"
+        :value="form.config.preview_link_to_album_page_from_upload_page"
+        class="checkbox"
+      />
+      <small>להציג כפתור מעבר מעמוד ההעלאות לעמוד האלבום</small>
+    </div>
+    <!-- <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
         @onClick="form.config.preview_qr_in_gallery = !form.config.preview_qr_in_gallery"
         title="להציג QR בגלריה"
         :value="form.config.preview_qr_in_gallery"
         class="checkbox"
       />
       <small>להציג QR בגלריה</small>
-    </div>
+    </div> -->
     <br>
     <MainButton :loading="loading" text="שמור" />
   </form>
@@ -132,6 +141,7 @@ export default defineComponent({
           preview_guests_assets_in_gallery: false as boolean,
           preview_owners_assets_in_gallery: false as boolean,
           preview_qr_in_gallery: false as boolean,
+          preview_link_to_album_page_from_upload_page: false as boolean,
           video_upload_enabled: true as boolean,
         }
       },
@@ -180,6 +190,7 @@ export default defineComponent({
       this.form.config.preview_guests_assets_in_gallery = this.event?.config?.preview_guests_assets_in_gallery ?? false;
       this.form.config.preview_owners_assets_in_gallery = this.event?.config?.preview_owners_assets_in_gallery ?? false;
       this.form.config.preview_qr_in_gallery = this.event?.config?.preview_qr_in_gallery ?? false;
+      this.form.config.preview_link_to_album_page_from_upload_page = this.event?.config?.preview_link_to_album_page_from_upload_page ?? false;
       this.form.config.video_upload_enabled = this.event?.config?.video_upload_enabled ?? true;
       this.imageExists = !!this.event?.image;
     },
