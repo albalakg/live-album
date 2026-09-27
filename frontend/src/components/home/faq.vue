@@ -87,6 +87,7 @@
 </template>
 
 <script lang="ts">
+import { FAQ_ITEMS } from "@/seo/faqContent";
 import { defineComponent } from "vue";
 
 type FaqItem = {
@@ -101,38 +102,10 @@ export default defineComponent({
   data() {
     return {
       openIndex: -1,
-      items: [
-        {
-          question: "איך האורחים מעלים תמונות וסרטונים?",
-          answer:
-            "האורחים סורקים QR או נכנסים לקישור, ובקליק מעלים תמונות/סרטונים ישר לאלבום החי — בלי להתקין אפליקציה.",
-          _maxHeight: 0,
-        },
-        {
-          question: "האם צריך להירשם כדי להשתמש?",
-          answer:
-            "בעלי האירוע נרשמים כדי ליצור אירוע, אבל האורחים נכנסים בקלות דרך קישור/QR בלי הרשמה.",
-          _maxHeight: 0,
-        },
-        {
-          question: "אפשר להוריד את כל התמונות בסוף האירוע?",
-          answer:
-            "כן. בסוף האירוע אפשר להוריד את כל המדיה בצורה מרוכזת, וגם לשמור אותה כזיכרון לשנים קדימה.",
-          _maxHeight: 0,
-        },
-        {
-          question: "האם האלבום מתעדכן בזמן אמת?",
-          answer:
-            "כן. כל העלאה מופיעה באלבום בזמן אמת כך שאפשר להקרין את הגלריה על מסך במהלך האירוע.",
-          _maxHeight: 0,
-        },
-        {
-          question: "האם ניתן להשתמש בכל סוג אירוע?",
-          answer:
-            "בטח — חתונות, אירוסין, בר/בת מצווה, אירועי חברה, מסיבות סיום, ברית/בריתה וכל חגיגה.",
-          _maxHeight: 0,
-        },
-      ] as FaqItem[],
+      items: FAQ_ITEMS.map((item) => ({
+        ...item,
+        _maxHeight: 0,
+      })) as FaqItem[],
     };
   },
 

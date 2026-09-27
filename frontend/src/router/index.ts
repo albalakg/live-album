@@ -155,7 +155,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/:path(.*)*",
     name: "notFound",
-    component: () => import("@/views/HomeView.vue"),
+    component: () => import("@/views/NotFoundView.vue"),
   },
 ];
 

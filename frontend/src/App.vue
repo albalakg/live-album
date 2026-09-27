@@ -1,4 +1,5 @@
 <template>
+  <SeoHead />
   <notifications position="top right" />
   <router-view v-if="isFullScreen" />
   <div class="app-wrapper" v-else>
@@ -26,6 +27,7 @@ import MobileBar from "@/components/library/app/MobileBar.vue";
 import AppMenu from "@/components/library/app/AppMenu.vue";
 import Footer from "@/components/library/app/Footer.vue";
 import LoadingPage from "@/components/library/app/LoadingPage.vue";
+import SeoHead from "@/components/library/app/SeoHead.vue";
 import { defineComponent } from "vue";
 import Auth from "@/helpers/Auth";
 
@@ -38,6 +40,7 @@ export default defineComponent({
     AppMenu,
     Footer,
     LoadingPage,
+    SeoHead,
   },
 
   created() {

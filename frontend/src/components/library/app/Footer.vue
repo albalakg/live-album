@@ -36,7 +36,7 @@
                     </router-link>
                 </div>
                 <div>
-                    <router-link to="/contact">
+                    <router-link to="/contact-us">
                         <p>צור קשר</p>
                     </router-link>
                     <router-link to="/order">
@@ -45,6 +45,9 @@
                     <router-link to="/terms-and-conditions">
                         <p>תנאי האתר</p>
                     </router-link>
+                    <a href="https://www.mit4mit.co.il/biz/105473" target="_blank" rel="noopener noreferrer">
+                        <p>המלצות ב-mit4mit</p>
+                    </a>
                 </div>
                 <div v-if="!isLoggedIn">
                     <router-link to="/login">

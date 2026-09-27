@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { createHead } from "@unhead/vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
@@ -19,6 +20,7 @@ if (session?.token) {
 
 
 const app = createApp(App);
+const head = createHead();
 app.component('VueDatePicker', VueDatePicker);
 app.config.globalProperties.$bp = useBreakpoints();
-app.use(store).use(router).use(Notifications).mount("#app");
+app.use(store).use(router).use(head).use(Notifications).mount("#app");

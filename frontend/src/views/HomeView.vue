@@ -6,8 +6,7 @@
       id="header"
     >
       <h1 class="title--x-large text--center-mobile">
-       ברוכים הבאים ל
-        <strong class="text--pink">SnapShare</strong>
+        אלבום תמונות חי לחתונה ולאירועים – האורחים מעלים, המסך מקרין
       </h1>
       <p>
         האורחים מצלמים, המסכים משדרים.
@@ -57,7 +56,7 @@
       <img
         class="header-image-gallery"
         src="/assets/home-gallery.webp"
-        alt="header-gallery-image"
+        alt="אורחים מעלים תמונות מהאירוע לאלבום החי של SnapShare, והמסך מקרין אותן בזמן אמת"
       />
       <div
         class="social-media display--flex direction--column justify--space-between"
@@ -295,9 +294,17 @@ export default defineComponent({
 
 .header-section {
   h1 {
-    margin-top: 10%;
+    margin-top: 8%;
     font-weight: 700;
-    letter-spacing: 3px;
+    letter-spacing: 0;
+    font-size: 2.35rem;
+    line-height: 1.35;
+    max-width: 16em;
+
+    @media only screen and (max-width: 600px) {
+      font-size: 1.65rem;
+      max-width: none;
+    }
   }
 
   p {

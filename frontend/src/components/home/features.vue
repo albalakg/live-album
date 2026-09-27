@@ -55,6 +55,7 @@
         width="x-large"
       />
     </template>
+    <span id="how-it-works" class="section-anchor"></span>
     <div class="home-page-content width--page-size margin--auto height--full">
       <h2 class="text--dark title--x-large text--center-mobile">
         החבילת מוצרים שתקבלו
@@ -164,6 +165,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.section-anchor {
+  display: block;
+  height: 0;
+  scroll-margin-top: 110px;
+}
+
 .home-page-section {
   min-height: calc(100vh - 99px);
   position: relative;

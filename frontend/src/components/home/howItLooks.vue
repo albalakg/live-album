@@ -108,6 +108,8 @@
               <video
                 ref="galleryVideo"
                 src="/assets/gallery_video.mp4"
+                poster="/assets/gallery_video_poster.jpg"
+                preload="none"
                 muted
                 loop
                 playsinline

@@ -21,7 +21,7 @@
     <MainCube color="green" right="31%" top="84%" width="medium" height="xxx-large" />
 
     <div class="contact-content width--corner width--80-mobile bg--pink margin--auto brs--medium padding--medium shadow--small">
-      <h2 class="text--center text--white title--large">צרו איתנו קשר</h2>
+      <h1 class="text--center text--white title--large">צרו איתנו קשר</h1>
       <p class="text--center title--small">
         כל בקשה, שאלה, תלונה או טיפ יתקבלו בברכה
       </p>
@@ -207,7 +207,7 @@ export default defineComponent({
       border-radius: 0 0 12px 12px;
     }
 
-    h2 {
+    h1 {
       margin-top: 10px;
     }
   }
