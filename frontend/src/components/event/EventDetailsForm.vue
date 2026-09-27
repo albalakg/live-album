@@ -1,0 +1,308 @@
+<template>
+  <form @submit.prevent="submit()" class="event-form">
+    <h2 class="title--large text--dark">עריכת פרטי האירוע</h2>
+    <br />
+    <MainInput v-model="form.name" title="שם האירוע" :error="errors.name" />
+    <br />
+    <p class="title--small">תאריך האירוע</p>
+    <VueDatePicker
+      :disabled="!isPending"
+      class="date-picker"
+      :class="{ 'disabled': !isPending }"
+      :min-date="minDate"
+      locale="he"
+      :format="format"
+      v-model="form.starts_at"
+      select-text="בחר"
+      cancel-text="בטל"
+      :day-names="days"
+    ></VueDatePicker>
+    <small class="hint" v-show="isPending">
+      בחרו תאריך ושעה מדוייקת של תחילת האירוע
+    </small>
+    <small class="hint" v-show="!isPending">
+      ניתן לשנות את התאריך רק בסטטוס ממתין
+    </small>
+    <br />
+    <MainInput
+      :fileExists="imageExists"
+      icon="attach_file"
+      type="file"
+      title="תמונת האירוע"
+      hint="התמונה משמשת לעמוד העלאת הקבצים לכן מומלץ ברזולוציה של מכשיר נייד"
+      :allowedAssets="['image']"
+      @onChange="fileUploaded"
+    />
+    <br />
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_site_display_image = !form.config.preview_site_display_image"
+        title="להציג את תמונת החתונה בעמוד העלאות"
+        :value="form.config.preview_site_display_image"
+        class="checkbox"
+      />
+      <small> להציג את תמונת החתונה בעמוד העלאות </small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_site_display_name = !form.config.preview_site_display_name"
+        title="להציג את שם החתונה בעמוד העלאות"
+        :value="form.config.preview_site_display_name"
+        class="checkbox"
+      />
+      <small> להציג את שם החתונה בעמוד העלאות </small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_site_display_date = !form.config.preview_site_display_date"
+        title="להציג את תאריך החתונה בעמוד העלאות"
+        :value="form.config.preview_site_display_date"
+        class="checkbox"
+      />
+      <small> להציג את תאריך החתונה בעמוד העלאות </small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.video_upload_enabled = !form.config.video_upload_enabled"
+        title="לאפשר העלאת סרטונים"
+        :value="form.config.video_upload_enabled"
+        class="checkbox"
+      />
+      <small>לאפשר לאורחים ולבעלי האירוע להעלות  סרטונים</small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_guests_assets_in_gallery = !form.config.preview_guests_assets_in_gallery"
+        title="להציג את תמונות האורחים בגלריה"
+        :value="form.config.preview_guests_assets_in_gallery"
+        class="checkbox"
+      />
+      <small>להציג את תמונות האורחים בגלריה</small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_owners_assets_in_gallery = !form.config.preview_owners_assets_in_gallery"
+        title="להציג את התמונות האישיות שלנו בגלריה"
+        :value="form.config.preview_owners_assets_in_gallery"
+        class="checkbox"
+      />
+      <small>להציג את התמונות האישיות שלנו בגלריה</small>
+    </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_link_to_album_page_from_upload_page = !form.config.preview_link_to_album_page_from_upload_page"
+        title="קישור לאלבום מעמוד העלאות"
+        :value="form.config.preview_link_to_album_page_from_upload_page"
+        class="checkbox"
+      />
+      <small>להציג כפתור מעבר מעמוד ההעלאות לעמוד האלבום</small>
+    </div>
+    <!-- <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.preview_qr_in_gallery = !form.config.preview_qr_in_gallery"
+        title="להציג QR בגלריה"
+        :value="form.config.preview_qr_in_gallery"
+        class="checkbox"
+      />
+      <small>להציג QR בגלריה</small>
+    </div> -->
+    <br>
+    <MainButton :loading="loading" text="שמור" />
+  </form>
+</template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import MainButton from "../library/buttons/MainButton.vue";
+import MainInput from "../library/inputs/MainInput.vue";
+import { IEvent } from "@/helpers/interfaces";
+import Time from "@/helpers/time";
+import MainCheckbox from "../library/inputs/MainCheckbox.vue";
+
+export default defineComponent({
+  name: "EventDetailsForm",
+
+  components: {
+    MainButton,
+    MainInput,
+    MainCheckbox,
+  },
+
+  data() {
+    return {
+      form: {
+        name: "" as string,
+        starts_at: "" as string,
+        image: null as File | null,
+        config: {
+          preview_site_display_image: false as boolean,
+          preview_site_display_name: false as boolean,
+          preview_site_display_date: false as boolean,
+          preview_guests_assets_in_gallery: false as boolean,
+          preview_owners_assets_in_gallery: false as boolean,
+          preview_qr_in_gallery: false as boolean,
+          preview_link_to_album_page_from_upload_page: false as boolean,
+          video_upload_enabled: true as boolean,
+        }
+      },
+      errors: {
+        name: "" as string,
+        starts_at: "" as string,
+      },
+      imageExists: false as boolean,
+      days: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
+      format: "dd/MM/yyyy HH:mm",
+      loading: false as boolean,
+    };
+  },
+
+  watch: {
+    event() {
+      this.setEvent();
+    },
+  },
+
+  created() {
+    this.setEvent();
+  },
+
+  computed: {
+    minDate(): Date {
+      return new Date();
+    },
+
+    event(): IEvent {
+      return this.$store.getters["event/getEvent"];
+    },
+
+    isPending(): boolean {
+      return this.$store.getters["event/isEventPending"];
+    },
+  },
+
+  methods: {
+    setEvent() {
+      this.form.name = this.event?.name ?? "";
+      this.form.starts_at = this.event?.starts_at ?? "";
+      this.form.config.preview_site_display_image = this.event?.config?.preview_site_display_image ?? false;
+      this.form.config.preview_site_display_name = this.event?.config?.preview_site_display_name ?? false;
+      this.form.config.preview_site_display_date = this.event?.config?.preview_site_display_date ?? false;
+      this.form.config.preview_guests_assets_in_gallery = this.event?.config?.preview_guests_assets_in_gallery ?? false;
+      this.form.config.preview_owners_assets_in_gallery = this.event?.config?.preview_owners_assets_in_gallery ?? false;
+      this.form.config.preview_qr_in_gallery = this.event?.config?.preview_qr_in_gallery ?? false;
+      this.form.config.preview_link_to_album_page_from_upload_page = this.event?.config?.preview_link_to_album_page_from_upload_page ?? false;
+      this.form.config.video_upload_enabled = this.event?.config?.video_upload_enabled ?? true;
+      this.imageExists = !!this.event?.image;
+    },
+
+    deleteImage() {
+      this.form.image = null;
+      this.imageExists = false;
+    },
+
+    fileUploaded(file: File) {
+      this.form.image = file;
+    },
+
+    async submit() {
+      const errors = this.validateForm();
+      if (Object.values(errors).some((error) => error !== "")) {
+        Object.values(errors).forEach((error) => {
+          if (error) {
+            this.$notify({
+              text: error,
+              type: "error",
+              duration: 5000,
+            });
+          }
+        });
+        return;
+      }
+
+      this.loading = true;
+      let payload = {
+        ...this.form,
+      } as any;
+
+      if(this.isPending) {
+        payload.starts_at = Time.toUTC(this.form.starts_at);
+      } else {
+        delete payload.starts_at;
+      }
+
+      await this.$store.dispatch(
+        "event/update",
+        payload
+      );
+      this.loading = false;
+    },
+
+    validateForm() {
+      this.errors = {
+        name: "",
+        starts_at: "",
+      };
+
+      if (!this.form.name) {
+        this.errors.name = "שם האירוע הינו שדה חובה";
+      } else if (!/.{1,100}$/.test(this.form.name)) {
+        this.errors.name = "שם האירוע צריך להכיל בין 1 ל 100 תווים";
+      }
+
+      if (!this.form.starts_at) {
+        this.errors.starts_at = "תאריך האירוע הינו שדה חובה";
+      }
+
+      return this.errors;
+    },
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+.event-form{
+  margin-bottom: 20px;
+}
+
+:deep(.dp__input_wrap) {
+  border-radius: 8px;
+  box-shadow: 0 2px 5px 1px var(--darkTransparent);
+
+  input {
+    direction: rtl;
+    border-radius: 8px;
+    padding: 8px 15px;
+  }
+
+  .dp--clear-btn {
+    left: 25px;
+    width: fit-content;
+  }
+}
+
+.date-picker {
+  margin-top: 5px;
+}
+
+.dp__theme_light {
+  --dp-border-color: #ffffff;
+  --dp-border-color-hover: #ffffff;
+  --dp-border-color-focus: #ffffff;
+  --dp-menu-min-width: 340px;
+  // --dp-primary-color: var(--green);
+  // --dp-secondary-color: var(--pink);
+}
+
+:deep(.dp__menu) {
+  min-width: unset;
+}
+
+.checkbox-wrapper {
+  margin-bottom: 10px;
+  
+  .checkbox {
+    margin-inline-end: 10px;
+  }
+}
+
+</style>

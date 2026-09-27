@@ -1,26 +1,195 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import Guard from "@/helpers/guard";
+import { isWhatsAppEnabled } from "@/helpers/features";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    name: 'home',
-    component: () => import('@/views/HomeView.vue')
+    path: "/",
+    name: "home",
+    component: () => import("@/views/HomeView.vue"),
   },
   {
-    path: '/gallery',
-    name: 'home',
-    component: () => import('@/views/GalleryView.vue')
+    path: "/login",
+    name: "login",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/LoginView.vue"),
   },
   {
-    path: '/:path(.*)*',
-    name: 'notFound',
-    component: () => import('@/views/HomeView.vue')
+    path: "/logout",
+    name: "logout",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/LogoutView.vue"),
   },
-]
+  {
+    path: "/signup",
+    name: "signup",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/SignupView.vue"),
+  },
+  {
+    path: "/forgot-password",
+    name: "forgot-password",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/ForgotPasswordView.vue"),
+  },
+  {
+    path: "/reset-password",
+    name: "resetPassword",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/ResetPasswordView.vue"),
+  },
+  {
+    path: "/email-confirmation",
+    name: "emailConfirmation",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/EmailConfirmationView.vue"),
+  },
+  {
+    path: "/auth/google/callback",
+    name: "googleAuthCallback",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/GoogleAuthCallbackView.vue"),
+  },
+  {
+    path: "/contact-us",
+    name: "contact",
+    component: () => import("@/views/ContactView.vue"),
+  },
+  {
+    path: "/order",
+    name: "order",
+    component: () => import("@/views/OrderView.vue"),
+  },
+  {
+    path: "/order/pay",
+    name: "orderPay",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/SubscriptionPaymentView.vue"),
+  },
+  {
+    path: "/order/success",
+    name: "OrderCallbackSuccess",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/OrderCallbackSuccess.vue"),
+  },
+  {
+    path: "/order/failure",
+    name: "OrderCallbackFailure",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/OrderCallbackFailure.vue"),
+  },
+  {
+    path: "/terms-and-conditions",
+    name: "termsAndConditions",
+    component: () => import("@/views/TermsAndConditionsView.vue"),
+  },
+  {
+    path: "/event/uploads/:event_path",
+    name: "gallery",
+    component: () => import("@/views/EventUploadsView.vue"),
+  },
+  {
+    path: "/event/open-album/:event_path",
+    name: "guestAlbum",
+    component: () => import("@/views/EventGuestAlbumView.vue"),
+  },
+  {
+    path: "/event/open-gallery/:event_path",
+    name: "guestGallery",
+    component: () => import("@/views/EventGuestGalleryView.vue"),
+  },
+  {
+    path: "/event",
+    name: "event",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/EventIndexView.vue"),
+    children: [
+      {
+        path: "",
+        name: "eventDetails",
+        component: () => import("../views/EventDetailsView.vue"),
+      },
+      {
+        path: "gallery",
+        name: "eventGallery",
+        component: () => import("../views/EventGalleryView.vue"),
+      },
+      {
+        path: "gallery/full-screen",
+        name: "eventGalleryFullScreen",
+        component: () => import("../views/EventGalleryFullScreenView.vue"),
+      },
+      {
+        path: "assets",
+        name: "eventAssets",
+        component: () => import("../views/EventAssetsView.vue"),
+      },
+      {
+        path: "qr",
+        name: "eventQRCard",
+        component: () => import("../views/EventQRCardView.vue"),
+      },
+      ...(isWhatsAppEnabled()
+        ? [
+            {
+              path: "whatsapp",
+              name: "eventWhatsApp",
+              component: () => import("../views/EventWhatsAppView.vue"),
+            },
+          ]
+        : []),
+    ],
+  },
+  {
+    path: "/profile",
+    name: "profile",
+    beforeEnter: Guard.user,
+    component: () => import("@/views/ProfileView.vue"),
+  },
+  {
+    path: "/design",
+    name: "design",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/DesignView.vue"),
+  },
+  {
+    path: "/:path(.*)*",
+    name: "notFound",
+    component: () => import("@/views/HomeView.vue"),
+  },
+];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes
-})
+  history: createWebHistory(),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    }
 
-export default router
+    if (to.hash) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const element = document.querySelector(to.hash);
+          if (element) {
+            const offset = 99;
+            const topPosition =
+              to.hash === "#header"
+                ? 0
+                : element.getBoundingClientRect().top + window.scrollY - offset;
+
+            window.scrollTo({
+              top: topPosition,
+              behavior: "smooth",
+            });
+          }
+          resolve();
+        }, 300);
+      });
+    }
+
+    return { top: 0 };
+  },
+});
+
+export default router;

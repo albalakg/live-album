@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /logout
+Disallow: /reset-password
+Disallow: /email-confirmation
+Disallow: /profile
+Disallow: /event
+Disallow: /design
+
+Sitemap: https://snapshare-live.com/sitemap.xml

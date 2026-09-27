@@ -1,0 +1,452 @@
+import axios from "axios";
+import {
+  IUserModuleState,
+  ILoginRequest,
+  IUserInfo,
+  ISignupRequest,
+  IUpdateUserRequest,
+  IUpdatePasswordRequest,
+  IForgotPasswordRequest,
+  IGoogleOAuthExchangeRequest,
+} from "@/helpers/interfaces";
+import { SubscriptionType } from "@/helpers/types";
+import Auth from "@/helpers/Auth";
+import ErrorsHandler from "@/helpers/errorsHandler";
+import { notify } from "@kyvg/vue3-notification";
+import router from "@/router";
+import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
+import { effectiveSubscriptionStorageHours } from "@/helpers/subscriptionPricing";
+
+function completeLogin(
+  context: {
+    commit: (arg0: string, arg1: IUserInfo | boolean) => void;
+  },
+  user: IUserInfo & { token?: string; expired_at?: string }
+) {
+  Auth.login(user);
+  delete user.token;
+  delete user.expired_at;
+  context.commit("SET_USER", user);
+  context.commit("SET_LOGGED_IN", true);
+  notify({
+    text: "התחברת בהצלחה",
+    type: "success",
+    duration: 5000,
+  });
+}
+
+const UserModule = {
+  namespaced: true,
+
+  state: {
+    user: null,
+    isLoggedIn: false,
+  } as IUserModuleState,
+
+  getters: {
+    getUser(state: IUserModuleState): IUserInfo | null {
+      return state.user;
+    },
+
+    getFirstName(state: IUserModuleState): string | null {
+      return state.user?.first_name ?? null;
+    },
+
+    getLastName(state: IUserModuleState): string | null {
+      return state.user?.last_name ?? null;
+    },
+
+    getFullName(state: IUserModuleState): string {
+      return (
+        (state.user?.first_name ?? "") + " " + (state.user?.last_name ?? "")
+      );
+    },
+
+    getEmail(state: IUserModuleState): string | null {
+      return state.user?.email ?? null;
+    },
+
+    isLoggedIn(state: IUserModuleState): boolean {
+      return state.isLoggedIn;
+    },
+
+    getSubscriptionName(state: IUserModuleState): SubscriptionTypesEnum | null {
+      return state.user?.order?.subscription?.name ?? null;
+    },
+
+    getSubscriptionPrice(state: IUserModuleState): number {
+      return parseFloat(state.user?.order?.subscription?.price ?? "0");
+    },
+
+    getSubscriptionFilesAllowed(state: IUserModuleState): number | null {
+      return state.user?.order?.subscription?.files_allowed ?? null;
+    },
+
+    getSubscriptionFilesStorageTime(state: IUserModuleState): number | null {
+      const subscription = state.user?.order?.subscription;
+      if (!subscription) return null;
+      return effectiveSubscriptionStorageHours(
+        subscription.name,
+        subscription.storage_time
+      );
+    },
+
+    getSubscriptionStartDate(
+      state: IUserModuleState
+    ): string | null | undefined {
+      return state.user?.order?.created_at;
+    },
+
+    // TODO: To fix this, not reactive
+    canUpgradeSubscription(
+      state: IUserModuleState,
+      getters: any,
+      rootState: any,
+      rootGetters: any
+    ): boolean {
+      console.log(
+        'rootGetters["EventModule/getEventStatus"]',
+        state.user?.order?.subscription?.name,
+        rootGetters["event/getEventStatus"]
+      );
+
+      console.log(
+        "2",
+        Boolean(
+          state.user?.order?.subscription?.name === SubscriptionTypesEnum.CLASSIC
+        )
+      );
+      console.log(
+        "3",
+        [StatusEnum.READY, StatusEnum.PENDING].includes(
+          rootGetters["EventModule/getEventStatus"]
+        )
+      );
+
+      return Boolean(
+        state.user?.order?.subscription?.name === SubscriptionTypesEnum.CLASSIC &&
+          [StatusEnum.READY, StatusEnum.PENDING].includes(
+            rootGetters["EventModule/getEventStatus"]
+          ) // ← replace with your actual module/getter
+      );
+    },
+  },
+
+  mutations: {
+    SET_USER(state: IUserModuleState, user: IUserInfo | null) {
+      state.user = user;
+    },
+
+    SET_LOGGED_IN(state: IUserModuleState, isLoggedIn: boolean) {
+      state.isLoggedIn = isLoggedIn;
+    },
+
+    SET_USER_PROFILE_UPDATED(
+      state: IUserModuleState,
+      user: IUpdateUserRequest
+    ) {
+      if (state.user) {
+        state.user.first_name = user.first_name;
+        state.user.last_name = user.last_name;
+      }
+    },
+  },
+
+  actions: {
+    login(
+      context: {
+        commit: (arg0: string, arg1: IUserInfo | boolean) => void;
+      },
+      payload: ILoginRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/login", payload)
+          .then((res) => {
+            const user = res.data.data.user;
+            completeLogin(context, user);
+            resolve(user);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            notify({
+              text: "כתובת המייל או הסיסמה אינם תקינים",
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    exchangeOAuthCode(
+      context: {
+        commit: (arg0: string, arg1: IUserInfo | boolean) => void;
+      },
+      payload: IGoogleOAuthExchangeRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/google/callback", payload)
+          .then((res) => {
+            const user = res.data.data.user;
+            completeLogin(context, user);
+            resolve(user);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "ההתחברות עם Google נכשלה"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    signup(
+      context: {
+        commit: (arg0: string, arg1: IUserInfo) => void;
+      },
+      payload: ISignupRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/signup", payload)
+          .then((res) => {
+            notify({
+              text: "נרשמת בהצלחה, ברוכים הבאים! נשלח מייל לאימות",
+              type: "success",
+              duration: 10000,
+            });
+            resolve(true);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך ההרשמה נכשלה"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            console.warn("get: ", err);
+            resolve(false);
+          });
+      });
+    },
+
+    logout(context: {
+      commit: (arg0: string, arg1: null | false) => void;
+      dispatch: (arg0: string, arg1: null, arg2: any) => void;
+    }) {
+      axios
+        .post("user/logout")
+        .then(() => {
+          //
+        })
+        .catch((err) => {
+          console.warn("get: ", err);
+        });
+      Auth.clearSession();
+      context.commit("SET_USER", null);
+      context.commit("SET_LOGGED_IN", false);
+      context.dispatch("event/setEvent", null, { root: true });
+    },
+
+    forgotPassword(
+      context: {
+        commit: (arg0: string, arg1: null) => void;
+      },
+      payload: IForgotPasswordRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/forgot-password", payload)
+          .then((res) => {
+            notify({
+              text: "נשלח אימייל לכתובת המייל לאיפוס הסיסמה",
+              type: "success",
+              duration: 5000,
+            });
+            resolve(true);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    resetPassword(
+      context: {
+        commit: (arg0: string, arg1: null) => void;
+      },
+      payload: any
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/reset-password", payload)
+          .then((res) => {
+            notify({
+              text: "איפסת את הסיסמה בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
+            resolve(true);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך האיפוס סיסמה נכשל"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    confirmEmail(
+      context: {
+        commit: (arg0: string, arg1: null) => void;
+      },
+      payload: any
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("auth/email-confirmation", payload)
+          .then((res) => {
+            resolve(true);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(false);
+          });
+      });
+    },
+
+    getProfile(context: {
+      commit: (arg0: string, arg1: any) => void;
+      dispatch: (arg0: string, arg1: any, arg2: any) => void;
+    }) {
+      return new Promise((resolve, reject) => {
+        axios
+          .get("user/profile")
+          .then((res) => {
+            context.dispatch("event/setEvent", res.data.data.event, {
+              root: true,
+            });
+
+            delete res.data.data.event;
+            context.commit("SET_USER", res.data.data);
+            resolve(res.data.data);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            if (err?.response?.status === 401) {
+              Auth.clearSession();
+              context.commit("SET_USER", null);
+              context.commit("SET_LOGGED_IN", false);
+              context.dispatch("event/setEvent", null, { root: true });
+              router.push("/");
+            }
+            reject(err);
+          });
+      });
+    },
+
+    updateProfile(
+      context: { commit: (arg0: string, arg1: any) => void },
+      payload: IUpdateUserRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("user/profile", payload)
+          .then((res) => {
+            notify({
+              text: "פרופיל המשתמש נערך בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
+            context.commit("SET_USER_PROFILE_UPDATED", payload);
+            resolve(res);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך עריכת המשתמש נכשלה"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    updatePassword(
+      context: { commit: (arg0: string, arg1: any) => void },
+      payload: IUpdatePasswordRequest
+    ) {
+      return new Promise((resolve) => {
+        axios
+          .post("user/password", payload)
+          .then((res) => {
+            notify({
+              text: "הסיסמה עודכנה בהצלחה",
+              type: "success",
+              duration: 5000,
+            });
+            context.commit("SET_USER_PROFILE_UPDATED", payload);
+            resolve(res);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(
+                err,
+                "מצטערים אך עדכון הסיסמה נכשל"
+              ),
+              type: "error",
+              duration: 5000,
+            });
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    delete(context: { commit: (arg0: string, arg1: any) => void }) {
+      return new Promise((resolve) => {
+        axios
+          .post("user/delete")
+          .then((res) => {
+            resolve(res);
+          })
+          .catch((err) => {
+            console.warn("get: ", err);
+            resolve(null);
+          });
+      });
+    },
+
+    setUserAsLoggedIn(context: {
+      commit: (arg0: string, arg1: boolean) => void;
+    }) {
+      context.commit("SET_LOGGED_IN", true);
+    },
+  },
+
+  modules: {},
+};
+
+export default UserModule;
