@@ -4,7 +4,7 @@
         'bg--white': !hasActiveEvent
     }">
         <div class="desktop-content display--flex justify--space-between align--center width--page-size">
-            <div class="display--flex justify--space-between">
+            <div class="desktop-links display--flex justify--space-between">
                 <DesktopBarLink :link="link" v-for="(link, index) in links" :key="index" />
             </div>
             <div>
@@ -128,6 +128,30 @@ export default defineComponent({
                     weight: '500'
                 },
                 {
+                    text: 'מחירים',
+                    url: '/pricing',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
+                    text: 'איך זה עובד',
+                    url: '/how-it-works',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
+                    text: 'חתונות',
+                    url: '/digital-wedding-album',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
+                    text: 'QR לאירועים',
+                    url: '/qr-photo-sharing',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
                     text: 'צור קשר',
                     url: '/contact-us',
                     color: 'dark',
@@ -171,5 +195,11 @@ export default defineComponent({
 .desktop-bar {
     position: fixed;
     z-index: 100;
+}
+
+.desktop-links {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    max-width: 72%;
 }
 </style>

@@ -1,6 +1,13 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Guard from "@/helpers/guard";
 import { isWhatsAppEnabled } from "@/helpers/features";
+import { LANDING_PAGES } from "@/content/landingPages";
+
+const landingRoutes: RouteRecordRaw[] = LANDING_PAGES.map((page) => ({
+  path: page.slug,
+  name: `landing-${page.slug.replace(/^\//, "")}`,
+  component: () => import("@/views/LandingPageView.vue"),
+}));
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -152,6 +159,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: Guard.guest,
     component: () => import("@/views/DesignView.vue"),
   },
+  ...landingRoutes,
   {
     path: "/:path(.*)*",
     name: "notFound",

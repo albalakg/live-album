@@ -1,5 +1,11 @@
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { FAQ_ITEMS } from "@/seo/faqContent";
+import {
+  findLandingPage,
+  ogImagePath,
+  visibleFaq,
+  type LandingPage,
+} from "@/content/landingPages";
 
 export const SITE_ORIGIN = "https://snapshare-live.com";
 export const SITE_NAME = "SnapShare";
@@ -214,7 +220,139 @@ export function canonicalUrl(route: RouteLocationNormalizedLoaded): string | nul
   return `${SITE_ORIGIN}${path === "/" ? "/" : path}`;
 }
 
+const PLAN_OFFERS = [
+  {
+    "@type": "Offer",
+    name: "ניסיון חינם",
+    price: "0",
+    priceCurrency: "ILS",
+    availability: "https://schema.org/InStock",
+    url: `${SITE_ORIGIN}/order?subscription=demo`,
+  },
+  {
+    "@type": "Offer",
+    name: "קלאסי",
+    price: "200",
+    priceCurrency: "ILS",
+    availability: "https://schema.org/InStock",
+    url: `${SITE_ORIGIN}/order?subscription=classic`,
+  },
+  {
+    "@type": "Offer",
+    name: "פרימיום",
+    price: "300",
+    priceCurrency: "ILS",
+    availability: "https://schema.org/InStock",
+    url: `${SITE_ORIGIN}/order?subscription=premium`,
+  },
+];
+
+function landingJsonLd(page: LandingPage): Record<string, unknown> {
+  const url = `${SITE_ORIGIN}${page.slug}`;
+  const service: Record<string, unknown> = {
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: page.h1,
+    serviceType: page.primaryKeyword,
+    provider: { "@id": `${SITE_ORIGIN}/#organization` },
+    areaServed: { "@type": "Country", name: "Israel" },
+    url,
+    offers: PLAN_OFFERS,
+  };
+  if (page.slug === "/pricing") {
+    service.hasOfferCatalog = {
+      "@type": "OfferCatalog",
+      name: "מסלולי SnapShare",
+      itemListElement: PLAN_OFFERS,
+    };
+  }
+
+  const graph: object[] = [
+    organizationNode(),
+    websiteNode(),
+    service,
+    {
+      "@type": "FAQPage",
+      "@id": `${url}#faq`,
+      url,
+      mainEntity: visibleFaq(page).map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${url}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "דף הבית",
+          item: `${SITE_ORIGIN}/`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: page.breadcrumbLabel,
+          item: url,
+        },
+      ],
+    },
+  ];
+
+  if (page.howToSteps && page.howToSteps.length) {
+    graph.push({
+      "@type": "HowTo",
+      "@id": `${url}#howto`,
+      name: page.h1,
+      step: page.howToSteps.map((step, index) => ({
+        "@type": "HowToStep",
+        position: index + 1,
+        name: step.name,
+        text: step.text,
+      })),
+    });
+  }
+
+  return { "@context": "https://schema.org", "@graph": graph };
+}
+
+function landingHead(page: LandingPage) {
+  const canonical = `${SITE_ORIGIN}${page.slug}`;
+  const image = `${SITE_ORIGIN}${ogImagePath(page)}`;
+  const json = JSON.stringify(landingJsonLd(page)).replace(/</g, "\\u003c");
+  return {
+    title: page.title,
+    htmlAttrs: { lang: "he", dir: "rtl" as const },
+    meta: [
+      { name: "description", content: page.metaDescription, key: "description" },
+      { name: "robots", content: "index, follow", key: "robots" },
+      { property: "og:title", content: page.title, key: "og:title" },
+      { property: "og:description", content: page.metaDescription, key: "og:description" },
+      { property: "og:type", content: "website", key: "og:type" },
+      { property: "og:url", content: canonical, key: "og:url" },
+      { property: "og:image", content: image, key: "og:image" },
+      { property: "og:image:width", content: OG_IMAGE_WIDTH, key: "og:image:width" },
+      { property: "og:image:height", content: OG_IMAGE_HEIGHT, key: "og:image:height" },
+      { property: "og:image:alt", content: page.h1, key: "og:image:alt" },
+      { property: "og:locale", content: "he_IL", key: "og:locale" },
+      { property: "og:site_name", content: SITE_NAME, key: "og:site_name" },
+      { name: "twitter:card", content: "summary_large_image", key: "twitter:card" },
+      { name: "twitter:title", content: page.title, key: "twitter:title" },
+      { name: "twitter:description", content: page.metaDescription, key: "twitter:description" },
+      { name: "twitter:image", content: image, key: "twitter:image" },
+    ],
+    link: [{ rel: "canonical", href: canonical, key: "canonical" }],
+    script: [
+      { type: "application/ld+json", key: "ldjson", innerHTML: json },
+    ],
+  };
+}
+
 export function buildHeadInput(route: RouteLocationNormalizedLoaded) {
+  const landing = findLandingPage(route.path);
+  if (landing) return landingHead(landing);
   const seo = pageSeoFor(route.name);
   const canonical = canonicalUrl(route);
   const jsonLd = jsonLdFor(seo.schema);

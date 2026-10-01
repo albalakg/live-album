@@ -22,7 +22,7 @@
                     <router-link to="/#features">
                         <p>מה מקבלים</p>
                     </router-link>
-                    <router-link to="/#how-it-works">
+                    <router-link to="/how-it-works">
                         <p>איך זה עובד</p>
                     </router-link>
                     <router-link to="/#how-it-looks">
@@ -48,6 +48,36 @@
                     <a href="https://www.mit4mit.co.il/biz/105473" target="_blank" rel="noopener noreferrer">
                         <p>המלצות ב-mit4mit</p>
                     </a>
+                </div>
+                <div>
+                    <p class="footer-block-label">אירועים</p>
+                    <router-link to="/digital-wedding-album">
+                        <p>אלבום דיגיטלי לחתונה</p>
+                    </router-link>
+                    <router-link to="/bar-bat-mitzvah-digital-album">
+                        <p>אלבום בר ובת מצווה</p>
+                    </router-link>
+                    <router-link to="/corporate-event-photo-sharing">
+                        <p>שיתוף תמונות באירוע עסקי</p>
+                    </router-link>
+                    <router-link to="/henna-engagement-birthday-album">
+                        <p>אלבום לחינה, אירוסין ויום הולדת</p>
+                    </router-link>
+                </div>
+                <div>
+                    <p class="footer-block-label">מידע</p>
+                    <router-link to="/pricing">
+                        <p>מחירים</p>
+                    </router-link>
+                    <router-link to="/how-it-works">
+                        <p>איך זה עובד</p>
+                    </router-link>
+                    <router-link to="/qr-photo-sharing">
+                        <p>שיתוף תמונות עם QR</p>
+                    </router-link>
+                    <router-link to="/live-photo-wall">
+                        <p>קיר תמונות חי</p>
+                    </router-link>
                 </div>
                 <div v-if="!isLoggedIn">
                     <router-link to="/login">
@@ -163,8 +193,14 @@ export default defineComponent({
         margin: auto;
     }
 
+    .footer-block-label {
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
     .footer-links {
-        width: 40%;
+        width: 68%;
+        gap: 12px;
         position: relative;
         z-index: 1;
         

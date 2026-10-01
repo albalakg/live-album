@@ -107,7 +107,25 @@ export default defineComponent({
         },
         {
           text: "איך זה עובד",
-          url: "/#how-it-works",
+          url: "/how-it-works",
+          color: "dark",
+          weight: "500",
+        },
+        {
+          text: "מחירים",
+          url: "/pricing",
+          color: "dark",
+          weight: "500",
+        },
+        {
+          text: "חתונות",
+          url: "/digital-wedding-album",
+          color: "dark",
+          weight: "500",
+        },
+        {
+          text: "QR לאירועים",
+          url: "/qr-photo-sharing",
           color: "dark",
           weight: "500",
         },

@@ -8,6 +8,14 @@ Canonical URLs (also listed in `frontend/public/sitemap.xml`) have **no trailing
 - `https://snapshare-live.com/contact-us`
 - `https://snapshare-live.com/order`
 - `https://snapshare-live.com/terms-and-conditions`
+- `https://snapshare-live.com/digital-wedding-album`
+- `https://snapshare-live.com/qr-photo-sharing`
+- `https://snapshare-live.com/live-photo-wall`
+- `https://snapshare-live.com/pricing`
+- `https://snapshare-live.com/bar-bat-mitzvah-digital-album`
+- `https://snapshare-live.com/corporate-event-photo-sharing`
+- `https://snapshare-live.com/how-it-works`
+- `https://snapshare-live.com/henna-engagement-birthday-album`
 
 The build writes real HTML for those routes (`dist/contact-us/index.html`, and so on) and a client-only shell at `dist/spa.html` for app deep links. Auth shells include `noindex`.
 
@@ -22,7 +30,7 @@ What it does:
 - `www.snapshare-live.com` → **301** to `https://snapshare-live.com` (same path and query string). This only works after the DNS record in section 3 exists and the distribution accepts the www host (alternate domain name + certificate).
 - Extensionless URLs are rewritten to an object that exists, so S3 does not 302 to a trailing slash and does not 404:
   - `/` → `/index.html`
-  - `/contact-us` and `/contact-us/` → `/contact-us/index.html` (same for `/order`, `/terms-and-conditions`, and the auth/app shells)
+  - `/contact-us` and `/contact-us/` → `/contact-us/index.html` (same for `/order`, `/terms-and-conditions`, the eight marketing landing pages, and the auth/app shells)
   - `/event/...` (guest album, uploads, gallery, and so on) → `/spa.html` (**200**, client-side router)
 - Any other extensionless path returns **404** with `X-Robots-Tag: noindex` and a short Hebrew page. The Vue app also has a `NotFound` view for in-app navigation.
 - Files with an extension (`/assets/...`, `/sitemap.xml`, `/robots.txt`, `/favicon.ico`) are left unchanged.

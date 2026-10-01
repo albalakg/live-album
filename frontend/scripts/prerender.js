@@ -13,6 +13,8 @@ const distDir = path.join(__dirname, "..", "dist");
 const PORT = 4173;
 const ORIGIN = "https://snapshare-live.com";
 
+const landingPages = require("../src/content/landing-pages.json");
+
 const ROUTES = [
   {
     path: "/",
@@ -50,6 +52,24 @@ const ROUTES = [
     index: true,
     schema: ["Organization", "WebSite"],
   },
+  ...landingPages.map((page) => ({
+    path: page.slug,
+    out: `${page.slug.replace(/^\//, "")}/index.html`,
+    expect: page.h1,
+    title: page.title,
+    canonical: `${ORIGIN}${page.slug}`,
+    index: true,
+    schema: [
+      "Service",
+      "FAQPage",
+      "BreadcrumbList",
+      ...(page.slug === "/pricing" ? ["OfferCatalog"] : []),
+      ...(page.slug === "/how-it-works" ? ["HowTo"] : []),
+    ],
+    faqSnippet: page.faq[0].q,
+    singleH1: page.h1,
+    ogImage: `/assets/og${page.slug}.jpg`,
+  })),
   {
     path: "/__seo_not_found__",
     out: "404.html",
@@ -119,7 +139,13 @@ function startServer() {
 
 function writeSitemap() {
   const lastmod = new Date().toISOString().slice(0, 10);
-  const locs = ["/", "/contact-us", "/order", "/terms-and-conditions"];
+  const locs = [
+    "/",
+    "/contact-us",
+    "/order",
+    "/terms-and-conditions",
+    ...landingPages.map((page) => page.slug),
+  ];
   const urls = locs
     .map(
       (loc) =>
@@ -165,7 +191,7 @@ function assertRoute(route, html) {
       "og:image:height",
       "og:locale",
       "he_IL",
-      "/assets/og-image.jpg",
+      route.ogImage || "/assets/og-image.jpg",
       'content="1200"',
       'content="630"',
     ]) {
@@ -192,8 +218,13 @@ function assertRoute(route, html) {
           errors.push("JSON-LD missing plan names");
         }
       }
-      if (route.schema.includes("FAQPage") && !ld.includes("איך האורחים מעלים")) {
+      const faqSnippet = route.faqSnippet || "איך האורחים מעלים";
+      if (route.schema.includes("FAQPage") && !ld.includes(faqSnippet)) {
         errors.push("FAQPage missing FAQ content");
+      }
+      if (route.singleH1) {
+        const h1s = html.match(/<h1\b/g) || [];
+        if (h1s.length !== 1) errors.push(`expected 1 h1, found ${h1s.length}`);
       }
     }
   } else if (!/noindex/i.test(robots)) {

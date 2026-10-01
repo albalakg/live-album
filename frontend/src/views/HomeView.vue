@@ -128,6 +128,16 @@
     <Pricing />
 
     <Faq />
+
+    <section class="home-guides width--page-size margin--auto" aria-label="מדריכים">
+      <h2 class="title--large text--dark">עוד על SnapShare</h2>
+      <ul>
+        <li><router-link to="/digital-wedding-album">אלבום דיגיטלי לחתונה</router-link></li>
+        <li><router-link to="/qr-photo-sharing">שיתוף תמונות עם QR</router-link></li>
+        <li><router-link to="/pricing">מחירים</router-link></li>
+        <li><router-link to="/how-it-works">איך זה עובד</router-link></li>
+      </ul>
+    </section>
   </div>
 </template>
 
@@ -289,6 +299,29 @@ export default defineComponent({
 
   h2 {
     font-weight: 700;
+  }
+}
+
+.home-guides {
+  padding: 24px 0 64px;
+
+  h2 {
+    margin-bottom: 16px;
+  }
+
+  ul {
+    list-style: disc;
+    padding-right: 1.2rem;
+  }
+
+  li {
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+  }
+
+  a {
+    color: #3d6b32;
+    font-weight: 600;
   }
 }
 
