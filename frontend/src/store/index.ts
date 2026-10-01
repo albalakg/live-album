@@ -1,11 +1,23 @@
 import { createStore } from 'vuex'
-import EventStore from './modules/EventStore'
+import EventModule from './modules/EventModule'
+import UserModule from './modules/UserModule'
+import ContactModule from './modules/ContactModule'
+import StoreModule from './modules/StoreModule'
+import SubscriptionsModule from './modules/SubscriptionsModule'
+import AppModule from './modules/AppModule'
+import WhatsAppModule from './modules/WhatsAppModule'
 
-// Create Vuex store
-const store = createStore({
+// Create Vuex module
+const module = createStore({
   modules: {
-    event: EventStore,
+    event: EventModule,
+    user: UserModule,
+    contact: ContactModule,
+    store: StoreModule,
+    subscriptions: SubscriptionsModule,
+    app: AppModule,
+    whatsapp: WhatsAppModule,
   },
 })
 
-export default store
+export default module
