@@ -555,7 +555,6 @@ const EventModule = {
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement("a");
             link.href = url;
-            const fileExtension = res.headers["content-type"].split("/")[1];
             link.setAttribute("download", data.fileName);
             document.body.appendChild(link);
             link.click();

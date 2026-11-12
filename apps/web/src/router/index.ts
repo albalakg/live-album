@@ -184,7 +184,7 @@ const router = createRouter({
     }
 
     if (to.hash) {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         setTimeout(() => {
           const element = document.querySelector(to.hash);
           if (element) {

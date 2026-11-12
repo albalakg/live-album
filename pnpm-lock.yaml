@@ -53,8 +53,8 @@ importers:
         specifier: ^3.2.13
         version: 3.5.43(typescript@4.5.5)
       vue-router:
-        specifier: ^4.0.3
-        version: 4.6.4(vue@3.5.43(typescript@4.5.5))
+        specifier: 4.5.1
+        version: 4.5.1(vue@3.5.43(typescript@4.5.5))
       vuex:
         specifier: ^4.0.0
         version: 4.1.0(vue@3.5.43(typescript@4.5.5))
@@ -3829,10 +3829,10 @@ packages:
       vue:
         optional: true
 
-  vue-router@4.6.4:
-    resolution: {integrity: sha512-Hz9q5sa33Yhduglwz6g9skT8OBPii+4bFn88w6J+J4MfEo4KRRpmiNG/hHHkdbRFlLBOqxN8y8gf2Fb0MTUgVg==}
+  vue-router@4.5.1:
+    resolution: {integrity: sha512-ogAF3P97NPm8fJsE4by9dwSYtDwXIY1nFY9T6DyQnGHd1E2Da94w9JIolpe42LJGIl0DwOHBi8TcRPlPGwbTtw==}
     peerDependencies:
-      vue: ^3.5.0
+      vue: ^3.2.0
 
   vue-style-loader@4.1.3:
     resolution: {integrity: sha512-sFuh0xfbtpRlKfm39ss/ikqs9AbKCoXZBpHeVZ8Tx650o0k0q/YCM7FRvigtxpACezfq6af+a7JeqVTWvncqDg==}
@@ -8037,7 +8037,7 @@ snapshots:
       '@vue/compiler-sfc': 3.5.43
       vue: 3.5.43(typescript@4.5.5)
 
-  vue-router@4.6.4(vue@3.5.43(typescript@4.5.5)):
+  vue-router@4.5.1(vue@3.5.43(typescript@4.5.5)):
     dependencies:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.43(typescript@4.5.5)
