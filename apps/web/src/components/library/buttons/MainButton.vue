@@ -109,11 +109,20 @@ export default defineComponent({
     border-radius: 999px;
     background: transparent;
     box-shadow: none;
+    /* Match GoogleSignInButton height: neutralize nested utility padding */
+    padding: 0 !important;
 }
 .main-button .inner-button {
     background: linear-gradient(135deg, #dc5b66, #c9a36a) !important;
     border-radius: 999px !important;
     box-shadow: 0 10px 28px rgba(220, 91, 102, 0.28);
+    /* Same vertical rhythm as .google-sign-in-button (14px 18px + border) */
+    padding: 14px 18px !important;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .main-button:focus {

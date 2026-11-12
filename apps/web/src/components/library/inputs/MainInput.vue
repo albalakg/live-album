@@ -225,7 +225,27 @@ export default defineComponent({
 
         input {
             font-size: 1em;
-            background-color: transparent
+            background-color: transparent;
+            border: 0;
+            outline: none;
+            box-shadow: none;
+
+            /* Chrome autofill paints a light-blue box on the inner <input>;
+               stretch an inset shadow in the field background so the control
+               still reads as one clean box. */
+            &:-webkit-autofill,
+            &:-webkit-autofill:hover,
+            &:-webkit-autofill:focus,
+            &:-webkit-autofill:active,
+            &:autofill {
+                -webkit-box-shadow: 0 0 0 1000px white inset !important;
+                box-shadow: 0 0 0 1000px white inset !important;
+                -webkit-text-fill-color: #161310 !important;
+                caret-color: #161310;
+                background-color: transparent !important;
+                background-image: none !important;
+                transition: background-color 99999s ease-in-out 0s;
+            }
         }
 
         .input-size-small {

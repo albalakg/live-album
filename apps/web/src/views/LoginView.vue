@@ -261,12 +261,18 @@ export default defineComponent({
     border-radius: 14px;
     background: #fff;
     min-height: 52px;
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    align-items: center;
   }
 
   :deep(input) {
     font-size: 1.05rem;
-    min-height: 48px;
+    min-height: 52px;
+    height: 52px;
     width: 100%;
+    background: transparent;
   }
 
   @media only screen and (max-width: 800px) {
