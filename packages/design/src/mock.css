@@ -291,14 +291,21 @@
     }
     .wall figure {
       margin: 0; position: relative; overflow: hidden; border-radius: 8px;
-      background: #1a1816; opacity: 0; transform: scale(.86);
-      animation: popin .7s cubic-bezier(.2,.8,.2,1) forwards;
+      background: #1a1816; opacity: 1; transform: none;
     }
-    .wall figure:nth-child(1) { grid-row: 1 / 3; animation-delay: .15s; }
-    .wall figure:nth-child(2) { animation-delay: .45s; }
-    .wall figure:nth-child(3) { animation-delay: .7s; }
-    .wall figure:nth-child(4) { animation-delay: 1s; }
-    .wall figure:nth-child(5) { animation-delay: 1.3s; }
+    html.js .wall figure {
+      animation: popin .7s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .wall figure:nth-child(1) { grid-column: 1; grid-row: 1 / 3; }
+    .wall figure:nth-child(2) { grid-column: 2; grid-row: 1; }
+    .wall figure:nth-child(3) { grid-column: 3; grid-row: 1; }
+    .wall figure:nth-child(4) { grid-column: 2; grid-row: 2; }
+    .wall figure:nth-child(5) { grid-column: 3; grid-row: 2; }
+    html.js .wall figure:nth-child(1) { animation-delay: .15s; }
+    html.js .wall figure:nth-child(2) { animation-delay: .3s; }
+    html.js .wall figure:nth-child(3) { animation-delay: .45s; }
+    html.js .wall figure:nth-child(4) { animation-delay: .6s; }
+    html.js .wall figure:nth-child(5) { animation-delay: .75s; }
     @keyframes popin {
       to { opacity: 1; transform: scale(1); }
     }
@@ -777,9 +784,17 @@
     }
     .wa:hover .wa-tip, .wa:focus .wa-tip { opacity: 1; }
 
-    /* REVEAL */
-    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
-    .reveal.in { opacity: 1; transform: none; }
+    /* REVEAL
+       Visible unless a head script has added html.js-reveal.
+       The shared helper then adds .in as each block enters the viewport. */
+    .reveal { opacity: 1; transform: none; }
+    html.js-reveal .reveal {
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    html.js-reveal .reveal:not(.in) {
+      opacity: 0;
+      transform: translateY(22px);
+    }
 
     /* RESPONSIVE */
     @media (max-width: 980px) {
@@ -820,8 +835,8 @@
         animation: none !important;
         transition: none !important;
       }
-      .reveal { opacity: 1; transform: none; }
-      .wall figure, .album-grid figure { opacity: 1; transform: none; }
+      .reveal, html.js-reveal .reveal:not(.in) { opacity: 1; transform: none; }
+      .wall figure, .album-grid figure { opacity: 1; transform: none; animation: none !important; }
     }
 
     .album-grid figure.seeded { opacity: 1; transform: none; animation: none; }

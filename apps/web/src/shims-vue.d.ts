@@ -43,6 +43,10 @@ declare module "@snapshare/design/site" {
   };
 }
 
+declare module "@snapshare/design/reveal" {
+  export function installReveal(): void;
+}
+
 declare module "@snapshare/design/analytics" {
   export function installAnalytics(options?: {
     ga4Id?: string;

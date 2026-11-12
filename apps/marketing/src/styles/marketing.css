@@ -746,10 +746,6 @@
     }
     .wa:hover .wa-tip, .wa:focus .wa-tip { opacity: 1; }
 
-    /* REVEAL */
-    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
-    .reveal.in { opacity: 1; transform: none; }
-
     /* RESPONSIVE */
     @media (max-width: 980px) {
       .nav-links { display: none; }
@@ -789,7 +785,6 @@
         animation: none !important;
         transition: none !important;
       }
-      .reveal { opacity: 1; transform: none; }
       .wall figure, .album-grid figure { opacity: 1; transform: none; }
     }
 

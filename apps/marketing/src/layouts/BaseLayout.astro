@@ -35,6 +35,14 @@ const analytics = analyticsBootstrapSource({ ga4Id, metaPixelId });
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
   <head>
+    <script is:inline>
+      (function () {
+        try {
+          if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+          document.documentElement.classList.add("js-reveal");
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
@@ -67,5 +75,9 @@ const analytics = analyticsBootstrapSource({ ga4Id, metaPixelId });
     </main>
     <Footer />
     <ContactDock />
+    <script>
+      import { installReveal } from "@snapshare/design/reveal";
+      installReveal();
+    </script>
   </body>
 </html>

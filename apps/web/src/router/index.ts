@@ -1,3 +1,4 @@
+import { installReveal } from "@snapshare/design/reveal";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Guard from "@/helpers/guard";
 import { isWhatsAppEnabled } from "@/helpers/features";
@@ -6,7 +7,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "home",
-    component: () => import("@/views/HomeView.vue"),
+    component: () => import("@/views/MarketingRedirect.vue"),
   },
   {
     path: "/login",
@@ -191,7 +192,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/:path(.*)*",
     name: "notFound",
-    component: () => import("@/views/HomeView.vue"),
+    component: () => import("@/views/NotFoundView.vue"),
   },
 ];
 
@@ -226,6 +227,10 @@ const router = createRouter({
 
     return { top: 0 };
   },
+});
+
+router.afterEach(() => {
+  installReveal();
 });
 
 export default router;

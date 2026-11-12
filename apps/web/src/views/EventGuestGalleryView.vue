@@ -121,12 +121,14 @@ export default defineComponent({
 
 .guest-gallery {
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
   background: var(--ivory, #f3eee6);
   color: var(--ink, #161310);
   font-family: var(--font, Heebo, sans-serif);
-  padding: 28px 16px 110px;
+  padding: 28px 20px 120px;
 }
-.guest-gallery-head { max-width: 1100px; margin: 0 auto 16px; }
+.guest-gallery-head { width: min(1100px, 100%); margin: 0 auto 16px; }
 .guest-gallery-head h1 { font-weight: 900; font-size: clamp(1.6rem, 4vw, 2.4rem); }
 .live-pill {
   display: inline-flex;
@@ -148,10 +150,10 @@ export default defineComponent({
   background: var(--live, #2fbe6a);
 }
 .guest-masonry {
-  max-width: 1100px;
+  width: min(1100px, 100%);
   margin: 0 auto;
   columns: 2;
-  column-gap: 10px;
+  column-gap: 12px;
 }
 @media (min-width: 800px) {
   .guest-masonry { columns: 4; }

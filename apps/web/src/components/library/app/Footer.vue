@@ -19,21 +19,21 @@
             </div>
             <div class="footer-links display--flex justify--space-between">
                 <div>
-                    <router-link to="/#events">
+                    <a :href="marketing('/#events')">
                         <p>לכל אירוע</p>
-                    </router-link>
-                    <router-link to="/#how">
+                    </a>
+                    <a :href="marketing('/#how')">
                         <p>איך זה עובד</p>
-                    </router-link>
-                    <router-link to="/#album">
+                    </a>
+                    <a :href="marketing('/#album')">
                         <p>האלבום החי</p>
-                    </router-link>
-                    <router-link to="/pricing">
+                    </a>
+                    <a :href="marketing('/pricing')">
                         <p>מחירים</p>
-                    </router-link>
-                    <router-link to="/faq">
+                    </a>
+                    <a :href="marketing('/faq')">
                         <p>שאלות</p>
-                    </router-link>
+                    </a>
                     <router-link to="/qr-cards">
                         <p>כרטיסי QR</p>
                     </router-link>
@@ -85,6 +85,7 @@
 </template>
 
 <script lang="ts">
+import { marketingHref } from '@/helpers/marketingUrl';
 import { defineComponent } from 'vue';
 import MainCube from '@/components/library/background/MainCube.vue';
 
@@ -119,8 +120,10 @@ export default defineComponent({
     },
 
     methods: {
-
-    }
+        marketing(path: string) {
+            return marketingHref(path);
+        },
+    },
 });
 </script>
 

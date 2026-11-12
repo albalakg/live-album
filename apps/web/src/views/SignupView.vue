@@ -29,9 +29,7 @@
     <MainCube left="22%" top="82%" width="large" height="large" />
     <MainCube right="0%" top="67%" width="small" height="large" />
 
-    <div
-      class="signup-content margin--auto shadow--small brs--x-large display--flex bg--white"
-    >
+    <div class="signup-content">
       <div class="signup-form">
         <h3 class="text--dark title--x-large text--center">
           שמחים שמצטרפים אלינו
@@ -250,31 +248,33 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .signup {
-  height: 100vh;
-  min-height: fit-content;
+  min-height: 0;
 }
 
 .signup-content {
   position: relative;
   z-index: 2;
-  width: 55%;
-  min-height: fit-content;
-  height: 65%;
-  margin-top: 5%;
-  background: linear-gradient(to right, var(--pink) 50%, white 50%);
+  width: min(960px, calc(100% - 48px));
+  min-height: 0;
+  height: auto;
+  margin: 40px auto 64px;
+  background: #fff;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
 
-  @media only screen and (max-width: 600px) {
-    width: 90%;
+  @media only screen and (max-width: 800px) {
+    width: min(440px, calc(100% - 32px));
   }
 
   .signup-form {
-    padding: 5% 4%;
-    height: 80%;
-    width: 92%;
-    min-height: fit-content;
+    padding: 36px 32px;
+    height: auto;
+    width: auto;
+    min-height: 0;
 
     h3 {
-      margin-bottom: 2%;
+      margin-bottom: 16px;
     }
 
     p a {
@@ -322,6 +322,20 @@ export default defineComponent({
       margin-top: 20%;
       text-align: center;
     }
+  }
+
+  :deep(.inner-input) {
+    box-shadow: none;
+    border: 1.5px solid rgba(22, 19, 16, 0.14);
+    border-radius: 14px;
+    background: #fff;
+    min-height: 52px;
+  }
+
+  :deep(input) {
+    font-size: 1.05rem;
+    min-height: 48px;
+    width: 100%;
   }
 }
 

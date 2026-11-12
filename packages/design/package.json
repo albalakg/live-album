@@ -7,6 +7,7 @@
     ".": "./src/site.js",
     "./site": "./src/site.js",
     "./analytics": "./src/analytics.js",
+    "./reveal": "./src/reveal.js",
     "./contact": "./src/contact.js",
     "./tokens.css": "./src/tokens.css",
     "./mock.css": "./src/mock.css",

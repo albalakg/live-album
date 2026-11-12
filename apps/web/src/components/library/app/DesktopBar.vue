@@ -1,7 +1,7 @@
 <template>
     <header class="snap-nav">
         <div class="snap-nav-inner">
-            <router-link to="/" class="snap-logo" aria-label="SnapShare">
+            <a :href="homeHref" class="snap-logo" aria-label="SnapShare">
                 <span class="snap-mark" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none">
                         <circle cx="12" cy="12" r="7.2" stroke="#C9A36A" stroke-width="1.8"/>
@@ -9,13 +9,13 @@
                     </svg>
                 </span>
                 SnapShare
-            </router-link>
+            </a>
             <nav class="snap-links" aria-label="ראשי">
-                <router-link to="/#events">לכל אירוע</router-link>
-                <router-link to="/#how">איך זה עובד</router-link>
-                <router-link to="/#album">האלבום החי</router-link>
-                <router-link to="/pricing">מחירים</router-link>
-                <router-link to="/faq">שאלות</router-link>
+                <a :href="marketing('/#events')">לכל אירוע</a>
+                <a :href="marketing('/#how')">איך זה עובד</a>
+                <a :href="marketing('/#album')">האלבום החי</a>
+                <a :href="marketing('/pricing')">מחירים</a>
+                <a :href="marketing('/faq')">שאלות</a>
             </nav>
             <div class="snap-cta">
                 <router-link v-if="user" class="snap-btn ghost" to="/event">האירוע</router-link>
@@ -27,6 +27,7 @@
 </template>
 
 <script lang="ts">
+import { marketingHref } from '@/helpers/marketingUrl';
 import { defineComponent } from 'vue';
 import { IUserInfo } from '@/helpers/interfaces'
 
@@ -57,12 +58,20 @@ export default defineComponent({
         
         hasActiveEvent(): boolean {
             return this.$store.getters['event/hasActiveEvent'];
-        }
+        },
+
+        homeHref(): string {
+            return marketingHref('/');
+        },
     },
 
     methods: {
         createLinks() {
             return undefined;
+        },
+
+        marketing(path: string) {
+            return marketingHref(path);
         },
     },
 });

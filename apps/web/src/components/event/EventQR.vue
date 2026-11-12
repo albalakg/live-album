@@ -1,11 +1,13 @@
 <template>
     <div class="qr-code">
-    <qrcode-svg :value="QRLink" level="H" ref="qrSvg" class="display--none" />
+    <div class="qr-export" aria-hidden="true">
+      <qrcode-svg :value="QRLink" level="H" ref="qrSvg" />
+    </div>
     <qrcode-vue
       ref="qrCode"
       :value="QRLink"
       :background="background"
-      :size="$bp.isMobile ? 75 : 100"
+      :size="renderedSize"
       level="H"
       render-as="svg"
     />
@@ -25,6 +27,10 @@ export default defineComponent({
       type: String,
       required: false,
       default: "#ffffff",
+    },
+    size: {
+      type: Number,
+      default: 0,
     },
   },
 
@@ -49,12 +55,21 @@ export default defineComponent({
     QRLink(): string {
       return window.location.origin + `/event/uploads/${this.event.path}`;
     },
+
+    renderedSize(): number {
+      if (this.size > 0) return this.size;
+      return this.$bp.isMobile ? 88 : 112;
+    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.event-info {
-  min-height: fit-content;
+.qr-export {
+  display: none !important;
+}
+.qr-code :deep(canvas),
+.qr-code :deep(img) {
+  display: none !important;
 }
 </style>

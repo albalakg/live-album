@@ -26,28 +26,34 @@ export default defineComponent({
 .guest-cta {
   position: fixed;
   z-index: 40;
-  right: 16px;
   left: 16px;
+  right: 16px;
   bottom: 16px;
+  width: auto;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
   padding: 12px 16px;
   border-radius: 18px;
-  background: rgba(255, 252, 250, 0.94);
+  background: rgba(255, 252, 250, 0.96);
   color: var(--ink, #161310);
-  box-shadow: var(--shadow, 0 24px 60px rgba(18, 16, 14, 0.16));
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.12);
   font-family: var(--font, Heebo, sans-serif);
 }
 .guest-cta p {
   margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   font-weight: 800;
   color: inherit;
+  line-height: 1.35;
 }
 .guest-cta-link {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   background: var(--rose, #dc5b66);
@@ -56,6 +62,7 @@ export default defineComponent({
   text-decoration: none;
   border-radius: 999px;
   padding: 10px 18px;
+  white-space: nowrap;
 }
 @media (max-width: 640px) {
   .guest-cta { bottom: 12px; }

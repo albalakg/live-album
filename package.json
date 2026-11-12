@@ -2,7 +2,7 @@
   "name": "snapshare",
   "private": true,
   "scripts": {
-    "dev": "pnpm --parallel --filter @snapshare/web --filter @snapshare/api dev",
+    "dev": "node scripts/dev.mjs",
     "dev:web": "pnpm --filter @snapshare/web dev",
     "dev:marketing": "pnpm --filter @snapshare/marketing dev",
     "dev:api": "pnpm --filter @snapshare/api dev",

@@ -11,7 +11,7 @@
     <MainCube left="22%" top="82%" width="large" height="large" />
     <MainCube right="0%" top="67%" width="small" height="large" />
 
-    <div class="login-content margin--auto shadow--small brs--x-large display--flex flex--wrap bg--white">
+    <div class="login-content">
       <form class="login-form display--flex direction--column justify--space-between width--full-mobile" @submit.prevent="login()">
         <h3 class="text--dark title--x-large">
           התחברות
@@ -44,7 +44,7 @@
           <GoogleSignInButton :redirect="googleRedirect" />
         </div>
       </form>
-      <div class="login-details width--half height--full bg--pink display--flex align--center justify--center width--full-mobile">
+      <div class="login-details">
         <div class="text--center">
           <h3 class="text--white title--x-large">
             SnapShare
@@ -170,41 +170,65 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .login {
-  height: 100vh;
-  min-height: fit-content;
+  min-height: 0;
 }
 
 .login-content {
-  min-height: fit-content;
+  width: min(920px, calc(100% - 48px));
+  margin: 40px auto 64px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  min-height: 520px;
+  background: #fff;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
   position: relative;
   z-index: 2;
-  width: 55%;
-  height: 65%;
-  margin-top: 5%;
-
-  @media only screen and (max-width: 600px) {
-    width: 90%;   
-  }
 
   .login-form {
-    padding: 5% 8%;
-    width: 34%;
-    height: 80%;
-    min-height: fit-content;
-
-    @media only screen and (max-width: 600px) {
-      height: 350px;
-      width: 90%;   
-      padding-bottom: 15%;
-    }
-  }
-  
-  .login-details {
-    border-radius: 40px 0 0 40px;
+    width: auto;
     height: auto;
+    min-height: 0;
+    padding: 40px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
 
-    @media only screen and (max-width: 600px) {
-      height: 330px;
+  .login-details {
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: #12100e;
+    color: #f7f2eb;
+    padding: 32px;
+  }
+
+  :deep(.inner-input) {
+    box-shadow: none;
+    border: 1.5px solid rgba(22, 19, 16, 0.14);
+    border-radius: 14px;
+    background: #fff;
+    min-height: 52px;
+  }
+
+  :deep(input) {
+    font-size: 1.05rem;
+    min-height: 48px;
+    width: 100%;
+  }
+
+  @media only screen and (max-width: 800px) {
+    grid-template-columns: 1fr;
+    width: min(440px, calc(100% - 32px));
+
+    .login-form,
+    .login-details {
+      width: auto;
+      height: auto;
+      padding: 28px 22px;
     }
   }
 
