@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PricingCards from "../components/PricingCards.astro";
 import FaqList from "../components/FaqList.astro";
-import Rich from "../components/Rich.astro";
+import RelatedLinks from "../components/RelatedLinks.astro";
 import { appPath } from "../lib/appUrl";
 import { applyPendingClaims } from "../lib/pendingClaims";
 import { breadcrumbNode, faqNode, graph, organizationNode, productNode } from "../lib/schema";
@@ -140,15 +140,8 @@ const schema = graph([
     </div>
   </section>
   <section>
-    <div class="wrap">
-      <nav class="prose-card" aria-label="עמודים קשורים">
-        <h2>עוד ב-SnapShare</h2>
-        <ul>
-          {page.data.internalLinks.filter((link) => link.slug !== "/order").map((link) => (
-            <li><a href={appPath(link.slug)}><Rich text={link.anchor} /></a></li>
-          ))}
-        </ul>
-      </nav>
+    <div class="wrap related-wrap">
+      <RelatedLinks links={page.data.internalLinks} />
     </div>
   </section>
   <section class="final">
@@ -161,6 +154,11 @@ const schema = graph([
 </BaseLayout>
 <style>
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .prose-card ul { margin-top: 12px; padding-inline-start: 1.1rem; }
-  .prose-card a { color: inherit; font-weight: 800; }
+  .related-wrap {
+    margin-top: 8px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 22px;
+  }
 </style>
