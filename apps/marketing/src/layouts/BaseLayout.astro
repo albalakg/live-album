@@ -3,7 +3,7 @@ import "../styles/marketing.css";
 import "@snapshare/design/tokens.css";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
-import WhatsApp from "../components/WhatsApp.astro";
+import ContactDock from "../components/ContactDock.astro";
 import { analyticsBootstrapSource } from "@snapshare/design/analytics";
 import { GA4_MEASUREMENT_ID, SITE_ORIGIN } from "@snapshare/design/site";
 
@@ -66,6 +66,6 @@ const analytics = analyticsBootstrapSource({ ga4Id, metaPixelId });
       <slot />
     </main>
     <Footer />
-    <WhatsApp />
+    <ContactDock />
   </body>
 </html>

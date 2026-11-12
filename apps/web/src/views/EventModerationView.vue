@@ -7,6 +7,7 @@
         תמונות שממתינות לבדיקה אוטומטית, ותמונות שנחסמו. אישור משתמש בנקודת הקצה הקיימת לביטול חסימה. הסתרה משתמשת בנקודת הקצה הקיימת להסתרה מהאלבום.
       </p>
       <p class="note">סרטונים אינם נבדקים אוטומטית.</p>
+    <p v-if="manualApproval" class="note">אישור ידני פעיל. תמונות שהועלו מאז מחכות כאן לפני שהן עולות לאלבום ולמסך.</p>
     </header>
 
     <div class="queues">
@@ -68,6 +69,9 @@ export default defineComponent({
     },
     blocked(): IEventAsset[] {
       return this.$store.getters["event/getBlockedAssets"];
+    },
+    manualApproval(): boolean {
+      return Boolean(this.$store.getters["event/manualPhotoApproval"]);
     },
   },
   async created() {

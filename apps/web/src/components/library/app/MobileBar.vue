@@ -211,7 +211,7 @@ export default defineComponent({
     position: fixed;
     bottom: 0;
     left: 0;
-    background-color: var(--pink);
+    background-color: var(--espresso, #12100e);
     display: flex;
     justify-content: space-between;
     align-items: center;

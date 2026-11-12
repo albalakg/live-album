@@ -12,9 +12,26 @@ declare module 'html2canvas';
 
 declare module "*.css";
 
+declare module "@snapshare/design/contact" {
+  export function sendContactMessage(
+    fields: { email?: string; full_name?: string; text?: string },
+    options?: {
+      provider?: string;
+      endpoint?: string;
+      formspreeId?: string;
+      web3formsKey?: string;
+      businessEmail?: string;
+    }
+  ): Promise<{ ok: boolean; via: string }>;
+}
+
 declare module "@snapshare/design/site" {
   export const SHOW_LAUNCH_SALE_STRIKETHROUGH: boolean;
   export const GA4_MEASUREMENT_ID: string;
+  export const BUSINESS_EMAIL_DEFAULT: string;
+  export const WHATSAPP_E164: string;
+  export function whatsappHref(number?: string): string;
+  export function isPaidPlan(name?: string | null): boolean;
   export const GUEST_CTA: {
     label: string;
     path: string;

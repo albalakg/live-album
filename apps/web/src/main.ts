@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import { installAnalytics } from "@snapshare/design/analytics";
 import { GA4_MEASUREMENT_ID } from "@snapshare/design/site";
 import "@snapshare/design/tokens.css";
+import "@/styles/app-shell.scss";
 import App from "./App.vue";
 
 installAnalytics({

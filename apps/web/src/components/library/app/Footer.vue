@@ -39,7 +39,7 @@
                     </router-link>
                 </div>
                 <div>
-                    <router-link to="/contact">
+                    <router-link to="/contact-us">
                         <p>צור קשר</p>
                     </router-link>
                     <router-link to="/order">

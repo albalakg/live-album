@@ -7,7 +7,8 @@ import {
   PRICES,
   SHOW_LAUNCH_SALE_STRIKETHROUGH,
   GUEST_CTA,
-  WHATSAPP_PLACEHOLDER,
+  WHATSAPP_E164,
+  BUSINESS_EMAIL_DEFAULT,
 } from "../packages/design/src/site.js";
 
 assert.equal(PRICES.trial, 0);
@@ -17,7 +18,8 @@ assert.equal(SHOW_LAUNCH_SALE_STRIKETHROUGH, false);
 assert.equal(GUEST_CTA.query.utm_source, "album");
 assert.equal(GUEST_CTA.query.utm_medium, "guest_cta");
 assert.equal(GUEST_CTA.query.utm_campaign, "viral");
-assert.equal(WHATSAPP_PLACEHOLDER, "0000000000");
+assert.equal(WHATSAPP_E164, "972528458600");
+assert.equal(BUSINESS_EMAIL_DEFAULT, "hello@snapshare-live.com");
 assert.equal(GA4_MEASUREMENT_ID, "G-XW53Y5YC3B");
 
 const source = analyticsBootstrapSource({ ga4Id: "G-TEST", metaPixelId: "" });

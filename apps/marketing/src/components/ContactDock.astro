@@ -1,0 +1,130 @@
+---
+import {
+  BUSINESS_EMAIL_DEFAULT,
+  CONTACT_PROVIDER_DEFAULT,
+} from "@snapshare/design/site";
+
+const email = import.meta.env.PUBLIC_BUSINESS_EMAIL || BUSINESS_EMAIL_DEFAULT;
+const provider = import.meta.env.PUBLIC_CONTACT_PROVIDER || CONTACT_PROVIDER_DEFAULT;
+const endpoint = import.meta.env.PUBLIC_CONTACT_ENDPOINT || "";
+const formspreeId = import.meta.env.PUBLIC_FORMSPREE_ID || "";
+const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY || "";
+---
+<div class="contact-dock">
+  <button class="contact-fab" type="button" id="contact-fab" aria-expanded="false" aria-controls="contact-panel">
+    צור קשר
+  </button>
+  <form class="contact-panel" id="contact-panel" hidden>
+    <p class="contact-panel-title">כתבו לנו</p>
+    <p class="contact-email">
+      <a id="contact-mail" href={`mailto:${email}`}>{email}</a>
+    </p>
+    <label>
+      שם
+      <input name="full_name" required maxlength="100" autocomplete="name" />
+    </label>
+    <label>
+      אימייל
+      <input name="email" type="email" required autocomplete="email" />
+    </label>
+    <label>
+      הודעה
+      <textarea name="text" required maxlength="1000" rows="4"></textarea>
+    </label>
+    <button class="btn btn-primary" type="submit">שליחה</button>
+    <p class="contact-status" id="contact-status" role="status"></p>
+  </form>
+</div>
+<script
+  is:inline
+  define:vars={{ email, provider, endpoint, formspreeId, web3formsKey }}
+>
+  (function () {
+    var fab = document.getElementById("contact-fab");
+    var panel = document.getElementById("contact-panel");
+    var status = document.getElementById("contact-status");
+    if (!fab || !panel) return;
+    fab.addEventListener("click", function () {
+      var open = panel.hasAttribute("hidden");
+      if (open) panel.removeAttribute("hidden");
+      else panel.setAttribute("hidden", "");
+      fab.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    panel.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var data = {
+        full_name: panel.full_name.value.trim(),
+        email: panel.email.value.trim(),
+        text: panel.text.value.trim(),
+      };
+      status.textContent = "שולחים…";
+      var done = function (ok, via) {
+        status.textContent = ok
+          ? via === "mailto"
+            ? "נפתח מייל אל " + email
+            : "הפנייה נשלחה. נחזור אליכם."
+          : "השליחה לא הצליחה. כתבו אל " + email;
+        if (ok && via !== "mailto") panel.reset();
+      };
+      if (provider === "formspree" && formspreeId) {
+        fetch("https://formspree.io/f/" + formspreeId, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }).then(function (res) { done(res.ok, "formspree"); }).catch(function () { done(false); });
+        return;
+      }
+      if (provider === "web3forms" && web3formsKey) {
+        fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: web3formsKey,
+            name: data.full_name,
+            email: data.email,
+            message: data.text,
+            subject: "SnapShare — פנייה מהאתר",
+          }),
+        }).then(function (res) { done(res.ok, "web3forms"); }).catch(function () { done(false); });
+        return;
+      }
+      if (endpoint) {
+        fetch(endpoint, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }).then(function (res) { done(res.ok, "laravel"); }).catch(function () { done(false); });
+        return;
+      }
+      var href = "mailto:" + email + "?subject=" + encodeURIComponent("SnapShare — פנייה מהאתר") + "&body=" + encodeURIComponent(data.full_name + "\n" + data.email + "\n\n" + data.text);
+      window.location.href = href;
+      done(true, "mailto");
+    });
+  })();
+</script>
+<style>
+  .contact-dock { position: fixed; bottom: 22px; left: 22px; z-index: 60; }
+  .contact-fab {
+    border: 0; cursor: pointer; border-radius: 999px;
+    background: var(--espresso, #12100e); color: #fff;
+    font-family: var(--font, Heebo, sans-serif); font-weight: 800;
+    padding: 14px 18px; box-shadow: 0 10px 28px rgba(18,16,14,.28);
+  }
+  .contact-panel {
+    position: absolute; bottom: 64px; left: 0; width: min(320px, calc(100vw - 32px));
+    background: var(--paper, #fff); color: var(--ink, #161310);
+    border-radius: 18px; padding: 16px; box-shadow: var(--shadow, 0 24px 60px rgba(18,16,14,.16));
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .contact-panel-title { font-weight: 900; margin: 0; }
+  .contact-email { margin: 0; font-weight: 700; }
+  .contact-panel label { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; font-weight: 700; }
+  .contact-panel input, .contact-panel textarea {
+    font: inherit; font-weight: 500; border: 1px solid var(--line, rgba(22,19,16,.15));
+    border-radius: 10px; padding: 8px 10px; background: #fff;
+  }
+  .contact-status { min-height: 1.2em; font-size: .85rem; color: var(--muted, #5e564e); }
+  @media (max-width: 640px) {
+    .contact-dock { bottom: 14px; left: 14px; }
+  }
+</style>

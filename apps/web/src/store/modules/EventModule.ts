@@ -241,6 +241,10 @@ const EventModule = {
       return Boolean(state.preview);
     },
 
+    manualPhotoApproval(state: IEventModuleState): boolean {
+      return Boolean(state.event?.config?.manual_photo_approval);
+    },
+
     getPendingAssets(state: IEventModuleState): IEventAsset[] {
       return filterAssetsByModeration(state.event?.assets ?? [], [
         AssetModerationStatusEnum.PENDING,

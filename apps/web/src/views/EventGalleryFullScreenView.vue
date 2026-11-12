@@ -1,58 +1,56 @@
 <template>
   <div
-    class="full-screen-gallery bg--dark"
+    class="stage"
     :class="{ 'has-guest-cta': showGuestCta }"
     v-if="event"
-    @mousemove="onMouseMove"
   >
-    <div
-      class="gallery-header bg--white display--flex justify--space-between align--center"
-      :class="{ 'is-visible': showHeader }"
-      @mouseenter="onHeaderMouseEnter"
-      @mouseleave="onHeaderMouseLeave"
-    >
-      <div>
-        <label
-          v-if="hasBlockedAssets && !showGuestCta"
-          class="blocked-toggle pointer display--flex align--center"
-        >
-          <input
-            type="checkbox"
-            :checked="showBlockedGalleryAssets"
-            @change="toggleBlockedGalleryAssets"
-          />
-          <small class="margin--right-small">הצג חסומות</small>
-        </label>
-        <strong class="pointer" @click="toggleFullScreen()">
-          <MainIcon :icon="screenIcon" />
-        </strong>
-      </div>
-      <div>
-        <h1 class="title--large screen-name text--center">
-          {{ event.name }}
-        </h1>
-      </div>
-      <div>
-        <router-link v-if="showGuestCta" :to="`/event/open-gallery/${event.path}`">
-          <MainIcon icon="grid_view" />
-        </router-link>
-        <router-link v-else to="/event/gallery">
-          <MainIcon icon="close" />
-        </router-link>
-      </div>
-    </div>
-    <div class="gallery-content">
+    <div class="stage-screen">
       <EventTriviaLiveStage v-if="triviaPhase === 'live' && triviaScreen" :screen="triviaScreen" />
       <EventTriviaPodium v-else-if="triviaPhase === 'results' && triviaScreen" :screen="triviaScreen" />
-      <component v-else :is="selectedAlbum"></component>
-      <EventQR
-        v-if="triviaPhase === 'photos'"
-        class="qr-code"
-        :background="background"
-      />
-      <strong class="logo">SnapShare</strong>
-      <p v-if="arrival" class="live-arrival">תמונה חדשה עלתה</p>
+      <div v-else-if="stageMode === 'mosaic'" class="mosaic">
+        <figure v-for="asset in mosaicAssets" :key="asset.id">
+          <img v-if="asset.type !== 'video'" :src="asset.fullPath" alt="" />
+          <video v-else :src="asset.fullPath" autoplay muted loop></video>
+        </figure>
+      </div>
+      <component v-else class="slideshow" :is="selectedAlbum"></component>
     </div>
+
+    <header class="stage-title">
+      <p class="stage-live"><i></i> LIVE</p>
+      <h1>{{ event.name }}</h1>
+      <router-link v-if="showGuestCta" class="stage-link" :to="`/event/open-gallery/${event.path}`">גלריה</router-link>
+    </header>
+
+    <p v-if="arrival" class="stage-new">תמונה חדשה</p>
+
+    <aside v-if="triviaPhase === 'photos'" class="stage-card" aria-label="כרטיס QR">
+      <EventQR background="#ffffff" />
+      <p>סרקו והעלו</p>
+    </aside>
+
+    <button
+      v-if="!showGuestCta"
+      class="stage-gear"
+      type="button"
+      aria-label="הגדרות מסך"
+      :aria-expanded="settingsOpen"
+      @click="settingsOpen = !settingsOpen"
+    >
+      הגדרות
+    </button>
+    <aside v-if="settingsOpen && !showGuestCta" class="stage-panel">
+      <p>תצוגה</p>
+      <button type="button" :class="{ on: stageMode === 'slideshow' }" @click="stageMode = 'slideshow'">מצגת</button>
+      <button type="button" :class="{ on: stageMode === 'mosaic' }" @click="stageMode = 'mosaic'">פסיפס</button>
+      <label v-if="hasBlockedAssets">
+        <input type="checkbox" :checked="showBlockedGalleryAssets" @change="toggleBlockedGalleryAssets" />
+        הצג חסומות
+      </label>
+      <button type="button" @click="toggleFullScreen">{{ isFullScreen ? "יציאה ממסך מלא" : "מסך מלא" }}</button>
+      <router-link to="/event/gallery">חזרה לניהול</router-link>
+    </aside>
+
     <GuestAlbumCta v-if="showGuestCta" />
   </div>
 </template>
@@ -102,6 +100,8 @@ export default defineComponent({
       seenIds: new Set<number>(),
       seenReady: false,
       arrivalTimer: null as ReturnType<typeof setTimeout> | null,
+      stageMode: "slideshow" as "slideshow" | "mosaic",
+      settingsOpen: false,
     };
   },
 
@@ -165,6 +165,11 @@ export default defineComponent({
 
     showGuestCta(): boolean {
       return this.$route.name === "guestAlbum";
+    },
+
+    mosaicAssets(): { id: number; fullPath: string; type?: string }[] {
+      const assets = this.$store.getters["event/getDisplayGalleryAssets"] || [];
+      return assets.slice(0, 9);
     },
 
     liveAssetIds(): number[] {
@@ -283,93 +288,135 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.full-screen-gallery {
+.stage {
   position: fixed;
   z-index: 1000;
   inset: 0;
   width: 100%;
   height: 100%;
   height: 100dvh;
-
-  .gallery-content {
-    height: 100%;
-    width: 100%;
-    margin: auto;
-    display: flex;
-    position: relative;
-  }
-
-  .gallery-header {
-    position: absolute;
-    left: 0;
-    right: 0;
-    width: auto;
-    top: 0;
-    height: 70px;
-    padding: 0 30px;
-    z-index: 10000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s ease;
-
-    &.is-visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  }
-
-  .qr-code {
-    position: absolute;
-    left: 30px;
-    bottom: 30px;
-    margin: auto;
-    text-align: center;
-  }
-
-  .logo {
-    position: absolute;
-    left: 35px;
-    bottom: 18px;
-    margin: auto;
-    text-align: center;
-    color: var(--gold, #c9a36a);
-    font-family: var(--brand, Outfit, sans-serif);
-    letter-spacing: -0.04em;
-  }
-
-  .gallery-header {
-    background: rgba(18, 16, 14, 0.88);
-    color: #f7f2eb;
-  }
-
-  .screen-name { color: var(--gold, #c9a36a); font-family: var(--font, Heebo, sans-serif); }
-  .live-arrival {
-    position: absolute;
-    top: 86px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 30;
-    background: var(--rose, #dc5b66);
-    color: #fff;
-    font-weight: 800;
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-family: var(--font, Heebo, sans-serif);
-  }
+  background: #070605;
+  color: #f7f2eb;
+  font-family: var(--font, Heebo, sans-serif);
+  overflow: hidden;
 }
-
-.full-screen-gallery {
-  background: var(--espresso, #12100e);
+.stage-screen, .slideshow, .mosaic { position: absolute; inset: 0; }
+.slideshow, .stage-screen :deep(.gallery), .stage-screen :deep(.album-wrapper), .stage-screen :deep(.album) {
+  width: 100%;
+  height: 100%;
 }
-.full-screen-gallery.has-guest-cta .qr-code {
-  bottom: 108px;
+.stage-screen :deep(.album-asset) {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  animation: stage-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.full-screen-gallery.has-guest-cta .logo {
-  bottom: 108px;
+@keyframes stage-in { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .stage-screen :deep(.album-asset) { animation: none; }
 }
-
-.blocked-toggle input {
-  margin-left: 8px;
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 6px;
+  padding: 6px;
 }
+.mosaic figure { margin: 0; overflow: hidden; border-radius: 10px; }
+.mosaic img, .mosaic video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.stage-title {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 5;
+  text-align: right;
+}
+.stage-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  color: #5ee392;
+  font-family: var(--brand, Outfit, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.stage-live i { width: 7px; height: 7px; border-radius: 50%; background: #2fbe6a; }
+.stage-title h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); font-weight: 900; color: #f7f2eb; text-shadow: 0 8px 24px rgba(0,0,0,.45); }
+.stage-link { color: var(--gold, #c9a36a); font-weight: 800; }
+.stage-new {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  margin: 0;
+  background: rgba(18,16,14,.72);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 800;
+}
+.stage-card {
+  position: absolute;
+  left: 22px;
+  bottom: 22px;
+  z-index: 5;
+  width: 148px;
+  padding: 12px 12px 10px;
+  border-radius: 18px;
+  background: rgba(255,252,250,.94);
+  color: #161310;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+}
+.stage-card p { margin: 8px 0 0; font-weight: 900; }
+.stage.has-guest-cta .stage-card { bottom: 108px; }
+.stage-gear {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  z-index: 6;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(18,16,14,.55);
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
+.stage-panel {
+  position: absolute;
+  top: 68px;
+  left: 22px;
+  z-index: 6;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(18,16,14,.88);
+  color: #fff;
+}
+.stage-panel button, .stage-panel a {
+  border: 1px solid rgba(255,255,255,.16);
+  background: transparent;
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.stage-panel button.on { background: #fff; color: #12100e; }
+.stage-panel label { display: flex; gap: 8px; align-items: center; font-weight: 700; }
 </style>
 

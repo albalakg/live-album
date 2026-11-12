@@ -1,5 +1,6 @@
 <template>
   <notifications position="top right" />
+  <HostAssist v-if="!isFullScreen" />
   <router-view v-if="isFullScreen" />
   <div class="app-wrapper" v-else>
     <template v-if="$bp.isMobile">
@@ -26,6 +27,7 @@ import MobileBar from "@/components/library/app/MobileBar.vue";
 import AppMenu from "@/components/library/app/AppMenu.vue";
 import Footer from "@/components/library/app/Footer.vue";
 import LoadingPage from "@/components/library/app/LoadingPage.vue";
+import HostAssist from "@/components/library/app/HostAssist.vue";
 import { defineComponent } from "vue";
 import Auth from "@/helpers/Auth";
 
@@ -38,6 +40,7 @@ export default defineComponent({
     AppMenu,
     Footer,
     LoadingPage,
+    HostAssist,
   },
 
   created() {

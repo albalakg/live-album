@@ -5,21 +5,18 @@
       <h1>{{ event.name }}</h1>
       <p>{{ assets.length }} תמונות באלבום</p>
     </header>
-    <div class="guest-grid">
-      <div
+    <div class="guest-masonry">
+      <button
         v-for="(asset, index) in assets"
         :key="asset.id || index"
+        type="button"
+        class="tile"
         :class="{ 'is-fresh': freshIds.includes(asset.id) }"
+        @click="openModal(index)"
       >
-        <EventGuestCard
-          class="pointer"
-          :loading="loading"
-          :assetIndex="index"
-          :asset="asset"
-          :eventName="event.name"
-          @onClick="openModal"
-        />
-      </div>
+        <img v-if="asset.type !== 'video'" :src="asset.fullPath" alt="" />
+        <video v-else :src="asset.fullPath" muted></video>
+      </button>
     </div>
     <p v-if="!loading && assets.length === 0" class="empty">עוד אין תמונות באלבום.</p>
     <GuestAlbumCta />
@@ -29,17 +26,8 @@
     <button @click.stop="changeAsset(currentAssetIndex + 1)" class="lightbox-next lightbox-icon">&#10094;</button>
     <button @click.stop="changeAsset(currentAssetIndex - 1)" class="lightbox-prev lightbox-icon">&#10095;</button>
     <div class="lightbox-content" @click.stop>
-      <EventGuestCard
-        class="lightbox-asset"
-        modalView
-        :loading="loading"
-        :assetIndex="0"
-        :asset="currentAsset"
-        :eventName="event.name"
-        @onClick="doNone"
-        controls
-        autoplay
-      />
+      <img v-if="currentAsset && currentAsset.type !== 'video'" class="lightbox-asset" :src="currentAsset.fullPath" alt="" />
+      <video v-else-if="currentAsset" class="lightbox-asset" :src="currentAsset.fullPath" controls autoplay></video>
     </div>
   </div>
 </template>
@@ -47,12 +35,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { IEventAsset } from "@/helpers/interfaces";
-import EventGuestCard from "@/components/event/EventGuestCard.vue";
 import GuestAlbumCta from "@/components/event/GuestAlbumCta.vue";
 
 export default defineComponent({
   name: "EventGuestGalleryView",
-  components: { EventGuestCard, GuestAlbumCta },
+  components: { GuestAlbumCta },
   data() {
     return {
       loading: true as boolean,
@@ -160,21 +147,37 @@ export default defineComponent({
   border-radius: 50%;
   background: var(--live, #2fbe6a);
 }
-.guest-grid {
+.guest-masonry {
   max-width: 1100px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-.guest-gallery .guest-grid .gallery-asset-wrapper {
-  width: 100% !important;
-  height: 180px !important;
-  padding: 0 !important;
+  columns: 2;
+  column-gap: 10px;
 }
 @media (min-width: 800px) {
-  .guest-grid { grid-template-columns: repeat(4, 1fr); }
-  .guest-gallery .guest-grid .gallery-asset-wrapper { height: 220px !important; }
+  .guest-masonry { columns: 4; }
+}
+.tile {
+  display: block;
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  break-inside: avoid;
+  cursor: pointer;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.tile img, .tile video {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+.lightbox-asset {
+  max-width: min(92vw, 1100px);
+  max-height: 86vh;
+  object-fit: contain;
 }
 .is-fresh { animation: snapshare-live-in 0.65s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes snapshare-live-in {
