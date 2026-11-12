@@ -101,9 +101,9 @@ export default defineComponent({
 .moderation {
   font-family: var(--font, Heebo, sans-serif);
   color: var(--ink, #161310);
-  padding: 28px 20px 48px;
-  background: var(--ivory, #f3eee6);
-  min-height: 100vh;
+  padding: 4px 0 12px;
+  background: transparent;
+  min-height: 0;
 }
 .kicker { color: var(--rose, #dc5b66); font-weight: 800; }
 h1 { font-weight: 900; font-size: 2rem; margin: 4px 0 8px; }

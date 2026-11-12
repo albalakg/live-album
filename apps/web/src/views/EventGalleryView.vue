@@ -255,20 +255,17 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-gallery {
-  height: 60vh;
   width: 100%;
-
-  @media only screen and (max-width: 600px) {
-    // height: 100%;
-    margin: 10px;
-    min-height: fit-content;
-  }
+  min-height: fit-content;
+  font-family: var(--font, Heebo, sans-serif);
+  color: var(--ink, #161310);
 }
 
 .gallery-top {
-  height: 50px;
-  margin-bottom: 20px;
-  width: calc(100% - 20px);
+  min-height: 50px;
+  margin-bottom: 16px;
+  width: 100%;
+  gap: 12px;
 
   .icon-wrapper {
     margin-inline-start: 10px;
@@ -276,32 +273,47 @@ export default defineComponent({
 }
 
 .gallery-content {
-  height: 100%;
   min-height: fit-content;
-  margin-top: 30px;
-  width: calc(100% - 20px);
-  display: flex;
-  gap: 20px;
+  margin-top: 12px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.9fr);
+  gap: 16px;
 
-  @media only screen and (max-width: 600px) {
-    flex-wrap: wrap;
+  @media only screen and (max-width: 900px) {
+    grid-template-columns: 1fr;
 
     .gallery-wrapper {
-      height: 200px;
+      min-height: 220px;
     }
   }
+}
+
+.gallery-content > .bg--white,
+.gallery-content > div:last-child {
+  background: #fffcfa !important;
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 18px;
+  box-shadow: none;
 }
 
 .blocked-gallery-toggle {
   text-align: start;
 }
 
+.blocked-toggle {
+  gap: 8px;
+  font-weight: 700;
+}
+
 .blocked-toggle input {
-  margin-left: 8px;
+  accent-color: #dc5b66;
+  margin-inline-start: 0;
+  margin-inline-end: 8px;
 }
 
 .blocked-toggle-note {
-  color: #8a2f35;
+  color: var(--muted, #5e564e);
   line-height: 1.4;
 }
 </style>

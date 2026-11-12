@@ -11,16 +11,14 @@
         <router-view></router-view>
       </transition>
     </template>
-    <div class="event-main display--flex padding--medium" v-else>
-      <div class="event-sidebar" v-if="$bp.isMediumAndUp">
+    <div class="event-main" v-else>
+      <aside class="event-sidebar">
         <Sidebar :items="items" />
-      </div>
-      <div class="event-mobile-bar" v-else>
+      </aside>
+      <nav class="event-mobile-nav" aria-label="ניווט האירוע">
         <MobileScrollBar :items="items" />
-      </div>
-      <div
-        class="event-content bg--gray padding--large padding--none-mobile brs--medium"
-      >
+      </nav>
+      <div class="event-content">
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -42,10 +40,6 @@ export default defineComponent({
   components: {
     Sidebar,
     MobileScrollBar,
-  },
-
-  mounted() {
-    return undefined;
   },
 
   computed: {
@@ -113,40 +107,87 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-main {
+  --host-sidebar: 240px;
   min-height: calc(100vh - 124px);
-  height: fit-content;
   width: min(1160px, calc(100% - 32px));
   margin: 0 auto;
   position: relative;
   z-index: 11;
+  display: grid;
+  grid-template-columns: var(--host-sidebar) minmax(0, 1fr);
   gap: 20px;
+  padding: 16px 0 40px;
+  align-items: start;
+}
 
-  .event-sidebar {
-    width: 20%;
-    min-width: 250px;
-  }
+.event-sidebar {
+  position: sticky;
+  top: calc(var(--nav, 72px) + 12px);
+}
 
-  .event-mobile-bar {
-    width: 100%;
-    position: fixed;
-    bottom: 62px;
-    left: 0;
-    z-index: 100;
+.event-mobile-nav {
+  display: none;
+}
+
+.event-content {
+  min-width: 0;
+  background: var(--paper, #fffcfa);
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+}
+
+@media (max-width: 1100px) {
+  .event-main {
+    --host-sidebar: 210px;
+    gap: 16px;
   }
 
   .event-content {
-    width: 78%;
-    margin-inline-start: 40px;
-    min-width: 0;
-    max-width: 100%;
-
-    @media only screen and (max-width: 600px) {
-      width: 100%;
-      margin: 0 auto;
-      min-height: fit-content;
-    }
+    padding: 20px;
   }
 }
+
+@media (max-width: 900px) {
+  .event-main {
+    grid-template-columns: 1fr;
+    width: min(1160px, calc(100% - 24px));
+    padding-top: 8px;
+  }
+
+  .event-sidebar {
+    display: none;
+  }
+
+  .event-mobile-nav {
+    display: block;
+    position: sticky;
+    top: calc(var(--nav, 72px) - 4px);
+    z-index: 40;
+    margin: 0 -4px 4px;
+  }
+
+  .event-content {
+    padding: 16px;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .event-main {
+    width: 100%;
+    padding: 0 0 88px;
+  }
+
+  .event-content {
+    border-radius: 0;
+    border-inline: 0;
+    box-shadow: none;
+    padding: 14px 14px 28px;
+  }
+}
+
 .host-empty {
   width: min(640px, calc(100% - 32px));
   margin: 48px auto;
@@ -156,9 +197,17 @@ export default defineComponent({
   box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
   text-align: center;
 }
-.host-empty .kicker { color: #dc5b66; font-weight: 800; }
-.host-empty h1 { font-weight: 900; margin: 8px 0; }
-.host-empty p { color: #5e564e; }
+.host-empty .kicker {
+  color: #dc5b66;
+  font-weight: 800;
+}
+.host-empty h1 {
+  font-weight: 900;
+  margin: 8px 0;
+}
+.host-empty p {
+  color: #5e564e;
+}
 .host-empty-cta {
   display: inline-flex;
   margin-top: 16px;
@@ -172,7 +221,7 @@ export default defineComponent({
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.35s ease;
 }
 .fade-enter-from,
 .fade-leave-to {

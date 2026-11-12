@@ -1,5 +1,22 @@
 <template>
-  <notifications position="top right" />
+  <notifications class="snap-toast-host" :position="toastPosition" :max="3" width="360px">
+    <template #body="{ item, close }">
+      <div
+        class="snap-toast"
+        :class="[`snap-toast--${item.type || 'info'}`, { 'snap-toast--closing': item.closed }]"
+        role="status"
+        @click="close"
+      >
+        <span class="snap-toast__icon material-symbols-outlined" aria-hidden="true">
+          {{ toastIcon(item.type) }}
+        </span>
+        <div class="snap-toast__body">
+          <strong v-if="item.title">{{ item.title }}</strong>
+          <p>{{ item.text }}</p>
+        </div>
+      </div>
+    </template>
+  </notifications>
   <HostAssist v-if="!isFullScreen" />
   <router-view v-if="isFullScreen" />
   <div class="app-wrapper" v-else>
@@ -65,9 +82,19 @@ export default defineComponent({
       }
       return false;
     },
+
+    toastPosition(): string {
+      return this.$bp.isMobile ? "bottom center" : "bottom right";
+    },
   },
 
   methods: {
+    toastIcon(type?: string): string {
+      if (type === "error" || type === "warn") return "error";
+      if (type === "success") return "check_circle";
+      return "info";
+    },
+
     async setInitialSettings() {
       try {
         if (this.$route.name !== "googleAuthCallback" && Auth.isLogged()) {

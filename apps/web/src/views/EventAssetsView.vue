@@ -31,7 +31,7 @@
               <span class="blocked-toggle-badge">{{ blockedAssets.length }}</span>
             </span>
           </label>
-          <strong class="text--pink"> ממליצים להוריד ישר אחרי האירוע </strong>
+          <strong class="assets-note"> ממליצים להוריד ישר אחרי האירוע </strong>
           <div class="collapse-container">
             <strong class="pointer" @click="toggleCollapse">
               איך מורידים
@@ -132,7 +132,7 @@
 
       <div v-if="showBlockedAssets" class="blocked-assets-section margin--top-large width--full">
         <div class="blocked-assets-header margin--bottom-medium">
-          <strong class="text--pink">תמונות חסומות</strong>
+          <strong class="blocked-title">תמונות חסומות</strong>
         </div>
         <div
           v-if="blockedAssets.length"
@@ -662,12 +662,30 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-assets {
+  font-family: var(--font, Heebo, sans-serif);
+  color: var(--ink, #161310);
+
+  h1 {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
   h1 small {
     font-size: 0.5em;
+    color: var(--muted, #5e564e);
+  }
+
+  .assets-note {
+    color: #8a7040;
+    font-weight: 800;
   }
 
   .assets-top {
     min-height: fit-content;
+    background: #fffcfa !important;
+    border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+    border-radius: 18px;
+    box-shadow: none;
   }
 
   .assets-body {
@@ -682,16 +700,23 @@ export default defineComponent({
     min-height: fit-content;
   }
 
+  .blocked-title {
+    color: var(--ink, #161310);
+    font-weight: 900;
+  }
+
   .blocked-assets-section {
-    border-top: 1px solid #f0d4d6;
+    border-top: 1px solid var(--line, rgba(22, 19, 16, 0.11));
     padding-top: 16px;
   }
 
   .blocked-warning,
   .blocked-empty {
-    border: 1px solid #f68589;
+    border: 1px solid rgba(220, 91, 102, 0.28);
+    background: rgba(220, 91, 102, 0.08) !important;
     color: #8a2f35;
     line-height: 1.5;
+    border-radius: 14px;
   }
 
   .blocked-empty {
@@ -713,35 +738,36 @@ export default defineComponent({
   .blocked-toggle-chip {
     gap: 8px;
     padding: 8px 14px;
-    border: 1px solid #f0d4d6;
-    background: #fff;
+    border: 1px solid rgba(220, 91, 102, 0.28);
+    background: #fffcfa;
     color: #8a2f35;
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1;
+    border-radius: 999px;
     transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     user-select: none;
   }
 
   .blocked-toggle:hover .blocked-toggle-chip {
-    border-color: #f68589;
-    box-shadow: 0 2px 8px rgba(246, 133, 137, 0.18);
+    border-color: rgba(220, 91, 102, 0.5);
+    box-shadow: 0 2px 8px rgba(220, 91, 102, 0.12);
   }
 
   .blocked-toggle--active .blocked-toggle-chip {
-    background: #fdf0f1;
-    border-color: #f68589;
-    box-shadow: 0 2px 10px rgba(246, 133, 137, 0.22);
+    background: rgba(220, 91, 102, 0.12);
+    border-color: rgba(220, 91, 102, 0.45);
+    box-shadow: 0 2px 10px rgba(220, 91, 102, 0.14);
   }
 
   .blocked-toggle-icon {
     font-size: 1.1rem;
     line-height: 1;
-    color: #c62828;
+    color: #dc5b66;
   }
 
   .blocked-toggle--active .blocked-toggle-icon {
-    color: #a31515;
+    color: #c94a56;
   }
 
   .blocked-toggle-badge {

@@ -1,161 +1,124 @@
 <template>
-    <div v-if="$bp.isMediumAndUp" class="switch" :class="{ disabled }">
-        <input ref="input" :id="`switch-${uniqueId}`" type="checkbox" class="switch-input"
-            :class="`switch-input-${color}`" @click="submit()" />
-        <label :for="`switch-${uniqueId}`" class="switch-label">Switch</label>
-    </div>
-    <div v-else class="switch-mobile" @click="submit()">
-        <input ref="input" type="checkbox" class="switch-input-mobile" />
-        <div class="switch-light-mobile" :class="{
-            'switch-light-on-mobile': value
-        }"></div>
-    </div>
+  <div
+    class="snap-switch"
+    :class="{ disabled, 'is-on': value }"
+    role="switch"
+    :aria-checked="value"
+    :aria-disabled="disabled"
+    @click.stop="submit()"
+  >
+    <input
+      ref="input"
+      :id="`switch-${uniqueId}`"
+      type="checkbox"
+      class="snap-switch__input"
+      :checked="value"
+      :disabled="disabled"
+      tabindex="-1"
+      @click.stop.prevent="submit()"
+    />
+    <span class="snap-switch__track" aria-hidden="true">
+      <span class="snap-switch__thumb"></span>
+    </span>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 
 export default defineComponent({
-    name: 'MainCheckbox',
+  name: "MainCheckbox",
 
-    props: {
-        text: {
-            type: String
-        },
-
-        color: {
-            type: String,
-            default: 'green'
-        },
-
-        disabled: {
-            type: Boolean,
-            default: false
-        },
-
-        value: {
-            type: Boolean,
-            default: false
-        },
+  props: {
+    text: {
+      type: String,
     },
 
-    computed: {
-        uniqueId(): number {
-            return Math.random()
-        },
+    color: {
+      type: String,
+      default: "rose",
     },
 
-    mounted() {
-        (this.$refs.input as any).checked = this.value;
+    disabled: {
+      type: Boolean,
+      default: false,
     },
 
-    watch: {
-        value() {
-            (this.$refs.input as any).checked = this.value;
-        }
+    value: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  data() {
+    return {
+      uniqueId: Math.random().toString(36).slice(2, 9),
+    };
+  },
+
+  methods: {
+    submit() {
+      if (this.disabled) return;
+      this.$emit("onClick");
     },
 
-    methods: {
-        submit() {
-            this.$emit('onClick');
-        },
-
-        toggle() {
-            (this.$refs.input as any)?.click();
-        }
-    }
+    toggle() {
+      this.submit();
+    },
+  },
 });
 </script>
 
 <style lang="scss" scoped>
-.switch {
-    position: relative;
-    display: inline-block;
+.snap-switch {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
-.switch-input {
-    display: none;
+.snap-switch.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
-.switch-label {
-    display: block;
-    width: 48px;
-    height: 24px;
-    text-indent: -150%;
-    clip: rect(0 0 0 0);
-    color: transparent;
-    user-select: none;
-    position: relative;
+.snap-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
 }
 
-.switch-label::before,
-.switch-label::after {
-    content: "";
-    display: block;
-    position: absolute;
-    cursor: pointer;
+.snap-switch__track {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(22, 19, 16, 0.14);
+  display: inline-block;
+  transition: background 0.2s ease;
+  box-sizing: border-box;
 }
 
-.switch-label::before {
-    width: 100%;
-    height: 100%;
-    background-color: #dedede;
-    border-radius: 9999em;
-    -webkit-transition: background-color 0.25s ease;
-    transition: background-color 0.25s ease;
+.snap-switch__thumb {
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(18, 16, 14, 0.28);
+  transition: inset-inline-start 0.2s ease;
 }
 
-.switch-label::after {
-    top: 0;
-    left: 0;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background-color: #fff;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.45);
-    -webkit-transition: left 0.25s ease;
-    transition: left 0.25s ease;
+.snap-switch.is-on .snap-switch__track {
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
 }
 
-.switch-input-green:checked+.switch-label::before {
-    background-color: var(--green);
-}
-
-.switch-input-pink:checked+.switch-label::before {
-    background-color: var(--pink);
-}
-
-.switch-input:checked+.switch-label::after {
-    left: 24px;
-}
-
-.switch-mobile {
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    min-height: 20px;
-    border: 1px solid var(--green);
-    display: block;
-    position: relative;
-    box-shadow: inset 0 0 5px 1px #0003;
-    padding: 2px;
-    cursor: pointer;
-    
-    .switch-input-mobile {
-        display: none;
-    }
-    
-    .switch-light-mobile {
-        border-radius: 50%;
-        height: 100%;
-        width: 100%;
-        background-color: #fff;
-        transition: .2s background-color linear;
-    }
-
-    .switch-light-on-mobile {
-        background-color: var(--green);
-    }
+.snap-switch.is-on .snap-switch__thumb {
+  inset-inline-start: calc(100% - 25px);
 }
 </style>
