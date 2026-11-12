@@ -1,5 +1,11 @@
 <template>
-  <template v-if="$store.getters['event/getEvent']">
+  <div v-if="!hasEvent" class="host-empty">
+    <p class="kicker">האירועים שלי</p>
+    <h1>עוד אין אירוע.</h1>
+    <p>הרשימה ריקה. פותחים ניסיון חינם, בלי כרטיס אשראי, או בוחרים מסלול בתשלום אחד.</p>
+    <router-link class="host-empty-cta" to="/order">נסו בחינם</router-link>
+  </div>
+  <template v-else-if="$store.getters['event/getEvent']">
     <template v-if="isFullScreen">
       <transition name="fade" mode="out-in">
         <router-view></router-view>
@@ -39,12 +45,13 @@ export default defineComponent({
   },
 
   mounted() {
-    if (!this.$store.getters["event/hasActiveEvent"]) {
-      this.$router.push({ name: "home" });
-    }
+    return undefined;
   },
 
   computed: {
+    hasEvent(): boolean {
+      return Boolean(this.$store.getters["event/getEvent"]);
+    },
     isFullScreen(): boolean {
       return (
         this.$route.path.includes("uploads") ||
@@ -108,9 +115,11 @@ export default defineComponent({
 .event-main {
   min-height: calc(100vh - 124px);
   height: fit-content;
-  width: calc(100% - 24px);
+  width: min(1160px, calc(100% - 32px));
+  margin: 0 auto;
   position: relative;
   z-index: 11;
+  gap: 20px;
 
   .event-sidebar {
     width: 20%;
@@ -137,6 +146,28 @@ export default defineComponent({
       min-height: fit-content;
     }
   }
+}
+.host-empty {
+  width: min(640px, calc(100% - 32px));
+  margin: 48px auto;
+  background: #fffcfa;
+  border-radius: 28px;
+  padding: 36px 28px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+  text-align: center;
+}
+.host-empty .kicker { color: #dc5b66; font-weight: 800; }
+.host-empty h1 { font-weight: 900; margin: 8px 0; }
+.host-empty p { color: #5e564e; }
+.host-empty-cta {
+  display: inline-flex;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  color: #fff !important;
+  font-weight: 800;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 12px 22px;
 }
 
 .fade-enter-active,

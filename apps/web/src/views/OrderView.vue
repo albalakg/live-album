@@ -140,6 +140,7 @@
                   class="order-pay-error display--flex direction--column align--center"
                 >
                   <p class="text--dark text--center">{{ loadError }}</p>
+                  <p class="sandbox-note">אין מפתחות PayPlus בסביבה המקומית, אז לא נטען iframe ולא מתבצע חיוב.</p>
                   <MainButton
                     color="pink"
                     text="נסו שוב"
@@ -552,7 +553,7 @@ export default defineComponent({
           `/login?redirect=${encodeURIComponent("/order?subscription=demo")}`
         );
         this.$notify({
-          text: "צריך להתחבר בשביל בשביל המסלול נסיון",
+          text: "צריך להתחבר כדי לפתוח את מסלול הניסיון",
           type: "success",
           duration: 5000,
         });

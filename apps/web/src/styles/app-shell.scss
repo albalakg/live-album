@@ -193,3 +193,13 @@ body, #app {
   border-color: #8a7040 !important;
   box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.35) !important;
 }
+.order-pay-error .sandbox-note {
+  max-width: 36rem;
+  margin: 8px auto 0;
+  color: #5e564e;
+  text-align: center;
+}
+.sidebar.bg--gray {
+  background: #fffcfa !important;
+  border-radius: 22px;
+}
