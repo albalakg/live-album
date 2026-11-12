@@ -1,0 +1,49 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import LandingArticle from "../components/LandingArticle.astro";
+import { applyPendingClaims } from "../lib/pendingClaims";
+import { breadcrumbNode, faqNode, graph, organizationNode } from "../lib/schema";
+
+export async function getStaticPaths() {
+  const pages = await getCollection("landing");
+  return pages
+    .filter((page) => page.data.slug !== "/pricing")
+    .map((page) => ({
+      params: { slug: page.data.slug.replace(/^\//, "") },
+      props: { page },
+    }));
+}
+
+const { page } = Astro.props;
+const faqs = page.data.faq
+  .map((item) => {
+    const answer = applyPendingClaims(item.a);
+    return answer ? { question: item.q, answer } : null;
+  })
+  .filter((item): item is { question: string; answer: string } => item !== null);
+
+const path = page.data.slug;
+const schema = graph([
+  organizationNode(),
+  breadcrumbNode([
+    { name: "SnapShare", path: "/" },
+    { name: page.data.breadcrumbLabel, path },
+  ]),
+  faqNode(faqs),
+]);
+---
+<BaseLayout
+  title={page.data.title}
+  description={page.data.metaDescription}
+  path={path}
+  schema={schema}
+>
+  <LandingArticle
+    h1={page.data.h1}
+    sections={page.data.sections}
+    faq={page.data.faq}
+    ctaTarget={page.data.ctaTarget}
+    internalLinks={page.data.internalLinks}
+  />
+</BaseLayout>

@@ -1,0 +1,195 @@
+/* Vue pages are not marketing sections; keep the mock type and chrome. */
+.app-content section {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.app-content .moderation {
+  padding: 28px 20px 48px;
+}
+
+/* Shared chrome for the Vue app. Marketing pages live in Astro. */
+body, #app {
+  background: var(--ivory, #f3eee6);
+  font-family: var(--font, "Heebo", "Segoe UI", sans-serif);
+}
+
+.main-cube,
+.main-line {
+  display: none !important;
+}
+
+.desktop-bar {
+  background: rgba(243, 238, 230, 0.92) !important;
+  color: var(--ink, #161310) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(22, 19, 16, 0.08);
+  box-shadow: none !important;
+}
+.desktop-bar .title--large,
+.desktop-bar a,
+.desktop-bar span {
+  color: var(--ink, #161310) !important;
+  font-family: var(--font, "Heebo", sans-serif);
+}
+
+.mobile-bar {
+  background: rgba(243, 238, 230, 0.96) !important;
+  border-bottom: 1px solid rgba(22, 19, 16, 0.08) !important;
+  border-top: none !important;
+  top: 0 !important;
+  bottom: auto !important;
+}
+
+.footer.bg--pink {
+  background: var(--espresso, #12100e) !important;
+  color: rgba(247, 242, 235, 0.78) !important;
+}
+.footer.bg--pink p,
+.footer.bg--pink h3,
+.footer.bg--pink h4,
+.footer.bg--pink a {
+  color: rgba(247, 242, 235, 0.86) !important;
+}
+
+.login,
+.signup,
+.contact,
+.order,
+.profile,
+.event-main {
+  background: var(--ivory, #f3eee6);
+  font-family: var(--font, "Heebo", sans-serif);
+  color: var(--ink, #161310);
+}
+
+.login-content,
+.contact-content,
+.order-discount {
+  border-radius: 28px !important;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08) !important;
+}
+
+.login-details.bg--pink {
+  background: var(--espresso, #12100e) !important;
+}
+.contact-content.bg--pink,
+.contact-content {
+  background: #fffcfa !important;
+  color: #161310 !important;
+}
+.contact .line,
+.contact .bottom-background {
+  display: none !important;
+}
+.login .inner-input,
+.signup .inner-input,
+.contact .inner-input,
+.order .inner-input,
+.order-discount {
+  box-shadow: none !important;
+}
+.contact-content {
+  background: #fffcfa !important;
+  color: #161310 !important;
+  width: min(480px, calc(100% - 32px)) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08) !important;
+  padding: 32px 28px !important;
+}
+.contact-content,
+.contact-content h2,
+.contact-content p,
+.contact-content label {
+  color: #161310 !important;
+}
+.forgot-password-content,
+.email-confirmation-content,
+.terms-and-conditions-content,
+.profile-content,
+.order-callback-content {
+  background: #fffcfa !important;
+  color: #161310 !important;
+  border-radius: 28px !important;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08) !important;
+  width: min(720px, calc(100% - 32px));
+  margin: 32px auto !important;
+  padding: 28px !important;
+}
+.forgot-password-content h3,
+.forgot-password-content p,
+.forgot-password-content small,
+.email-confirmation-content h2,
+.email-confirmation-content h3,
+.order-callback-details,
+.order-callback-details h3,
+.order-callback-details p {
+  color: #161310 !important;
+  background: transparent !important;
+}
+.terms-and-conditions-content {
+  width: min(860px, calc(100% - 32px));
+}
+.order-content {
+  width: min(1100px, calc(100% - 40px));
+  padding-bottom: 48px;
+}
+.order-steps {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 8px 0 20px;
+  padding: 0;
+  justify-content: center;
+}
+.order-steps li {
+  border: 1px solid rgba(22, 19, 16, 0.12);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 700;
+  color: #5e564e;
+  background: #fffcfa;
+}
+.order-steps li.on {
+  background: #12100e;
+  color: #f7f2eb;
+  border-color: #12100e;
+}
+
+.sidebar.bg--gray,
+.event-content.bg--gray {
+  background: var(--paper, #fffcfa) !important;
+  border: 1px solid rgba(22, 19, 16, 0.08);
+}
+
+.main-button .inner-button.bg--green,
+.main-button .inner-button.bg--pink {
+  background: linear-gradient(135deg, #dc5b66, #c9a36a) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+.main-button {
+  border-radius: 999px !important;
+}
+
+.pricing-card {
+  background: var(--paper, #fffcfa);
+  border: 1px solid rgba(22, 19, 16, 0.1);
+  border-radius: 22px;
+  color: var(--ink, #161310);
+}
+.dp__input_wrap {
+  box-shadow: none !important;
+}
+.dp__input,
+.order-discount__input {
+  box-shadow: none !important;
+  border: 1px solid rgba(22, 19, 16, 0.16) !important;
+  border-radius: 14px !important;
+  background: #fffcfa !important;
+}
+.dp__input:focus,
+.order-discount__input:focus {
+  outline: none !important;
+  border-color: #8a7040 !important;
+  box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.35) !important;
+}

@@ -97,6 +97,15 @@
       />
       <small>להציג כפתור מעבר מעמוד ההעלאות לעמוד האלבום</small>
     </div>
+    <div class="display--flex checkbox-wrapper">
+      <MainCheckbox
+        @onClick="form.config.manual_photo_approval = !form.config.manual_photo_approval"
+        title="אישור ידני לתמונות"
+        :value="form.config.manual_photo_approval"
+        class="checkbox"
+      />
+      <small>אישור ידני לתמונות — מרגע ההפעלה, תמונות חדשות מחכות לאישור לפני האלבום והמסך</small>
+    </div>
     <!-- <div class="display--flex checkbox-wrapper">
       <MainCheckbox
         @onClick="form.config.preview_qr_in_gallery = !form.config.preview_qr_in_gallery"
@@ -143,6 +152,7 @@ export default defineComponent({
           preview_qr_in_gallery: false as boolean,
           preview_link_to_album_page_from_upload_page: false as boolean,
           video_upload_enabled: true as boolean,
+          manual_photo_approval: false as boolean,
         }
       },
       errors: {
@@ -192,6 +202,7 @@ export default defineComponent({
       this.form.config.preview_qr_in_gallery = this.event?.config?.preview_qr_in_gallery ?? false;
       this.form.config.preview_link_to_album_page_from_upload_page = this.event?.config?.preview_link_to_album_page_from_upload_page ?? false;
       this.form.config.video_upload_enabled = this.event?.config?.video_upload_enabled ?? true;
+      this.form.config.manual_photo_approval = Boolean(this.event?.config?.manual_photo_approval);
       this.imageExists = !!this.event?.image;
     },
 

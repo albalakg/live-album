@@ -1,10 +1,10 @@
 * {
   margin: 0;
   padding: 0;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Heebo", "Segoe UI", Tahoma, sans-serif;
   direction: rtl;
-  font-weight: 300;
-  color: var(--dark);
+  font-weight: 400;
+  color: #161310;
 }
 
 /* body {
@@ -12,14 +12,18 @@
 } */
 
 :root {
-  --green: #79ae60;
-  --lightGreen: #a3d18d;
-  --pink: #f68589;
-  --lightPink: #ffaeb1;
-  --dark-gray: #686666;
-  --gray: #eeeeee;
-  --dark: #222;
-  --darkTransparent: #2228;
+  --green: #12100e;
+  --lightGreen: #e8e0d4;
+  --pink: #dc5b66;
+  --lightPink: #f3eee6;
+  --dark-gray: #5e564e;
+  --gray: #f3eee6;
+  --dark: #161310;
+  --darkTransparent: #161310cc;
+  --gold: #c9a36a;
+  --rose: #dc5b66;
+  --ivory: #f3eee6;
+  --espresso: #12100e;
 }
 
 .instrument-serif-regular {
@@ -362,12 +366,15 @@
 
 .title--large {
   font-size: 1.8em;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .title--x-large {
-  font-size: 3.4em;
-  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
 }
 
 .title--xx-large {

@@ -3,7 +3,7 @@
         <p class="title--small">
             {{ title }}
         </p>
-        <div class="inner-textarea padding--x-small shadow--small"
+        <div class="inner-textarea padding--x-small"
             :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''}`">
             <textarea :maxLength="maxLength" :rows="rows" v-model="localValue" ref="textarea" :readonly="readonly" :placeholder="placeholder"
                     class="width--full" @input="updateValue($event?.target?.value)" />

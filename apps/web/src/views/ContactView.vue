@@ -1,60 +1,27 @@
 <template>
   <div class="contact">
-    <MainLine color="light-green" top="250px" width="full" height="x-large" />
-    <MainLine color="green" top="300px" width="full" height="large" />
-    <MainLine color="light-green" top="335px" width="full" height="medium" />
-    <MainLine color="green" top="350px" width="full" height="xx-large" />
-    <MainLine color="light-green" top="430px" width="full" height="medium" />
-    <MainLine color="green" top="455px" width="full" height="large" />
-    <MainLine color="light-green" top="485px" width="full" height="x-large" />
-
-
-    <MainCube color="pink" left="27%" top="72%" width="small" height="small" />
-    <MainCube color="pink" left="23%" top="73%" width="medium" height="medium" />
-    <MainCube color="pink" left="26%" top="76%" width="large" height="large" />
-    <MainCube color="green" left="30%" top="13%" width="large" height="xxx-large" />
-    <MainCube color="pink" left="10%" top="8%" width="medium" height="x-large" />
-    <MainCube color="green" left="11%" top="13%" width="medium" height="medium" />
-    <MainCube color="green" left="5%" top="10%" width="large" height="large" />
-    <MainCube color="green" right="0" top="22%" width="xx-large" height="medium" />
-    <MainCube color="pink" right="32%" top="80%" width="xx-large" height="large" />
-    <MainCube color="green" right="31%" top="84%" width="medium" height="xxx-large" />
-
-    <div class="contact-content width--corner width--80-mobile bg--pink margin--auto brs--medium padding--medium shadow--small">
-      <h2 class="text--center text--white title--large">צרו איתנו קשר</h2>
-      <p class="text--center title--small">
-        כל בקשה, שאלה, תלונה או טיפ יתקבלו בברכה
-      </p>
-      <div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
+    <div class="contact-layout">
+      <div class="contact-copy">
+        <p class="kicker">צור קשר</p>
+        <h1>כתבו לנו.</h1>
+        <p>כל בקשה, שאלה, תלונה או טיפ יתקבלו בברכה. נחזור אליכם למייל.</p>
+        <a class="mail" :href="`mailto:${email}`">{{ email }}</a>
       </div>
-      <form @submit.prevent="submit()" class="contact-form display--flex justify--space-between direction--column">
-        <div class="contact-body">
-          <MainInput type="email" v-model="form.email" title="כתובת מייל" />
-          <br>
-          <MainInput v-model="form.full_name" title="שם מלא" />
-          <br>
-          <MainTextArea v-model="form.text" title="טקסט חופשי" />
-        </div>
-        <div class="contact-bottom">
-          <MainButton :loading="isLoading" text="פנו אלינו עכשיו" />
-        </div>
+      <form class="contact-card" @submit.prevent="submit()">
+        <MainInput type="email" v-model="form.email" title="כתובת מייל" />
+        <MainInput v-model="form.full_name" title="שם מלא" />
+        <MainTextArea v-model="form.text" title="טקסט חופשי" />
+        <MainButton :loading="isLoading" text="פנו אלינו עכשיו" />
       </form>
-      <div class="bottom-background bg--white"></div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import MainCube from '@/components/library/background/MainCube.vue';
-import MainLine from '@/components/library/background/MainLine.vue';
 import MainButton from '@/components/library/buttons/MainButton.vue';
 import MainInput from '@/components/library/inputs/MainInput.vue';
 import MainTextArea from '@/components/library/inputs/MainTextArea.vue';
+import { BUSINESS_EMAIL_DEFAULT } from '@snapshare/design/site';
 import { defineComponent } from 'vue';
 import { IUserInfo } from '@/helpers/interfaces';
 
@@ -62,8 +29,6 @@ export default defineComponent({
   name: 'ContactView',
 
   components: {
-    MainCube,
-    MainLine,
     MainInput,
     MainTextArea,
     MainButton,
@@ -98,7 +63,10 @@ export default defineComponent({
   computed: {
     user(): IUserInfo | null {
       return this.$store.getters['user/getUser'];
-    }
+    },
+    email(): string {
+      return process.env.VUE_APP_BUSINESS_EMAIL || BUSINESS_EMAIL_DEFAULT;
+    },
   },
 
   methods: {
@@ -173,43 +141,52 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .contact {
-  height: 100vh;
-  min-height: fit-content;
-
-  .contact-content {
-    min-height: 520px;
-    position: relative;
-    max-width: 400px;
-    top: 5%;
-
-    .contact-form {
-      position: relative;
-      z-index: 1;
-      min-height: fit-content;
-      height: calc(100% - 80px);
-      margin: 10px;
-
-      .contact-body {
-        padding-bottom: 20px;
-      }
-
-      .contact-bottom {
-        margin-top: 50px;
-      }
-    }
-
-    .bottom-background {
-      width: 100%;
-      height: 19%;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      border-radius: 0 0 12px 12px;
-    }
-
-    h2 {
-      margin-top: 10px;
-    }
+  min-height: 0;
+  padding: 12px 0 48px;
+}
+.contact-layout {
+  width: min(980px, calc(100% - 40px));
+  margin: 24px auto 48px;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 36px;
+  align-items: start;
+}
+.contact-copy .kicker {
+  color: #dc5b66;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+.contact-copy h1 {
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 12px;
+}
+.contact-copy p {
+  color: #5e564e;
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+.mail {
+  color: #161310;
+  font-weight: 800;
+  text-decoration: underline;
+}
+.contact-card {
+  background: #fffcfa;
+  border-radius: 28px;
+  padding: 28px 24px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+@media (max-width: 800px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+    width: min(480px, calc(100% - 32px));
+    gap: 20px;
   }
 }
 </style>

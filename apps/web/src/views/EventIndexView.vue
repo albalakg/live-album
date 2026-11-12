@@ -70,6 +70,11 @@ export default defineComponent({
           isActive: false,
         },
         {
+          text: "בדיקת תוכן",
+          path: "/event/moderation",
+          isActive: false,
+        },
+        {
           text: "כרטיס QR",
           path: "/event/qr",
           isActive: false,

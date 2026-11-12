@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqList from "../components/FaqList.astro";
+import { FAQ_GROUPS, FAQ_ITEMS } from "../data/faq";
+import { faqNode, graph, organizationNode } from "../lib/schema";
+
+const title = "שאלות נפוצות | SnapShare";
+const description =
+  "איך האורחים מעלים תמונות בלי אפליקציה, האם האלבום חי, ואיך מורידים את כל הקבצים בסוף האירוע.";
+---
+<BaseLayout
+  title={title}
+  description={description}
+  path="/faq"
+  schema={graph([organizationNode(), faqNode(FAQ_ITEMS)])}
+>
+  <section id="faq">
+    <div class="wrap">
+      <p class="sec-kicker">שאלות נפוצות</p>
+      <h1 class="sec-title">התשובות הקצרות.</h1>
+      <p class="sec-sub">שאלות על המוצר. שאלות על המחיר נמצאות ב<a href="/pricing">עמוד המחירים</a>.</p>
+      {FAQ_GROUPS.map((group) => (
+        <div class="faq-group">
+          <h2>{group.title}</h2>
+          <FaqList items={group.items} />
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  #faq > .wrap { width: min(820px, calc(100% - 40px)); }
+  .faq-group { margin-top: 28px; }
+  .faq-group h2 { font-weight: 900; margin-bottom: 8px; }
+  .sec-sub a { color: inherit; font-weight: 800; }
+  #faq .faq-list { max-width: none; }
+</style>

@@ -1,0 +1,109 @@
+---
+import Rich from "./Rich.astro";
+import { applyPendingClaims } from "../lib/pendingClaims";
+import { appPath } from "../lib/appUrl";
+
+interface Section {
+  level: number;
+  heading: string | null;
+  paragraphs?: string[];
+  bullets?: string[];
+}
+interface Faq { q: string; a: string; }
+interface Link { slug: string; anchor: string; }
+interface Props {
+  h1: string;
+  sections: Section[];
+  faq: Faq[];
+  ctaTarget: string;
+  ctaLabel?: string;
+  internalLinks?: Link[];
+}
+
+const { h1, sections, faq, ctaTarget, ctaLabel = "נסו בחינם", internalLinks = [] } = Astro.props;
+
+function keep(text: string | undefined): string | null {
+  if (!text) return null;
+  return applyPendingClaims(text);
+}
+
+const blocks = sections
+  .map((section) => ({
+    level: section.level,
+    heading: section.heading,
+    paragraphs: (section.paragraphs || []).map(keep).filter((item): item is string => Boolean(item)),
+    bullets: (section.bullets || []).map(keep).filter((item): item is string => Boolean(item)),
+  }))
+  .filter((section) => section.heading || section.paragraphs.length || section.bullets.length);
+
+const faqs = faq
+  .map((item) => {
+    const answer = keep(item.a);
+    if (!answer) return null;
+    return { q: item.q, a: answer };
+  })
+  .filter((item): item is Faq => item !== null);
+---
+<article class="landing">
+  <header class="landing-head">
+    <p class="sec-kicker">SnapShare</p>
+    <h1 class="sec-title">{h1}</h1>
+  </header>
+  {blocks.map((section) => (
+    <section class="landing-section">
+      {section.heading && section.level === 3 && <h3>{section.heading}</h3>}
+      {section.heading && section.level !== 3 && <h2>{section.heading}</h2>}
+      {section.paragraphs.map((paragraph) => <p><Rich text={paragraph} /></p>)}
+      {section.bullets.length > 0 && (
+        <ul>
+          {section.bullets.map((bullet) => <li><Rich text={bullet} /></li>)}
+        </ul>
+      )}
+    </section>
+  ))}
+  {faqs.length > 0 && (
+    <section class="landing-section">
+      <h2>שאלות נפוצות</h2>
+      <div class="faq-list">
+        {faqs.map((item) => (
+          <div class="faq-item">
+            <button type="button" aria-expanded="false">
+              {item.q}
+              <span class="ico" aria-hidden="true">+</span>
+            </button>
+            <div class="ans">{item.a}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+  {internalLinks.length > 0 && (
+    <nav class="landing-links" aria-label="עמודים קשורים">
+      <h2>עוד ב-SnapShare</h2>
+      <ul>
+        {internalLinks.map((link) => <li><a href={appPath(link.slug)}>{link.anchor}</a></li>)}
+      </ul>
+    </nav>
+  )}
+  <p class="landing-cta">
+    <a class="btn btn-primary" href={appPath(ctaTarget)}>{ctaLabel}</a>
+  </p>
+</article>
+<style>
+  .landing { padding: 28px 0 48px; }
+  .landing-head, .landing-section, .landing-links, .landing-cta { width: min(860px, calc(100% - 40px)); margin-inline: auto; }
+  .landing-section, .landing-links {
+    margin-top: 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 22px;
+  }
+  .landing-section h2, .landing-section h3, .landing-links h2 { font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px; }
+  .landing-section h2, .landing-links h2 { font-size: 1.45rem; }
+  .landing-section h3 { font-size: 1.15rem; }
+  .landing-section p, .landing-section li { color: var(--muted); margin: 8px 0; }
+  .landing-section ul, .landing-links ul { padding-inline-start: 1.2rem; }
+  .landing-section a, .landing-links a { color: var(--ink); font-weight: 800; }
+  .landing-cta { margin-top: 22px; }
+</style>

@@ -1,0 +1,166 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PricingCards from "../components/PricingCards.astro";
+import FaqList from "../components/FaqList.astro";
+import Rich from "../components/Rich.astro";
+import { appPath } from "../lib/appUrl";
+import { applyPendingClaims } from "../lib/pendingClaims";
+import { breadcrumbNode, faqNode, graph, organizationNode, productNode } from "../lib/schema";
+
+const pages = await getCollection("landing");
+const page = pages.find((entry) => entry.data.slug === "/pricing");
+if (!page) throw new Error("missing pricing landing content");
+
+const faqs = page.data.faq
+  .map((item) => {
+    const answer = applyPendingClaims(item.a);
+    return answer ? { question: item.q, answer } : null;
+  })
+  .filter((item): item is { question: string; answer: string } => item !== null);
+
+const schema = graph([
+  organizationNode(),
+  productNode(),
+  breadcrumbNode([
+    { name: "SnapShare", path: "/" },
+    { name: "מחירים", path: "/pricing" },
+  ]),
+  faqNode(faqs),
+]);
+---
+<BaseLayout
+  title={page.data.title}
+  description={page.data.metaDescription}
+  path="/pricing"
+  schema={schema}
+>
+  <section id="pricing">
+    <div class="wrap">
+      <p class="sec-kicker">המסלולים</p>
+      <h1 class="sec-title">תשלום אחד לאירוע.<br />בלי מנוי.</h1>
+      <p class="sec-sub">ניסיון חינם בלי כרטיס אשראי, קלאסי ₪200, פרימיום ₪300. המסך החי כלול.</p>
+      <PricingCards />
+      <div class="compare-wrap">
+        <table class="compare">
+          <caption class="sr-only">השוואת המסלולים</caption>
+          <thead>
+            <tr>
+              <th>מה כלול</th>
+              <th>ניסיון</th>
+              <th>קלאסי</th>
+              <th>פרימיום</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>מחיר</th>
+              <td>חינם</td>
+              <td>₪200</td>
+              <td>₪300</td>
+            </tr>
+            <tr>
+              <th>קבצים</th>
+              <td>10</td>
+              <td>עד 1,000</td>
+              <td>עד 5,000</td>
+            </tr>
+            <tr>
+              <th>שמירה</th>
+              <td>48 שעות</td>
+              <td>כ-6 חודשים</td>
+              <td>כשנה</td>
+            </tr>
+            <tr>
+              <th>אלבום חי להקרנה</th>
+              <td>לבדיקה</td>
+              <td>כלול</td>
+              <td>כלול</td>
+            </tr>
+            <tr>
+              <th>כרטיס QR מעוצב</th>
+              <td>—</td>
+              <td>כלול</td>
+              <td>כלול</td>
+            </tr>
+            <tr>
+              <th>הורדת כל הקבצים</th>
+              <td>—</td>
+              <td>כלול</td>
+              <td>כלול</td>
+            </tr>
+            <tr>
+              <th>בדיקת תמונות</th>
+              <td>—</td>
+              <td>תמונות בלבד</td>
+              <td>תמונות בלבד</td>
+            </tr>
+            <tr>
+              <th>כרטיס אשראי</th>
+              <td>לא נדרש</td>
+              <td>בתשלום</td>
+              <td>בתשלום</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="pay-strip">תשלום אחד לאירוע, בלי מנוי. ניסיון חינם — בלי כרטיס אשראי.</p>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="prose-grid">
+        <article class="prose-card">
+          <h2>איך בוחרים</h2>
+          <p>ההבדל בין קלאסי לפרימיום הוא בעיקר בכמות הקבצים ובזמן השמירה. ככל שיותר אורחים מצלמים, עולים יותר קבצים.</p>
+          <p>קלאסי מתאים לאירוע בינוני. פרימיום מתאים לאירוע גדול, או כשהאלבום צריך להישמר כשנה.</p>
+        </article>
+        <article class="prose-card">
+          <h2>מה כלול במסלול בתשלום</h2>
+          <p>אלבום חי שאפשר להקרין על מסך באולם, כרטיס QR מעוצב לשולחנות, הורדה של כל הקבצים בסוף האירוע, ובדיקה אוטומטית של תמונות לתוכן לא הולם. הבדיקה חלה על תמונות בלבד, לא על סרטונים.</p>
+          <p>מסלול הניסיון מוגבל ל-10 קבצים ול-48 שעות. הוא לבדיקה, לא לאירוע מלא.</p>
+        </article>
+        <article class="prose-card">
+          <h2>אחרי האירוע</h2>
+          <p>בסוף האירוע מורידים את כל הקבצים. בקלאסי האירוע נשמר כ-6 חודשים, ובפרימיום כשנה.</p>
+          <p>אין דמי מנוי. משלמים פעם אחת על האירוע.</p>
+        </article>
+        <article class="prose-card">
+          <h2>והצלם</h2>
+          <p>אלבום דיגיטלי שיתופי הוא תוספת לצלם המקצועי, לא תחליף. הצלם מתעד את מה שתכננתם, והאורחים מתעדים את השאר.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+  <section id="pricing-faq">
+    <div class="wrap">
+      <p class="sec-kicker">שאלות על המחיר</p>
+      <h2 class="sec-title">לפני שסוגרים מסלול.</h2>
+      <FaqList items={faqs} />
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <nav class="prose-card" aria-label="עמודים קשורים">
+        <h2>עוד ב-SnapShare</h2>
+        <ul>
+          {page.data.internalLinks.filter((link) => link.slug !== "/order").map((link) => (
+            <li><a href={appPath(link.slug)}><Rich text={link.anchor} /></a></li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </section>
+  <section class="final">
+    <div class="wrap">
+      <h2>מתחילים בחינם.</h2>
+      <p>בלי כרטיס אשראי. כשתהיו מוכנים לאירוע עצמו, תבחרו קלאסי או פרימיום.</p>
+      <a class="btn btn-on-dark" href={appPath("/order?subscription=demo")}>נסו בחינם</a>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .prose-card ul { margin-top: 12px; padding-inline-start: 1.1rem; }
+  .prose-card a { color: inherit; font-weight: 800; }
+</style>

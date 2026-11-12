@@ -1,3 +1,4 @@
+import { installReveal } from "@snapshare/design/reveal";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Guard from "@/helpers/guard";
 import { isWhatsAppEnabled } from "@/helpers/features";
@@ -6,7 +7,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "home",
-    component: () => import("@/views/HomeView.vue"),
+    component: () => import("@/views/MarketingRedirect.vue"),
   },
   {
     path: "/login",
@@ -54,6 +55,21 @@ const routes: Array<RouteRecordRaw> = [
     path: "/contact-us",
     name: "contact",
     component: () => import("@/views/ContactView.vue"),
+  },
+  {
+    path: "/qr-cards",
+    name: "qrGallery",
+    component: () => import("@/views/QrGalleryView.vue"),
+  },
+  {
+    path: "/preview/host-screen",
+    name: "previewHost",
+    component: () => import("@/views/EventGalleryFullScreenView.vue"),
+  },
+  {
+    path: "/preview/moderation",
+    name: "previewModeration",
+    component: () => import("@/views/EventModerationView.vue"),
   },
   {
     path: "/order",
@@ -130,6 +146,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/EventAssetsView.vue"),
       },
       {
+        path: "moderation",
+        name: "eventModeration",
+        component: () => import("../views/EventModerationView.vue"),
+      },
+      {
         path: "qr",
         name: "eventQRCard",
         component: () => import("../views/EventQRCardView.vue"),
@@ -171,7 +192,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/:path(.*)*",
     name: "notFound",
-    component: () => import("@/views/HomeView.vue"),
+    component: () => import("@/views/NotFoundView.vue"),
   },
 ];
 
@@ -206,6 +227,10 @@ const router = createRouter({
 
     return { top: 0 };
   },
+});
+
+router.afterEach(() => {
+  installReveal();
 });
 
 export default router;

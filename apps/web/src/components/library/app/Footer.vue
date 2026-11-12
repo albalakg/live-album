@@ -19,24 +19,27 @@
             </div>
             <div class="footer-links display--flex justify--space-between">
                 <div>
-                    <router-link to="/#features">
-                        <p>מה מקבלים</p>
-                    </router-link>
-                    <router-link to="/#how-it-works">
+                    <a :href="marketing('/#events')">
+                        <p>לכל אירוע</p>
+                    </a>
+                    <a :href="marketing('/#how')">
                         <p>איך זה עובד</p>
-                    </router-link>
-                    <router-link to="/#how-it-looks">
-                        <p>איך זה נראה</p>
-                    </router-link>
-                    <router-link to="/#testimonials">
-                        <p>המלצות</p>
-                    </router-link>
-                    <router-link to="/#pricing">
-                        <p>המסלולים שלנו</p>
+                    </a>
+                    <a :href="marketing('/#album')">
+                        <p>האלבום החי</p>
+                    </a>
+                    <a :href="marketing('/pricing')">
+                        <p>מחירים</p>
+                    </a>
+                    <a :href="marketing('/faq')">
+                        <p>שאלות</p>
+                    </a>
+                    <router-link to="/qr-cards">
+                        <p>כרטיסי QR</p>
                     </router-link>
                 </div>
                 <div>
-                    <router-link to="/contact">
+                    <router-link to="/contact-us">
                         <p>צור קשר</p>
                     </router-link>
                     <router-link to="/order">
@@ -82,6 +85,7 @@
 </template>
 
 <script lang="ts">
+import { marketingHref } from '@/helpers/marketingUrl';
 import { defineComponent } from 'vue';
 import MainCube from '@/components/library/background/MainCube.vue';
 
@@ -116,8 +120,10 @@ export default defineComponent({
     },
 
     methods: {
-
-    }
+        marketing(path: string) {
+            return marketingHref(path);
+        },
+    },
 });
 </script>
 

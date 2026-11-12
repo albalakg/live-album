@@ -23,6 +23,7 @@ import {
 } from "@/helpers/types";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@kyvg/vue3-notification";
+import { buildSampleAlbum } from "@/helpers/previewAlbum";
 
 function asAssetArray(assets: unknown): IEventAsset[] {
   if (Array.isArray(assets)) {
@@ -94,6 +95,7 @@ const EventModule = {
       showBlockedAssets: false,
     },
     galleryAudience: "owner",
+    preview: false,
   } as IEventModuleState,
 
   getters: {
@@ -231,7 +233,22 @@ const EventModule = {
     },
 
     hasActiveEvent(state: IEventModuleState): boolean {
+      if (state.preview) return false;
       return state.event && state.event.status !== StatusEnum.INACTIVE;
+    },
+
+    isPreview(state: IEventModuleState): boolean {
+      return Boolean(state.preview);
+    },
+
+    manualPhotoApproval(state: IEventModuleState): boolean {
+      return Boolean(state.event?.config?.manual_photo_approval);
+    },
+
+    getPendingAssets(state: IEventModuleState): IEventAsset[] {
+      return filterAssetsByModeration(state.event?.assets ?? [], [
+        AssetModerationStatusEnum.PENDING,
+      ]);
     },
 
     getManagedAssetsMode(
@@ -283,6 +300,16 @@ const EventModule = {
       audience: EventGalleryAudience
     ) {
       state.galleryAudience = audience;
+    },
+
+    LOAD_SAMPLE(
+      state: IEventModuleState,
+      payload: { event: IEvent; gallery: IEventAsset[]; audience: EventGalleryAudience }
+    ) {
+      state.preview = true;
+      state.galleryAudience = payload.audience;
+      state.event = payload.event;
+      state.gallery.assets = payload.gallery;
     },
 
     SET_EVENT(state: IEventModuleState, event: IEvent | null) {
@@ -608,6 +635,11 @@ const EventModule = {
     ) {
       return new Promise((resolve) => {
         const queryString = guestToken ? "?token=" + guestToken : "";
+        if (!context.state.event?.id || context.state.preview) {
+          resolve(null);
+          return;
+        }
+
         const url = queryString
           ? `events/${context.state.event.id}/gallery-guests-assets${queryString}`
           : `events/${context.state.event.id}/gallery-assets`;
@@ -1085,6 +1117,83 @@ const EventModule = {
       showBlockedAssets: boolean
     ) {
       context.commit("SET_SHOW_BLOCKED_GALLERY_ASSETS", showBlockedAssets);
+    },
+
+    loadSampleAlbum(
+      context: { commit: (mutation: string, payload?: unknown) => void },
+      audience: "guest" | "owner" = "guest"
+    ) {
+      const sample = buildSampleAlbum();
+      context.commit("LOAD_SAMPLE", {
+        event: sample.event,
+        gallery: sample.gallery,
+        audience,
+      });
+      return Promise.resolve(sample);
+    },
+
+    approveAssets(
+      context: {
+        state: IEventModuleState;
+        commit: (mutation: string, payload?: unknown) => void;
+        dispatch: (action: string, payload?: unknown) => Promise<unknown>;
+      },
+      assetIds: number[]
+    ) {
+      if (context.state.preview) {
+        context.commit("UNBLOCK_FILES", assetIds);
+        notify({ text: "התמונה אושרה ותופיע באלבום", type: "success", duration: 4000 });
+        return Promise.resolve(true);
+      }
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/assets/unblock`, { assets: assetIds })
+          .then(async (res) => {
+            notify({ text: "התמונה אושרה ותופיע באלבום", type: "success", duration: 4000 });
+            context.commit("UNBLOCK_FILES", assetIds);
+            await context.dispatch("getEventGalleryAssets");
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, "מצטערים אך הייתה תקלה באישור התמונה"),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    hideAssetIds(
+      context: {
+        state: IEventModuleState;
+        commit: (mutation: string, payload?: unknown) => void;
+      },
+      assetIds: number[]
+    ) {
+      if (context.state.preview) {
+        context.commit("HIDE_FILES", assetIds);
+        notify({ text: "התצוגה באלבום עודכנה", type: "success", duration: 4000 });
+        return Promise.resolve(true);
+      }
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/assets/hide`, { assets: assetIds })
+          .then((res) => {
+            notify({ text: "התצוגה באלבום עודכנה", type: "success", duration: 4000 });
+            context.commit("HIDE_FILES", assetIds);
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, "מצטערים אך הייתה תקלה בהסתרת התמונה"),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
     },
   },
 

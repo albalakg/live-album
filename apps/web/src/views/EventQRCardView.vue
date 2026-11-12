@@ -10,6 +10,7 @@
         <p class="text--center">מומלץ להוריד מהמחשב</p>
       </template>
       <br />
+      <QrCardGallery selectable :selected="selectedQR" @select="onSelectDesign" />
       <MainSelect
         :options="QROptions"
         v-model="selectedQR"
@@ -67,6 +68,7 @@ import MainButton from "@/components/library/buttons/MainButton.vue";
 import MainSelect from "@/components/library/inputs/MainSelect.vue";
 import MainInput from "@/components/library/inputs/MainInput.vue";
 import EventQR from "@/components/event/EventQR.vue";
+import QrCardGallery from "@/components/event/QrCardGallery.vue";
 import {
   DEFAULT_QR_CARD_DESIGN,
   DEFAULT_QR_CARD_TEXT,
@@ -82,6 +84,7 @@ export default defineComponent({
     MainSelect,
     MainInput,
     EventQR,
+    QrCardGallery,
   },
 
   data() {
@@ -104,6 +107,10 @@ export default defineComponent({
 
   created() {
     this.setForm();
+    const design = this.$route.query.design;
+    if (typeof design === "string" && isValidQrCardDesign(design)) {
+      this.selectedQR = design;
+    }
   },
 
   computed: {
@@ -128,6 +135,10 @@ export default defineComponent({
   },
 
   methods: {
+    onSelectDesign(file: string) {
+      this.selectedQR = file;
+    },
+
     setForm() {
       const savedDesign = this.event?.config?.qr_card_design;
       this.selectedQR = isValidQrCardDesign(savedDesign)

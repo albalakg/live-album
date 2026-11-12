@@ -6,7 +6,7 @@
             <div class="album" :class="{
                 'brs--medium': rounded,
                 'hide-menu': hideMenu
-            }" v-for="(asset, index) in sessionAsset" :key="index">
+            }" v-for="(asset, index) in sessionAsset" :key="asset.id || index">
                 <EventGalleryMediaFrame>
                     <template v-if="asset.type === 'image'">
                         <img :src="asset.fullPath" alt="image" class="album-asset" />
@@ -215,5 +215,15 @@ export default defineComponent({
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    animation: snapshare-live-in 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes snapshare-live-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .album-asset { animation: none; }
 }
 </style>

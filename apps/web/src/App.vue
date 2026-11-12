@@ -1,5 +1,6 @@
 <template>
   <notifications position="top right" />
+  <HostAssist v-if="!isFullScreen" />
   <router-view v-if="isFullScreen" />
   <div class="app-wrapper" v-else>
     <template v-if="$bp.isMobile">
@@ -26,6 +27,7 @@ import MobileBar from "@/components/library/app/MobileBar.vue";
 import AppMenu from "@/components/library/app/AppMenu.vue";
 import Footer from "@/components/library/app/Footer.vue";
 import LoadingPage from "@/components/library/app/LoadingPage.vue";
+import HostAssist from "@/components/library/app/HostAssist.vue";
 import { defineComponent } from "vue";
 import Auth from "@/helpers/Auth";
 
@@ -38,6 +40,7 @@ export default defineComponent({
     AppMenu,
     Footer,
     LoadingPage,
+    HostAssist,
   },
 
   created() {
@@ -53,16 +56,12 @@ export default defineComponent({
 
   computed: {
     isFullScreen(): boolean {
-      if (this.$route.path.includes("/event/trivia/")) {
-        return true;
-      }
-
+      const path = this.$route.path;
+      if (path.includes("/event/trivia/")) return true;
+      if (path.includes("open-album") || path.includes("open-gallery")) return true;
+      if (path.startsWith("/preview/")) return true;
       for (let index = 0; index < this.links.length; index++) {
-        if (this.$route.path.includes(this.links[index])) {
-          {
-            return true;
-          }
-        }
+        if (path.includes(this.links[index])) return true;
       }
       return false;
     },
@@ -90,7 +89,7 @@ export default defineComponent({
   padding-top: 99px;
 
   @media only screen and (max-width: 600px) {
-    padding-top: 0px;
+    padding-top: 72px;
   }
 }
 
