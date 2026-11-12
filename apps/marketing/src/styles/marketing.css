@@ -801,6 +801,11 @@
       .guest-lead { padding-bottom: 28px; }
       .event-chips { justify-content: center; }
     }
+    .nav .wrap, .nav-links { flex-wrap: nowrap; }
+    .nav-links a { white-space: nowrap; padding: 8px 12px; }
+    @media (max-width: 980px) {
+      .nav-links { display: none; }
+    }
     @media (max-width: 640px) {
       body { padding-bottom: 24px; }
       .wa { bottom: 14px; }

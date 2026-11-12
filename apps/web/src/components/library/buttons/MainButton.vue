@@ -103,9 +103,17 @@ export default defineComponent({
 <style lang="scss" scoped>
 .main-button {
     width: 100%;
-    transition: .3s scale linear;
+    transition: transform .2s ease;
     z-index: 2;
     position: relative;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+}
+.main-button .inner-button {
+    background: linear-gradient(135deg, #dc5b66, #c9a36a) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 10px 28px rgba(220, 91, 102, 0.28);
 }
 
 .main-button:focus {

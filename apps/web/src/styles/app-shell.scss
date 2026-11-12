@@ -1,3 +1,12 @@
+/* Vue pages are not marketing sections; keep the mock type and chrome. */
+.app-content section {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.app-content .moderation {
+  padding: 28px 20px 48px;
+}
+
 /* Shared chrome for the Vue app. Marketing pages live in Astro. */
 body, #app {
   background: var(--ivory, #f3eee6);
@@ -60,6 +69,14 @@ body, #app {
 .login-details.bg--pink,
 .contact-content.bg--pink {
   background: var(--espresso, #12100e) !important;
+}
+.login-details,
+.login-details a,
+.login-details small,
+.login-details h3,
+.login-details h4,
+.login-details p {
+  color: #f7f2eb !important;
 }
 
 .sidebar.bg--gray,

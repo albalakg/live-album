@@ -38,7 +38,16 @@
         :class="{ 'is-selected': selectable && selected === card.file }"
         @click="choose(card.file)"
       >
-        <img :src="`/assets/${card.file}`" :alt="card.label" />
+        <span class="qr-frame">
+          <img :src="`/assets/${card.file}`" alt="" />
+          <span class="qr-preview">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <rect width="64" height="64" fill="#fff"/>
+              <path fill="#161310" d="M6 6h20v20H6zm6 6v8h8v-8zM38 6h20v20H38zm6 6v8h8v-8zM6 38h20v20H6zm6 6v8h8v-8zM38 38h6v6h-6zm10 0h10v6H48zm-10 10h6v10h-6zm10 4h10v6H48z"/>
+            </svg>
+            <span>סרקו, צלמו ותעלו</span>
+          </span>
+        </span>
         <span class="qr-card-label">{{ card.label }}</span>
         <span class="qr-card-meta">{{ styleLabel(card.style) }}</span>
       </button>
@@ -125,7 +134,21 @@ export default defineComponent({
   font-family: inherit;
 }
 .qr-card.is-selected { border-color: var(--rose, #dc5b66); box-shadow: 0 0 0 2px rgba(220, 91, 102, 0.25); }
-.qr-card img { width: 100%; height: 210px; object-fit: cover; border-radius: 10px; background: #eee; }
+.qr-frame { position: relative; display: block; border-radius: 12px; overflow: hidden; background: #f3eee6; }
+.qr-frame img { width: 100%; height: 230px; object-fit: cover; display: block; }
+.qr-preview {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 22%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.qr-preview svg { width: 72px; height: 72px; background: #fff; border-radius: 6px; }
+.qr-preview span { font-size: 0.72rem; font-weight: 800; color: #161310; line-height: 1.3; }
 .qr-card-label { display: block; margin-top: 8px; font-weight: 800; }
 .qr-card-meta { display: block; color: var(--muted, #5e564e); font-size: 0.85rem; }
 .qr-empty { color: var(--muted, #5e564e); }

@@ -50,11 +50,11 @@
             SnapShare
           </h3>
           <br>
-          <h4 class="title--large text--dark">
+          <h4 class="title--large text--white">
             אין לך עדיין חשבון?
           </h4>
           <br>
-          <p class="title--small text--dark">
+          <p class="title--small text--white">
             <span>
               <router-link to="/signup">לחץ כאן</router-link>
             </span> לפתיחת חשבון

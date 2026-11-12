@@ -4,6 +4,21 @@
     :class="{ 'has-guest-cta': showGuestCta }"
     v-if="event"
   >
+    <header class="stage-bar">
+      <p class="stage-live"><i></i> LIVE</p>
+      <h1>{{ event.name }}</h1>
+      <router-link v-if="showGuestCta" class="stage-link" :to="`/event/open-gallery/${event.path}`">גלריה</router-link>
+      <button
+        v-else
+        class="stage-gear"
+        type="button"
+        aria-label="הגדרות מסך"
+        :aria-expanded="settingsOpen"
+        @click="settingsOpen = !settingsOpen"
+      >
+        הגדרות
+      </button>
+    </header>
     <div class="stage-screen">
       <EventTriviaLiveStage v-if="triviaPhase === 'live' && triviaScreen" :screen="triviaScreen" />
       <EventTriviaPodium v-else-if="triviaPhase === 'results' && triviaScreen" :screen="triviaScreen" />
@@ -16,12 +31,6 @@
       <component v-else class="slideshow" :is="selectedAlbum"></component>
     </div>
 
-    <header class="stage-title">
-      <p class="stage-live"><i></i> LIVE</p>
-      <h1>{{ event.name }}</h1>
-      <router-link v-if="showGuestCta" class="stage-link" :to="`/event/open-gallery/${event.path}`">גלריה</router-link>
-    </header>
-
     <p v-if="arrival" class="stage-new">תמונה חדשה</p>
 
     <aside v-if="triviaPhase === 'photos'" class="stage-card" aria-label="כרטיס QR">
@@ -29,16 +38,6 @@
       <p>סרקו והעלו</p>
     </aside>
 
-    <button
-      v-if="!showGuestCta"
-      class="stage-gear"
-      type="button"
-      aria-label="הגדרות מסך"
-      :aria-expanded="settingsOpen"
-      @click="settingsOpen = !settingsOpen"
-    >
-      הגדרות
-    </button>
     <aside v-if="settingsOpen && !showGuestCta" class="stage-panel">
       <p>תצוגה</p>
       <button type="button" :class="{ on: stageMode === 'slideshow' }" @click="stageMode = 'slideshow'">מצגת</button>
@@ -299,8 +298,34 @@ export default defineComponent({
   color: #f7f2eb;
   font-family: var(--font, Heebo, sans-serif);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-.stage-screen, .slideshow, .mosaic { position: absolute; inset: 0; }
+.stage-bar {
+  flex: none;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 22px;
+  background: #12100e;
+  z-index: 6;
+}
+.stage-bar h1 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #f7f2eb;
+}
+.stage-brand { color: #c9a36a; font-family: Outfit, Heebo, sans-serif; font-weight: 800; }
+.stage-screen { position: relative; flex: 1; min-height: 0; }
+.slideshow, .mosaic { position: absolute; inset: 0; }
 .slideshow, .stage-screen :deep(.gallery), .stage-screen :deep(.album-wrapper), .stage-screen :deep(.album) {
   width: 100%;
   height: 100%;
@@ -326,13 +351,7 @@ export default defineComponent({
 }
 .mosaic figure { margin: 0; overflow: hidden; border-radius: 10px; }
 .mosaic img, .mosaic video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.stage-title {
-  position: absolute;
-  top: 22px;
-  right: 22px;
-  z-index: 5;
-  text-align: right;
-}
+.stage-title { display: none; }
 .stage-live {
   display: inline-flex;
   align-items: center;
@@ -377,10 +396,7 @@ export default defineComponent({
 .stage-card p { margin: 8px 0 0; font-weight: 900; }
 .stage.has-guest-cta .stage-card { bottom: 108px; }
 .stage-gear {
-  position: absolute;
-  top: 22px;
-  left: 22px;
-  z-index: 6;
+  position: static;
   border: 1px solid rgba(255,255,255,.2);
   background: rgba(18,16,14,.55);
   color: #fff;
@@ -392,7 +408,7 @@ export default defineComponent({
 }
 .stage-panel {
   position: absolute;
-  top: 68px;
+  top: 84px;
   left: 22px;
   z-index: 6;
   width: 220px;

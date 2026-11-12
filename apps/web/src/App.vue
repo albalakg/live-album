@@ -89,7 +89,7 @@ export default defineComponent({
   padding-top: 99px;
 
   @media only screen and (max-width: 600px) {
-    padding-top: 0px;
+    padding-top: 72px;
   }
 }
 

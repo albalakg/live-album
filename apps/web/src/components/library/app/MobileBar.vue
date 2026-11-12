@@ -205,20 +205,20 @@ export default defineComponent({
 <style lang="scss" scoped>
 .mobile-bar {
     box-sizing: border-box;
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    height: 72px;
     width: 100%;
-    padding: 0 20px env(safe-area-inset-bottom, 0px);
+    padding: 0 16px;
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
-    background-color: var(--espresso, #12100e);
+    background: rgba(243, 238, 230, 0.96);
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 10000;
-    border-top: 2px solid var(--lightPink);
-    transform: translateZ(0);
-    will-change: top;
+    border-bottom: 1px solid rgba(22, 19, 16, 0.08);
+    transform: none;
+    will-change: auto;
 
     .mobile-bar-icon {
         width: 31px;

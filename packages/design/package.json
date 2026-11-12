@@ -9,6 +9,7 @@
     "./analytics": "./src/analytics.js",
     "./contact": "./src/contact.js",
     "./tokens.css": "./src/tokens.css",
+    "./mock.css": "./src/mock.css",
     "./EventTypeSwitcher.vue": "./src/components/EventTypeSwitcher.vue",
     "./HowItWorksDemo.vue": "./src/components/HowItWorksDemo.vue",
     "./LiveAlbumDemo.vue": "./src/components/LiveAlbumDemo.vue"

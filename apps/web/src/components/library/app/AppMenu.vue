@@ -1,6 +1,6 @@
 <template>
   <transition name="slide-menu">
-    <div v-if="isMenuOpen" class="mobile-menu bg--pink">
+    <div v-if="isMenuOpen" class="mobile-menu">
       <div class="text--left menu-header">
         <router-link to="/#header" @click="toggleMenu()">
           <span class="title--large text--white"> SnapShare </span>
@@ -198,15 +198,12 @@ export default defineComponent({
 <style lang="scss" scoped>
 .mobile-menu {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: calc(100% - 4rem);
-  height: 100vh;
-  min-height: fit-content;
-  // background-color: white;
+  inset: 72px 0 0 0;
+  width: 100%;
+  height: auto;
+  background: rgba(243, 238, 230, 0.98);
   z-index: 1000;
-  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -224,9 +221,12 @@ export default defineComponent({
 
 .menu-link {
   display: flex;
-  font-size: 1.3rem;
+  font-size: 1.35rem;
+  font-weight: 800;
   text-decoration: none;
-  color: #222;
+  color: #161310;
+  padding: 14px 4px;
+  border-bottom: 1px solid rgba(22, 19, 16, 0.11);
 
   span {
     font-weight: bold;

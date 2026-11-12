@@ -173,6 +173,7 @@ export default defineComponent({
   height: auto;
   display: block;
   object-fit: cover;
+  transform: scale(1.08);
 }
 .lightbox-asset {
   max-width: min(92vw, 1100px);
