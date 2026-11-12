@@ -1,0 +1,55 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { breadcrumbNode, graph, organizationNode } from "../../lib/schema";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts
+    .filter((post) => !post.data.draft)
+    .map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const path = `/blog/${post.id}`;
+---
+<BaseLayout
+  title={`${post.data.title} | SnapShare`}
+  description={post.data.description}
+  path={path}
+  schema={graph([
+    organizationNode(),
+    {
+      "@type": "BlogPosting",
+      headline: post.data.title,
+      datePublished: post.data.pubDate.toISOString(),
+      description: post.data.description,
+      inLanguage: "he-IL",
+      author: { "@id": "https://snapshare-live.com/#organization" },
+      mainEntityOfPage: `https://snapshare-live.com${path}`,
+    },
+    breadcrumbNode([
+      { name: "SnapShare", path: "/" },
+      { name: "בלוג", path: "/blog" },
+      { name: post.data.title, path },
+    ]),
+  ])}
+>
+  <section>
+    <div class="wrap landing">
+      <p class="sec-kicker"><a href="/blog">בלוג</a></p>
+      <h1 class="sec-title">{post.data.title}</h1>
+      <p class="sec-sub"><time datetime={post.data.pubDate.toISOString().slice(0, 10)}>{post.data.pubDate.toLocaleDateString("he-IL")}</time></p>
+      <div class="post-body">
+        <Content />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .post-body { max-width: 46rem; margin-top: 24px; }
+  .post-body :global(p), .post-body :global(li) { color: var(--muted); margin: 10px 0; }
+  .post-body :global(h2) { margin-top: 28px; font-weight: 900; }
+  .post-body :global(a) { color: var(--ink); font-weight: 700; }
+</style>

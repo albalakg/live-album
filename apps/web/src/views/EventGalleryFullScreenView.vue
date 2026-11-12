@@ -1,6 +1,7 @@
 <template>
   <div
     class="full-screen-gallery bg--dark"
+    :class="{ 'has-guest-cta': showGuestCta }"
     v-if="event"
     @mousemove="onMouseMove"
   >
@@ -12,7 +13,7 @@
     >
       <div>
         <label
-          v-if="hasBlockedAssets"
+          v-if="hasBlockedAssets && !showGuestCta"
           class="blocked-toggle pointer display--flex align--center"
         >
           <input
@@ -27,12 +28,15 @@
         </strong>
       </div>
       <div>
-        <h1 class="title--large text--pink text--center">
+        <h1 class="title--large screen-name text--center">
           {{ event.name }}
         </h1>
       </div>
       <div>
-        <router-link to="/event/gallery">
+        <router-link v-if="showGuestCta" :to="`/event/open-gallery/${event.path}`">
+          <MainIcon icon="grid_view" />
+        </router-link>
+        <router-link v-else to="/event/gallery">
           <MainIcon icon="close" />
         </router-link>
       </div>
@@ -46,8 +50,10 @@
         class="qr-code"
         :background="background"
       />
-      <strong class="logo text--pink">SnapShare</strong>
+      <strong class="logo">SnapShare</strong>
+      <p v-if="arrival" class="live-arrival">תמונה חדשה עלתה</p>
     </div>
+    <GuestAlbumCta v-if="showGuestCta" />
   </div>
 </template>
 
@@ -63,6 +69,7 @@ import EventGalleryRandom from "@/components/event/EventGalleryRandom.vue";
 import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
 import EventTriviaLiveStage from "@/components/event/EventTriviaLiveStage.vue";
 import EventTriviaPodium from "@/components/event/EventTriviaPodium.vue";
+import GuestAlbumCta from "@/components/event/GuestAlbumCta.vue";
 
 const HEADER_HIDE_DELAY_MS = 3000;
 
@@ -78,6 +85,7 @@ export default defineComponent({
     EventGallerySplitScreen,
     EventTriviaLiveStage,
     EventTriviaPodium,
+    GuestAlbumCta,
   },
 
   data() {
@@ -90,10 +98,23 @@ export default defineComponent({
       hideHeaderTimeoutId: null as ReturnType<typeof setTimeout> | null,
       triviaScreen: null as any,
       triviaPollIntervalId: null as ReturnType<typeof setInterval> | null,
+      arrival: false,
+      seenIds: new Set<number>(),
+      seenReady: false,
+      arrivalTimer: null as ReturnType<typeof setTimeout> | null,
     };
   },
 
-  created() {
+  async created() {
+    if (this.$route.name === "previewHost") {
+      await this.$store.dispatch("event/loadSampleAlbum", "owner");
+      this.scheduleHideHeader();
+      return;
+    }
+    if (this.$store.getters["event/isPreview"]) {
+      this.scheduleHideHeader();
+      return;
+    }
     this.$store.dispatch("event/getEventGalleryAssets");
     this.$store.dispatch("event/getEventAssets");
     this.galleryPollIntervalId = setInterval(() => {
@@ -140,6 +161,36 @@ export default defineComponent({
 
     triviaPhase(): string {
       return this.triviaScreen?.phase || "photos";
+    },
+
+    showGuestCta(): boolean {
+      return this.$route.name === "guestAlbum";
+    },
+
+    liveAssetIds(): number[] {
+      const assets = this.$store.getters["event/getDisplayGalleryAssets"] || [];
+      return assets.map((asset: { id: number }) => asset.id);
+    },
+  },
+
+  watch: {
+    liveAssetIds: {
+      immediate: true,
+      handler(ids: number[]) {
+        if (!this.seenReady) {
+          ids.forEach((id) => this.seenIds.add(id));
+          this.seenReady = true;
+          return;
+        }
+        const fresh = ids.filter((id) => !this.seenIds.has(id));
+        ids.forEach((id) => this.seenIds.add(id));
+        if (!fresh.length) return;
+        this.arrival = true;
+        if (this.arrivalTimer) clearTimeout(this.arrivalTimer);
+        this.arrivalTimer = setTimeout(() => {
+          this.arrival = false;
+        }, 2400);
+      },
     },
   },
 
@@ -219,6 +270,7 @@ export default defineComponent({
       clearInterval(this.triviaPollIntervalId);
       this.triviaPollIntervalId = null;
     }
+    if (this.arrivalTimer) clearTimeout(this.arrivalTimer);
     try {
       if (document.fullscreenElement) {
         document.exitFullscreen();
@@ -232,16 +284,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .full-screen-gallery {
-  position: absolute;
+  position: fixed;
   z-index: 1000;
-  top: 0;
-  right: 0;
-  height: 100vh;
-  min-height: fit-content;
-  width: 100vw;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
 
   .gallery-content {
-    height: 100vh;
+    height: 100%;
     width: 100%;
     margin: auto;
     display: flex;
@@ -250,7 +301,9 @@ export default defineComponent({
 
   .gallery-header {
     position: absolute;
-    width: calc(100% - 60px);
+    left: 0;
+    right: 0;
+    width: auto;
     top: 0;
     height: 70px;
     padding: 0 30px;
@@ -276,10 +329,43 @@ export default defineComponent({
   .logo {
     position: absolute;
     left: 35px;
-    bottom: 10px;
+    bottom: 18px;
     margin: auto;
     text-align: center;
+    color: var(--gold, #c9a36a);
+    font-family: var(--brand, Outfit, sans-serif);
+    letter-spacing: -0.04em;
   }
+
+  .gallery-header {
+    background: rgba(18, 16, 14, 0.88);
+    color: #f7f2eb;
+  }
+
+  .screen-name { color: var(--gold, #c9a36a); font-family: var(--font, Heebo, sans-serif); }
+  .live-arrival {
+    position: absolute;
+    top: 86px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    background: var(--rose, #dc5b66);
+    color: #fff;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-family: var(--font, Heebo, sans-serif);
+  }
+}
+
+.full-screen-gallery {
+  background: var(--espresso, #12100e);
+}
+.full-screen-gallery.has-guest-cta .qr-code {
+  bottom: 108px;
+}
+.full-screen-gallery.has-guest-cta .logo {
+  bottom: 108px;
 }
 
 .blocked-toggle input {

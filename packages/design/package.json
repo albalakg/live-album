@@ -1,0 +1,18 @@
+{
+  "name": "@snapshare/design",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/site.js",
+    "./site": "./src/site.js",
+    "./analytics": "./src/analytics.js",
+    "./tokens.css": "./src/tokens.css",
+    "./EventTypeSwitcher.vue": "./src/components/EventTypeSwitcher.vue",
+    "./HowItWorksDemo.vue": "./src/components/HowItWorksDemo.vue",
+    "./LiveAlbumDemo.vue": "./src/components/LiveAlbumDemo.vue"
+  },
+  "peerDependencies": {
+    "vue": "^3.2.0"
+  }
+}

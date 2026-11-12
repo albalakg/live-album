@@ -100,32 +100,38 @@ export default defineComponent({
         createBaseLinks() {
             this.links = [
                 {
-                    text: 'מה מקבלים',
-                    url: '/#features',
+                    text: 'לכל אירוע',
+                    url: '/#events',
                     color: 'dark',
                     weight: '500'
                 },
                 {
-                    text: 'איך זה נראה',
-                    url: '/#how-it-looks',
+                    text: 'איך זה עובד',
+                    url: '/#how',
                     color: 'dark',
                     weight: '500'
                 },
                 {
-                    text: 'למי זה מתאים',
-                    url: '/#who-is-it-for',
+                    text: 'האלבום החי',
+                    url: '/#album',
                     color: 'dark',
                     weight: '500'
                 },
                 {
-                    text: 'המלצות',
-                    url: '/#testimonials',
+                    text: 'מחירים',
+                    url: '/pricing',
                     color: 'dark',
                     weight: '500'
                 },
                 {
-                    text: 'המסלולים',
-                    url: '/#pricing',
+                    text: 'שאלות',
+                    url: '/faq',
+                    color: 'dark',
+                    weight: '500'
+                },
+                {
+                    text: 'כרטיסי QR',
+                    url: '/qr-cards',
                     color: 'dark',
                     weight: '500'
                 },

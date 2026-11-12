@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqList from "../components/FaqList.astro";
+import { FAQ_ITEMS } from "../data/faq";
+import { faqNode, graph, organizationNode } from "../lib/schema";
+
+const title = "שאלות נפוצות | SnapShare";
+const description =
+  "איך האורחים מעלים תמונות בלי אפליקציה, האם האלבום חי, ואיך מורידים את כל הקבצים בסוף האירוע.";
+---
+<BaseLayout
+  title={title}
+  description={description}
+  path="/faq"
+  schema={graph([organizationNode(), faqNode(FAQ_ITEMS)])}
+>
+  <section id="faq">
+    <div class="wrap">
+      <p class="sec-kicker">שאלות נפוצות</p>
+      <h1 class="sec-title">התשובות הקצרות.</h1>
+      <p class="sec-sub">אותן תשובות שמופיעות בעמוד הבית, במקום אחד שאפשר לשתף.</p>
+      <FaqList items={FAQ_ITEMS} />
+    </div>
+  </section>
+</BaseLayout>

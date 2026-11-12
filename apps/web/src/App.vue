@@ -53,16 +53,12 @@ export default defineComponent({
 
   computed: {
     isFullScreen(): boolean {
-      if (this.$route.path.includes("/event/trivia/")) {
-        return true;
-      }
-
+      const path = this.$route.path;
+      if (path.includes("/event/trivia/")) return true;
+      if (path.includes("open-album") || path.includes("open-gallery")) return true;
+      if (path.startsWith("/preview/")) return true;
       for (let index = 0; index < this.links.length; index++) {
-        if (this.$route.path.includes(this.links[index])) {
-          {
-            return true;
-          }
-        }
+        if (path.includes(this.links[index])) return true;
       }
       return false;
     },

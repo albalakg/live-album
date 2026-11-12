@@ -1,5 +1,13 @@
 import { createApp } from "vue";
+import { installAnalytics } from "@snapshare/design/analytics";
+import { GA4_MEASUREMENT_ID } from "@snapshare/design/site";
+import "@snapshare/design/tokens.css";
 import App from "./App.vue";
+
+installAnalytics({
+  ga4Id: process.env.VUE_APP_GA4_ID || GA4_MEASUREMENT_ID,
+  metaPixelId: process.env.VUE_APP_META_PIXEL_ID || "",
+});
 import router from "./router";
 import store from "./store";
 import Auth from "@/helpers/Auth";

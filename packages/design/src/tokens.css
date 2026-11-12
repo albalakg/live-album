@@ -1,0 +1,44 @@
+:root {
+  --font: "Heebo", "Segoe UI", Tahoma, sans-serif;
+  --brand: "Outfit", "Heebo", sans-serif;
+  --espresso: #12100e;
+  --ivory: #f3eee6;
+  --gold: #c9a36a;
+  --rose: #dc5b66;
+  --bg: #f3eee6;
+  --bg-2: #e8e0d4;
+  --paper: #fffcfa;
+  --ink: #161310;
+  --muted: #5e564e;
+  --faint: #8a8278;
+  --line: rgba(22, 19, 16, 0.11);
+  --deep: #12100e;
+  --deep-2: #1c1814;
+  --live: #2fbe6a;
+  --whatsapp: #1fad4f;
+  --shadow: 0 24px 60px rgba(18, 16, 14, 0.16);
+  --shadow-sm: 0 8px 24px rgba(18, 16, 14, 0.08);
+  --accent: #c9a36a;
+  --accent-2: #dc5b66;
+  --accent-soft: rgba(201, 163, 106, 0.16);
+  --glow: rgba(201, 163, 106, 0.45);
+  --mood: #1a1410;
+  --nav: 72px;
+  --max: 1160px;
+}
+
+@property --accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #c9a36a;
+}
+@property --accent-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #dc5b66;
+}
+@property --glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgba(201, 163, 106, 0.45);
+}

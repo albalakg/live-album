@@ -19,20 +19,23 @@
             </div>
             <div class="footer-links display--flex justify--space-between">
                 <div>
-                    <router-link to="/#features">
-                        <p>מה מקבלים</p>
+                    <router-link to="/#events">
+                        <p>לכל אירוע</p>
                     </router-link>
-                    <router-link to="/#how-it-works">
+                    <router-link to="/#how">
                         <p>איך זה עובד</p>
                     </router-link>
-                    <router-link to="/#how-it-looks">
-                        <p>איך זה נראה</p>
+                    <router-link to="/#album">
+                        <p>האלבום החי</p>
                     </router-link>
-                    <router-link to="/#testimonials">
-                        <p>המלצות</p>
+                    <router-link to="/pricing">
+                        <p>מחירים</p>
                     </router-link>
-                    <router-link to="/#pricing">
-                        <p>המסלולים שלנו</p>
+                    <router-link to="/faq">
+                        <p>שאלות</p>
+                    </router-link>
+                    <router-link to="/qr-cards">
+                        <p>כרטיסי QR</p>
                     </router-link>
                 </div>
                 <div>

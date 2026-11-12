@@ -1,0 +1,34 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { organizationNode, websiteNode, graph } from "../../lib/schema";
+
+const posts = (await getCollection("blog"))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const title = "בלוג | SnapShare";
+const description = "מדריכים קצרים על אלבום חי, QR והקרנה באירוע. בלי מספרים מומצאים.";
+---
+<BaseLayout title={title} description={description} path="/blog" schema={graph([organizationNode(), websiteNode()])}>
+  <section>
+    <div class="wrap">
+      <p class="sec-kicker">בלוג</p>
+      <h1 class="sec-title">מהשטח, בלי רעש.</h1>
+      <p class="sec-sub">האוסף מוכן לעוד כתבות. מה שמופיע כאן הוא תוכן אמיתי על המוצר, לא המלצות מומצאות.</p>
+      <div class="blog-list">
+        {posts.map((post) => (
+          <article class="feat">
+            <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
+            <p>{post.data.description}</p>
+            <p><time datetime={post.data.pubDate.toISOString().slice(0, 10)}>{post.data.pubDate.toLocaleDateString("he-IL")}</time></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .blog-list { display: grid; gap: 16px; margin-top: 28px; }
+  .blog-list a { color: inherit; }
+</style>

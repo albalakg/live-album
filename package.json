@@ -4,8 +4,11 @@
   "scripts": {
     "dev": "pnpm --parallel --filter @snapshare/web --filter @snapshare/api dev",
     "dev:web": "pnpm --filter @snapshare/web dev",
+    "dev:marketing": "pnpm --filter @snapshare/marketing dev",
     "dev:api": "pnpm --filter @snapshare/api dev",
     "build:web": "pnpm --filter @snapshare/web build",
+    "build:marketing": "pnpm --filter @snapshare/marketing build",
+    "test": "node scripts/phase1-check.mjs",
     "install:api": "composer install --working-dir=apps/api"
   }
 }

@@ -56,6 +56,21 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/ContactView.vue"),
   },
   {
+    path: "/qr-cards",
+    name: "qrGallery",
+    component: () => import("@/views/QrGalleryView.vue"),
+  },
+  {
+    path: "/preview/host-screen",
+    name: "previewHost",
+    component: () => import("@/views/EventGalleryFullScreenView.vue"),
+  },
+  {
+    path: "/preview/moderation",
+    name: "previewModeration",
+    component: () => import("@/views/EventModerationView.vue"),
+  },
+  {
     path: "/order",
     name: "order",
     component: () => import("@/views/OrderView.vue"),
@@ -128,6 +143,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "assets",
         name: "eventAssets",
         component: () => import("../views/EventAssetsView.vue"),
+      },
+      {
+        path: "moderation",
+        name: "eventModeration",
+        component: () => import("../views/EventModerationView.vue"),
       },
       {
         path: "qr",

@@ -1,0 +1,71 @@
+---
+import "../styles/marketing.css";
+import "@snapshare/design/tokens.css";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import WhatsApp from "../components/WhatsApp.astro";
+import { analyticsBootstrapSource } from "@snapshare/design/analytics";
+import { GA4_MEASUREMENT_ID, SITE_ORIGIN } from "@snapshare/design/site";
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  ogImage?: string;
+  schema?: Record<string, unknown>;
+  robots?: string;
+}
+
+const {
+  title,
+  description,
+  path,
+  ogImage = "/media/photo-night.jpg",
+  schema,
+  robots = "index, follow",
+} = Astro.props;
+
+const canonicalPath = path === "/" ? "/" : path.replace(/\/$/, "");
+const canonical = `${SITE_ORIGIN}${canonicalPath}`;
+const image = ogImage.startsWith("http") ? ogImage : `${SITE_ORIGIN}${ogImage}`;
+const ga4Id = import.meta.env.PUBLIC_GA4_ID || GA4_MEASUREMENT_ID;
+const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || "";
+const analytics = analyticsBootstrapSource({ ga4Id, metaPixelId });
+---
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#12100E" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="he_IL" />
+    <meta property="og:site_name" content="SnapShare" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script is:inline set:html={analytics}></script>
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+  </head>
+  <body data-event="wedding">
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <WhatsApp />
+  </body>
+</html>

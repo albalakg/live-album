@@ -1,0 +1,51 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PricingCards from "../components/PricingCards.astro";
+import LandingArticle from "../components/LandingArticle.astro";
+import { applyPendingClaims } from "../lib/pendingClaims";
+import { breadcrumbNode, faqNode, graph, organizationNode, productNode } from "../lib/schema";
+
+const pages = await getCollection("landing");
+const page = pages.find((entry) => entry.data.slug === "/pricing");
+if (!page) throw new Error("missing pricing landing content");
+
+const faqs = page.data.faq
+  .map((item) => {
+    const answer = applyPendingClaims(item.a);
+    return answer ? { question: item.q, answer } : null;
+  })
+  .filter((item): item is { question: string; answer: string } => item !== null);
+
+const schema = graph([
+  organizationNode(),
+  productNode(),
+  breadcrumbNode([
+    { name: "SnapShare", path: "/" },
+    { name: "מחירים", path: "/pricing" },
+  ]),
+  faqNode(faqs),
+]);
+---
+<BaseLayout
+  title={page.data.title}
+  description={page.data.metaDescription}
+  path="/pricing"
+  schema={schema}
+>
+  <section id="pricing">
+    <div class="wrap">
+      <p class="sec-kicker">המסלולים</p>
+      <h2 class="sec-title">תשלום אחד לאירוע.<br />בלי מנוי.</h2>
+      <p class="sec-sub">ניסיון חינם בלי כרטיס אשראי, קלאסי ₪200, פרימיום ₪300. המסך החי כלול.</p>
+      <PricingCards />
+    </div>
+  </section>
+  <LandingArticle
+    h1={page.data.h1}
+    sections={page.data.sections}
+    faq={page.data.faq}
+    ctaTarget={page.data.ctaTarget}
+    internalLinks={page.data.internalLinks}
+  />
+</BaseLayout>

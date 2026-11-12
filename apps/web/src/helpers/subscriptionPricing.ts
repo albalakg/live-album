@@ -1,3 +1,4 @@
+import { SHOW_LAUNCH_SALE_STRIKETHROUGH } from "@snapshare/design/site";
 import { ISubscriptionPlan } from "@/helpers/interfaces";
 import { SubscriptionTypesEnum } from "@/helpers/enums";
 
@@ -19,6 +20,7 @@ export function discountedAmount(price: number, percent: number): number {
 }
 
 export function showSubscriptionStrikePrice(price: number): boolean {
+  if (!SHOW_LAUNCH_SALE_STRIKETHROUGH) return false;
   return price > 0;
 }
 
