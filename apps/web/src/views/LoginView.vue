@@ -45,24 +45,15 @@
         </div>
       </form>
       <div class="login-details">
-        <div class="text--center">
-          <h3 class="text--white title--x-large">
-            SnapShare
-          </h3>
-          <br>
-          <h4 class="title--large text--white">
-            אין לך עדיין חשבון?
-          </h4>
-          <br>
-          <p class="title--small text--white">
-            <span>
-              <router-link to="/signup">לחץ כאן</router-link>
-            </span> לפתיחת חשבון
-          </p>
-          <small>
+        <div class="login-details-inner">
+          <h3>SnapShare</h3>
+          <h4>אין לך עדיין חשבון?</h4>
+          <p>פתיחת חשבון לוקחת דקה. בלי כרטיס אשראי.</p>
+          <router-link class="panel-cta" to="/signup">פתיחת חשבון</router-link>
+          <p class="panel-note">
             שכחת סיסמה?
             <router-link to="/forgot-password">נאפס אותה כאן</router-link>
-          </small>
+          </p>
         </div>
       </div>
     </div>
@@ -203,7 +194,65 @@ export default defineComponent({
     border-radius: 0;
     background: #12100e;
     color: #f7f2eb;
-    padding: 32px;
+    padding: 36px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-details-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    max-width: 320px;
+  }
+
+  .login-details h3,
+  .login-details h4,
+  .login-details p,
+  .login-details a {
+    color: #f7f2eb !important;
+  }
+
+  .login-details h3 {
+    font-family: Outfit, Heebo, sans-serif;
+    font-weight: 800;
+    font-size: 2.4rem;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  .login-details h4 {
+    font-weight: 800;
+    font-size: 1.35rem;
+    line-height: 1.3;
+  }
+
+  .login-details p {
+    color: rgba(247, 242, 235, 0.86) !important;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .login-details a.panel-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+    padding: 14px 28px;
+    border-radius: 999px;
+    background: #fff;
+    color: #12100e !important;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: none;
+  }
+
+  .panel-note a {
+    font-weight: 800;
+    text-decoration: underline;
   }
 
   :deep(.inner-input) {
@@ -232,7 +281,7 @@ export default defineComponent({
     }
   }
 
-  a {
+  .login-form a {
     font-weight: 700;
     text-decoration: underline;
   }

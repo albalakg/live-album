@@ -1,7 +1,7 @@
 <template>
   <button
     type="button"
-    class="google-sign-in-button pointer shadow--small brs--medium display--flex align--center justify--center"
+    class="google-sign-in-button pointer display--flex align--center justify--center"
     @click="signInWithGoogle()"
   >
     <svg class="google-sign-in-button__icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -61,14 +61,17 @@ export default defineComponent({
 .google-sign-in-button {
   width: 100%;
   gap: 10px;
-  padding: 10px 16px;
+  padding: 14px 18px;
   background: #fff;
-  border: 1px solid #dadce0;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
+  border: 1.5px solid rgba(22, 19, 16, 0.16);
+  border-radius: 999px;
+  box-shadow: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
 
   &:hover {
-    background: #f8f9fa;
-    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
+    background: #fff;
+    border-color: #161310;
+    box-shadow: none;
   }
 
   &__icon {

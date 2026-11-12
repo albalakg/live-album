@@ -95,18 +95,26 @@ export default defineComponent({
 .assist { position: fixed; z-index: 80; bottom: 22px; left: 22px; }
 .assist-fab {
   display: inline-flex;
-  border: 0;
+  border: 1.5px solid #c9a36a;
   border-radius: 999px;
-  background: var(--espresso, #12100e);
-  color: #fff;
+  background: #fffcfa;
+  color: #12100e;
   font-family: var(--font, Heebo, sans-serif);
   font-weight: 800;
   padding: 12px 16px;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 10px 28px rgba(18, 16, 14, 0.28);
+  box-shadow: 0 8px 20px rgba(18, 16, 14, 0.22);
 }
-.assist-fab--wa { position: fixed; z-index: 80; bottom: 22px; left: 22px; background: #1fad4f; }
+.assist-fab--wa {
+  position: fixed;
+  z-index: 80;
+  bottom: 22px;
+  left: 22px;
+  background: #1fad4f;
+  color: #fff;
+  border-color: transparent;
+}
 .assist-panel {
   position: absolute;
   bottom: 58px;
