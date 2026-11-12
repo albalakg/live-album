@@ -3,8 +3,9 @@
     class="event-qr display--flex justify--space-between height--full brs--medium flex--wrap padding--medium-mobile"
   >
     <div class="width--corner width--full-mobile">
-      <h1 class="title--large">כרטיס QR</h1>
-      <h1 class="title--small">הכנו בשבליכם כרטיס QR שתוכלו לשלוח ולהדפיס</h1>
+      <p class="kicker">שיתוף</p>
+      <h1 class="title--large">QR</h1>
+      <p class="qr-lede">בחרו עיצוב, ערכו טקסט, והורידו כרטיס או קוד להדפסה ושיתוף.</p>
       <template v-if="$bp.isMobile">
         <br />
         <p class="text--center">מומלץ להוריד מהמחשב</p>
@@ -231,6 +232,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.kicker {
+  color: var(--rose, #dc5b66);
+  font-weight: 800;
+  margin: 0;
+}
+
+.qr-lede {
+  margin: 8px 0 16px;
+  color: var(--muted, #5e564e);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  max-width: 42ch;
+}
+
 .event-qr-card {
   width: 40%;
   background-position: center;

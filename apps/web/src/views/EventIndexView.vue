@@ -61,13 +61,13 @@ export default defineComponent({
           isActive: false,
         },
         {
-          text: "האלבום",
+          text: "אלבום חי",
           path: "/event/gallery",
           isActive: false,
         },
         {
-          text: "כל הקבצים",
-          path: "/event/assets",
+          text: "עמוד העלאה",
+          path: "/event/upload",
           isActive: false,
         },
         {
@@ -76,8 +76,23 @@ export default defineComponent({
           isActive: false,
         },
         {
-          text: "כרטיס QR",
+          text: "QR",
           path: "/event/qr",
+          isActive: false,
+        },
+        {
+          text: "האלבום",
+          path: "/event/album",
+          isActive: false,
+        },
+        {
+          text: "כל הקבצים",
+          path: "/event/assets",
+          isActive: false,
+        },
+        {
+          text: "חבילה",
+          path: "/event/plan",
           isActive: false,
         },
         {
@@ -107,17 +122,19 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-main {
-  --host-sidebar: 240px;
+  --host-sidebar: 260px;
   min-height: calc(100vh - 124px);
-  width: min(1160px, calc(100% - 32px));
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   position: relative;
   z-index: 11;
   display: grid;
   grid-template-columns: var(--host-sidebar) minmax(0, 1fr);
   gap: 20px;
-  padding: 16px 0 40px;
+  padding: 16px 24px 40px;
   align-items: start;
+  box-sizing: border-box;
 }
 
 .event-sidebar {
@@ -138,10 +155,18 @@ export default defineComponent({
   box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
 }
 
+@media (max-width: 1440px) {
+  .event-main {
+    --host-sidebar: 240px;
+    padding-inline: 20px;
+  }
+}
+
 @media (max-width: 1100px) {
   .event-main {
     --host-sidebar: 210px;
     gap: 16px;
+    padding-inline: 16px;
   }
 
   .event-content {
@@ -152,8 +177,8 @@ export default defineComponent({
 @media (max-width: 900px) {
   .event-main {
     grid-template-columns: 1fr;
-    width: min(1160px, calc(100% - 24px));
-    padding-top: 8px;
+    width: 100%;
+    padding: 8px 12px 40px;
   }
 
   .event-sidebar {

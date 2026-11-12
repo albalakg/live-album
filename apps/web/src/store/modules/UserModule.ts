@@ -12,7 +12,7 @@ import {
 import { SubscriptionType } from "@/helpers/types";
 import Auth from "@/helpers/Auth";
 import ErrorsHandler from "@/helpers/errorsHandler";
-import { notify } from "@kyvg/vue3-notification";
+import { notify } from "@/helpers/notify";
 import router from "@/router";
 import { StatusEnum, SubscriptionTypesEnum } from "@/helpers/enums";
 import { effectiveSubscriptionStorageHours } from "@/helpers/subscriptionPricing";

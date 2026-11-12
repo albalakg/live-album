@@ -2,6 +2,7 @@
   <notifications class="snap-toast-host" :position="toastPosition" :max="3" width="360px">
     <template #body="{ item, close }">
       <div
+        v-if="toastHasContent(item)"
         class="snap-toast"
         :class="[`snap-toast--${item.type || 'info'}`, { 'snap-toast--closing': item.closed }]"
         role="status"
@@ -12,7 +13,7 @@
         </span>
         <div class="snap-toast__body">
           <strong v-if="item.title">{{ item.title }}</strong>
-          <p>{{ item.text }}</p>
+          <p v-if="item.text">{{ item.text }}</p>
         </div>
       </div>
     </template>
@@ -89,6 +90,12 @@ export default defineComponent({
   },
 
   methods: {
+    toastHasContent(item: { title?: string; text?: string }): boolean {
+      const title = typeof item?.title === "string" ? item.title.trim() : "";
+      const text = typeof item?.text === "string" ? item.text.trim() : "";
+      return Boolean(title || text);
+    },
+
     toastIcon(type?: string): string {
       if (type === "error" || type === "warn") return "error";
       if (type === "success") return "check_circle";

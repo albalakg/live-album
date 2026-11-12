@@ -457,17 +457,14 @@ a {
   z-index: 10050 !important;
 }
 
+/* Legacy notification skins — app uses .snap-toast exclusively */
+.vue-notification,
+.vue-notification-template,
+.notification-title,
 .notification-content {
-  font-weight: 700 !important;
-}
-
-.vue-notification-template {
-  border-radius: 16px;
-  box-shadow: none;
-  text-align: right !important;
-  direction: rtl;
   background: transparent !important;
   border: 0 !important;
+  box-shadow: none !important;
   margin: 0 !important;
   padding: 0 !important;
 }

@@ -9,9 +9,10 @@
         class="details display--flex direction--column justify--space-between width--full-mobile"
       >
         <div>
+          <p class="kicker">ניהול מדיה</p>
           <h1 class="title--large">
-            {{ totalAssets }} קבצים
-            <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
+            כל הקבצים
+            <small>{{ totalAssets }} קבצים · נבחרו {{ totalManagedAssetsIds }}</small>
           </h1>
           <label
             v-if="blockedAssets.length"
@@ -664,6 +665,12 @@ export default defineComponent({
 .event-assets {
   font-family: var(--font, Heebo, sans-serif);
   color: var(--ink, #161310);
+
+  .kicker {
+    color: var(--rose, #dc5b66);
+    font-weight: 800;
+    margin: 0 0 4px;
+  }
 
   h1 {
     font-weight: 900;

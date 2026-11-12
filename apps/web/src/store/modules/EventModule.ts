@@ -22,7 +22,7 @@ import {
   EventGalleryType,
 } from "@/helpers/types";
 import ErrorsHandler from "@/helpers/errorsHandler";
-import { notify } from "@kyvg/vue3-notification";
+import { notify } from "@/helpers/notify";
 import { buildSampleAlbum } from "@/helpers/previewAlbum";
 
 function asAssetArray(assets: unknown): IEventAsset[] {

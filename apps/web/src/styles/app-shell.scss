@@ -42,15 +42,10 @@ body, #app {
   bottom: auto !important;
 }
 
+/* Legacy pink footer chrome — app footer now uses .app-footer */
 .footer.bg--pink {
   background: var(--espresso, #12100e) !important;
   color: rgba(247, 242, 235, 0.78) !important;
-}
-.footer.bg--pink p,
-.footer.bg--pink h3,
-.footer.bg--pink h4,
-.footer.bg--pink a {
-  color: rgba(247, 242, 235, 0.86) !important;
 }
 
 .login,
@@ -201,7 +196,18 @@ body, #app {
   color: #5e564e !important;
 }
 
-/* App-wide mock toast */
+/* App-wide mock toast — kill legacy pink/default bars */
+.vue-notification,
+.vue-notification-template,
+.notification-title,
+.notification-content {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
 .snap-toast-host.vue-notification-group {
   top: auto !important;
   bottom: 24px !important;
@@ -210,6 +216,14 @@ body, #app {
 .snap-toast-host .vue-notification-wrapper {
   margin: 8px 0 !important;
   overflow: visible !important;
+  background: transparent !important;
+}
+.snap-toast-host .vue-notification-wrapper:not(:has(.snap-toast)) {
+  display: none !important;
+  margin: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
 }
 .snap-toast {
   display: flex;

@@ -1,10 +1,16 @@
 <template>
   <div class="event-gallery">
+    <header class="page-head">
+      <p class="kicker">מסך חי</p>
+      <h1>אלבום חי</h1>
+      <p class="lede">פריסת המסך, מה מוצג באולם, וקישור לתצוגה המלאה.</p>
+    </header>
+
     <div class="gallery-top display--flex justify--space-between align--center">
       <div class="display--flex align--center" v-if="$bp.isMediumAndUp">
         <div class="width--full-mobile">
           <router-link to="/event/gallery/full-screen">
-            <MainButton text="צפה בגלרייה" class="gallery-button" />
+            <MainButton text="צפייה במסך החי" class="gallery-button" />
           </router-link>
         </div>
         <div class="display--flex align--center width--full-mobile">
@@ -18,7 +24,7 @@
         <div class="width--full-mobile margin--top-large">
           <div class="width--full-mobile">
             <router-link to="/event/gallery/full-screen">
-              <MainButton text="צפה בגלרייה" class="gallery-button" />
+              <MainButton text="צפייה במסך החי" class="gallery-button" />
             </router-link>
           </div>
           <div
@@ -67,7 +73,7 @@
           title="זמן תצוגת וידאו (שניות)"
         />
         <br> -->
-        <MainButton :loading="loading" text="שמור" @onClick="submit()" />
+        <MainButton :loading="loading" text="שמור פריסה" @onClick="submit()" />
         <div
           v-if="hasBlockedAssets"
           class="blocked-gallery-toggle margin--top-medium width--full"
@@ -86,6 +92,19 @@
         </div>
       </div>
     </div>
+
+    <form class="live-settings" @submit.prevent="saveLiveConfig">
+      <EventSwitchPanel
+        title="מה מוצג באלבום החי"
+        lede="שליטה על תמונות אורחים, תמונות שלכם, וכרטיס QR על המסך."
+        :items="liveSwitches"
+        :values="liveConfig"
+        @toggle="toggleLive"
+      />
+      <div class="form-actions">
+        <MainButton :loading="configLoading" text="שמור הגדרות תצוגה" />
+      </div>
+    </form>
   </div>
 </template>
 
@@ -95,12 +114,20 @@ import EventGallerySingle from "@/components/event/EventGallerySingle.vue";
 import EventGallerySplitScreen from "@/components/event/EventGallerySplitScreen.vue";
 import EventGalleryRandom from "@/components/event/EventGalleryRandom.vue";
 import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
+import EventSwitchPanel, {
+  SwitchItem,
+} from "@/components/event/EventSwitchPanel.vue";
 
 import MainIcon from "@/components/library/general/MainIcon.vue";
 import { defineComponent } from "vue";
 import MainSelect from "@/components/library/inputs/MainSelect.vue";
 import MainInput from "@/components/library/inputs/MainInput.vue";
 import { IEvent } from "@/helpers/interfaces";
+
+type LiveConfigKey =
+  | "preview_guests_assets_in_gallery"
+  | "preview_owners_assets_in_gallery"
+  | "preview_qr_in_gallery";
 
 export default defineComponent({
   name: "EventGalleryView",
@@ -114,6 +141,7 @@ export default defineComponent({
     EventGalleryGrid3X3,
     EventGallerySplitScreen,
     MainInput,
+    EventSwitchPanel,
   },
 
   data() {
@@ -127,6 +155,29 @@ export default defineComponent({
         // { value: "EventGalleryGrid3X3", label: "אלבום תמונות רשת 3x3" },
       ] as { value: string; label: string }[],
       loading: false as boolean,
+      configLoading: false as boolean,
+      liveConfig: {
+        preview_guests_assets_in_gallery: false,
+        preview_owners_assets_in_gallery: false,
+        preview_qr_in_gallery: false,
+      } as Record<LiveConfigKey, boolean>,
+      liveSwitches: [
+        {
+          key: "preview_guests_assets_in_gallery",
+          title: "תמונות אורחים בגלריה",
+          hint: "להציג את תמונות האורחים באלבום החי",
+        },
+        {
+          key: "preview_owners_assets_in_gallery",
+          title: "תמונות אישיות בגלריה",
+          hint: "להציג את התמונות האישיות שלכם באלבום החי",
+        },
+        {
+          key: "preview_qr_in_gallery",
+          title: "כרטיס QR על המסך",
+          hint: "להציג את כרטיס ה־QR ליד האלבום החי",
+        },
+      ] as SwitchItem[],
       form: {
         selectedAlbum: "EventGallerySingle" as string,
         // imageDisplayTime: 3 as number,
@@ -177,9 +228,41 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    event: {
+      immediate: true,
+      handler() {
+        this.syncLiveConfig();
+      },
+    },
+  },
+
   methods: {
     setForm() {
       this.form.selectedAlbum = this.event.config.displayed_gallery || "EventGallerySingle";
+    },
+
+    syncLiveConfig() {
+      const cfg = this.event?.config;
+      this.liveConfig.preview_guests_assets_in_gallery =
+        cfg?.preview_guests_assets_in_gallery ?? false;
+      this.liveConfig.preview_owners_assets_in_gallery =
+        cfg?.preview_owners_assets_in_gallery ?? false;
+      this.liveConfig.preview_qr_in_gallery =
+        cfg?.preview_qr_in_gallery ?? false;
+    },
+
+    toggleLive(key: string) {
+      const k = key as LiveConfigKey;
+      this.liveConfig[k] = !this.liveConfig[k];
+    },
+
+    async saveLiveConfig() {
+      this.configLoading = true;
+      await this.$store.dispatch("event/update", {
+        config: { ...this.liveConfig },
+      });
+      this.configLoading = false;
     },
 
     async submit() {
@@ -259,17 +342,53 @@ export default defineComponent({
   min-height: fit-content;
   font-family: var(--font, Heebo, sans-serif);
   color: var(--ink, #161310);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-head .kicker {
+  color: var(--rose, #dc5b66);
+  font-weight: 800;
+  margin: 0;
+}
+
+.page-head h1 {
+  margin: 4px 0 0;
+  font-weight: 900;
+  font-size: clamp(1.55rem, 2.4vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.lede {
+  margin: 8px 0 0;
+  color: var(--muted, #5e564e);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  max-width: 52ch;
 }
 
 .gallery-top {
   min-height: 50px;
-  margin-bottom: 16px;
   width: 100%;
   gap: 12px;
 
   .icon-wrapper {
     margin-inline-start: 10px;
   }
+}
+
+.live-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-actions {
+  max-width: 260px;
+  margin-inline-start: auto;
+  width: 100%;
 }
 
 .gallery-content {

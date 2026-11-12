@@ -1,5 +1,5 @@
 import axios from "axios";
-import { notify } from "@kyvg/vue3-notification";
+import { notify } from "@/helpers/notify";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { IStoreOrderResult } from "@/helpers/interfaces";
 

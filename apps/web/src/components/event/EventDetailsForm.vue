@@ -2,7 +2,7 @@
   <form @submit.prevent="submit()" class="event-form">
     <header class="form-head">
       <h2>עריכת פרטי האירוע</h2>
-      <p>שם, תאריך, תמונת כיסוי והרשאות תצוגה.</p>
+      <p>שם, תאריך ותמונת כיסוי בלבד. שאר ההגדרות בכרטיסיות שלהן.</p>
     </header>
 
     <div class="form-grid">
@@ -58,7 +58,11 @@
         hidden
         @change="onFileInput"
       />
-      <div class="cover-preview" v-if="previewUrl" :style="{ backgroundImage: `url(${previewUrl})` }"></div>
+      <div
+        class="cover-preview"
+        v-if="previewUrl"
+        :style="{ backgroundImage: `url(${previewUrl})` }"
+      ></div>
       <div class="cover-copy">
         <span class="material-symbols-outlined" aria-hidden="true">upload</span>
         <strong>תמונת האירוע</strong>
@@ -66,60 +70,6 @@
         <em v-if="uploadedLabel">{{ uploadedLabel }}</em>
       </div>
     </div>
-
-    <section class="switch-section">
-      <h3>תצוגה בעמוד העלאות</h3>
-      <div
-        v-for="item in uploadDisplaySwitches"
-        :key="item.key"
-        class="switch-row"
-        @click="toggleConfig(item.key)"
-      >
-        <div class="switch-copy">
-          <strong>{{ item.title }}</strong>
-          <small>{{ item.hint }}</small>
-        </div>
-        <MainCheckbox
-          :value="form.config[item.key]"
-          @onClick.stop="toggleConfig(item.key)"
-        />
-      </div>
-    </section>
-
-    <section class="switch-section">
-      <h3>הרשאות אורחים</h3>
-      <div
-        v-for="item in guestPermissionSwitches"
-        :key="item.key"
-        class="switch-row"
-        @click="toggleConfig(item.key)"
-      >
-        <div class="switch-copy">
-          <strong>{{ item.title }}</strong>
-          <small>{{ item.hint }}</small>
-        </div>
-        <MainCheckbox
-          :value="form.config[item.key]"
-          @onClick.stop="toggleConfig(item.key)"
-        />
-      </div>
-    </section>
-
-    <section class="switch-section">
-      <h3>אישור ידני</h3>
-      <div class="switch-row" @click="toggleConfig('manual_photo_approval')">
-        <div class="switch-copy">
-          <strong>אישור ידני לתמונות</strong>
-          <small>
-            מרגע ההפעלה, תמונות חדשות מחכות לאישור לפני האלבום והמסך
-          </small>
-        </div>
-        <MainCheckbox
-          :value="form.config.manual_photo_approval"
-          @onClick.stop="toggleConfig('manual_photo_approval')"
-        />
-      </div>
-    </section>
 
     <div class="form-actions">
       <MainButton :loading="loading" text="שמור" />
@@ -133,17 +83,7 @@ import MainButton from "../library/buttons/MainButton.vue";
 import MainInput from "../library/inputs/MainInput.vue";
 import { IEvent } from "@/helpers/interfaces";
 import Time from "@/helpers/time";
-import MainCheckbox from "../library/inputs/MainCheckbox.vue";
-
-type ConfigKey =
-  | "preview_site_display_image"
-  | "preview_site_display_name"
-  | "preview_site_display_date"
-  | "preview_guests_assets_in_gallery"
-  | "preview_owners_assets_in_gallery"
-  | "preview_link_to_album_page_from_upload_page"
-  | "video_upload_enabled"
-  | "manual_photo_approval";
+import { notify } from "@/helpers/notify";
 
 export default defineComponent({
   name: "EventDetailsForm",
@@ -151,7 +91,6 @@ export default defineComponent({
   components: {
     MainButton,
     MainInput,
-    MainCheckbox,
   },
 
   data() {
@@ -160,17 +99,6 @@ export default defineComponent({
         name: "" as string,
         starts_at: "" as string,
         image: null as File | null,
-        config: {
-          preview_site_display_image: false as boolean,
-          preview_site_display_name: false as boolean,
-          preview_site_display_date: false as boolean,
-          preview_guests_assets_in_gallery: false as boolean,
-          preview_owners_assets_in_gallery: false as boolean,
-          preview_qr_in_gallery: false as boolean,
-          preview_link_to_album_page_from_upload_page: false as boolean,
-          video_upload_enabled: true as boolean,
-          manual_photo_approval: false as boolean,
-        },
       },
       errors: {
         name: "" as string,
@@ -182,45 +110,6 @@ export default defineComponent({
       days: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
       format: "dd/MM/yyyy HH:mm",
       loading: false as boolean,
-      uploadDisplaySwitches: [
-        {
-          key: "preview_site_display_image" as ConfigKey,
-          title: "הצגת תמונת האירוע",
-          hint: "להציג את תמונת הכיסוי בעמוד העלאות",
-        },
-        {
-          key: "preview_site_display_name" as ConfigKey,
-          title: "הצגת שם האירוע",
-          hint: "להציג את שם האירוע בעמוד העלאות",
-        },
-        {
-          key: "preview_site_display_date" as ConfigKey,
-          title: "הצגת תאריך האירוע",
-          hint: "להציג את תאריך האירוע בעמוד העלאות",
-        },
-      ],
-      guestPermissionSwitches: [
-        {
-          key: "video_upload_enabled" as ConfigKey,
-          title: "העלאת סרטונים",
-          hint: "לאפשר לאורחים ולבעלי האירוע להעלות סרטונים",
-        },
-        {
-          key: "preview_guests_assets_in_gallery" as ConfigKey,
-          title: "תמונות אורחים בגלריה",
-          hint: "להציג את תמונות האורחים בגלריה",
-        },
-        {
-          key: "preview_owners_assets_in_gallery" as ConfigKey,
-          title: "תמונות אישיות בגלריה",
-          hint: "להציג את התמונות האישיות שלכם בגלריה",
-        },
-        {
-          key: "preview_link_to_album_page_from_upload_page" as ConfigKey,
-          title: "קישור לאלבום מעמוד העלאות",
-          hint: "להציג כפתור מעבר מעמוד ההעלאות לעמוד האלבום",
-        },
-      ],
     };
   },
 
@@ -268,33 +157,10 @@ export default defineComponent({
     setEvent() {
       this.form.name = this.event?.name ?? "";
       this.form.starts_at = this.event?.starts_at ?? "";
-      this.form.config.preview_site_display_image =
-        this.event?.config?.preview_site_display_image ?? false;
-      this.form.config.preview_site_display_name =
-        this.event?.config?.preview_site_display_name ?? false;
-      this.form.config.preview_site_display_date =
-        this.event?.config?.preview_site_display_date ?? false;
-      this.form.config.preview_guests_assets_in_gallery =
-        this.event?.config?.preview_guests_assets_in_gallery ?? false;
-      this.form.config.preview_owners_assets_in_gallery =
-        this.event?.config?.preview_owners_assets_in_gallery ?? false;
-      this.form.config.preview_qr_in_gallery =
-        this.event?.config?.preview_qr_in_gallery ?? false;
-      this.form.config.preview_link_to_album_page_from_upload_page =
-        this.event?.config?.preview_link_to_album_page_from_upload_page ?? false;
-      this.form.config.video_upload_enabled =
-        this.event?.config?.video_upload_enabled ?? true;
-      this.form.config.manual_photo_approval = Boolean(
-        this.event?.config?.manual_photo_approval
-      );
       this.imageExists = !!this.event?.image;
       if (!this.form.image) {
         this.revokeLocalPreview();
       }
-    },
-
-    toggleConfig(key: ConfigKey) {
-      this.form.config[key] = !this.form.config[key];
     },
 
     openFilePicker() {
@@ -334,7 +200,7 @@ export default defineComponent({
       if (Object.values(errors).some((error) => error !== "")) {
         Object.values(errors).forEach((error) => {
           if (error) {
-            this.$notify({
+            notify({
               text: error,
               type: "error",
               duration: 5000,
@@ -346,13 +212,12 @@ export default defineComponent({
 
       this.loading = true;
       const payload = {
-        ...this.form,
+        name: this.form.name,
+        image: this.form.image,
       } as Record<string, unknown>;
 
       if (this.isPending) {
         payload.starts_at = Time.toUTC(this.form.starts_at);
-      } else {
-        delete payload.starts_at;
       }
 
       await this.$store.dispatch("event/update", payload);
@@ -371,7 +236,7 @@ export default defineComponent({
         this.errors.name = "שם האירוע צריך להכיל בין 1 ל 100 תווים";
       }
 
-      if (!this.form.starts_at) {
+      if (this.isPending && !this.form.starts_at) {
         this.errors.starts_at = "תאריך האירוע הינו שדה חובה";
       }
 
@@ -512,56 +377,6 @@ export default defineComponent({
     max-height: 180px;
     aspect-ratio: 16 / 10;
   }
-}
-
-.switch-section {
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 18px;
-  padding: 14px 16px;
-  background: #fffcfa;
-}
-
-.switch-section h3 {
-  margin: 0 0 10px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--muted, #5e564e);
-  letter-spacing: 0.02em;
-}
-
-.switch-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 0;
-  border-top: 1px solid rgba(22, 19, 16, 0.06);
-  cursor: pointer;
-}
-
-.switch-row:first-of-type {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.switch-copy {
-  min-width: 0;
-  flex: 1;
-}
-
-.switch-copy strong {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.switch-copy small {
-  display: block;
-  margin-top: 2px;
-  color: var(--muted, #5e564e);
-  font-size: 0.82rem;
-  line-height: 1.35;
 }
 
 .form-actions {

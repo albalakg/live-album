@@ -7,8 +7,22 @@
         תמונות שממתינות לבדיקה אוטומטית, ותמונות שנחסמו. אישור משתמש בנקודת הקצה הקיימת לביטול חסימה. הסתרה משתמשת בנקודת הקצה הקיימת להסתרה מהאלבום.
       </p>
       <p class="note">סרטונים אינם נבדקים אוטומטית.</p>
-    <p v-if="manualApproval" class="note">אישור ידני פעיל. תמונות שהועלו מאז מחכות כאן לפני שהן עולות לאלבום ולמסך.</p>
+      <p v-if="manualApproval" class="note">
+        אישור ידני פעיל. תמונות שהועלו מאז מחכות כאן לפני שהן עולות לאלבום ולמסך.
+      </p>
     </header>
+
+    <form class="approval-form" @submit.prevent="saveManualApproval">
+      <EventSwitchPanel
+        title="אישור ידני"
+        :items="approvalSwitches"
+        :values="approvalConfig"
+        @toggle="toggleApproval"
+      />
+      <div class="form-actions">
+        <MainButton :loading="approvalLoading" text="שמור הגדרה" />
+      </div>
+    </form>
 
     <div class="queues">
       <section>
@@ -56,12 +70,30 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IEventAsset } from "@/helpers/interfaces";
+import { IEvent, IEventAsset } from "@/helpers/interfaces";
+import MainButton from "@/components/library/buttons/MainButton.vue";
+import EventSwitchPanel, {
+  SwitchItem,
+} from "@/components/event/EventSwitchPanel.vue";
 
 export default defineComponent({
   name: "EventModerationView",
+  components: { MainButton, EventSwitchPanel },
   data() {
-    return { busyId: null as number | null };
+    return {
+      busyId: null as number | null,
+      approvalLoading: false,
+      approvalConfig: {
+        manual_photo_approval: false,
+      } as Record<string, boolean>,
+      approvalSwitches: [
+        {
+          key: "manual_photo_approval",
+          title: "אישור ידני לתמונות",
+          hint: "מרגע ההפעלה, תמונות חדשות מחכות לאישור לפני האלבום והמסך",
+        },
+      ] as SwitchItem[],
+    };
   },
   computed: {
     pending(): IEventAsset[] {
@@ -73,6 +105,19 @@ export default defineComponent({
     manualApproval(): boolean {
       return Boolean(this.$store.getters["event/manualPhotoApproval"]);
     },
+    event(): IEvent {
+      return this.$store.getters["event/getEvent"];
+    },
+  },
+  watch: {
+    event: {
+      immediate: true,
+      handler() {
+        this.approvalConfig.manual_photo_approval = Boolean(
+          this.event?.config?.manual_photo_approval
+        );
+      },
+    },
   },
   async created() {
     if (this.$route.name === "previewModeration") {
@@ -83,6 +128,16 @@ export default defineComponent({
     await this.$store.dispatch("event/getEventAssets");
   },
   methods: {
+    toggleApproval(key: string) {
+      this.approvalConfig[key] = !this.approvalConfig[key];
+    },
+    async saveManualApproval() {
+      this.approvalLoading = true;
+      await this.$store.dispatch("event/update", {
+        config: { ...this.approvalConfig },
+      });
+      this.approvalLoading = false;
+    },
     async approve(id: number) {
       this.busyId = id;
       await this.$store.dispatch("event/approveAssets", [id]);
@@ -109,6 +164,18 @@ export default defineComponent({
 h1 { font-weight: 900; font-size: 2rem; margin: 4px 0 8px; }
 .moderation-head p { color: var(--muted, #5e564e); max-width: 42rem; }
 .note { font-weight: 700; }
+.approval-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+  max-width: 720px;
+}
+.form-actions {
+  max-width: 220px;
+  margin-inline-start: auto;
+  width: 100%;
+}
 .queues { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
 @media (max-width: 800px) { .queues { grid-template-columns: 1fr; } }
 h2 { display: flex; gap: 8px; align-items: center; font-weight: 900; }

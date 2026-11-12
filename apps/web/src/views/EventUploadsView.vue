@@ -182,7 +182,7 @@ import MainCube from "@/components/library/background/MainCube.vue";
 import { StatusEnum } from "@/helpers/enums";
 import Auth from "@/helpers/Auth";
 import MediaEditorModal from "@/components/event/MediaEditorModal.vue";
-import { notify } from "@kyvg/vue3-notification";
+import { notify } from "@/helpers/notify";
 import { validateUploadFile } from "@/helpers/uploadValidation";
 
 export default defineComponent({

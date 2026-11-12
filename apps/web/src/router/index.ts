@@ -141,6 +141,16 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/EventGalleryFullScreenView.vue"),
       },
       {
+        path: "upload",
+        name: "eventUploadPage",
+        component: () => import("../views/EventUploadPageView.vue"),
+      },
+      {
+        path: "album",
+        name: "eventAlbum",
+        component: () => import("../views/EventAlbumView.vue"),
+      },
+      {
         path: "assets",
         name: "eventAssets",
         component: () => import("../views/EventAssetsView.vue"),
@@ -154,6 +164,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "qr",
         name: "eventQRCard",
         component: () => import("../views/EventQRCardView.vue"),
+      },
+      {
+        path: "plan",
+        name: "eventPlan",
+        component: () => import("../views/EventPlanView.vue"),
       },
       {
         path: "trivia",

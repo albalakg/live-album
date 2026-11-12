@@ -781,7 +781,10 @@ export default defineComponent({
 }
 
 .order-step.done {
-  border-color: color-mix(in srgb, var(--live) 40%, var(--line));
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  background: color-mix(in srgb, var(--rose, #dc5b66) 8%, var(--paper));
+  color: var(--ink);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .order-step__lbl {
