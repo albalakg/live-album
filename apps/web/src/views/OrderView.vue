@@ -1,176 +1,181 @@
 <template>
   <div class="order">
-    <MainCube left="5%" top="5%" width="large" height="large" />
-    <MainCube
-      color="pink"
-      left="7%"
-      top="12%"
-      width="medium"
-      height="x-large"
-    />
-    <MainCube
-      color="pink"
-      left="65%"
-      top="46%"
-      width="large"
-      height="x-large"
-    />
-    <MainCube color="pink" left="85%" top="15%" width="medium" height="medium" />
+    <div class="order-content wrap">
+      <header class="order-head">
+        <h1 class="order-page-title">הזמנת אלבום לאירוע</h1>
+        <p class="order-page-sub">
+          תשלום אחד לאירוע, בלי מנוי. בחרו מסלול והמשיכו הלאה.
+        </p>
+      </header>
 
-    <div class="order-content width--page-size margin--auto">
-      <h1 class="title--x-large order-page-title">הזמנת אלבום לאירוע</h1>
-      <ol class="order-steps">
-        <li :class="{ on: viewMode === 'cards' }">בחירת מסלול</li>
-        <li :class="{ on: viewMode === 'payment' }">תשלום</li>
+      <ol class="order-steps" :style="{ '--order-steps': String(orderSteps.length) }">
+        <li
+          v-for="(step, index) in orderSteps"
+          :key="step.id"
+          class="order-step"
+          :class="{ on: viewMode === step.id, done: isStepDone(step.id) }"
+        >
+          <span class="order-step__num">{{ index + 1 }}</span>
+          <span class="order-step__lbl">{{ step.label }}</span>
+        </li>
       </ol>
-
-      <div class="order-discount bg--white brs--medium">
-        <template v-if="appliedDiscount">
-          <p class="order-discount__applied text--dark title--small">
-            {{ appliedDiscount.code }} — הנחה {{ appliedDiscount.percent }}%
-          </p>
-          <button
-            type="button"
-            class="order-discount__remove text--dark"
-            @click="clearDiscount"
-          >
-            הסר
-          </button>
-        </template>
-        <form v-else class="order-discount__form" @submit.prevent="verifyDiscount">
-          <label class="order-discount__label text--dark title--small" for="discount-code">
-            קוד הנחה
-          </label>
-          <div class="order-discount__row">
-            <input
-              id="discount-code"
-              v-model="discountInput"
-              class="order-discount__input"
-              type="text"
-              maxlength="32"
-              autocomplete="off"
-              placeholder="הזינו קוד"
-            />
-            <MainButton
-              color="pink"
-              size="x-small"
-              text="אימות"
-              :loading="discountVerifying"
-              @onClick="verifyDiscount"
-            />
-          </div>
-          <p v-if="discountError" class="order-discount__error">{{ discountError }}</p>
-        </form>
-      </div>
 
       <div class="order-stage">
         <Transition name="order-fade" mode="out-in">
-          <div
-            v-if="viewMode === 'cards'"
-            key="cards"
-            class="order-cards-panel"
-          >
-            <div
-              class="display--flex justify--space-between width--two-thirds margin--auto flex--wrap-mobile order-plan-cards"
-            >
-              <SubscriptionPlanCard
-                v-for="card in displayCards"
-                :key="card.slug"
-                :slug="card.slug"
-                :title="card.title"
-                :display-price="card.displayPrice"
-                :strike-price="card.strikePrice"
-                :show-strike-price="card.showStrikePrice"
-                :description="card.description"
-                :icon="card.icon"
-                :card-class="card.cardClass"
-                :selectable="false"
-                :launch-sale-label="saleLabel"
+          <div v-if="viewMode === 'cards'" key="cards" class="order-cards-panel">
+            <OrderPlanCards :cards="displayCards" @select="onPlanAction" />
+
+            <div class="order-coupon">
+              <template v-if="appliedDiscount">
+                <p class="order-coupon__applied">
+                  {{ appliedDiscount.code }} — הנחה {{ appliedDiscount.percent }}%
+                </p>
+                <button
+                  type="button"
+                  class="order-coupon__remove"
+                  @click="clearDiscount"
+                >
+                  הסרת הקוד
+                </button>
+              </template>
+              <template v-else-if="!couponOpen">
+                <button
+                  type="button"
+                  class="order-coupon__toggle"
+                  @click="couponOpen = true"
+                >
+                  יש לכם קוד הנחה?
+                </button>
+              </template>
+              <form
+                v-else
+                class="order-coupon__form"
+                @submit.prevent="verifyDiscount"
               >
-                <template #footer>
-                  <MainButton
-                    animation
-                    size="x-small"
-                    :color="card.slug === 'demo' ? 'pink' : 'green'"
-                    :text="card.slug === 'demo' ? 'נסו עכשיו בחינם' : 'רכשו עכשיו'"
-                    :loading="isCardActionLoading(card.slug)"
-                    @onClick="onPlanAction(card.slug)"
+                <label class="order-coupon__label" for="discount-code">
+                  קוד הנחה
+                </label>
+                <div class="order-coupon__row">
+                  <input
+                    id="discount-code"
+                    ref="discountInputEl"
+                    v-model="discountInput"
+                    class="order-coupon__input"
+                    type="text"
+                    maxlength="32"
+                    autocomplete="off"
+                    placeholder="הזינו קוד"
                   />
-                </template>
-              </SubscriptionPlanCard>
+                  <button
+                    type="submit"
+                    class="btn btn-ghost order-coupon__submit"
+                    :disabled="discountVerifying"
+                  >
+                    {{ discountVerifying ? "מאמת…" : "אימות" }}
+                  </button>
+                </div>
+                <p v-if="discountError" class="order-coupon__error">
+                  {{ discountError }}
+                </p>
+              </form>
             </div>
+
+            <ul class="order-reassure">
+              <li>תשלום אחד לאירוע</li>
+              <li>בלי מנוי</li>
+              <li>הניסיון בלי כרטיס אשראי</li>
+              <li>תשלום מאובטח</li>
+            </ul>
           </div>
 
-          <div
-            v-else
-            key="payment"
-            class="order-payment-panel brs--medium bg--white"
-          >
+          <div v-else key="payment" class="order-payment-panel">
             <button
               type="button"
-              class="order-back-btn text--dark title--small"
+              class="order-back-btn"
               @click="goBackToCards"
             >
               ← חזרה למסלולים
             </button>
 
-            <div class="order-payment-panel__body">
-              <template v-if="!isLogged">
-                <div
-                  class="order-pay-guest display--flex direction--column align--center justify--center"
-                >
-                  <p class="text--dark text--center title--small">
-                    התחברו כדי לטעון את עמוד התשלום
-                  </p>
-                  <router-link class="order-pay-guest__link" :to="guestLoginTo">
-                    <MainButton color="pink" text="התחברות" />
-                  </router-link>
-                </div>
-              </template>
-              <template v-else>
-                <p
-                  v-if="paymentLoading"
-                  class="text--dark title--small text--center order-pay-state"
-                >
-                  <span class="order-pay-spinner" aria-hidden="true"></span>
-                  טוען את עמוד התשלום…
-                </p>
-                <div
-                  v-else-if="loadError"
-                  class="order-pay-error display--flex direction--column align--center"
-                >
-                  <p class="text--dark text--center">{{ loadError }}</p>
-                  <p class="sandbox-note">אין מפתחות PayPlus בסביבה המקומית, אז לא נטען iframe ולא מתבצע חיוב.</p>
-                  <MainButton
-                    color="pink"
-                    text="נסו שוב"
-                    @onClick="loadPaymentSrc"
-                  />
-                </div>
-                <div
-                  v-else-if="paymentSrc"
-                  class="order-pay-iframe-wrap position--relative"
-                >
-                  <div
-                    v-if="!paymentIframeReady"
-                    class="order-pay-iframe-loading display--flex align--center justify--center"
-                  >
-                    <span class="order-pay-spinner" aria-hidden="true"></span>
-                    <p class="text--dark title--small text--center">
-                      טוען את עמוד התשלום…
-                    </p>
+            <div class="order-payment-grid">
+              <aside class="order-summary">
+                <h2 class="order-summary__title">סיכום הזמנה</h2>
+                <dl class="order-summary__list">
+                  <div class="order-summary__row">
+                    <dt>מסלול</dt>
+                    <dd>{{ paymentSummary.planLabel }}</dd>
                   </div>
-                  <iframe
-                    :key="`${form.subscription}-${paymentIframeKey}`"
-                    class="order-pay-iframe"
-                    :class="{ 'order-pay-iframe--invisible': !paymentIframeReady }"
-                    frameBorder="0"
-                    :src="paymentSrc"
-                    title="עמוד תשלום"
-                    @load="onPaymentIframeLoad"
-                  />
-                </div>
-              </template>
+                  <div class="order-summary__row">
+                    <dt>מחיר</dt>
+                    <dd>{{ formatMoney(paymentSummary.basePrice) }}</dd>
+                  </div>
+                  <div
+                    v-if="paymentSummary.discountPercent > 0"
+                    class="order-summary__row"
+                  >
+                    <dt>הנחה ({{ paymentSummary.discountPercent }}%)</dt>
+                    <dd>−{{ formatMoney(paymentSummary.discountAmount) }}</dd>
+                  </div>
+                  <div class="order-summary__row order-summary__row--total">
+                    <dt>לתשלום</dt>
+                    <dd>{{ formatMoney(paymentSummary.total) }}</dd>
+                  </div>
+                </dl>
+              </aside>
+
+              <div class="order-pay-panel">
+                <template v-if="!isLogged">
+                  <div class="order-pay-state">
+                    <p>התחברו כדי לטעון את עמוד התשלום</p>
+                    <router-link class="order-pay-guest__link" :to="guestLoginTo">
+                      <span class="btn btn-primary">התחברות</span>
+                    </router-link>
+                  </div>
+                </template>
+                <template v-else>
+                  <p v-if="paymentLoading" class="order-pay-state">
+                    <span class="order-pay-spinner" aria-hidden="true"></span>
+                    טוען את עמוד התשלום…
+                  </p>
+                  <div v-else-if="loadError" class="order-pay-state order-pay-error">
+                    <p>{{ loadError }}</p>
+                    <p v-if="isDevBuild" class="sandbox-note">
+                      אין מפתחות PayPlus בסביבה המקומית, אז לא נטען iframe ולא
+                      מתבצע חיוב.
+                    </p>
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      @click="loadPaymentSrc"
+                    >
+                      נסו שוב
+                    </button>
+                  </div>
+                  <div
+                    v-else-if="paymentSrc"
+                    class="order-pay-iframe-wrap"
+                  >
+                    <div
+                      v-if="!paymentIframeReady"
+                      class="order-pay-iframe-loading"
+                    >
+                      <span class="order-pay-spinner" aria-hidden="true"></span>
+                      <p>טוען את עמוד התשלום…</p>
+                    </div>
+                    <iframe
+                      :key="`${form.subscription}-${paymentIframeKey}`"
+                      class="order-pay-iframe"
+                      :class="{
+                        'order-pay-iframe--invisible': !paymentIframeReady,
+                      }"
+                      frameBorder="0"
+                      :src="paymentSrc"
+                      title="עמוד תשלום"
+                      @load="onPaymentIframeLoad"
+                    />
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
         </Transition>
@@ -180,20 +185,14 @@
 </template>
 
 <script lang="ts">
-import MainButton from "@/components/library/buttons/MainButton.vue";
-import MainCube from "@/components/library/background/MainCube.vue";
-import SubscriptionPlanCard from "@/components/subscription/SubscriptionPlanCard.vue";
+import OrderPlanCards, {
+  OrderPlanCardModel,
+} from "@/components/subscription/OrderPlanCards.vue";
 import { defineComponent } from "vue";
 import { IStoreOrderResult, ISubscriptionPlan } from "@/helpers/interfaces";
 import { SubscriptionTypesEnum } from "@/helpers/enums";
-import {
-  buildPlanDisplayCardsFromPlans,
-  PlanDisplayCard,
-} from "@/helpers/subscriptionPlanDisplay";
-import {
-  discountedAmount,
-  SUBSCRIPTION_LAUNCH_SALE_LABEL,
-} from "@/helpers/subscriptionPricing";
+import { discountedAmount } from "@/helpers/subscriptionPricing";
+import { PLAN_FACTS, planFactBySlug } from "@snapshare/design/site";
 
 const DISCOUNT_STORAGE_KEY = "snapshareDiscountCode";
 
@@ -204,18 +203,22 @@ type AppliedDiscount = {
 
 type OrderViewMode = "cards" | "payment";
 
+type OrderStep = {
+  id: OrderViewMode;
+  label: string;
+};
+
 export default defineComponent({
   name: "OrderView",
 
   components: {
-    MainCube,
-    MainButton,
-    SubscriptionPlanCard,
+    OrderPlanCards,
   },
 
   data() {
     return {
       viewMode: "cards" as OrderViewMode,
+      couponOpen: false as boolean,
       discountInput: "" as string,
       discountError: "" as string,
       discountVerifying: false as boolean,
@@ -235,52 +238,84 @@ export default defineComponent({
   },
 
   computed: {
+    isDevBuild(): boolean {
+      return process.env.NODE_ENV === "development";
+    },
+
+    orderSteps(): OrderStep[] {
+      // Event-details step is omitted until that flow exists on /order.
+      return [
+        { id: "cards", label: "בחירת מסלול" },
+        { id: "payment", label: "תשלום" },
+      ];
+    },
+
     subscriptionPlans(): ISubscriptionPlan[] {
-      const plans = this.$store.getters["subscriptions/plans"] as ISubscriptionPlan[];
+      const plans =
+        (this.$store.getters["subscriptions/plans"] as ISubscriptionPlan[]) ||
+        [];
+      const source = plans.length > 0 ? plans : this.fallbackPlans;
+
       if (this.userIsDemo) {
-        return plans.filter((p) => p.slug !== "demo");
+        return source.filter((p) => p.slug !== "demo");
       }
-
       if (this.userIsClassic) {
-        return plans.filter((p) => p.slug === "premium");
+        return source.filter((p) => p.slug === "premium");
       }
-
-      return plans;
+      return source;
     },
 
-    saleLabel(): string {
-      if (this.appliedDiscount) {
-        return `הנחה ${this.appliedDiscount.percent}%`;
-      }
-      return SUBSCRIPTION_LAUNCH_SALE_LABEL;
+    fallbackPlans(): ISubscriptionPlan[] {
+      return PLAN_FACTS.map((fact, index) => ({
+        id: index + 1,
+        slug: fact.slug,
+        name: fact.nameApi,
+        price: fact.price,
+        status: 1,
+        events_allowed: 1,
+        files_allowed: fact.files_allowed,
+        storage_time: fact.storage_hours,
+      }));
     },
 
-    displayCards(): PlanDisplayCard[] {
-      const userSub = this.userSubscriptionName;
-      const userPrice = this.userSubscriptionPrice;
+    displayCards(): OrderPlanCardModel[] {
+      const bySlug = Object.fromEntries(
+        this.subscriptionPlans.map((plan) => [plan.slug, plan])
+      );
       const percent = this.appliedDiscount?.percent ?? 0;
-      const cards = buildPlanDisplayCardsFromPlans(this.subscriptionPlans, {
-        priceOverrideForSlug: (_slug, plan) => {
-          const base = this.payableBase(plan, userSub, userPrice);
-          if (plan.slug === "demo") return 0;
-          if (percent > 0 && base > 0) return discountedAmount(base, percent);
-          if (userSub) return base;
-          return undefined;
-        },
-      });
+      const allowed = new Set(this.subscriptionPlans.map((p) => p.slug));
 
-      if (percent <= 0) return cards;
+      return PLAN_FACTS.filter((fact) => allowed.has(fact.slug)).map((fact) => {
+        const plan = bySlug[fact.slug];
+        const base = this.payableBase(
+          plan ?? {
+            id: 0,
+            slug: fact.slug,
+            name: fact.nameApi,
+            price: fact.price,
+          },
+          this.userSubscriptionName,
+          this.userSubscriptionPrice
+        );
+        const displayPrice =
+          fact.slug === "demo"
+            ? 0
+            : percent > 0 && base > 0
+              ? discountedAmount(base, percent)
+              : base;
 
-      return cards.map((card) => {
-        if (card.slug === "demo") return card;
-        const plan = this.subscriptionPlans.find((item) => item.slug === card.slug);
-        if (!plan) return card;
-        const base = this.payableBase(plan, userSub, userPrice);
-        if (!(base > card.displayPrice)) return card;
         return {
-          ...card,
-          strikePrice: base,
-          showStrikePrice: true,
+          slug: fact.slug,
+          title: fact.nameHe,
+          displayPrice,
+          priceLabel: fact.slug === "demo" ? fact.priceLabel : null,
+          priceSub: fact.priceSub,
+          features: [...fact.features],
+          cta: fact.cta,
+          featured: Boolean(fact.featured),
+          badge: fact.badge,
+          selected: this.form.subscription === fact.slug,
+          loading: this.isCardActionLoading(fact.slug),
         };
       });
     },
@@ -316,8 +351,36 @@ export default defineComponent({
     guestLoginTo(): string {
       const path = `/order?subscription=${encodeURIComponent(
         this.form.subscription
-      )}`;
+      )}&pay=1`;
       return `/login?redirect=${encodeURIComponent(path)}`;
+    },
+
+    paymentSummary(): {
+      planLabel: string;
+      basePrice: number;
+      discountPercent: number;
+      discountAmount: number;
+      total: number;
+    } {
+      const fact = planFactBySlug(this.form.subscription);
+      const plan = this.currentPlan;
+      const base = plan
+        ? this.payableBase(
+            plan,
+            this.userSubscriptionName,
+            this.userSubscriptionPrice
+          )
+        : fact?.price ?? 0;
+      const percent = this.appliedDiscount?.percent ?? 0;
+      const total =
+        percent > 0 && base > 0 ? discountedAmount(base, percent) : base;
+      return {
+        planLabel: fact?.nameHe ?? plan?.name ?? this.form.subscription,
+        basePrice: base,
+        discountPercent: percent > 0 && base > 0 ? percent : 0,
+        discountAmount: percent > 0 && base > 0 ? base - total : 0,
+        total,
+      };
     },
   },
 
@@ -325,37 +388,71 @@ export default defineComponent({
     "$route.query.subscription": {
       handler() {
         this.applyQuerySubscription();
-        if (this.viewMode === "payment") {
+        if (this.viewMode === "payment" && !this.wantsPaymentStep()) {
           this.resetPaymentUi();
           this.viewMode = "cards";
         }
       },
       immediate: true,
     },
+    "$route.query.pay"() {
+      if (this.wantsPaymentStep() && this.form.subscription !== "demo") {
+        this.openPaymentStep(false);
+      }
+    },
     isLogged(newVal: boolean) {
-      if (!newVal) {
+      if (!newVal && this.viewMode === "payment") {
         this.resetPaymentUi();
-        this.viewMode = "cards";
+      } else if (newVal && this.viewMode === "payment" && this.paymentRequested) {
+        this.loadPaymentSrc();
+      }
+    },
+    couponOpen(open: boolean) {
+      if (open) {
+        this.$nextTick(() => {
+          const el = this.$refs.discountInputEl as HTMLInputElement | undefined;
+          el?.focus();
+        });
       }
     },
   },
 
   async mounted() {
-    if (!this.$store.getters["subscriptions/plansLoaded"]) {
-      await this.$store.dispatch("subscriptions/fetchPlans");
-    }
     this.applyQuerySubscription();
+    if (!this.$store.getters["subscriptions/plansLoaded"]) {
+      this.$store.dispatch("subscriptions/fetchPlans");
+    }
     await this.restoreDiscount();
+    if (this.wantsPaymentStep() && this.form.subscription !== "demo") {
+      await this.openPaymentStep(false);
+    } else {
+      await this.scrollToSelectedPlan();
+    }
   },
 
   methods: {
+    isStepDone(id: OrderViewMode): boolean {
+      return id === "cards" && this.viewMode === "payment";
+    },
+
+    wantsPaymentStep(): boolean {
+      const pay = this.$route.query.pay;
+      return pay === "1" || pay === "true";
+    },
+
+    formatMoney(value: number): string {
+      if (!Number.isFinite(value) || value <= 0) return "חינם";
+      const rounded = Number.isInteger(value) ? String(value) : value.toFixed(2);
+      return `₪${rounded}`;
+    },
+
     payableBase(
       plan: ISubscriptionPlan,
       userSub: string | null,
       userPrice: number
     ): number {
       if (plan.slug === "demo") return 0;
-      if (userSub) return Number(plan.price) - userPrice;
+      if (userSub) return Math.max(0, Number(plan.price) - userPrice);
       return Number(plan.price);
     },
 
@@ -382,12 +479,14 @@ export default defineComponent({
       this.appliedDiscount = null;
       this.discountError = "";
       this.discountInput = "";
+      this.couponOpen = false;
       sessionStorage.removeItem(DISCOUNT_STORAGE_KEY);
     },
 
     async restoreDiscount() {
       const stored = this.readStoredDiscount();
       if (!stored) return;
+      this.couponOpen = true;
       await this.verifyDiscountCode(stored.code, true);
     },
 
@@ -422,6 +521,7 @@ export default defineComponent({
       };
       this.appliedDiscount = discount;
       this.discountInput = "";
+      this.couponOpen = true;
       this.storeDiscount(discount);
     },
 
@@ -447,6 +547,10 @@ export default defineComponent({
     goBackToCards() {
       this.resetPaymentUi();
       this.viewMode = "cards";
+      const query = { ...this.$route.query } as Record<string, string | string[]>;
+      delete query.pay;
+      this.$router.replace({ path: "/order", query });
+      this.$nextTick(() => this.scrollToSelectedPlan());
     },
 
     onPaymentIframeLoad() {
@@ -455,20 +559,38 @@ export default defineComponent({
 
     applyQuerySubscription() {
       const q = this.$route.query.subscription as string | undefined;
-      const plans = this.subscriptionPlans;
-      const byQuery = q ? plans.find((p) => p.slug === q) : undefined;
+      const allowed = ["demo", "classic", "premium"];
+      if (q && allowed.includes(q)) {
+        const visible = this.subscriptionPlans.some((p) => p.slug === q);
+        this.form.subscription = visible ? q : "classic";
+        return;
+      }
       const fallback =
-        plans.find((p) => p.slug === "classic") ?? plans[0] ?? null;
-      this.form.subscription = (byQuery ?? fallback)?.slug ?? "classic";
+        this.subscriptionPlans.find((p) => p.slug === "classic") ??
+        this.subscriptionPlans[0] ??
+        null;
+      this.form.subscription = fallback?.slug ?? "classic";
     },
 
-    async setPlanSlug(slug: string) {
+    async scrollToSelectedPlan() {
+      await this.$nextTick();
+      const slug = this.form.subscription;
+      const el = document.getElementById(`plan-${slug}`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+
+    async setPlanSlug(slug: string, options?: { pay?: boolean }) {
       this.form.subscription = slug;
-      if (this.$route.query.subscription !== slug) {
-        await this.$router.replace({
-          path: "/order",
-          query: { subscription: slug },
-        });
+      const query: Record<string, string> = { subscription: slug };
+      if (options?.pay || this.wantsPaymentStep()) query.pay = "1";
+      const nextPay = query.pay ?? null;
+      const curPay = (this.$route.query.pay as string | undefined) ?? null;
+      if (
+        this.$route.query.subscription !== slug ||
+        nextPay !== curPay
+      ) {
+        await this.$router.replace({ path: "/order", query });
       }
     },
 
@@ -478,26 +600,31 @@ export default defineComponent({
       }
 
       this.actionLoadingSlug = slug;
-      await this.setPlanSlug(slug);
 
       if (slug === "demo") {
+        await this.setPlanSlug(slug);
         await this.submitDemo();
         this.actionLoadingSlug = "";
         return;
       }
 
-      if (!this.isLogged) {
-        const path = `/order?subscription=${encodeURIComponent(slug)}`;
-        this.actionLoadingSlug = "";
-        this.$router.push(`/login?redirect=${encodeURIComponent(path)}`);
-        return;
-      }
+      await this.setPlanSlug(slug, { pay: true });
+      await this.openPaymentStep(true);
+      this.actionLoadingSlug = "";
+    },
 
-      this.resetPaymentUi();
+    async openPaymentStep(requestPayment: boolean) {
       this.viewMode = "payment";
       this.paymentRequested = true;
-      await this.loadPaymentSrc();
-      this.actionLoadingSlug = "";
+      if (!this.isLogged) {
+        this.paymentLoading = false;
+        this.paymentSrc = "";
+        this.loadError = "";
+        return;
+      }
+      if (requestPayment || !this.paymentSrc) {
+        await this.loadPaymentSrc();
+      }
     },
 
     async loadPaymentSrc() {
@@ -584,107 +711,194 @@ export default defineComponent({
 .order {
   min-height: 100vh;
   position: relative;
-
-  @media only screen and (max-width: 600px) {
-    margin-top: 24px;
-  }
+  padding: 28px 0 48px;
 }
 
 .order-content {
   position: relative;
   z-index: 2;
-  padding: 24px 0 32px;
+  padding-bottom: 32px;
+}
+
+.order-head {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .order-page-title {
-  margin: 0 0 20px;
-  font-weight: 700;
-  text-align: center;
+  margin: 0 0 8px;
+  font-weight: 900;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
-.order-discount {
-  max-width: 520px;
-  margin: 0 auto 24px;
-  padding: 16px 18px;
+.order-page-sub {
+  margin: 0 auto;
+  max-width: 40rem;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 1.02rem;
+  line-height: 1.5;
 }
 
-.order-discount__form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.order-steps {
+  --order-steps: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--order-steps), minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  margin: 0 auto 28px;
+  padding: 0;
+  max-width: 640px;
 }
 
-.order-discount__label {
-  font-weight: 700;
-}
-
-.order-discount__row {
+.order-step {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.order-discount__input {
-  flex: 1;
-  min-width: 0;
-  border: 1px solid #eadfdf;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 16px;
-}
-
-.order-discount__row :deep(.main-button) {
-  width: 140px;
-  flex-shrink: 0;
-}
-
-.order-discount__error {
-  margin: 0;
-  color: #c0392b;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--muted);
   font-weight: 700;
 }
 
-.order-discount__applied {
-  margin: 0 0 8px;
-  font-weight: 700;
+.order-step__num {
+  font-family: var(--brand);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
 }
 
-.order-discount__remove {
-  border: 0;
-  background: none;
-  cursor: pointer;
-  font-weight: 700;
-  padding: 0;
+.order-step.on {
+  background: color-mix(in srgb, var(--accent) 14%, var(--paper));
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  color: var(--ink);
 }
 
-.order-discount__remove:hover {
-  color: var(--pink);
+.order-step.done {
+  border-color: color-mix(in srgb, var(--live) 40%, var(--line));
+}
+
+.order-step__lbl {
+  font-weight: 800;
+  font-size: 1.02rem;
+  color: inherit;
 }
 
 .order-stage {
   position: relative;
-  min-height: calc(100vh - 180px);
+  min-height: 420px;
 }
 
-.order-plan-cards {
-  gap: 30px;
-  width: 950px;
-  max-width: 92%;
+.order-coupon {
+  margin: 28px auto 0;
+  max-width: 420px;
+  text-align: center;
+}
 
-  @media only screen and (max-width: 600px) {
-    max-width: 100%;
-    flex-wrap: wrap;
+.order-coupon__toggle,
+.order-coupon__remove {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 4px;
+}
 
-    :deep(.pricing-card) {
-      width: 80%;
-      margin: 10px auto;
-    }
-  }
+.order-coupon__toggle:hover,
+.order-coupon__remove:hover {
+  color: var(--accent-2);
+}
+
+.order-coupon__applied {
+  margin: 0 0 8px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.order-coupon__form {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 16px 18px;
+  text-align: right;
+  box-shadow: var(--shadow-sm);
+}
+
+.order-coupon__label {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.order-coupon__row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.order-coupon__input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 16px;
+  background: #fff;
+}
+
+.order-coupon__submit {
+  flex-shrink: 0;
+  padding: 12px 18px;
+}
+
+.order-coupon__error {
+  margin: 10px 0 0;
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.order-reassure {
+  list-style: none;
+  margin: 28px auto 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 18px;
+  max-width: 820px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.order-reassure li {
+  position: relative;
+  padding-inline-start: 14px;
+}
+
+.order-reassure li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--live);
 }
 
 .order-fade-enter-active,
 .order-fade-leave-active {
-  transition: opacity 0.35s ease;
+  transition: opacity 0.28s ease;
 }
 
 .order-fade-enter-from,
@@ -693,38 +907,85 @@ export default defineComponent({
 }
 
 .order-payment-panel {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 16px 20px 20px;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 180px);
-
-  &__body {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
 }
 
 .order-back-btn {
-  align-self: flex-start;
+  display: inline-flex;
   margin: 0 0 16px;
   padding: 8px 4px;
   border: 0;
   background: none;
   cursor: pointer;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: var(--pink);
-  }
+  font-weight: 800;
+  color: var(--ink);
 }
 
-.order-pay-guest,
+.order-back-btn:hover {
+  color: var(--accent-2);
+}
+
+.order-payment-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.order-summary,
+.order-pay-panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.order-summary {
+  padding: 22px 20px;
+}
+
+.order-summary__title {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.order-summary__list {
+  margin: 0;
+}
+
+.order-summary__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-weight: 700;
+}
+
+.order-summary__row dt {
+  color: var(--muted);
+}
+
+.order-summary__row dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+.order-summary__row--total {
+  border-bottom: 0;
+  padding-top: 14px;
+  font-size: 1.08rem;
+}
+
+.order-pay-panel {
+  min-height: 420px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
 .order-pay-state,
 .order-pay-error {
   flex: 1;
@@ -732,13 +993,23 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 24px 16px;
+  gap: 14px;
   text-align: center;
+  padding: 24px 12px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .order-pay-guest__link {
   text-decoration: none;
+}
+
+.sandbox-note {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .order-pay-spinner {
@@ -746,7 +1017,7 @@ export default defineComponent({
   width: 32px;
   height: 32px;
   border: 3px solid rgba(0, 0, 0, 0.12);
-  border-top-color: var(--green);
+  border-top-color: var(--live);
   border-radius: 50%;
   animation: order-spin 0.8s linear infinite;
 }
@@ -759,7 +1030,7 @@ export default defineComponent({
 
 .order-pay-iframe-wrap {
   flex: 1;
-  min-height: 0;
+  min-height: 420px;
   width: 100%;
   position: relative;
 }
@@ -768,24 +1039,64 @@ export default defineComponent({
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: #fff;
-  border-radius: 8px;
+  background: var(--paper);
+  border-radius: 16px;
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 12px;
+  font-weight: 700;
 }
 
 .order-pay-iframe {
   width: 100%;
   height: 100%;
-  min-height: calc(100vh - 260px);
+  min-height: 420px;
   border: 0;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 16px;
   display: block;
 }
 
 .order-pay-iframe--invisible {
   opacity: 0;
   pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .order-payment-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .order {
+    padding-top: 16px;
+    overflow-x: hidden;
+  }
+
+  .order-steps {
+    gap: 8px;
+  }
+
+  .order-step {
+    padding: 12px 12px;
+  }
+
+  .order-step__lbl {
+    font-size: 0.95rem;
+  }
+
+  .order-coupon__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .order-reassure {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
 }
 </style>

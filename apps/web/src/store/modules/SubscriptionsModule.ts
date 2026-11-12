@@ -18,6 +18,7 @@ import {
 } from "@/helpers/interfaces";
 import { SubscriptionTypesEnum } from "@/helpers/enums";
 import { DEMO_SUBSCRIPTION_STORAGE_HOURS } from "@/helpers/subscriptionPricing";
+import { PLAN_FACTS } from "@snapshare/design/site";
 
 export interface ISubscriptionsState {
   plans: ISubscriptionPlan[];
@@ -127,38 +128,19 @@ function toIframeSession(checkout: ICheckoutLinkResponse): IOrderResponse {
   return { payment_page_link: checkout.paymentUrl };
 }
 
-const OFFLINE_FALLBACK_PLANS: ISubscriptionPlan[] = sortPlansBySlug([
-  {
-    id: 1,
-    slug: "demo",
-    name: SubscriptionTypesEnum.DEMO,
-    price: 0,
+const OFFLINE_FALLBACK_PLANS: ISubscriptionPlan[] = sortPlansBySlug(
+  PLAN_FACTS.map((fact, index) => ({
+    id: index + 1,
+    slug: fact.slug,
+    name: fact.nameApi,
+    price: fact.price,
     status: 1,
     events_allowed: 1,
-    files_allowed: 10,
-    storage_time: DEMO_SUBSCRIPTION_STORAGE_HOURS,
-  },
-  {
-    id: 2,
-    slug: "classic",
-    name: SubscriptionTypesEnum.CLASSIC,
-    price: 200,
-    status: 1,
-    events_allowed: 1,
-    files_allowed: 1000,
-    storage_time: 4320,
-  },
-  {
-    id: 3,
-    slug: "premium",
-    name: SubscriptionTypesEnum.PREMIUM,
-    price: 300,
-    status: 1,
-    events_allowed: 1,
-    files_allowed: 5000,
-    storage_time: 8760,
-  },
-]);
+    files_allowed: fact.files_allowed,
+    storage_time:
+      fact.slug === "demo" ? DEMO_SUBSCRIPTION_STORAGE_HOURS : fact.storage_hours,
+  }))
+);
 
 function extractSubscriptionsPayload(resData: unknown): unknown[] {
   if (Array.isArray(resData)) return resData;
@@ -172,7 +154,8 @@ const SubscriptionsModule = {
   namespaced: true,
 
   state: {
-    plans: [] as ISubscriptionPlan[],
+    // Seed immediately so /order cards never wait on a slow/down API.
+    plans: OFFLINE_FALLBACK_PLANS as ISubscriptionPlan[],
     plansLoaded: false,
   } as ISubscriptionsState,
 

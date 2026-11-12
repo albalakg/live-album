@@ -30,6 +30,28 @@ declare module "@snapshare/design/site" {
   export const GA4_MEASUREMENT_ID: string;
   export const BUSINESS_EMAIL_DEFAULT: string;
   export const WHATSAPP_E164: string;
+  export const PRICES: {
+    trial: number;
+    classic: number;
+    premium: number;
+    currency: string;
+  };
+  export type PlanFact = {
+    slug: string;
+    nameHe: string;
+    nameApi: string;
+    price: number;
+    priceLabel: string | null;
+    priceSub: string;
+    features: string[];
+    cta: string;
+    featured: boolean;
+    badge?: string;
+    files_allowed: number;
+    storage_hours: number;
+  };
+  export const PLAN_FACTS: PlanFact[];
+  export function planFactBySlug(slug?: string | null): PlanFact | null;
   export function whatsappHref(number?: string): string;
   export function isPaidPlan(name?: string | null): boolean;
   export const GUEST_CTA: {

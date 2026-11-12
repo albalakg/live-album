@@ -1,39 +1,41 @@
 ---
-import { PRICES } from "@snapshare/design/site";
+import { PLAN_FACTS } from "@snapshare/design/site";
 import { appPath } from "../lib/appUrl";
+
+function priceText(plan: (typeof PLAN_FACTS)[number]) {
+  if (plan.priceLabel) return plan.priceLabel;
+  return `₪${plan.price}`;
+}
 ---
 <div class="plans">
-  <article class="plan reveal">
-    <h3>ניסיון</h3>
-    <div class="price">חינם</div>
-    <p class="price-sub">בלי כרטיס אשראי</p>
-    <ul>
-      <li>10 קבצים</li>
-      <li>48 שעות</li>
-      <li>בלי כרטיס אשראי</li>
-    </ul>
-    <a class="btn btn-ghost" href={appPath("/order?subscription=demo")}>נסו בחינם</a>
-  </article>
-  <article class="plan featured reveal">
-    <h3>קלאסי</h3>
-    <div class="price">₪{PRICES.classic}</div>
-    <p class="price-sub">תשלום אחד לאירוע, בלי מנוי</p>
-    <ul>
-      <li>עד 1,000 קבצים</li>
-      <li>האירוע נשמר כ-6 חודשים</li>
-      <li>מסך חי כלול</li>
-    </ul>
-    <a class="btn btn-primary" href={appPath("/order?subscription=classic")}>בחירת קלאסיק</a>
-  </article>
-  <article class="plan reveal">
-    <h3>פרימיום</h3>
-    <div class="price">₪{PRICES.premium}</div>
-    <p class="price-sub">תשלום אחד לאירוע, בלי מנוי</p>
-    <ul>
-      <li>עד 5,000 קבצים</li>
-      <li>האירוע נשמר כשנה</li>
-      <li>מסך חי כלול</li>
-    </ul>
-    <a class="btn btn-ghost" href={appPath("/order?subscription=premium")}>בחירת פרימיום</a>
-  </article>
+  {PLAN_FACTS.map((plan) => (
+    <article class:list={["plan", "reveal", { featured: plan.featured }]}>
+      {plan.featured && plan.badge ? <span class="plan-badge">{plan.badge}</span> : null}
+      <h3>{plan.nameHe}</h3>
+      <div class="price">{priceText(plan)}</div>
+      <p class="price-sub">{plan.priceSub}</p>
+      <ul>
+        {plan.features.map((feature) => (
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M5 12.5l5 5L20 7.5"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>{feature}</span>
+          </li>
+        ))}
+      </ul>
+      <a
+        class:list={["btn", plan.featured ? "btn-primary" : "btn-ghost"]}
+        href={appPath(`/order?subscription=${plan.slug}`)}
+      >
+        {plan.cta}
+      </a>
+    </article>
+  ))}
 </div>
