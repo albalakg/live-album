@@ -1,4 +1,5 @@
 ---
+import { appPath } from "../lib/appUrl";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PricingCards from "../components/PricingCards.astro";
 import FaqList from "../components/FaqList.astro";
@@ -29,7 +30,7 @@ const schema = graph([
         <h1>מזכרות, חיבור ואווירה <span class="line2">— בזמן אמת.</span></h1>
         <p class="lead">האורחים סורקים QR ומעלים תמונות וסרטונים מהטלפון. הכל מופיע על המסך באולם, ונשמר באלבום חי אחד. בלי אפליקציה, בלי הרשמה לאורחים.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="/order">נסו בחינם <span class="chev" aria-hidden="true">←</span></a>
+          <a class="btn btn-primary" href={appPath("/order")}>נסו בחינם <span class="chev" aria-hidden="true">←</span></a>
           <a class="btn btn-on-dark-ghost" href="#how">תראו איך זה עובד</a>
         </div>
         <p class="hero-note"><strong>בלי כרטיס אשראי.</strong> ניסיון חינם · תשלום אחד לאירוע, בלי מנוי.</p>
@@ -67,10 +68,10 @@ const schema = graph([
               <span class="new-tag">חדש</span>
             </figure>
             <figure>
-              <img src="/media/album-12.jpg" alt="החתן והכלה באירוע" />
+              <img src="/media/album-11.jpg" alt="החתן והכלה באירוע" />
             </figure>
             <figure>
-              <img src="/media/album-01.jpg" alt="זוג קופץ על הדשא" />
+              <img src="/media/album-02.jpg" alt="נשיקה בשקיעה" />
             </figure>
           </div>
           <div class="bezel-foot"><b></b></div>
@@ -90,7 +91,7 @@ const schema = graph([
   </section>
 
   <HowItWorksDemo client:visible assetBase="/media" />
-  <LiveAlbumDemo client:visible assetBase="/media" />
+  <LiveAlbumDemo client:visible assetBase="/media" orderHref={appPath("/order")} />
 
   <section id="promise">
     <div class="wrap">
@@ -131,7 +132,7 @@ const schema = graph([
         </article>
         <article class="feat">
           <h4>כרטיס QR מעוצב</h4>
-          <p>כל אירוע מקבל קישור ייחודי וכרטיס מעוצב עם QR — מוכן לשולחנות. <a href="/qr-cards">כל העיצובים</a>.</p>
+          <p>כל אירוע מקבל קישור ייחודי וכרטיס מעוצב עם QR — מוכן לשולחנות. <a href={appPath("/qr-cards")}>כל העיצובים</a>.</p>
         </article>
         <article class="feat">
           <h4>הגנה חכמה על תמונות</h4>
@@ -165,7 +166,7 @@ const schema = graph([
     <div class="wrap">
       <h2>מוכנים לראות את האירוע שלכם על המסך?</h2>
       <p>פתחו ניסיון חינם, בלי כרטיס אשראי. תשלום אחד לאירוע, בלי מנוי — כשתהיו מוכנים.</p>
-      <a class="btn btn-on-dark" href="/order">נסו בחינם ←</a>
+      <a class="btn btn-on-dark" href={appPath("/order")}>נסו בחינם ←</a>
     </div>
   </section>
 </BaseLayout>

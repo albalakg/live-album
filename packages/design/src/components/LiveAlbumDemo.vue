@@ -29,7 +29,7 @@
             רוצים אלבום כזה לאירוע שלכם?
             <span>ניסיון חינם, בלי כרטיס אשראי. תשלום אחד לאירוע, בלי מנוי.</span>
           </p>
-          <a class="btn btn-primary" href="/order">נסו בחינם</a>
+          <a class="btn btn-primary" :href="orderHref">נסו בחינם</a>
         </div>
       </div>
     </div>
@@ -39,7 +39,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
 
-const props = withDefaults(defineProps<{ assetBase?: string }>(), { assetBase: "/media" });
+const props = withDefaults(defineProps<{ assetBase?: string; orderHref?: string }>(), {
+  assetBase: "/media",
+  orderHref: "/order",
+});
 
 type Photo = {
   file: string;
@@ -55,9 +58,9 @@ const catalog = [
   { file: "photo-night.jpg", alt: "עמית וגל בסלפי בערב החתונה", wide: true, tall: true },
   { file: "photo-lounge.jpg", alt: "עמית וגל בסלפי על הדשא", tall: true },
   { file: "album-02.jpg", alt: "נשיקה בשקיעה" },
-  { file: "album-01.jpg", alt: "זוג קופץ על הדשא" },
+  { file: "album-11.jpg", alt: "סלפי של אורחים" },
   { file: "photo-hat.jpg", alt: "עמית וגל ביום שמשי", tall: true },
-  { file: "album-12.jpg", alt: "החתן והכלה באירוע", wide: true },
+  { file: "album-22.jpg", alt: "אורחת בשמלה אדומה", wide: true },
   { file: "album-10.jpg", alt: "אורחים במסיבה" },
   { file: "album-11.jpg", alt: "סלפי של אורחים" },
   { file: "album-13.jpg", alt: "רגעים ליד החופה" },

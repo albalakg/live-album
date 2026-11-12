@@ -56,8 +56,30 @@
     button, a { font-family: inherit; }
     a { color: inherit; }
     :focus-visible {
-      outline: 3px solid var(--accent-2);
+      outline: 2px solid rgba(201, 163, 106, 0.95);
       outline-offset: 3px;
+    }
+    input,
+    textarea,
+    select,
+    .inner-input,
+    .inner-textarea {
+      background: #fffcfa;
+      border: 1px solid rgba(22, 19, 16, 0.16);
+      border-radius: 14px;
+      box-shadow: none;
+    }
+    input:focus,
+    input:focus-visible,
+    textarea:focus,
+    textarea:focus-visible,
+    select:focus,
+    select:focus-visible,
+    .inner-input:focus-within,
+    .inner-textarea:focus-within {
+      outline: none;
+      border-color: #8a7040;
+      box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.35);
     }
     .skip {
       position: absolute; right: 12px; top: -48px; z-index: 100;
@@ -840,6 +862,25 @@
     }
 
     .album-grid figure.seeded { opacity: 1; transform: none; animation: none; }
+    .compare-wrap { overflow-x: auto; margin-top: 28px; border-radius: 22px; border: 1px solid var(--line); background: var(--paper); }
+    .compare { width: 100%; border-collapse: collapse; min-width: 640px; }
+    .compare th, .compare td { padding: 14px 16px; text-align: right; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .compare th { font-weight: 800; background: #f7f2eb; }
+    .compare td { color: var(--ink); font-weight: 600; }
+    .pay-strip {
+      margin-top: 28px; padding: 18px 22px; border-radius: 18px;
+      background: var(--deep); color: #f7f2eb; font-weight: 800; text-align: center;
+    }
+    .prose-grid { display: grid; gap: 16px; margin-top: 28px; }
+    @media (min-width: 800px) { .prose-grid { grid-template-columns: 1fr 1fr; } }
+    .prose-card { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 22px; }
+    .prose-card h2, .prose-card h3 { font-weight: 900; letter-spacing: -0.03em; margin-bottom: 8px; }
+    .prose-card p, .prose-card li { color: var(--muted); }
+    .blog-list { display: grid; gap: 16px; margin-top: 28px; }
+    .blog-list a { color: inherit; text-decoration: none; }
+    .blog-card { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 22px; }
+    .post { width: min(760px, 100%); margin-inline: auto; }
+    .post p { margin: 12px 0; color: var(--ink); }
     #events, #how, #album, #pricing, #faq, #promise, #cta { scroll-margin-top: calc(var(--nav) + 12px); }
     @media (max-width: 980px) {
       .demo-stage { min-height: 0; }

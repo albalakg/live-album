@@ -1,4 +1,5 @@
 ---
+import { appPath } from "../lib/appUrl";
 import { getCollection } from "astro:content";
 
 const guides = (await getCollection("landing"))
@@ -27,7 +28,7 @@ const guides = (await getCollection("landing"))
           <li><a href="/#events">לכל סוג אירוע</a></li>
           <li><a href="/pricing">מחירים</a></li>
           <li><a href="/faq">שאלות נפוצות</a></li>
-          <li><a href="/qr-cards">גלריית כרטיסי QR</a></li>
+          <li><a href={appPath("/qr-cards")}>גלריית כרטיסי QR</a></li>
           <li><a href="/blog">בלוג</a></li>
         </ul>
       </div>
@@ -42,10 +43,11 @@ const guides = (await getCollection("landing"))
       <div>
         <h4>קישורים</h4>
         <ul>
-          <li><a href="/order">ניסיון חינם</a></li>
-          <li><a href="/login">התחברות</a></li>
-          <li><a href="/contact-us">צור קשר</a></li>
-          <li><a href="/terms-and-conditions">תנאי האתר</a></li>
+          <li><a href={appPath("/order")}>ניסיון חינם</a></li>
+          <li><a href={appPath("/login")}>התחברות</a></li>
+          <li><a href={appPath("/signup")}>הרשמה</a></li>
+          <li><a href={appPath("/contact-us")}>צור קשר</a></li>
+          <li><a href={appPath("/terms-and-conditions")}>תנאי האתר</a></li>
         </ul>
       </div>
     </div>

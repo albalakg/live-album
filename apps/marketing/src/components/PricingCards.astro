@@ -1,5 +1,6 @@
 ---
 import { PRICES } from "@snapshare/design/site";
+import { appPath } from "../lib/appUrl";
 ---
 <div class="plans">
   <article class="plan reveal">
@@ -7,56 +8,32 @@ import { PRICES } from "@snapshare/design/site";
     <div class="price">חינם</div>
     <p class="price-sub">בלי כרטיס אשראי</p>
     <ul>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        ניסיון חינם, בלי כרטיס אשראי
-      </li>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        לראות איך זה עובד לפני האירוע
-      </li>
+      <li>10 קבצים</li>
+      <li>48 שעות</li>
+      <li>בלי כרטיס אשראי</li>
     </ul>
-    <a class="btn btn-ghost" href="/order">נסו בחינם</a>
+    <a class="btn btn-ghost" href={appPath("/order?subscription=demo")}>נסו בחינם</a>
   </article>
   <article class="plan featured reveal">
     <h3>קלאסי</h3>
     <div class="price">₪{PRICES.classic}</div>
     <p class="price-sub">תשלום אחד לאירוע, בלי מנוי</p>
     <ul>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        תשלום אחד לאירוע — בלי מנוי
-      </li>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        מסך חי כלול
-      </li>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        שירות בעברית
-      </li>
+      <li>עד 1,000 קבצים</li>
+      <li>האירוע נשמר כ-6 חודשים</li>
+      <li>מסך חי כלול</li>
     </ul>
-    <a class="btn btn-primary" href="/order?subscription=classic">נסו בחינם</a>
+    <a class="btn btn-primary" href={appPath("/order?subscription=classic")}>בחירת קלאסיק</a>
   </article>
   <article class="plan reveal">
     <h3>פרימיום</h3>
     <div class="price">₪{PRICES.premium}</div>
     <p class="price-sub">תשלום אחד לאירוע, בלי מנוי</p>
     <ul>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        תשלום אחד לאירוע — בלי מנוי
-      </li>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        מסך חי כלול
-      </li>
-      <li>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round"/></svg>
-        שירות בעברית
-      </li>
+      <li>עד 5,000 קבצים</li>
+      <li>האירוע נשמר כשנה</li>
+      <li>מסך חי כלול</li>
     </ul>
-    <a class="btn btn-ghost" href="/order?subscription=premium">נסו בחינם</a>
+    <a class="btn btn-ghost" href={appPath("/order?subscription=premium")}>בחירת פרימיום</a>
   </article>
 </div>
-<p class="pricing-note">תשלום אחד לאירוע, בלי מנוי. המסך החי כלול. ניסיון חינם — בלי כרטיס אשראי.</p>

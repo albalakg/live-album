@@ -1,5 +1,6 @@
 ---
 import { parseInline } from "../lib/inline";
+import { appPath } from "../lib/appUrl";
 
 interface Props {
   text: string;
@@ -9,6 +10,6 @@ const parts = parseInline(text);
 ---
 {parts.map((part) => (
   part.type === "strong" ? <strong>{part.text}</strong>
-  : part.type === "link" ? <a href={part.href}>{part.text}</a>
+  : part.type === "link" ? <a href={appPath(part.href)}>{part.text}</a>
   : part.text
 ))}

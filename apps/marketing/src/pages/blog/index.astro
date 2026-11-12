@@ -18,7 +18,7 @@ const description = "מדריכים קצרים על אלבום חי, QR והקר
       <p class="sec-sub">האוסף מוכן לעוד כתבות. מה שמופיע כאן הוא תוכן אמיתי על המוצר, לא המלצות מומצאות.</p>
       <div class="blog-list">
         {posts.map((post) => (
-          <article class="feat">
+          <article class="blog-card">
             <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
             <p>{post.data.description}</p>
             <p><time datetime={post.data.pubDate.toISOString().slice(0, 10)}>{post.data.pubDate.toLocaleDateString("he-IL")}</time></p>
@@ -28,7 +28,3 @@ const description = "מדריכים קצרים על אלבום חי, QR והקר
     </div>
   </section>
 </BaseLayout>
-<style>
-  .blog-list { display: grid; gap: 16px; margin-top: 28px; }
-  .blog-list a { color: inherit; }
-</style>

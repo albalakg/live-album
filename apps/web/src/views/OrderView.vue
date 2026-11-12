@@ -19,6 +19,10 @@
 
     <div class="order-content width--page-size margin--auto">
       <h1 class="title--x-large order-page-title">הזמנת אלבום לאירוע</h1>
+      <ol class="order-steps">
+        <li :class="{ on: viewMode === 'cards' }">בחירת מסלול</li>
+        <li :class="{ on: viewMode === 'payment' }">תשלום</li>
+      </ol>
 
       <div class="order-discount bg--white brs--medium">
         <template v-if="appliedDiscount">

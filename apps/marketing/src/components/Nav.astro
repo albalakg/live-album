@@ -3,6 +3,7 @@ interface Props {
   solid?: boolean;
 }
 const { solid = false } = Astro.props;
+import { appPath } from "../lib/appUrl";
 ---
 <a class="skip" href="#main">דילוג לתוכן</a>
 <header class:list={["nav", { scrolled: solid }]} id="nav">
@@ -28,7 +29,7 @@ const { solid = false } = Astro.props;
     </nav>
     <div class="nav-cta">
       <a class="btn btn-ghost" href="/#how">איך זה עובד</a>
-      <a class="btn btn-primary" href="/order">נסו בחינם</a>
+      <a class="btn btn-primary" href={appPath("/order")}>נסו בחינם</a>
       <button class="burger" type="button" aria-label="תפריט" aria-expanded="false" aria-controls="mobile-menu" id="burger">
         <span></span>
       </button>
@@ -42,9 +43,10 @@ const { solid = false } = Astro.props;
   <a href="/pricing">מחירים</a>
   <a href="/faq">שאלות</a>
   <a href="/blog">בלוג</a>
-  <a href="/qr-cards">כרטיסי QR</a>
-  <a href="/login">התחברות</a>
-  <a class="btn btn-primary" href="/order">נסו בחינם</a>
+  <a href={appPath("/qr-cards")}>כרטיסי QR</a>
+  <a href={appPath("/login")}>התחברות</a>
+  <a href={appPath("/signup")}>הרשמה</a>
+  <a class="btn btn-primary" href={appPath("/order")}>נסו בחינם</a>
 </div>
 <script is:inline>
   (function () {

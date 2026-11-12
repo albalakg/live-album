@@ -4,10 +4,10 @@ const files = [
   "photo-night.jpg",
   "photo-lounge.jpg",
   "photo-hat.jpg",
-  "album-01.jpg",
+  "album-11.jpg",
   "album-02.jpg",
   "album-10.jpg",
-  "album-12.jpg",
+  "album-20.jpg",
   "album-22.jpg",
   "album-23.jpg",
 ];

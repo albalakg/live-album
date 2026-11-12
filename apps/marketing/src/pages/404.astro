@@ -1,4 +1,5 @@
 ---
+import { appPath } from "../lib/appUrl";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 <BaseLayout
@@ -13,7 +14,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <p class="sec-sub">אפשר לחזור לעמוד הבית, או לפתוח ניסיון חינם.</p>
       <p style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap;">
         <a class="btn btn-primary" href="/">לעמוד הבית</a>
-        <a class="btn btn-ghost" href="/order">נסו בחינם</a>
+        <a class="btn btn-ghost" href={appPath("/order")}>נסו בחינם</a>
       </p>
     </div>
   </section>

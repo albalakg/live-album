@@ -1,6 +1,7 @@
 ---
 import Rich from "./Rich.astro";
 import { applyPendingClaims } from "../lib/pendingClaims";
+import { appPath } from "../lib/appUrl";
 
 interface Section {
   level: number;
@@ -80,23 +81,29 @@ const faqs = faq
     <nav class="landing-links" aria-label="עמודים קשורים">
       <h2>עוד ב-SnapShare</h2>
       <ul>
-        {internalLinks.map((link) => <li><a href={link.slug}>{link.anchor}</a></li>)}
+        {internalLinks.map((link) => <li><a href={appPath(link.slug)}>{link.anchor}</a></li>)}
       </ul>
     </nav>
   )}
   <p class="landing-cta">
-    <a class="btn btn-primary" href={ctaTarget}>{ctaLabel}</a>
+    <a class="btn btn-primary" href={appPath(ctaTarget)}>{ctaLabel}</a>
   </p>
 </article>
 <style>
-  .landing { padding: 48px 0 24px; }
-  .landing-head, .landing-section, .landing-links, .landing-cta { width: min(780px, calc(100% - 40px)); margin-inline: auto; }
-  .landing-section { margin-top: 28px; }
-  .landing-section h2, .landing-section h3, .landing-links h2 { font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
-  .landing-section h2, .landing-links h2 { font-size: 1.6rem; }
-  .landing-section h3 { font-size: 1.25rem; }
+  .landing { padding: 28px 0 48px; }
+  .landing-head, .landing-section, .landing-links, .landing-cta { width: min(860px, calc(100% - 40px)); margin-inline: auto; }
+  .landing-section, .landing-links {
+    margin-top: 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 22px;
+  }
+  .landing-section h2, .landing-section h3, .landing-links h2 { font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px; }
+  .landing-section h2, .landing-links h2 { font-size: 1.45rem; }
+  .landing-section h3 { font-size: 1.15rem; }
   .landing-section p, .landing-section li { color: var(--muted); margin: 8px 0; }
   .landing-section ul, .landing-links ul { padding-inline-start: 1.2rem; }
-  .landing-section a, .landing-links a { color: var(--ink); font-weight: 700; }
-  .landing-cta { margin-top: 28px; }
+  .landing-section a, .landing-links a { color: var(--ink); font-weight: 800; }
+  .landing-cta { margin-top: 22px; }
 </style>

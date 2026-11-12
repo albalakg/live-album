@@ -25,3 +25,18 @@ export const FAQ_ITEMS = [
       "בטח — חתונות, אירוסין, בר ובת מצווה, אירועי חברה, מסיבות סיום, ברית ובריתה, וכל חגיגה.",
   },
 ];
+
+export const FAQ_GROUPS = [
+  {
+    title: "האורחים",
+    items: [FAQ_ITEMS[0], FAQ_ITEMS[1]],
+  },
+  {
+    title: "האלבום",
+    items: [FAQ_ITEMS[2], FAQ_ITEMS[3]],
+  },
+  {
+    title: "סוג האירוע",
+    items: [FAQ_ITEMS[4]],
+  },
+];

@@ -46,6 +46,13 @@ export function guestCtaHref() {
   return `${GUEST_CTA.path}?${params.toString()}`;
 }
 
+/** Prefix an app path with the Vue origin. Empty origin means same host (production). */
+export function appHref(path, origin = "") {
+  const base = String(origin || "").replace(/\/$/, "");
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return base ? `${base}${normalized}` : normalized;
+}
+
 export function whatsappHref(number) {
   const digits = String(number || "").replace(/\D/g, "");
   let resolved = digits || WHATSAPP_E164;

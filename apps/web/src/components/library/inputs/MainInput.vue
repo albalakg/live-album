@@ -5,7 +5,7 @@
         <p class="title--small">
             {{ title }} <small class="subtitle" v-if="subtitle">({{ subtitle }})</small>
         </p>
-        <div class="inner-input padding--x-small shadow--small"
+        <div class="inner-input padding--x-small"
             :class="`brs--${borderRadius} ${readonly ? 'disabled' : ''} ${isFile ? 'pointer' : ''}`" @click="uploadFile()">
             <template v-if="isFile">
                 <input v-model="localValue" ref="fileInput" :type="type" :readonly="readonly" :placeholder="placeholder"
