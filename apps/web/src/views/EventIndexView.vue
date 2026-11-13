@@ -11,14 +11,14 @@
         <router-view></router-view>
       </transition>
     </template>
-    <div class="event-main" v-else>
-      <aside class="event-sidebar">
-        <Sidebar :items="items" />
+    <div class="event-main" :class="{ 'focus-mode': isTriviaFocus }" v-else>
+      <aside class="event-sidebar" :class="{ 'is-rail': isTriviaFocus }">
+        <Sidebar :items="items" :rail="isTriviaFocus" />
       </aside>
       <nav class="event-mobile-nav" aria-label="ניווט האירוע">
         <MobileScrollBar :items="items" />
       </nav>
-      <div class="event-content">
+      <div class="event-content" :class="{ 'focus-content': isTriviaFocus }">
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -51,6 +51,9 @@ export default defineComponent({
         this.$route.path.includes("uploads") ||
         this.$route.path.includes("full-screen")
       );
+    },
+    isTriviaFocus(): boolean {
+      return this.$route.path === "/event/trivia";
     },
 
     items(): IMobileScrollBarItem[] {
@@ -132,6 +135,13 @@ export default defineComponent({
   box-sizing: border-box;
 }
 
+.event-main.focus-mode {
+  --host-sidebar: 72px;
+  padding-inline-start: calc(var(--host-sidebar) + 12px);
+  padding-block: 12px 20px;
+  background: #f3eee6;
+}
+
 .event-sidebar {
   position: fixed;
   top: var(--host-nav);
@@ -140,6 +150,10 @@ export default defineComponent({
   height: calc(100vh - var(--host-nav));
   z-index: 20;
   overflow: hidden;
+}
+
+.event-sidebar.is-rail {
+  overflow: visible;
 }
 
 .event-mobile-nav {
@@ -157,36 +171,60 @@ export default defineComponent({
   box-sizing: border-box;
 }
 
+.event-content.focus-content {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+
 @media (max-width: 1440px) {
-  .event-main {
+  .event-main:not(.focus-mode) {
     --host-sidebar: 240px;
     padding-inline-end: 20px;
   }
 }
 
 @media (max-width: 1100px) {
-  .event-main {
+  .event-main:not(.focus-mode) {
     --host-sidebar: 210px;
     padding-inline-start: calc(var(--host-sidebar) + 16px);
     padding-inline-end: 16px;
   }
 
-  .event-content {
+  .event-content:not(.focus-content) {
     padding: 20px;
   }
 }
 
+/* Focus-mode rail hides under ~820px (SPEC §6) */
+@media (max-width: 820px) {
+  .event-main.focus-mode {
+    --host-sidebar: 0px;
+    padding: 8px 12px 40px;
+  }
+
+  .event-main.focus-mode .event-sidebar {
+    display: none;
+  }
+
+  .event-main.focus-mode .event-mobile-nav {
+    display: block;
+  }
+}
+
 @media (max-width: 900px) {
-  .event-main {
+  .event-main:not(.focus-mode) {
     width: 100%;
     padding: 8px 12px 40px;
   }
 
-  .event-sidebar {
+  .event-main:not(.focus-mode) .event-sidebar {
     display: none;
   }
 
-  .event-mobile-nav {
+  .event-main:not(.focus-mode) .event-mobile-nav {
     display: block;
     position: sticky;
     top: calc(var(--nav, 72px) - 4px);
@@ -194,9 +232,18 @@ export default defineComponent({
     margin: 0 -4px 4px;
   }
 
-  .event-content {
+  .event-content:not(.focus-content) {
     padding: 16px;
     border-radius: 18px;
+  }
+}
+
+@media (max-width: 820px) {
+  .event-main.focus-mode .event-mobile-nav {
+    position: sticky;
+    top: calc(var(--nav, 72px) - 4px);
+    z-index: 40;
+    margin: 0 -4px 4px;
   }
 }
 
@@ -206,7 +253,7 @@ export default defineComponent({
     padding: 0 0 88px;
   }
 
-  .event-content {
+  .event-content:not(.focus-content) {
     border-radius: 0;
     border-inline: 0;
     box-shadow: none;

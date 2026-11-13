@@ -20,8 +20,16 @@
       </button>
     </header>
     <div class="stage-screen">
-      <EventTriviaLiveStage v-if="triviaPhase === 'live' && triviaScreen" :screen="triviaScreen" />
-      <EventTriviaPodium v-else-if="triviaPhase === 'results' && triviaScreen" :screen="triviaScreen" />
+      <EventTriviaPodium
+        v-if="showTriviaPodium && triviaScreen"
+        :screen="triviaScreen"
+        :event-name="event?.name || ''"
+      />
+      <EventTriviaLiveStage
+        v-else-if="showTriviaLive && triviaScreen"
+        :screen="triviaScreen"
+        :event-name="event?.name || ''"
+      />
       <div v-else-if="stageMode === 'mosaic'" class="mosaic">
         <figure v-for="asset in mosaicAssets" :key="asset.id">
           <img v-if="asset.type !== 'video'" :src="asset.fullPath" alt="" />
@@ -122,7 +130,7 @@ export default defineComponent({
     this.refreshTriviaScreen();
     this.triviaPollIntervalId = setInterval(() => {
       this.refreshTriviaScreen();
-    }, 4000);
+    }, 2000);
     this.scheduleHideHeader();
   },
 
@@ -160,6 +168,23 @@ export default defineComponent({
 
     triviaPhase(): string {
       return this.triviaScreen?.phase || "photos";
+    },
+
+    triviaCurrentPhase(): string {
+      return this.triviaScreen?.current_phase || this.triviaPhase || "photos";
+    },
+
+    showTriviaPodium(): boolean {
+      if (!this.triviaScreen) return false;
+      return (
+        this.triviaPhase === "results" || this.triviaCurrentPhase === "podium"
+      );
+    },
+
+    showTriviaLive(): boolean {
+      if (!this.triviaScreen) return false;
+      if (this.triviaPhase !== "live") return false;
+      return this.triviaCurrentPhase !== "photos";
     },
 
     showGuestCta(): boolean {

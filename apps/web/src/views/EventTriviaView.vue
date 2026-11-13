@@ -1,345 +1,179 @@
 <template>
-  <div class="trivia-admin">
-    <div v-if="!loaded && !loadError" class="card loading-card" role="status">
-      טוען את הטריוויה...
-    </div>
+  <div class="trivia-builder" dir="rtl" lang="he">
+    <div v-if="!loaded && !loadError" class="tb-loading" role="status">טוען את הטריוויה...</div>
 
-    <div v-else-if="loadError" class="card error-card" role="alert">
-      <p class="title--medium">לא הצלחנו לטעון את הטריוויה</p>
-      <p class="hint">{{ loadError }}</p>
-      <button type="button" class="retry-btn" :disabled="loading" @click="load">
+    <div v-else-if="loadError" class="tb-error" role="alert">
+      <h2>לא הצלחנו לטעון את הטריוויה</h2>
+      <p>{{ loadError }}</p>
+      <button type="button" class="tb-btn tb-btn-primary" :disabled="loading" @click="load">
         {{ loading ? "טוען..." : "נסו שוב" }}
       </button>
     </div>
 
     <template v-else>
-      <header class="page-head">
+      <header class="tb-page-head">
         <div>
-          <p class="kicker">משחק חי</p>
           <h1>טריוויה</h1>
-          <p class="lede">הגדירו מתי המשחק עולה למסך, כתבו שאלות, ועקבו אחרי הניקוד.</p>
+          <p class="tb-lede">
+            בונים את המשחק בדקות. האורחים עונים מהטלפון, בלי אפליקציה, והמסך הגדול באירוע הוא הכוכב.
+          </p>
+          <span class="tb-focus-tag">מצב מיקוד</span>
         </div>
-        <span class="status" :class="form.status">{{ statusLabel }}</span>
+        <div class="tb-head-actions">
+          <span class="tb-status-pill" :class="savePillClass">
+            <i></i> {{ savePillLabel }}
+          </span>
+          <span class="tb-status-pill" :class="statusPillClass">
+            <i></i> {{ statusLabel }}
+          </span>
+          <button type="button" class="tb-btn tb-btn-ghost" @click="templatesOpen = true">תבניות</button>
+          <button type="button" class="tb-btn tb-btn-ghost" @click="togglePreview">
+            {{ previewOpen ? "סגירת תצוגה" : "תצוגה חיה" }}
+          </button>
+          <button type="button" class="tb-btn tb-btn-ghost" @click="openDryRun">ניסוי</button>
+          <button
+            type="button"
+            class="tb-btn tb-btn-primary"
+            :disabled="acting || !questions.length"
+            @click="goLive"
+          >הפעלה על המסך</button>
+        </div>
       </header>
 
-      <div class="tabs" role="tablist" aria-label="אזורי טריוויה">
+      <div class="tb-tabs" role="tablist" aria-label="אזורי טריוויה">
         <button
           v-for="item in tabs"
           :key="item.id"
           type="button"
-          class="tab"
+          class="tb-tab"
           role="tab"
-          :class="{ active: tab === item.id }"
+          :class="{ on: tab === item.id }"
           :aria-selected="tab === item.id"
           @click="setTab(item.id)"
-        >
-          {{ item.label }}
-          <span v-if="item.count !== null" class="tab-count">{{ item.count }}</span>
-        </button>
+        >{{ item.label }}</button>
       </div>
 
-      <section v-show="tab === 'settings'" class="stack">
-        <form class="card" @submit.prevent="saveSettings">
-          <div class="enable-row">
-            <MainCheckbox :value="form.enabled" @onClick="form.enabled = !form.enabled" />
-            <div>
-              <p class="title--small">הפעלת טריוויה לאירוע</p>
-              <p class="hint">כשהאפשרות כבויה המשחק לא יחליף את התמונות, גם אם הוגדר זמן.</p>
-            </div>
-          </div>
+      <TriviaHostRemote
+        :visible="isLive"
+        :busy="acting"
+        :has-questions="questions.length > 0"
+        :current-phase="game.current_phase"
+        @phase="setLivePhase"
+        @photos="runPhotos"
+      />
 
-          <MainInput v-model="form.title" title="כותרת שמוצגת לאורחים" :maxLength="80" />
+      <p v-if="questionsLocked && tab === 'build'" class="tb-lock-note">
+        השאלות נעולות כי הטריוויה על המסך.
+        <button type="button" :disabled="acting" @click="runPhotos">חזרה לתמונות כדי לערוך</button>
+      </p>
 
-          <div class="field-grid">
-            <label class="field">
-              <span class="title--small">מתי להחליף את התמונות</span>
-              <VueDatePicker
-                v-model="form.starts_at"
-                class="date-picker"
-                locale="he"
-                :format="dateFormat"
-                select-text="בחר"
-                cancel-text="בטל"
-                :day-names="days"
-              />
-              <span class="hint">המסך עובר לטריוויה בזמן הזה, אם המשחק פעיל.</span>
-            </label>
-            <label class="field">
-              <span class="title--small">מתי להציג את שלושת המקומות הראשונים</span>
-              <VueDatePicker
-                v-model="form.results_at"
-                class="date-picker"
-                locale="he"
-                :format="dateFormat"
-                select-text="בחר"
-                cancel-text="בטל"
-                :day-names="days"
-              />
-              <span class="hint">אפשר גם להציג את הפודיום ידנית מהבקרה למטה.</span>
-            </label>
-          </div>
+      <div v-show="tab === 'build'" class="tb-mob-tabs">
+        <button type="button" :class="{ on: mobPane === 'list' }" @click="mobPane = 'list'">שאלות</button>
+        <button type="button" :class="{ on: mobPane === 'edit' }" @click="mobPane = 'edit'">עריכה</button>
+        <button type="button" :class="{ on: mobPane === 'preview' }" @click="openPreviewFromMobile">תצוגה</button>
+      </div>
 
-          <div class="save-row">
-            <MainButton text="שמירת הגדרות" color="pink" :loading="savingSettings" />
-          </div>
-        </form>
+      <div v-show="tab === 'build'" class="tb-workspace">
+        <TriviaQuestionList
+          :questions="questions"
+          :selected-index="selectedIndex"
+          :locked="questionsLocked"
+          :cap="questionCap"
+          :mob-on="mobPane === 'list'"
+          @select="selectQuestion"
+          @add="openGalleryForAdd"
+          @reorder="onReorder"
+          @open-templates="templatesOpen = true"
+        />
+        <TriviaQuestionEditor
+          :question="selectedQuestion"
+          :locked="questionsLocked"
+          :at-cap="questions.length >= questionCap"
+          :mob-on="mobPane === 'edit'"
+          :album-photos="albumPhotos"
+          @update="onQuestionUpdate"
+          @change-type="openGalleryForChange"
+          @duplicate="duplicateQuestion"
+          @delete="deleteQuestion"
+        />
+      </div>
 
-        <div class="card">
-          <h2 class="title--medium">מה מוצג על המסך</h2>
-          <p class="hint">בחרו מה האורחים רואים עכשיו. עריכת שאלות נעולה בזמן שהטריוויה או התוצאות על המסך.</p>
-          <div class="modes">
+      <TriviaThemeGrid
+        v-show="tab === 'theme'"
+        :theme="game.theme"
+        @select="onThemeSelect"
+      />
+
+      <TriviaSettingsPanel
+        v-show="tab === 'settings'"
+        :game="game"
+        :guest-url="guestUrl"
+        :copied="copied"
+        @patch="onSettingsPatch"
+        @copy-link="copyLink"
+      />
+
+      <TriviaReportPanel
+        v-show="tab === 'results'"
+        :report="report"
+        :refreshing="refreshing"
+        :team-labels="game.team_labels"
+        @refresh="loadReport()"
+      />
+
+      <TriviaTypeGallery
+        :open="galleryOpen"
+        :mode="galleryMode"
+        @close="galleryOpen = false"
+        @pick="onTypePicked"
+      />
+
+      <TriviaTemplatesModal
+        :open="templatesOpen"
+        :busy="templateBusy"
+        @close="templatesOpen = false"
+        @apply="applyTemplate"
+      />
+
+      <TriviaPreviewDrawer
+        :open="previewOpen"
+        :screen="previewScreen"
+        :phase="previewPhase"
+        :theme="previewTheme"
+        :event-name="eventName"
+        @close="previewOpen = false"
+        @phase="previewPhase = $event"
+        @theme="previewTheme = $event"
+      />
+
+      <!-- Dry-run overlay — no live phase API calls -->
+      <teleport to="body">
+        <div v-if="dryRunOpen" class="tb-dryrun">
+          <div class="tb-dryrun-bar">
+            <b>ניסוי · לא משפיע על המסך באירוע</b>
             <button
+              v-for="p in dryPhases"
+              :key="p.id"
               type="button"
-              class="mode"
-              :class="{ active: screenMode === 'photos', busy: actingAction === 'photos' }"
-              :disabled="actingAction !== null || screenMode === 'photos'"
-              @click="runAction('photos')"
-            >
-              <span class="mode-title">תמונות</span>
-              <span class="mode-text">חזרה לאלבום</span>
-            </button>
-            <button
-              type="button"
-              class="mode"
-              :class="{ active: screenMode === 'live', busy: actingAction === 'show' }"
-              :disabled="actingAction !== null || screenMode === 'live' || !questions.length"
-              @click="runAction('show')"
-            >
-              <span class="mode-title">טריוויה</span>
-              <span class="mode-text">השאלות עולות עכשיו</span>
-            </button>
-            <button
-              type="button"
-              class="mode"
-              :class="{ active: screenMode === 'results', busy: actingAction === 'results' }"
-              :disabled="actingAction !== null || screenMode === 'results' || !canShowResults"
-              @click="runAction('results')"
-            >
-              <span class="mode-title">תוצאות</span>
-              <span class="mode-text">שלושת המקומות הראשונים</span>
-            </button>
+              :class="{ on: previewPhase === p.id }"
+              @click="previewPhase = p.id"
+            >{{ p.label }}</button>
+            <button type="button" @click="dryRunOpen = false">סגירה</button>
           </div>
-          <p v-if="!questions.length" class="hint">כדי להעלות את הטריוויה למסך צריך לשמור לפחות שאלה אחת.</p>
-
-          <div class="join">
-            <div>
-              <p class="title--small">קישור לאורחים</p>
-              <p class="hint">האורחים נכנסים מהטלפון, בוחרים כינוי ומצטרפים למשחק.</p>
-            </div>
-            <div class="join-row">
-              <input class="join-input" readonly :value="guestUrl" @focus="selectGuestUrl" />
-              <button type="button" class="copy-btn" @click="copyLink">{{ copied ? "הועתק" : "העתקה" }}</button>
-            </div>
+          <div class="tb-dryrun-stage">
+            <EventTriviaPodium
+              v-if="previewPhase === 'podium' && previewScreen"
+              :screen="previewScreen"
+              :event-name="eventName"
+            />
+            <EventTriviaLiveStage
+              v-else-if="previewScreen"
+              :screen="previewScreen"
+              :event-name="eventName"
+            />
           </div>
         </div>
-      </section>
-
-      <section v-show="tab === 'questions'" class="stack">
-        <div class="card questions-card">
-          <div class="section-head">
-            <div>
-              <h2 class="title--medium">שאלות</h2>
-              <p class="hint">עד 20 שאלות. לכל שאלה לפחות שתי תשובות, ואחת מהן מסומנת כנכונה.</p>
-            </div>
-            <button type="button" class="add-btn" :disabled="questionsLocked || questions.length >= 20" @click="addQuestion">
-              הוספת שאלה
-            </button>
-          </div>
-
-          <p v-if="questionsLocked" class="lock-note">
-            השאלות נעולות כי הטריוויה על המסך.
-            <button type="button" class="inline-link" :disabled="actingAction !== null" @click="runAction('photos')">
-              חזרה לתמונות כדי לערוך
-            </button>
-          </p>
-
-          <div v-if="!questions.length" class="empty">
-            <p class="title--medium">עדיין אין שאלות</p>
-            <p class="hint">התחילו משאלה קצרה, שתי תשובות, וסמנו מה נכון.</p>
-          </div>
-
-          <article
-            v-for="(question, questionIndex) in questions"
-            :key="question.key"
-            class="question"
-            :class="{ open: openQuestionKey === question.key, invalid: invalidKeys.includes(question.key) }"
-          >
-            <div class="question-head" @click="toggleQuestion(question.key)">
-              <span class="q-num">{{ questionIndex + 1 }}</span>
-              <span class="q-preview">{{ question.prompt.trim() || "שאלה חדשה" }}</span>
-              <span class="q-meta">{{ question.time_limit_seconds }} שנ׳</span>
-              <div class="row-actions" @click.stop>
-                <button type="button" class="icon-btn" aria-label="הזזה למעלה" :disabled="questionsLocked || questionIndex === 0" @click="moveQuestion(questionIndex, -1)">
-                  <span class="material-symbols-outlined">keyboard_arrow_up</span>
-                </button>
-                <button type="button" class="icon-btn" aria-label="הזזה למטה" :disabled="questionsLocked || questionIndex === questions.length - 1" @click="moveQuestion(questionIndex, 1)">
-                  <span class="material-symbols-outlined">keyboard_arrow_down</span>
-                </button>
-                <button type="button" class="icon-btn danger" aria-label="מחיקת שאלה" :disabled="questionsLocked" @click="removeQuestion(questionIndex)">
-                  <span class="material-symbols-outlined">delete</span>
-                </button>
-              </div>
-              <span class="material-symbols-outlined chevron">{{ openQuestionKey === question.key ? "expand_less" : "expand_more" }}</span>
-            </div>
-
-            <div v-show="openQuestionKey === question.key" class="question-body">
-              <label class="field">
-                <span class="title--small">השאלה</span>
-                <textarea
-                  v-model="question.prompt"
-                  :disabled="questionsLocked"
-                  maxlength="500"
-                  rows="2"
-                  placeholder="לדוגמה: איפה נפגשנו לראשונה?"
-                  @input="touchQuestion(question.key)"
-                ></textarea>
-              </label>
-
-              <div class="meta">
-                <label>
-                  שניות
-                  <input v-model.number="question.time_limit_seconds" type="number" min="5" max="120" :disabled="questionsLocked" />
-                </label>
-                <label>
-                  נקודות
-                  <input v-model.number="question.max_points" type="number" min="100" max="10000" :disabled="questionsLocked" />
-                </label>
-              </div>
-
-              <div class="options">
-                <div
-                  v-for="(option, optionIndex) in question.options"
-                  :key="option.key"
-                  class="option"
-                  :class="{ correct: option.is_correct }"
-                >
-                  <input
-                    v-model="option.label"
-                    :disabled="questionsLocked"
-                    maxlength="200"
-                    placeholder="תשובה"
-                    @input="touchQuestion(question.key)"
-                  />
-                  <button
-                    type="button"
-                    class="mark"
-                    :class="{ on: option.is_correct }"
-                    :disabled="questionsLocked"
-                    @click="option.is_correct = !option.is_correct; touchQuestion(question.key)"
-                  >
-                    {{ option.is_correct ? "נכונה" : "סמן כנכונה" }}
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-btn"
-                    aria-label="מחיקת תשובה"
-                    :disabled="questionsLocked || question.options.length <= 2"
-                    @click="question.options.splice(optionIndex, 1)"
-                  >
-                    <span class="material-symbols-outlined">close</span>
-                  </button>
-                </div>
-              </div>
-              <button type="button" class="text-button" :disabled="questionsLocked || question.options.length >= 6" @click="addOption(question)">
-                תשובה נוספת
-              </button>
-              <p v-if="invalidKeys.includes(question.key)" class="error-note">מלאו את השאלה ואת כל התשובות, וסמנו לפחות תשובה נכונה אחת.</p>
-            </div>
-          </article>
-
-          <div v-if="questions.length" class="save-row">
-            <MainButton text="שמירת שאלות" color="pink" :loading="savingQuestions" :disabled="questionsLocked" @onClick="saveQuestions" />
-          </div>
-        </div>
-      </section>
-
-      <section v-show="tab === 'results'" class="stack">
-        <div class="stats" v-if="report">
-          <div class="stat">
-            <span class="stat-label">שחקנים</span>
-            <strong>{{ report.summary.player_count }}</strong>
-          </div>
-          <div class="stat">
-            <span class="stat-label">ממוצע נקודות</span>
-            <strong>{{ report.summary.average_score }}</strong>
-          </div>
-          <div class="stat">
-            <span class="stat-label">דיוק ממוצע</span>
-            <strong>{{ report.summary.average_accuracy === null ? "—" : percent(report.summary.average_accuracy) }}</strong>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-head">
-            <h2 class="title--medium">טבלת ניקוד</h2>
-            <button type="button" class="text-button" :disabled="refreshing" @click="loadReport()">
-              {{ refreshing ? "מרענן..." : "רענון" }}
-            </button>
-          </div>
-
-          <div v-if="report && report.players.length" class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>שחקן</th>
-                  <th>ניקוד</th>
-                  <th>נכונות</th>
-                  <th>זמן</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template v-for="player in report.players" :key="player.id">
-                  <tr class="player-row" :class="{ open: openPlayerId === player.id }" @click="togglePlayer(player.id)">
-                    <td><span class="rank" :class="'rank-' + player.rank">{{ player.rank }}</span></td>
-                    <td>
-                      <div class="player-cell">
-                        <img v-if="player.avatar_url" :src="player.avatar_url" alt="" />
-                        <span v-else class="avatar-fallback">{{ player.nickname.slice(0, 1) }}</span>
-                        {{ player.nickname }}
-                      </div>
-                    </td>
-                    <td>{{ player.score }}</td>
-                    <td>{{ player.correct_count }}</td>
-                    <td>{{ seconds(player.total_time_ms) }}</td>
-                  </tr>
-                  <tr v-if="openPlayerId === player.id" class="detail-row">
-                    <td colspan="5">
-                      <ul class="answers">
-                        <li v-for="answer in player.answers" :key="answer.question_id">
-                          <span class="chip" :class="answer.is_correct ? 'ok' : 'bad'">{{ answer.is_correct ? "נכון" : "לא נכון" }}</span>
-                          <span class="answer-prompt">{{ questionPrompt(answer.question_id) }}</span>
-                          <span class="answer-meta">{{ answer.points_awarded }} נק׳ · {{ seconds(answer.elapsed_ms) }}</span>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-          <div v-else class="empty">
-            <p class="title--medium">עדיין אין תוצאות</p>
-            <p class="hint">ברגע שאורחים יצטרפו ויענו, הניקוד יופיע כאן.</p>
-          </div>
-        </div>
-
-        <div v-if="report && report.questions.length" class="card">
-          <h2 class="title--medium">קושי השאלות</h2>
-          <p class="hint">אחוז התשובות הנכונות. שאלה עם אחוז נמוך הייתה קשה יותר.</p>
-          <div class="diff-list">
-            <div v-for="question in report.questions" :key="question.id" class="diff-row">
-              <div class="diff-top">
-                <span>{{ question.prompt }}</span>
-                <strong>{{ question.accuracy === null ? "אין תשובות" : percent(question.accuracy) }}</strong>
-              </div>
-              <div class="bar">
-                <span :style="{ width: barWidth(question.accuracy) }" :class="barTone(question.accuracy)"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      </teleport>
     </template>
   </div>
 </template>
@@ -347,114 +181,120 @@
 <script lang="ts">
 import axios from "axios";
 import { defineComponent } from "vue";
-import MainButton from "@/components/library/buttons/MainButton.vue";
-import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
-import MainInput from "@/components/library/inputs/MainInput.vue";
+import EventTriviaLiveStage from "@/components/event/EventTriviaLiveStage.vue";
+import EventTriviaPodium from "@/components/event/EventTriviaPodium.vue";
+import TriviaQuestionList from "@/components/event/trivia/TriviaQuestionList.vue";
+import TriviaQuestionEditor from "@/components/event/trivia/TriviaQuestionEditor.vue";
+import TriviaTypeGallery from "@/components/event/trivia/TriviaTypeGallery.vue";
+import TriviaPreviewDrawer from "@/components/event/trivia/TriviaPreviewDrawer.vue";
+import TriviaThemeGrid from "@/components/event/trivia/TriviaThemeGrid.vue";
+import TriviaSettingsPanel from "@/components/event/trivia/TriviaSettingsPanel.vue";
+import TriviaReportPanel, {
+  TriviaReportData,
+} from "@/components/event/trivia/TriviaReportPanel.vue";
+import TriviaTemplatesModal from "@/components/event/trivia/TriviaTemplatesModal.vue";
+import TriviaHostRemote from "@/components/event/trivia/TriviaHostRemote.vue";
 import ErrorsHandler from "@/helpers/errorsHandler";
-import Time from "@/helpers/time";
 import { notify } from "@/helpers/notify";
+import Time from "@/helpers/time";
+import { findTriviaTemplate } from "@/helpers/triviaTemplates";
+import {
+  TriviaScreenPayload,
+  TriviaCurrentPhase,
+  TRIVIA_QUESTION_CAP,
+  defaultConfigForType,
+  defaultOptionsForType,
+  isUnscoredType,
+} from "@/helpers/triviaTypes";
+import {
+  BuilderTabId,
+  MobilePaneId,
+  TriviaBuilderGame,
+  TriviaBuilderQuestion,
+  applyTypeChange,
+  blankBuilderQuestion,
+  gameFromApi,
+  nextBuilderKey,
+  questionFromApi,
+  questionPayload,
+  toPublicQuestion,
+} from "@/helpers/triviaBuilder";
 
-type TriviaTabId = "settings" | "questions" | "results";
-const TRIVIA_TABS: TriviaTabId[] = ["settings", "questions", "results"];
-
-interface TriviaOptionForm {
-  key: string;
-  label: string;
-  is_correct: boolean;
-}
-
-interface TriviaQuestionForm {
-  key: string;
-  prompt: string;
-  time_limit_seconds: number;
-  max_points: number;
-  options: TriviaOptionForm[];
-}
-
-interface ReportAnswer {
-  question_id: number;
-  is_correct: boolean;
-  points_awarded: number;
-  elapsed_ms: number;
-}
-
-interface ReportPlayer {
-  id: number;
-  rank: number;
-  nickname: string;
-  avatar_url?: string | null;
-  score: number;
-  correct_count: number;
-  total_time_ms: number;
-  answers: ReportAnswer[];
-}
-
-interface ReportQuestion {
-  id: number;
-  prompt: string;
-  accuracy: number | null;
-}
-
-interface TriviaReport {
-  summary: {
-    player_count: number;
-    average_score: number;
-    average_accuracy: number | null;
-  };
-  players: ReportPlayer[];
-  questions: ReportQuestion[];
-}
-
-let keySeed = 0;
-function nextKey(): string {
-  keySeed += 1;
-  return `q-${keySeed}`;
-}
-
-function blankQuestion(): TriviaQuestionForm {
-  return {
-    key: nextKey(),
-    prompt: "",
-    time_limit_seconds: 20,
-    max_points: 1000,
-    options: [
-      { key: nextKey(), label: "", is_correct: true },
-      { key: nextKey(), label: "", is_correct: false },
-    ],
-  };
-}
+const TABS: BuilderTabId[] = ["build", "theme", "settings", "results"];
+const AUTOSAVE_MS = 800;
 
 export default defineComponent({
   name: "EventTriviaView",
 
-  components: { MainButton, MainCheckbox, MainInput },
+  components: {
+    EventTriviaLiveStage,
+    EventTriviaPodium,
+    TriviaQuestionList,
+    TriviaQuestionEditor,
+    TriviaTypeGallery,
+    TriviaPreviewDrawer,
+    TriviaThemeGrid,
+    TriviaSettingsPanel,
+    TriviaReportPanel,
+    TriviaTemplatesModal,
+    TriviaHostRemote,
+  },
 
   data() {
     return {
       loaded: false,
       loading: false,
       loadError: "" as string,
-      savingSettings: false,
-      savingQuestions: false,
-      actingAction: null as "show" | "results" | "photos" | null,
+      tab: "build" as BuilderTabId,
+      mobPane: "edit" as MobilePaneId,
+      questions: [] as TriviaBuilderQuestion[],
+      selectedIndex: 0,
+      game: {
+        enabled: true,
+        status: "draft",
+        phase: "photos",
+        current_phase: "lobby",
+        title: "טריוויה",
+        theme: "elegant",
+        pace: "host",
+        teams_mode: "none",
+        team_labels: { a: "צד עמית", b: "צד גל" },
+        speed_bonus: true,
+        prize_text: "",
+        reveal_seconds: 6,
+        default_time: 20,
+        default_points: 1000,
+        current_question_id: null,
+        starts_at: null,
+        results_at: null,
+        join_path: "",
+        question_cap: TRIVIA_QUESTION_CAP,
+      } as TriviaBuilderGame,
+      report: null as TriviaReportData | null,
       refreshing: false,
+      acting: false,
+      templateBusy: false,
+      galleryOpen: false,
+      galleryMode: "add" as "add" | "change",
+      templatesOpen: false,
+      previewOpen: false,
+      dryRunOpen: false,
+      previewPhase: "lobby" as TriviaCurrentPhase | string,
+      previewTheme: "elegant",
+      saveState: "idle" as "idle" | "pending" | "saving" | "saved" | "error",
+      questionSaveTimer: null as ReturnType<typeof setTimeout> | null,
+      settingsSaveTimer: null as ReturnType<typeof setTimeout> | null,
+      savedClearTimer: null as ReturnType<typeof setTimeout> | null,
       copied: false,
       copyTimer: null as ReturnType<typeof setTimeout> | null,
-      tab: "settings" as TriviaTabId,
-      openQuestionKey: null as string | null,
-      invalidKeys: [] as string[],
-      openPlayerId: null as number | null,
-      form: {
-        enabled: false,
-        status: "draft",
-        title: "טריוויה",
-        starts_at: null as Date | null,
-        results_at: null as Date | null,
-        join_path: "",
-      },
-      questions: [] as TriviaQuestionForm[],
-      report: null as TriviaReport | null,
-      days: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
+      suppressAutosave: false,
+      dryPhases: [
+        { id: "lobby", label: "הצטרפות" },
+        { id: "question", label: "שאלה" },
+        { id: "reveal", label: "חשיפה" },
+        { id: "leaderboard", label: "ניקוד" },
+        { id: "podium", label: "פודיום" },
+      ],
     };
   },
 
@@ -462,26 +302,29 @@ export default defineComponent({
     eventId(): number {
       return this.$store.getters["event/getEvent"]?.id;
     },
-
+    eventName(): string {
+      return this.$store.getters["event/getEventName"] || "";
+    },
+    eventPath(): string {
+      return this.$store.getters["event/getEventPath"] || "";
+    },
+    questionCap(): number {
+      return this.game.question_cap || TRIVIA_QUESTION_CAP;
+    },
     questionsLocked(): boolean {
-      return this.form.status === "live" || this.form.status === "results";
+      return this.game.status === "live" || this.game.status === "results";
     },
-
-    screenMode(): "photos" | "live" | "results" {
-      if (this.form.status === "live") return "live";
-      if (this.form.status === "results") return "results";
-      return "photos";
+    isLive(): boolean {
+      return this.game.status === "live" || this.game.status === "results";
     },
-
-    canShowResults(): boolean {
-      return this.form.status === "live" || this.form.status === "results";
+    selectedQuestion(): TriviaBuilderQuestion | null {
+      return this.questions[this.selectedIndex] || null;
     },
-
     guestUrl(): string {
-      const path = this.form.join_path || `/event/trivia/${this.$store.getters["event/getEventPath"]}`;
+      const path =
+        this.game.join_path || `/event/trivia/${this.eventPath}`;
       return window.location.origin + path;
     },
-
     statusLabel(): string {
       const labels: Record<string, string> = {
         draft: "טיוטה",
@@ -489,15 +332,156 @@ export default defineComponent({
         live: "על המסך",
         results: "תוצאות על המסך",
       };
-      return labels[this.form.status] || "טיוטה";
+      return labels[this.game.status] || "טיוטה";
     },
-
-    tabs(): { id: TriviaTabId; label: string; count: number | null }[] {
+    statusPillClass(): string {
+      if (this.game.status === "live") return "live";
+      return "draft";
+    },
+    savePillClass(): string {
+      if (this.saveState === "saved") return "saved";
+      if (this.saveState === "saving" || this.saveState === "pending") return "saving";
+      return "draft";
+    },
+    savePillLabel(): string {
+      if (this.saveState === "saving") return "שומר…";
+      if (this.saveState === "pending") return "שומר…";
+      if (this.saveState === "saved") return "נשמר עכשיו";
+      if (this.saveState === "error") return "שמירה נכשלה";
+      return "טיוטה";
+    },
+    tabs(): { id: BuilderTabId; label: string }[] {
       return [
-        { id: "settings", label: "הגדרות", count: null },
-        { id: "questions", label: "שאלות", count: this.questions.length },
-        { id: "results", label: "תוצאות", count: this.report?.summary.player_count ?? 0 },
+        { id: "build", label: "בנייה" },
+        { id: "theme", label: "עיצוב" },
+        { id: "settings", label: "הגדרות" },
+        { id: "results", label: "תוצאות" },
       ];
+    },
+    albumPhotos(): { id: number; url: string }[] {
+      const assets =
+        this.$store.getters["event/getActiveGuestAssets"] ||
+        this.$store.getters["event/getEvent"]?.assets ||
+        [];
+      return (assets as any[])
+        .filter((a) => a && (a.type === "image" || !a.type) && (a.fullPath || a.url || a.path))
+        .slice(0, 12)
+        .map((a) => ({
+          id: a.id,
+          url: a.fullPath || a.url || a.path,
+        }));
+    },
+    previewScreen(): TriviaScreenPayload | null {
+      const q = this.selectedQuestion;
+      const phase = this.previewPhase;
+      const theme = this.previewTheme || this.game.theme;
+      const publicQ = toPublicQuestion(q);
+      const sampleTop = [
+        { rank: 1, nickname: "נועה", score: 4200, team: "a" },
+        { rank: 2, nickname: "יואב", score: 3800, team: "b" },
+        { rank: 3, nickname: "מיכל", score: 3100, team: "a" },
+      ];
+      const joining = [
+        { nickname: "נועה" },
+        { nickname: "יואב" },
+        { nickname: "מיכל" },
+        { nickname: "איתי" },
+      ];
+
+      if (phase === "podium") {
+        return {
+          phase: "results",
+          current_phase: "podium",
+          theme,
+          pace: this.game.pace,
+          title: this.game.title,
+          player_count: 12,
+          join_path: this.game.join_path,
+          top: sampleTop,
+          prize_text: this.game.prize_text || "הפרס: בקבוק יין",
+          teams:
+            this.game.teams_mode === "sides"
+              ? {
+                  mode: "sides",
+                  labels: this.game.team_labels,
+                  scores: { a: 12000, b: 9800 },
+                }
+              : null,
+          server_now: new Date().toISOString(),
+          event_name: this.eventName,
+        };
+      }
+
+      const isReveal = phase === "reveal";
+      let question = publicQ;
+      if (question && isReveal) {
+        question = {
+          ...question,
+          options: (question.options || []).map((o) => ({
+            ...o,
+            is_correct: !!o.is_correct,
+          })),
+        };
+      } else if (question) {
+        question = {
+          ...question,
+          options: (question.options || []).map(({ id, label, sort_order }) => ({
+            id,
+            label,
+            sort_order,
+          })),
+        };
+      }
+
+      const tallies =
+        isReveal || q?.type === "poll" || q?.type === "thisorthat"
+          ? {
+              mode: "options" as const,
+              total_answers: 24,
+              options: (question?.options || []).map((o, i) => ({
+                option_id: o.id || i + 1,
+                count: [10, 8, 4, 2][i] || 1,
+                percent: [42, 33, 17, 8][i] || 5,
+              })),
+            }
+          : null;
+
+      return {
+        phase: "live",
+        current_phase: phase,
+        theme,
+        pace: this.game.pace,
+        title: this.game.title,
+        player_count: 12,
+        join_path: this.game.join_path,
+        top: sampleTop,
+        joining: phase === "lobby" ? joining : undefined,
+        teams:
+          this.game.teams_mode === "sides"
+            ? {
+                mode: "sides",
+                labels: this.game.team_labels,
+                scores: { a: 4200, b: 3800 },
+              }
+            : null,
+        prize_text: this.game.prize_text,
+        question: phase === "lobby" || phase === "leaderboard" ? null : question,
+        tallies: isReveal || q?.type === "poll" || q?.type === "thisorthat" ? tallies : null,
+        fun_fact: isReveal ? q?.fun_fact || null : null,
+        correct: isReveal
+          ? {
+              option_ids: (q?.options || [])
+                .map((o, i) => (o.is_correct ? o.id ?? i + 1 : null))
+                .filter((x): x is number => x != null),
+              number:
+                q?.type === "number"
+                  ? Number((q.config as any)?.correct ?? 0)
+                  : undefined,
+            }
+          : null,
+        server_now: new Date().toISOString(),
+        event_name: this.eventName,
+      };
     },
   },
 
@@ -507,9 +491,14 @@ export default defineComponent({
       handler(value: unknown) {
         const raw = Array.isArray(value) ? value[0] : value;
         const next = typeof raw === "string" ? raw : "";
-        this.tab = TRIVIA_TABS.includes(next as TriviaTabId)
-          ? (next as TriviaTabId)
-          : "settings";
+        const map: Record<string, BuilderTabId> = {
+          build: "build",
+          theme: "theme",
+          settings: "settings",
+          results: "results",
+          questions: "build",
+        };
+        this.tab = map[next] || "build";
       },
     },
   },
@@ -519,27 +508,20 @@ export default defineComponent({
   },
 
   beforeUnmount() {
+    if (this.questionSaveTimer) clearTimeout(this.questionSaveTimer);
+    if (this.settingsSaveTimer) clearTimeout(this.settingsSaveTimer);
+    if (this.savedClearTimer) clearTimeout(this.savedClearTimer);
     if (this.copyTimer) clearTimeout(this.copyTimer);
   },
 
   methods: {
-    setTab(id: TriviaTabId) {
+    setTab(id: BuilderTabId) {
       this.tab = id;
       const query = { ...this.$route.query } as Record<string, unknown>;
-      if (id === "settings") {
-        delete query.tab;
-      } else {
-        query.tab = id;
-      }
+      if (id === "build") delete query.tab;
+      else query.tab = id;
       this.$router.replace({ query: query as never }).catch(() => undefined);
-    },
-
-    dateFormat(date: Date): string {
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      return `${day}/${month}/${date.getFullYear()} ${hours}:${minutes}`;
+      if (id === "results") this.loadReport(true);
     },
 
     fail(error: unknown, fallback: string) {
@@ -550,29 +532,35 @@ export default defineComponent({
       });
     },
 
-    applyGame(data: any) {
-      this.form.enabled = !!data.enabled;
-      this.form.status = data.status || "draft";
-      this.form.title = data.title || "טריוויה";
-      this.form.starts_at = data.starts_at ? new Date(data.starts_at) : null;
-      this.form.results_at = data.results_at ? new Date(data.results_at) : null;
-      this.form.join_path = data.join_path || "";
-      const openIndex = this.questions.findIndex((question) => question.key === this.openQuestionKey);
-      this.questions = (data.questions || []).map((question: any) => ({
-        key: nextKey(),
-        prompt: question.prompt,
-        time_limit_seconds: question.time_limit_seconds,
-        max_points: question.max_points,
-        options: (question.options || []).map((option: any) => ({
-          key: nextKey(),
-          label: option.label,
-          is_correct: !!option.is_correct,
-        })),
-      }));
-      this.openQuestionKey = openIndex >= 0 && this.questions[openIndex]
-        ? this.questions[openIndex].key
-        : null;
-      this.invalidKeys = [];
+    markSaved() {
+      this.saveState = "saved";
+      if (this.savedClearTimer) clearTimeout(this.savedClearTimer);
+      this.savedClearTimer = setTimeout(() => {
+        if (this.saveState === "saved") this.saveState = "idle";
+      }, 2500);
+    },
+
+    applyAdminPayload(data: any, keepSelection = true) {
+      this.suppressAutosave = true;
+      const prevId = keepSelection ? this.selectedQuestion?.id : null;
+      const prevKey = keepSelection ? this.selectedQuestion?.key : null;
+      this.game = gameFromApi(data);
+      this.previewTheme = this.game.theme;
+      this.questions = (data.questions || []).map(questionFromApi);
+      if (!this.questions.length) {
+        this.selectedIndex = 0;
+      } else if (prevId != null) {
+        const idx = this.questions.findIndex((q) => q.id === prevId);
+        this.selectedIndex = idx >= 0 ? idx : 0;
+      } else if (prevKey) {
+        const idx = this.questions.findIndex((q) => q.key === prevKey);
+        this.selectedIndex = idx >= 0 ? idx : Math.min(this.selectedIndex, this.questions.length - 1);
+      } else {
+        this.selectedIndex = Math.min(this.selectedIndex, this.questions.length - 1);
+      }
+      this.$nextTick(() => {
+        this.suppressAutosave = false;
+      });
     },
 
     async load() {
@@ -580,22 +568,16 @@ export default defineComponent({
       this.loadError = "";
       try {
         const game = await axios.get(`events/${this.eventId}/trivia/admin`);
-        this.applyGame(game.data.data);
+        this.applyAdminPayload(game.data.data, false);
         this.loaded = true;
         try {
-          const report = await axios.get(
-            `events/${this.eventId}/trivia/admin/report`
-          );
+          const report = await axios.get(`events/${this.eventId}/trivia/admin/report`);
           this.report = report.data.data;
-        } catch (reportError) {
+        } catch {
           this.report = null;
-          this.fail(reportError, "לא הצלחנו לטעון תוצאות");
         }
       } catch (error) {
-        this.loadError = ErrorsHandler.getErrorMessage(
-          error,
-          "לא הצלחנו לטעון את הטריוויה"
-        );
+        this.loadError = ErrorsHandler.getErrorMessage(error, "לא הצלחנו לטעון את הטריוויה");
         this.fail(error, "לא הצלחנו לטעון את הטריוויה");
         this.loaded = false;
       } finally {
@@ -609,121 +591,430 @@ export default defineComponent({
         const report = await axios.get(`events/${this.eventId}/trivia/admin/report`);
         this.report = report.data.data;
       } catch (error) {
-        this.fail(error, "לא הצלחנו לטעון תוצאות");
+        if (!silent) this.fail(error, "לא הצלחנו לטעון תוצאות");
       } finally {
         if (!silent) this.refreshing = false;
       }
     },
 
+    selectQuestion(index: number) {
+      this.selectedIndex = index;
+      this.mobPane = "edit";
+    },
+
+    scheduleQuestionSave() {
+      if (this.suppressAutosave || this.questionsLocked) return;
+      const q = this.selectedQuestion;
+      if (!q?.id) return;
+      this.saveState = "pending";
+      if (this.questionSaveTimer) clearTimeout(this.questionSaveTimer);
+      this.questionSaveTimer = setTimeout(() => {
+        this.patchQuestion(q);
+      }, AUTOSAVE_MS);
+    },
+
+    async patchQuestion(q: TriviaBuilderQuestion) {
+      if (!q.id || this.questionsLocked) return;
+      this.saveState = "saving";
+      try {
+        const res = await axios.patch(
+          `events/${this.eventId}/trivia/admin/questions/${q.id}`,
+          questionPayload(q)
+        );
+        this.applyAdminPayload(res.data.data);
+        this.markSaved();
+      } catch (error) {
+        this.saveState = "error";
+        this.fail(error, "לא הצלחנו לשמור את השאלה");
+      }
+    },
+
+    onQuestionUpdate(next: TriviaBuilderQuestion) {
+      const idx = this.questions.findIndex((q) => q.key === next.key);
+      if (idx < 0) return;
+      this.questions.splice(idx, 1, next);
+      this.scheduleQuestionSave();
+    },
+
+    scheduleSettingsSave() {
+      if (this.suppressAutosave) return;
+      this.saveState = "pending";
+      if (this.settingsSaveTimer) clearTimeout(this.settingsSaveTimer);
+      this.settingsSaveTimer = setTimeout(() => {
+        this.saveSettings();
+      }, AUTOSAVE_MS);
+    },
+
     async saveSettings() {
-      this.savingSettings = true;
+      this.saveState = "saving";
       try {
         const res = await axios.put(`events/${this.eventId}/trivia/admin`, {
-          enabled: this.form.enabled,
-          title: this.form.title || "טריוויה",
-          starts_at: this.form.starts_at ? Time.toUTC(this.form.starts_at) : null,
-          results_at: this.form.results_at ? Time.toUTC(this.form.results_at) : null,
+          enabled: this.game.enabled,
+          title: this.game.title || "טריוויה",
+          starts_at: this.game.starts_at ? Time.toUTC(this.game.starts_at) : null,
+          results_at: this.game.results_at ? Time.toUTC(this.game.results_at) : null,
+          theme: this.game.theme,
+          pace: this.game.pace,
+          teams_mode: this.game.teams_mode,
+          team_labels: this.game.team_labels,
+          speed_bonus: this.game.speed_bonus,
+          prize_text: this.game.prize_text || null,
+          reveal_seconds: this.game.reveal_seconds,
+          default_time: this.game.default_time,
+          default_points: this.game.default_points,
         });
-        this.applyGame(res.data.data);
-        notify({ text: "ההגדרות נשמרו", type: "success", duration: 3000 });
+        this.applyAdminPayload(res.data.data);
+        this.markSaved();
       } catch (error) {
+        this.saveState = "error";
         this.fail(error, "לא הצלחנו לשמור את ההגדרות");
-      } finally {
-        this.savingSettings = false;
       }
     },
 
-    addQuestion() {
-      if (this.questions.length >= 20 || this.questionsLocked) return;
-      const question = blankQuestion();
-      this.questions.push(question);
-      this.openQuestionKey = question.key;
+    onSettingsPatch(partial: Partial<TriviaBuilderGame>) {
+      this.game = { ...this.game, ...partial } as TriviaBuilderGame;
+      this.scheduleSettingsSave();
     },
 
-    removeQuestion(index: number) {
+    onThemeSelect(id: string) {
+      this.game.theme = id;
+      this.previewTheme = id;
+      this.scheduleSettingsSave();
+    },
+
+    openGalleryForAdd() {
       if (this.questionsLocked) return;
-      if (!window.confirm("למחוק את השאלה?")) return;
-      const [removed] = this.questions.splice(index, 1);
-      if (removed && this.openQuestionKey === removed.key) {
-        this.openQuestionKey = null;
-      }
-    },
-
-    toggleQuestion(key: string) {
-      this.openQuestionKey = this.openQuestionKey === key ? null : key;
-    },
-
-    touchQuestion(key: string) {
-      this.invalidKeys = this.invalidKeys.filter((item) => item !== key);
-    },
-
-    addOption(question: TriviaQuestionForm) {
-      if (question.options.length >= 6) return;
-      question.options.push({ key: nextKey(), label: "", is_correct: false });
-    },
-
-    moveQuestion(index: number, direction: number) {
-      const next = index + direction;
-      const copy = [...this.questions];
-      const [item] = copy.splice(index, 1);
-      copy.splice(next, 0, item);
-      this.questions = copy;
-    },
-
-    async saveQuestions() {
-      const invalid = this.questions
-        .filter((question) => {
-          const incomplete = !question.prompt.trim() || question.options.some((option) => !option.label.trim());
-          const missingCorrect = !question.options.some((option) => option.is_correct);
-          return incomplete || missingCorrect;
-        })
-        .map((question) => question.key);
-
-      if (invalid.length) {
-        this.invalidKeys = invalid;
-        this.openQuestionKey = invalid[0];
-        notify({ text: "מלאו את כל השאלות והתשובות, וסמנו תשובה נכונה", type: "error", duration: 4000 });
+      if (this.questions.length >= this.questionCap) {
+        notify({
+          text: `אפשר עד ${this.questionCap} שאלות`,
+          type: "error",
+          duration: 4000,
+        });
         return;
       }
+      this.galleryMode = "add";
+      this.galleryOpen = true;
+    },
 
-      this.savingQuestions = true;
-      try {
-        const res = await axios.put(`events/${this.eventId}/trivia/admin/questions`, {
-          questions: this.questions.map((question) => ({
-            prompt: question.prompt.trim(),
-            time_limit_seconds: question.time_limit_seconds,
-            max_points: question.max_points,
-            options: question.options.map((option) => ({
-              label: option.label.trim(),
-              is_correct: option.is_correct,
-            })),
-          })),
+    openGalleryForChange() {
+      if (this.questionsLocked || !this.selectedQuestion) return;
+      this.galleryMode = "change";
+      this.galleryOpen = true;
+    },
+
+    async onTypePicked(typeId: string) {
+      this.galleryOpen = false;
+      if (this.galleryMode === "add") {
+        await this.addQuestion(typeId);
+        return;
+      }
+      const q = this.selectedQuestion;
+      if (!q) return;
+      if (q.type === typeId) return;
+      const losesData =
+        q.options.some((o) => o.label.trim()) ||
+        q.type === "number" ||
+        q.type === "photo";
+      if (losesData && !window.confirm("להחליף סוג? נתונים ספציפיים לסוג עלולים להימחק.")) {
+        return;
+      }
+      const next = applyTypeChange(q, typeId);
+      this.onQuestionUpdate(next);
+    },
+
+    async addQuestion(type: string) {
+      if (this.questionsLocked) return;
+      if (this.questions.length >= this.questionCap) {
+        notify({
+          text: `אפשר עד ${this.questionCap} שאלות`,
+          type: "error",
+          duration: 4000,
         });
-        this.applyGame(res.data.data);
-        notify({ text: "השאלות נשמרו", type: "success", duration: 3000 });
+        return;
+      }
+      const draft = blankBuilderQuestion(type, {
+        time: this.game.default_time,
+        points: this.game.default_points,
+      });
+      this.saveState = "saving";
+      try {
+        const res = await axios.post(
+          `events/${this.eventId}/trivia/admin/questions`,
+          questionPayload(draft)
+        );
+        this.applyAdminPayload(res.data.data, false);
+        this.selectedIndex = this.questions.length - 1;
+        this.mobPane = "edit";
+        this.markSaved();
       } catch (error) {
-        this.fail(error, "לא הצלחנו לשמור את השאלות");
-      } finally {
-        this.savingQuestions = false;
+        this.saveState = "error";
+        this.fail(error, "לא הצלחנו להוסיף שאלה");
       }
     },
 
-    async runAction(action: "show" | "results" | "photos") {
-      this.actingAction = action;
+    async duplicateQuestion() {
+      const q = this.selectedQuestion;
+      if (!q || this.questionsLocked) return;
+      if (this.questions.length >= this.questionCap) {
+        notify({
+          text: `אפשר עד ${this.questionCap} שאלות`,
+          type: "error",
+          duration: 4000,
+        });
+        return;
+      }
+      const copy: TriviaBuilderQuestion = {
+        ...q,
+        key: nextBuilderKey("q"),
+        id: undefined,
+        prompt: q.prompt ? `${q.prompt} (העתק)` : "",
+        options: q.options.map((o) => ({
+          ...o,
+          key: nextBuilderKey("o"),
+          id: undefined,
+        })),
+        config: q.config ? { ...q.config } : null,
+      };
+      this.saveState = "saving";
       try {
-        const res = await axios.post(`events/${this.eventId}/trivia/admin/${action}`);
-        this.applyGame(res.data.data);
+        const res = await axios.post(
+          `events/${this.eventId}/trivia/admin/questions`,
+          questionPayload(copy)
+        );
+        this.applyAdminPayload(res.data.data, false);
+        this.selectedIndex = this.questions.length - 1;
+        this.markSaved();
+      } catch (error) {
+        this.saveState = "error";
+        this.fail(error, "לא הצלחנו לשכפל");
+      }
+    },
+
+    async deleteQuestion() {
+      const q = this.selectedQuestion;
+      if (!q || this.questionsLocked) return;
+      if (!window.confirm("למחוק את השאלה?")) return;
+      if (!q.id) {
+        this.questions.splice(this.selectedIndex, 1);
+        this.selectedIndex = Math.max(0, this.selectedIndex - 1);
+        return;
+      }
+      this.saveState = "saving";
+      try {
+        const res = await axios.delete(
+          `events/${this.eventId}/trivia/admin/questions/${q.id}`
+        );
+        this.applyAdminPayload(res.data.data, false);
+        this.markSaved();
+      } catch (error) {
+        this.saveState = "error";
+        this.fail(error, "לא הצלחנו למחוק");
+      }
+    },
+
+    async onReorder(payload: { from: number; to: number }) {
+      if (this.questionsLocked) return;
+      const { from, to } = payload;
+      const copy = [...this.questions];
+      const [item] = copy.splice(from, 1);
+      copy.splice(to, 0, item);
+      this.questions = copy;
+      this.selectedIndex = to;
+      const ids = copy.map((q) => q.id).filter((id): id is number => !!id);
+      if (ids.length !== copy.length) return;
+      this.saveState = "saving";
+      try {
+        const res = await axios.put(
+          `events/${this.eventId}/trivia/admin/questions/reorder`,
+          { ids }
+        );
+        this.applyAdminPayload(res.data.data);
+        this.markSaved();
+      } catch (error) {
+        this.saveState = "error";
+        this.fail(error, "לא הצלחנו לסדר מחדש");
+        this.load();
+      }
+    },
+
+    async applyTemplate(templateId: string) {
+      if (this.questionsLocked) {
+        notify({
+          text: "אי אפשר להחליף שאלות בזמן שהטריוויה על המסך",
+          type: "error",
+          duration: 4000,
+        });
+        return;
+      }
+      const pack = findTriviaTemplate(templateId);
+      if (!pack) return;
+
+      const replace =
+        this.questions.length === 0
+          ? false
+          : window.confirm(
+              "יש כבר שאלות. להחליף אותן בתבנית? הניקוד של שחקנים קודמים יאופס."
+            );
+      if (this.questions.length > 0 && !replace) return;
+
+      this.templateBusy = true;
+      this.saveState = "saving";
+      try {
+        if (pack.backend_id) {
+          const res = await axios.post(
+            `events/${this.eventId}/trivia/admin/from-template`,
+            { template_id: pack.backend_id, replace: this.questions.length > 0 }
+          );
+          this.applyAdminPayload(res.data.data, false);
+        } else {
+          const questions = pack.questions.map((tq) => {
+            const type = tq.type;
+            const opts =
+              tq.options ||
+              defaultOptionsForType(type).map((o) => ({
+                label: o.label,
+                is_correct: o.is_correct,
+              }));
+            return {
+              type,
+              prompt: tq.prompt,
+              time_limit_seconds: tq.time_limit_seconds ?? this.game.default_time,
+              max_points: isUnscoredType(type)
+                ? 0
+                : tq.max_points ?? this.game.default_points,
+              fun_fact: tq.fun_fact ?? null,
+              media_asset_id: tq.media_asset_id ?? null,
+              config: tq.config ?? defaultConfigForType(type),
+              options: opts,
+            };
+          });
+          if (pack.game) {
+            await axios.put(`events/${this.eventId}/trivia/admin`, {
+              enabled: true,
+              title: pack.game.title || this.game.title,
+              theme: pack.game.theme || this.game.theme,
+              pace: pack.game.pace || this.game.pace,
+              teams_mode: pack.game.teams_mode || this.game.teams_mode,
+              team_labels: pack.game.team_labels || this.game.team_labels,
+              prize_text: pack.game.prize_text ?? this.game.prize_text,
+              speed_bonus: this.game.speed_bonus,
+              reveal_seconds: this.game.reveal_seconds,
+              default_time: this.game.default_time,
+              default_points: this.game.default_points,
+              starts_at: this.game.starts_at ? Time.toUTC(this.game.starts_at) : null,
+              results_at: this.game.results_at ? Time.toUTC(this.game.results_at) : null,
+            });
+          }
+          const res = await axios.put(
+            `events/${this.eventId}/trivia/admin/questions`,
+            { questions }
+          );
+          this.applyAdminPayload(res.data.data, false);
+        }
+        this.templatesOpen = false;
+        this.tab = "build";
+        this.markSaved();
+        notify({ text: "התבנית הוחלה", type: "success", duration: 3000 });
+      } catch (error) {
+        this.saveState = "error";
+        this.fail(error, "לא הצלחנו להחיל תבנית");
+      } finally {
+        this.templateBusy = false;
+      }
+    },
+
+    togglePreview() {
+      this.previewOpen = !this.previewOpen;
+      if (this.previewOpen) {
+        this.previewTheme = this.game.theme;
+        if (!this.previewPhase) this.previewPhase = "lobby";
+      }
+    },
+
+    openPreviewFromMobile() {
+      this.mobPane = "preview";
+      this.previewOpen = true;
+    },
+
+    openDryRun() {
+      this.previewTheme = this.game.theme;
+      this.previewPhase = "lobby";
+      this.dryRunOpen = true;
+      this.previewOpen = false;
+    },
+
+    async goLive() {
+      if (!this.questions.length) return;
+      this.acting = true;
+      try {
+        if (!this.game.enabled) {
+          await axios.put(`events/${this.eventId}/trivia/admin`, {
+            enabled: true,
+            title: this.game.title || "טריוויה",
+            theme: this.game.theme,
+            pace: this.game.pace,
+            teams_mode: this.game.teams_mode,
+            team_labels: this.game.team_labels,
+            speed_bonus: this.game.speed_bonus,
+            prize_text: this.game.prize_text || null,
+            reveal_seconds: this.game.reveal_seconds,
+            default_time: this.game.default_time,
+            default_points: this.game.default_points,
+            starts_at: this.game.starts_at ? Time.toUTC(this.game.starts_at) : null,
+            results_at: this.game.results_at ? Time.toUTC(this.game.results_at) : null,
+          });
+        }
+        const res = await axios.post(`events/${this.eventId}/trivia/admin/show`);
+        this.applyAdminPayload(res.data.data);
+        notify({ text: "הטריוויה על המסך", type: "success", duration: 3000 });
+      } catch (error) {
+        this.fail(error, "לא הצלחנו להפעיל על המסך");
+      } finally {
+        this.acting = false;
+      }
+    },
+
+    async setLivePhase(phase: string) {
+      this.acting = true;
+      try {
+        const body: Record<string, unknown> = { phase };
+        if (phase === "question") {
+          const ids = this.questions.map((q) => q.id).filter(Boolean) as number[];
+          const cur = this.game.current_question_id;
+          let nextId = ids[0];
+          if (cur && this.game.current_phase === "question") {
+            const i = ids.indexOf(cur);
+            nextId = i >= 0 && i < ids.length - 1 ? ids[i + 1] : ids[i] || ids[0];
+          } else if (cur && ids.includes(cur)) {
+            nextId = cur;
+          } else if (this.selectedQuestion?.id) {
+            nextId = this.selectedQuestion.id;
+          }
+          if (nextId) body.question_id = nextId;
+        }
+        const res = await axios.post(
+          `events/${this.eventId}/trivia/admin/phase`,
+          body
+        );
+        this.applyAdminPayload(res.data.data);
         await this.loadReport(true);
       } catch (error) {
-        this.fail(error, "הפעולה לא הושלמה");
+        this.fail(error, "לא הצלחנו לעדכן את שלב המשחק");
       } finally {
-        this.actingAction = null;
+        this.acting = false;
       }
     },
 
-    selectGuestUrl(event: FocusEvent) {
-      const input = event.target as HTMLInputElement | null;
-      input?.select();
+    async runPhotos() {
+      this.acting = true;
+      try {
+        const res = await axios.post(`events/${this.eventId}/trivia/admin/photos`);
+        this.applyAdminPayload(res.data.data);
+      } catch (error) {
+        this.fail(error, "לא הצלחנו לחזור לתמונות");
+      } finally {
+        this.acting = false;
+      }
     },
 
     async copyLink() {
@@ -735,712 +1026,17 @@ export default defineComponent({
           this.copied = false;
         }, 2000);
       } catch {
-        notify({ text: "לא הצלחנו להעתיק. סמנו את הקישור ידנית.", type: "error", duration: 4000 });
+        notify({
+          text: "לא הצלחנו להעתיק. סמנו את הקישור ידנית.",
+          type: "error",
+          duration: 4000,
+        });
       }
-    },
-
-    togglePlayer(id: number) {
-      this.openPlayerId = this.openPlayerId === id ? null : id;
-    },
-
-    questionPrompt(id: number): string {
-      return this.report?.questions.find((question) => question.id === id)?.prompt || `שאלה ${id}`;
-    },
-
-    seconds(ms: number): string {
-      return `${(ms / 1000).toFixed(1)} שנ׳`;
-    },
-
-    percent(value: number): string {
-      return `${Math.round(value * 100)}%`;
-    },
-
-    barWidth(accuracy: number | null): string {
-      if (accuracy === null) return "0%";
-      return `${Math.round(accuracy * 100)}%`;
-    },
-
-    barTone(accuracy: number | null): string {
-      if (accuracy === null) return "none";
-      if (accuracy >= 0.7) return "easy";
-      if (accuracy >= 0.4) return "mid";
-      return "hard";
     },
   },
 });
 </script>
 
-<style lang="scss" scoped>
-.trivia-admin {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  font-family: var(--font, Heebo, sans-serif);
-  color: var(--ink, #161310);
-}
-
-.page-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.kicker {
-  color: var(--rose, #dc5b66);
-  font-weight: 800;
-  margin: 0;
-}
-
-.page-head h1 {
-  margin: 4px 0 0;
-  font-weight: 900;
-  font-size: clamp(1.55rem, 2.4vw, 2rem);
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-}
-
-.lede,
-.hint {
-  color: var(--muted, #5e564e);
-  font-size: 0.92rem;
-  line-height: 1.5;
-}
-
-.lede {
-  margin-top: 8px;
-  max-width: 52ch;
-}
-
-.status {
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(22, 19, 16, 0.05);
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.status.scheduled {
-  background: rgba(201, 163, 106, 0.18);
-  border-color: rgba(201, 163, 106, 0.35);
-  color: #8a7040;
-}
-
-.status.live {
-  background: rgba(220, 91, 102, 0.14);
-  border-color: rgba(220, 91, 102, 0.32);
-  color: #b4232c;
-}
-
-.status.results {
-  background: rgba(47, 190, 106, 0.14);
-  border-color: rgba(47, 190, 106, 0.3);
-  color: #2f6b22;
-}
-
-.tabs {
-  display: flex;
-  gap: 6px;
-  padding: 6px;
-  background: #fffcfa;
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 16px;
-}
-
-.tab {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 0;
-  background: transparent;
-  border-radius: 12px;
-  padding: 10px 12px;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
-  color: var(--muted, #5e564e);
-}
-
-.tab.active {
-  background: color-mix(in srgb, var(--accent, #c9a36a) 18%, #fffcfa);
-  color: var(--ink, #161310);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #c9a36a) 45%, transparent);
-}
-
-.tab-count {
-  min-width: 22px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: rgba(22, 19, 16, 0.08);
-  font-size: 12px;
-}
-
-.tab.active .tab-count {
-  background: rgba(201, 163, 106, 0.28);
-  color: #8a7040;
-}
-
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.card {
-  background: #fffcfa;
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 18px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.loading-card,
-.error-card {
-  color: var(--muted, #5e564e);
-}
-
-.error-card .title--medium {
-  margin: 0;
-  color: var(--ink, #161310);
-}
-
-.retry-btn {
-  align-self: flex-start;
-  border: 0;
-  border-radius: 999px;
-  padding: 10px 18px;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-  background: linear-gradient(135deg, #dc5b66, #c9a36a);
-  color: #fff;
-}
-
-.retry-btn:disabled {
-  opacity: 0.7;
-  cursor: default;
-}
-
-.enable-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.date-picker {
-  width: 100%;
-}
-
-.date-picker :deep(.dp__input) {
-  border: 1px solid #eadfdf;
-  border-radius: 12px;
-  font: inherit;
-  min-height: 44px;
-}
-
-.save-row :deep(.main-button) {
-  width: auto;
-  min-width: 180px;
-}
-
-.modes {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.mode {
-  text-align: right;
-  border: 1px solid #eadfdf;
-  background: #fff;
-  border-radius: 14px;
-  padding: 14px;
-  cursor: pointer;
-  font: inherit;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.mode.active {
-  border-color: var(--accent, #c9a36a);
-  background: color-mix(in srgb, var(--accent, #c9a36a) 12%, #fffcfa);
-  box-shadow: inset 0 0 0 1px var(--accent, #c9a36a);
-}
-
-.mode:disabled {
-  cursor: default;
-  opacity: 0.72;
-}
-
-.mode.active:disabled {
-  opacity: 1;
-}
-
-.mode.busy {
-  opacity: 0.6;
-}
-
-.mode-title {
-  font-weight: 700;
-}
-
-.mode-text {
-  color: var(--dark-gray);
-  font-size: 13px;
-}
-
-.join {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 4px;
-  border-top: 1px solid #f3ecec;
-}
-
-.join-row {
-  display: flex;
-  gap: 8px;
-}
-
-.join-input,
-textarea,
-.option input,
-.meta input {
-  width: 100%;
-  border: 1px solid #eadfdf;
-  border-radius: 12px;
-  padding: 10px 12px;
-  box-sizing: border-box;
-  font: inherit;
-  background: #fff;
-  color: var(--dark);
-}
-
-.join-input {
-  direction: ltr;
-  text-align: left;
-}
-
-.copy-btn,
-.add-btn,
-.text-button,
-.mark,
-.inline-link {
-  border: 0;
-  background: none;
-  color: #8a7040;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
-}
-
-.copy-btn,
-.add-btn {
-  background: linear-gradient(135deg, #dc5b66, #c9a36a);
-  color: #fff;
-  border-radius: 12px;
-  padding: 10px 16px;
-  white-space: nowrap;
-}
-
-.copy-btn:disabled,
-.add-btn:disabled,
-.text-button:disabled,
-.mark:disabled,
-.inline-link:disabled,
-.icon-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.lock-note {
-  background: #fff6f6;
-  border-radius: 12px;
-  padding: 10px 12px;
-  color: #9a3036;
-}
-
-.inline-link {
-  margin-right: 6px;
-}
-
-.empty {
-  text-align: center;
-  padding: 28px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
-}
-
-.question {
-  border: 1px solid #f0e6e6;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.question.invalid {
-  border-color: var(--rose, #dc5b66);
-}
-
-.question-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  cursor: pointer;
-  background: #fff;
-}
-
-.question.open .question-head {
-  background: #fffafa;
-}
-
-.q-num {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--gray);
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.q-preview {
-  flex: 1;
-  min-width: 0;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.q-meta {
-  color: var(--dark-gray);
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-.chevron {
-  color: var(--dark-gray);
-}
-
-.question-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 0 12px 14px;
-}
-
-.meta,
-.option,
-.row-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.meta label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--dark-gray);
-}
-
-.meta input {
-  width: 88px;
-}
-
-.option {
-  border: 1px solid #eadfdf;
-  border-radius: 12px;
-  padding: 6px;
-  background: #fff;
-}
-
-.option.correct {
-  border-color: var(--green);
-  background: #f4faf1;
-}
-
-.option input {
-  border: 0;
-  padding: 8px;
-}
-
-.mark {
-  border-radius: 999px;
-  padding: 6px 10px;
-  background: var(--gray);
-  color: var(--dark-gray);
-  white-space: nowrap;
-}
-
-.mark.on {
-  background: #e5f3dc;
-  color: #2f6b22;
-}
-
-.icon-btn {
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--gray);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.icon-btn .material-symbols-outlined,
-.chevron {
-  font-size: 20px;
-}
-
-.icon-btn.danger {
-  color: #b4232c;
-}
-
-.error-note {
-  color: #b4232c;
-  font-size: 13px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.stat {
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px 18px;
-}
-
-.stat-label {
-  color: var(--dark-gray);
-  font-size: 13px;
-}
-
-.stat strong {
-  display: block;
-  margin-top: 4px;
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.table-wrap {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  text-align: right;
-  padding: 10px 8px;
-  border-bottom: 1px solid #f3ecec;
-  vertical-align: middle;
-}
-
-th {
-  color: var(--dark-gray);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.player-row {
-  cursor: pointer;
-}
-
-.player-row:hover,
-.player-row.open {
-  background: #fffafa;
-}
-
-.rank {
-  display: inline-grid;
-  place-items: center;
-  min-width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--gray);
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.rank-1 {
-  background: #ffe08a;
-}
-
-.rank-2 {
-  background: #ececec;
-}
-
-.rank-3 {
-  background: #f3d2b5;
-}
-
-.player-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.player-cell img,
-.avatar-fallback {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.avatar-fallback {
-  display: grid;
-  place-items: center;
-  background: #ffe1e3;
-  font-weight: 700;
-}
-
-.detail-row td {
-  background: #fafafa;
-}
-
-.answers {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.answers li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.answer-prompt {
-  flex: 1;
-  min-width: 140px;
-}
-
-.answer-meta {
-  color: var(--dark-gray);
-  font-size: 13px;
-}
-
-.chip {
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.chip.ok {
-  background: #e5f3dc;
-  color: #2f6b22;
-}
-
-.chip.bad {
-  background: #ffe1e3;
-  color: #b4232c;
-}
-
-.diff-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.diff-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 6px;
-}
-
-.bar {
-  height: 8px;
-  border-radius: 99px;
-  background: var(--gray);
-  overflow: hidden;
-}
-
-.bar span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-}
-
-.bar .easy {
-  background: var(--green);
-}
-
-.bar .mid {
-  background: #e2b340;
-}
-
-.bar .hard {
-  background: var(--rose, #dc5b66);
-}
-
-@media (max-width: 720px) {
-  .field-grid,
-  .modes,
-  .stats {
-    grid-template-columns: 1fr;
-  }
-
-  .page-head,
-  .section-head,
-  .join-row {
-    flex-direction: column;
-  }
-
-  .q-meta {
-    display: none;
-  }
-
-  .save-row :deep(.main-button),
-  .add-btn,
-  .copy-btn {
-    width: 100%;
-  }
-}
+<style lang="scss">
+@import "@/styles/trivia-builder.scss";
 </style>

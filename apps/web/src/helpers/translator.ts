@@ -27,6 +27,10 @@ const errorsList = {
   "Trivia player was not found": "השחקן לא נמצא",
   "Could not save the player image": "לא הצלחנו לשמור את התמונה",
   "Answers are closed": "אי אפשר לענות יותר",
+  "Question limit reached": "הגעתם למקסימום של 40 שאלות",
+  "Confirm replace existing questions": "יש כבר שאלות — להחליף בתבנית?",
+  "Trivia phase update failed": "לא הצלחנו לעדכן את שלב המשחק",
+  "This question type is not available yet": "סוג השאלה הזה עדיין לא זמין",
 } as Record<string, string>;
 
 
