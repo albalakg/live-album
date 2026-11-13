@@ -2,22 +2,13 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PricingCards from "../components/PricingCards.astro";
-import FaqList from "../components/FaqList.astro";
-import Rich from "../components/Rich.astro";
+import RelatedLinks from "../components/RelatedLinks.astro";
 import { appPath } from "../lib/appUrl";
-import { applyPendingClaims } from "../lib/pendingClaims";
-import { breadcrumbNode, faqNode, graph, organizationNode, productNode } from "../lib/schema";
+import { breadcrumbNode, graph, organizationNode, productNode } from "../lib/schema";
 
 const pages = await getCollection("landing");
 const page = pages.find((entry) => entry.data.slug === "/pricing");
 if (!page) throw new Error("missing pricing landing content");
-
-const faqs = page.data.faq
-  .map((item) => {
-    const answer = applyPendingClaims(item.a);
-    return answer ? { question: item.q, answer } : null;
-  })
-  .filter((item): item is { question: string; answer: string } => item !== null);
 
 const schema = graph([
   organizationNode(),
@@ -26,7 +17,6 @@ const schema = graph([
     { name: "SnapShare", path: "/" },
     { name: "מחירים", path: "/pricing" },
   ]),
-  faqNode(faqs),
 ]);
 ---
 <BaseLayout
@@ -132,23 +122,10 @@ const schema = graph([
       </div>
     </div>
   </section>
-  <section id="pricing-faq">
-    <div class="wrap">
-      <p class="sec-kicker">שאלות על המחיר</p>
-      <h2 class="sec-title">לפני שסוגרים מסלול.</h2>
-      <FaqList items={faqs} />
-    </div>
-  </section>
   <section>
-    <div class="wrap">
-      <nav class="prose-card" aria-label="עמודים קשורים">
-        <h2>עוד ב-SnapShare</h2>
-        <ul>
-          {page.data.internalLinks.filter((link) => link.slug !== "/order").map((link) => (
-            <li><a href={appPath(link.slug)}><Rich text={link.anchor} /></a></li>
-          ))}
-        </ul>
-      </nav>
+    <div class="wrap related-wrap">
+      <p class="faq-link">שאלות על המחיר? <a href="/faq#pricing-faq">לשאלות הנפוצות</a>.</p>
+      <RelatedLinks links={page.data.internalLinks} />
     </div>
   </section>
   <section class="final">
@@ -161,6 +138,19 @@ const schema = graph([
 </BaseLayout>
 <style>
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .prose-card ul { margin-top: 12px; padding-inline-start: 1.1rem; }
-  .prose-card a { color: inherit; font-weight: 800; }
+  .related-wrap {
+    margin-top: 8px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 22px;
+  }
+  .faq-link {
+    margin: 0 0 18px;
+    font-weight: 700;
+  }
+  .faq-link a {
+    color: inherit;
+    font-weight: 900;
+  }
 </style>

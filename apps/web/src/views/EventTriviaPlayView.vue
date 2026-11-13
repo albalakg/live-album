@@ -84,7 +84,7 @@
 import axios from "axios";
 import { defineComponent } from "vue";
 import ErrorsHandler from "@/helpers/errorsHandler";
-import { notify } from "@kyvg/vue3-notification";
+import { notify } from "@/helpers/notify";
 
 interface TriviaOption {
   id: number;

@@ -42,9 +42,8 @@ These paths come from `apps/web/src/router/index.ts` plus the Phase 1 routes add
 | `/terms-and-conditions` | Legal (still the SPA) |
 | `/event` | Host event shell |
 | `/event/gallery` `/event/gallery/full-screen` | Host album and live screen |
-| `/event/assets` | Host files |
+| `/event/assets` | Host media management (files + content review queue) |
 | `/event/qr` | Host QR card editor |
-| `/event/moderation` | Host review queue |
 | `/event/trivia` `/event/whatsapp` | Host tools (WhatsApp only if the feature flag is on) |
 | `/event/uploads/:event_path` | Guest upload |
 | `/event/open-album/:event_path` | Guest live album |

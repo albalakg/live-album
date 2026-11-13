@@ -21,13 +21,45 @@
     <p v-if="!loading && assets.length === 0" class="empty">עוד אין תמונות באלבום.</p>
     <GuestAlbumCta />
   </div>
-  <div v-if="isModalOpened" class="lightbox" @click="isModalOpened = false">
-    <span class="lightbox-close lightbox-icon">&times;</span>
-    <button @click.stop="changeAsset(currentAssetIndex + 1)" class="lightbox-next lightbox-icon">&#10094;</button>
-    <button @click.stop="changeAsset(currentAssetIndex - 1)" class="lightbox-prev lightbox-icon">&#10095;</button>
+  <div v-if="isModalOpened && currentAsset" class="lightbox" @click="isModalOpened = false">
+    <button
+      type="button"
+      class="lightbox-close lightbox-icon"
+      aria-label="סגירה"
+      @click.stop="isModalOpened = false"
+    >
+      &times;
+    </button>
+    <button
+      type="button"
+      @click.stop="changeAsset(currentAssetIndex + 1)"
+      class="lightbox-next lightbox-icon"
+      aria-label="הקודם"
+    >
+      &#10094;
+    </button>
+    <button
+      type="button"
+      @click.stop="changeAsset(currentAssetIndex - 1)"
+      class="lightbox-prev lightbox-icon"
+      aria-label="הבא"
+    >
+      &#10095;
+    </button>
     <div class="lightbox-content" @click.stop>
-      <img v-if="currentAsset && currentAsset.type !== 'video'" class="lightbox-asset" :src="currentAsset.fullPath" alt="" />
-      <video v-else-if="currentAsset" class="lightbox-asset" :src="currentAsset.fullPath" controls autoplay></video>
+      <img
+        v-if="currentAsset.type !== 'video'"
+        class="lightbox-asset"
+        :src="currentAsset.fullPath"
+        alt=""
+      />
+      <video
+        v-else
+        class="lightbox-asset"
+        :src="currentAsset.fullPath"
+        controls
+        autoplay
+      ></video>
     </div>
   </div>
 </template>
@@ -109,9 +141,6 @@ export default defineComponent({
       else if (e.key === "ArrowLeft") this.changeAsset(this.currentAssetIndex + 1);
       else if (e.key === "Escape") this.isModalOpened = false;
     },
-    doNone() {
-      return undefined;
-    },
   },
 });
 </script>
@@ -176,11 +205,6 @@ export default defineComponent({
   display: block;
   object-fit: cover;
   transform: scale(1.08);
-}
-.lightbox-asset {
-  max-width: min(92vw, 1100px);
-  max-height: 86vh;
-  object-fit: contain;
 }
 .is-fresh { animation: snapshare-live-in 0.65s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes snapshare-live-in {

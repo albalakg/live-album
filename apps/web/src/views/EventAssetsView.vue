@@ -1,245 +1,297 @@
 <template>
-  <div
-    class="event-assets height--full display--flex direction--column"
-  >
-    <div
-      class="assets-top bg--white brs--medium padding--large display--flex justify--space-between flex--wrap-mobile"
-    >
-      <div
-        class="details display--flex direction--column justify--space-between width--full-mobile"
-      >
-        <div>
-          <h1 class="title--large">
-            {{ totalAssets }} קבצים
-            <small>נבחרו {{ totalManagedAssetsIds }} קבצים</small>
-          </h1>
-          <label
-            v-if="blockedAssets.length"
-            class="blocked-toggle pointer margin--top-small"
-            :class="{ 'blocked-toggle--active': showBlockedAssets }"
-          >
-            <input
-              type="checkbox"
-              v-model="showBlockedAssets"
-              class="blocked-toggle-input"
-            />
-            <span class="blocked-toggle-chip display--flex align--center brs--large">
-              <span class="blocked-toggle-icon material-symbols-outlined" aria-hidden="true">
-                block
-              </span>
-              <span class="blocked-toggle-text">הצג תמונות חסומות</span>
-              <span class="blocked-toggle-badge">{{ blockedAssets.length }}</span>
-            </span>
-          </label>
-          <strong class="text--pink"> ממליצים להוריד ישר אחרי האירוע </strong>
-          <div class="collapse-container">
-            <strong class="pointer" @click="toggleCollapse">
-              איך מורידים
-              <MainIcon icon="info" size="1.1em" />
-            </strong>
+  <div class="event-assets">
+    <header class="page-head">
+      <p class="kicker">ניהול מדיה</p>
+      <h1>כל הקבצים</h1>
+      <p class="lede">
+        בחירה, הורדה, הסתרה וחסימה של קבצי האירוע. מומלץ להוריד ישר אחרי האירוע.
+      </p>
+      <p v-if="isEventActive" class="meta-note">
+        בעוד <strong>{{ counter }}</strong> כל קבצי האירוע יימחקו ולא יהיה ניתן להוריד או לשחזר.
+      </p>
+      <button type="button" class="how-toggle" @click="toggleCollapse">
+        איך מורידים
+        <MainIcon icon="info" size="1.05em" />
+      </button>
+      <transition name="collapse">
+        <div v-if="isOpen" class="how-body">
+          <p>
+            מסמנים קבצים (או לוחצים "בחר"), לוחצים "הורדה", וממתינים לארכיון —
+            כשיהיה מוכן יופיע כאן כפתור להורדה.
+          </p>
+        </div>
+      </transition>
+    </header>
 
-            <!-- Content section with smooth transition -->
-            <transition name="collapse">
-              <div v-if="isOpen">
-                <slot>
-                  <small>
-                   להורדה, בוחרים בפעולה "הורדת קבצים".
-                   <br />
-                   בוחרים את הקבצים שרוצים ולאחר מכן לוחצים על "בצע פעולה".
-                   <br />
-                   לאחר מכן, אנחנו נכין את כל הקבצים להורדה ותוך כמה דקות יהיה
-                   מוכן.
-                   <br />
-                   כאשר מוכן, יופיע כאן למטה, כפתור להורדת הקובץ
-                   <br />
-                    מוזמנים לחכות בינתיים או שתחזרו לעיסוקכם ואנחנו כבר נדאג
-                    לעדכן אתכם.
-                  </small>
-                </slot>
-              </div>
-            </transition>
-          </div>
-          <UploadMedia />
+    <section class="upload-strip" aria-label="העלאת קבצים">
+      <UploadMedia />
+    </section>
+
+    <div
+      class="assets-toolbar"
+      :class="{ 'assets-toolbar--active': selectionActive }"
+      role="toolbar"
+      :aria-label="selectionActive ? 'פעולות בחירה' : 'ניהול קבצים'"
+    >
+      <div class="toolbar-main">
+        <div class="selection-meta" aria-live="polite">
+          <span class="selection-count">{{ assetsCountLabel }}</span>
+          <span
+            v-if="selectionActive && totalManagedAssetsIds"
+            class="selection-picked"
+          >
+            נבחרו {{ totalManagedAssetsIds }}
+          </span>
+          <span
+            v-else-if="selectionActive"
+            class="selection-hint"
+          >
+            סמנו קבצים לפעולה
+          </span>
         </div>
-        <div>
-          <small>
-            <template v-if="isEventActive">
-              <strong> שימו לב: </strong>
-              בעוד <strong>{{ counter }}</strong> כל קבצי האירוע יימחקו ולא יהיה
-              ניתן להוריד/לשחזר
-            </template>
-          </small>
-          <br />
-        </div>
-      </div>
-      <div
-        class="actions display--flex direction--column align--center justify--space-between width--full-mobile"
-      >
-        <div
-          class="width--full display--flex align--center justify--space-between"
+
+        <label
+          v-if="selectionActive"
+          class="select-all"
+          :class="{ disabled: loading }"
         >
-          <div class="action-select-wrapper">
-            <MainSelect
-              :options="[
-                { label: 'הורדת קבצים', value: 'download' },
-                { label: 'הסתרת קבצים', value: 'hide' },
-                { label: 'חסימת קבצים', value: 'block' },
-                { label: 'מחיקת קבצים', value: 'delete' },
-              ]"
-              v-model="action"
-              ref="actionSelect"
-            />
-          </div>
+          <span>הכל</span>
           <MainCheckbox
-            :disabled="loading || !mode"
+            :disabled="loading"
             ref="downloadCheckbox"
             @onClick="toggleAllAssets()"
             title="לחצו בשביל לבחור את כולם"
             :value="pickedAll"
           />
-        </div>
-        <div class="download-button-wrapper width--full">
-          <BaseButton
-            :loading="loading"
-            :disabled="!canSubmit"
-            text="בצע פעולה"
-            @onClick="submit()"
-          />
-        </div>
-        <div class="download-button-wrapper width--full">
-          <a
-            :href="downloadProcess.fullPath"
-            :download="processFileName"
-            v-if="isDownloadProcessFinished"
-          >
-            <BaseButton :loading="loading" text="הורדת הקבצים" color="green" />
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="assets-body">
-      <div class="assets-content display--flex flex--wrap brs--medium">
-        <template v-for="(asset, index) in ownerVisibleAssets" :key="'asset-' + asset.id">
-          <EventAssetCard
-            class="pointer"
-            :loading="loading"
-            :assetIndex="index"
-            :asset="asset"
-            @onClick="openModal"
-          />
-        </template>
+        </label>
       </div>
 
-      <div v-if="showBlockedAssets" class="blocked-assets-section margin--top-large width--full">
-        <div class="blocked-assets-header margin--bottom-medium">
-          <strong class="text--pink">תמונות חסומות</strong>
+      <div class="toolbar-actions">
+        <template v-if="!selectionActive">
+          <button
+            type="button"
+            class="tb-btn tb-btn--select"
+            :disabled="loading || !totalAssets"
+            @click="enterSelectMode"
+          >
+            בחר
+          </button>
+          <a
+            v-if="isDownloadProcessFinished"
+            class="tb-btn tb-btn--download zip-download"
+            :href="downloadProcess.fullPath"
+            :download="processFileName"
+          >
+            הורדת הארכיון
+          </a>
+        </template>
+
+        <template v-else>
+          <div class="toolbar-action-group" :class="{ 'is-ready': canAct }">
+            <button
+              type="button"
+              class="tb-btn tb-btn--download"
+              :disabled="!canAct"
+              @click="runAction('download')"
+            >
+              {{ loading ? "טוען..." : "הורדה" }}
+            </button>
+            <button
+              type="button"
+              class="tb-btn tb-btn--neutral"
+              :disabled="!canAct"
+              @click="runAction('hide')"
+            >
+              הסתרה
+            </button>
+            <button
+              type="button"
+              class="tb-btn tb-btn--warn"
+              :disabled="!canAct"
+              @click="runAction('block')"
+            >
+              חסימה
+            </button>
+            <button
+              type="button"
+              class="tb-btn tb-btn--danger"
+              :disabled="!canAct"
+              @click="runAction('delete')"
+            >
+              מחיקה
+            </button>
+          </div>
+          <button
+            type="button"
+            class="tb-btn tb-btn--ghost"
+            :disabled="loading"
+            @click="exitSelectMode"
+          >
+            ביטול
+          </button>
+          <a
+            v-if="isDownloadProcessFinished"
+            class="tb-btn tb-btn--download zip-download"
+            :href="downloadProcess.fullPath"
+            :download="processFileName"
+          >
+            הורדת הארכיון
+          </a>
+        </template>
+      </div>
+    </div>
+
+    <section class="assets-body" aria-label="ספריית מדיה">
+      <div v-if="!ownerVisibleAssets.length" class="assets-empty">
+        <p>עדיין אין קבצים להצגה.</p>
+        <p class="assets-empty-hint">העלו תמונות או סרטונים למעלה.</p>
+      </div>
+      <div v-else class="assets-grid">
+        <EventAssetCard
+          v-for="(asset, index) in ownerVisibleAssets"
+          :key="'asset-' + asset.id"
+          class="pointer"
+          :loading="loading"
+          :assetIndex="index"
+          :asset="asset"
+          :selectionActive="selectionActive"
+          :selectOnTileClick="selectionActive"
+          @onClick="openModal"
+        />
+      </div>
+    </section>
+
+    <section class="moderation-shell">
+      <button
+        type="button"
+        class="moderation-toggle"
+        :aria-expanded="moderationOpen"
+        @click="toggleModeration"
+      >
+        <div class="moderation-toggle-text">
+          <p class="kicker">בדיקת תוכן</p>
+          <strong>תור בדיקה</strong>
         </div>
-        <div
-          v-if="blockedAssets.length"
-          class="blocked-warning bg--white brs--medium padding--medium margin--bottom-medium"
-        >
-          <strong>שימו לב:</strong>
-          תמונות אלו חסומות (ידנית או אוטומטית) ואינן מוצגות באלבום החי או בגלריית האורחים.
+        <div class="moderation-badges">
+          <span v-if="pendingCount" class="badge badge--pending">
+            {{ pendingCount }} ממתינות
+          </span>
+          <span v-if="blockedCount" class="badge badge--blocked">
+            {{ blockedCount }} חסומות
+          </span>
+          <span v-if="!pendingCount && !blockedCount" class="badge badge--idle">
+            ריק
+          </span>
+          <MainIcon
+            :icon="moderationOpen ? 'expand_less' : 'expand_more'"
+            size="1.35em"
+          />
         </div>
-        <div
-          v-if="blockedAssets.length"
-          class="assets-content blocked-content display--flex flex--wrap brs--medium"
-        >
-          <template v-for="(asset, index) in blockedAssets" :key="'blocked-' + asset.id">
-            <EventAssetCard
-              class="pointer"
-              :loading="loading"
-              :assetIndex="index"
-              :asset="asset"
-              :bulkSelectable="false"
-              allowUnblock
-              :unblockLoading="unblockingAssetId === asset.id"
-              @onClick="openBlockedModal(index)"
-              @onUnblock="unblockAsset"
-            />
+      </button>
+      <div v-show="moderationOpen" class="moderation-panel">
+        <EventModerationSection class="moderation-section" />
+      </div>
+    </section>
+
+    <div v-if="isModalOpened" class="lightbox" @click="isModalOpened = false">
+      <span class="lightbox-close lightbox-icon">&times;</span>
+      <button
+        @click.stop="changeAsset(currentAssetIndex + 1)"
+        class="lightbox-next lightbox-icon"
+      >
+        &#10094;
+      </button>
+      <button
+        @click.stop="changeAsset(currentAssetIndex - 1)"
+        class="lightbox-prev lightbox-icon"
+      >
+        &#10095;
+      </button>
+      <div class="lightbox-content lightbox-content--with-actions" @click.stop>
+        <EventAssetCard
+          class="lightbox-asset"
+          modalView
+          :bulkSelectable="false"
+          :loading="loading"
+          :assetIndex="0"
+          :asset="currentAsset"
+          @onClick="doNone"
+          controls
+          autoplay
+        />
+        <div class="lightbox-actions" role="group" aria-label="פעולות קובץ">
+          <template v-if="currentAsset">
+            <a
+              class="lb-btn lb-btn--download"
+              :href="currentAsset.fullPath"
+              :download="currentAssetFileName"
+            >
+              הורדה
+            </a>
+            <a
+              class="lb-btn lb-btn--ghost"
+              :href="currentAsset.fullPath"
+              target="_blank"
+              rel="noopener"
+            >
+              פתיחה
+            </a>
           </template>
-        </div>
-        <div
-          v-else
-          class="blocked-empty bg--white brs--medium padding--medium"
-        >
-          לא נמצאו תמונות חסומות. אם ציפיתם לראות תמונה כאן, ייתכן שהבדיקה עדיין בתהליך.
+          <button
+            v-if="isCurrentAssetBlocked"
+            type="button"
+            class="lb-btn lb-btn--restore"
+            :disabled="unblockingAssetId === currentAsset.id"
+            @click="unblockAsset(currentAsset.id)"
+          >
+            {{ unblockingAssetId === currentAsset.id ? "טוען..." : "בטל חסימה" }}
+          </button>
+          <button
+            v-else-if="canBlockCurrentAsset"
+            type="button"
+            class="lb-btn lb-btn--block"
+            :disabled="blockingAssetId === currentAsset.id"
+            @click="blockAssets(currentAsset.id)"
+          >
+            {{ blockingAssetId === currentAsset.id ? "טוען..." : "חסום" }}
+          </button>
         </div>
       </div>
     </div>
-      <div v-if="isModalOpened" class="lightbox" @click="isModalOpened = false">
-        <span class="lightbox-close lightbox-icon">&times;</span>
-        <button @click.stop="changeAsset(currentAssetIndex + 1)" class="lightbox-next lightbox-icon">&#10094;</button>
-        <button @click.stop="changeAsset(currentAssetIndex - 1)" class="lightbox-prev lightbox-icon">&#10095;</button>
-        <div class="lightbox-content" @click.stop>
-          <EventAssetCard
-            class="lightbox-asset"
-            modalView
-            :bulkSelectable="false"
-            :loading="loading"
-            :assetIndex="0"
-            :asset="currentAsset"
-            :eventName="event.name"
-            @onClick="doNone"
-            controls
-            autoplay
-          />
-          <div
-            v-if="isCurrentAssetBlocked"
-            class="lightbox-actions display--flex justify--center"
-          >
-            <BaseButton
-              color="green"
-              text="בטל חסימה"
-              :loading="unblockingAssetId === currentAsset.id"
-              @onClick="unblockAsset(currentAsset.id)"
-            />
-          </div>
-          <div
-            v-else-if="canBlockCurrentAsset"
-            class="lightbox-actions display--flex justify--center"
-          >
-            <BaseButton
-              color="pink"
-              text="חסום קובץ"
-              :loading="blockingAssetId === currentAsset.id"
-              @onClick="blockAssets(currentAsset.id)"
-            />
-          </div>
-        </div>
-      </div>
   </div>
 </template>
 
 <script lang="ts">
-import { EventAssetsManagementModesEnum, StatusEnum, AssetModerationStatusEnum, getAssetModerationStatus } from "@/helpers/enums";
+import {
+  EventAssetsManagementModesEnum,
+  StatusEnum,
+  AssetModerationStatusEnum,
+  getAssetModerationStatus,
+} from "@/helpers/enums";
 import { IEventAsset, IEventDownloadAssetsProcess } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
 import Time from "@/helpers/time";
 import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
-import BaseButton from "@/components/library/buttons/BaseButton.vue";
 import EventAssetCard from "@/components/event/EventAssetCard.vue";
 import { EventAssetsManagementModesType } from "@/helpers/types";
 import MainIcon from "@/components/library/general/MainIcon.vue";
 import UploadMedia from "@/components/library/inputs/UploadMedia.vue";
-import MainSelect from "@/components/library/inputs/MainSelect.vue";
+import EventModerationSection from "@/components/event/EventModerationSection.vue";
 
 export default defineComponent({
   name: "EventAssetsView",
 
   components: {
-    BaseButton,
     MainCheckbox,
     EventAssetCard,
     MainIcon,
     UploadMedia,
-    MainSelect,
+    EventModerationSection,
   },
 
   data() {
     return {
       counter: "" as string,
-      action: "" as string,
       intervalId: null as ReturnType<typeof setInterval> | null,
       processPollingId: undefined as ReturnType<typeof setInterval> | undefined,
       pickedAll: false as boolean,
@@ -248,10 +300,13 @@ export default defineComponent({
       pollingCounter: 0 as number,
       isModalOpened: false as boolean,
       currentAssetIndex: 0 as number,
-      showBlockedAssets: false as boolean,
       unblockingAssetId: null as number | null,
       blockingAssetId: null as number | null,
       assetsPollIntervalId: null as ReturnType<typeof setInterval> | null,
+      moderationOpen: false as boolean,
+      moderationTouched: false as boolean,
+      selectMode: false as boolean,
+      keydownHandler: null as ((e: KeyboardEvent) => void) | null,
     };
   },
 
@@ -277,18 +332,21 @@ export default defineComponent({
       },
     },
 
+    moderationQueueCount: {
+      immediate: true,
+      handler(count: number) {
+        if (!this.moderationTouched) {
+          this.moderationOpen = count > 0;
+        }
+      },
+    },
+
     totalManagedAssetsIds() {
-      this.pickedAll = this.totalManagedAssetsIds === this.totalAssets;
-    },
-
-    action() {
-      this.$store.dispatch("event/setModeForAssetsManagement", this.action);
-    },
-
-    mode() {
-      if (!this.mode) {
-        this.pickedAll = false;
-        this.$store.dispatch("event/toggleAllAssetsInAssetsManagement", false);
+      this.pickedAll =
+        this.totalAssets > 0 &&
+        this.totalManagedAssetsIds === this.totalAssets;
+      if (this.totalManagedAssetsIds > 0) {
+        this.selectMode = true;
       }
     },
 
@@ -300,66 +358,51 @@ export default defineComponent({
   },
 
   computed: {
-    assetToggleColor(): string {
-      return this.canDelete ? "pink" : "green";
-    },
-
     totalAssets(): number {
       return this.$store.getters["event/getTotalAssets"];
+    },
+
+    assetsCountLabel(): string {
+      const n = this.totalAssets;
+      if (n === 1) return "קובץ אחד";
+      if (n === 2) return "2 קבצים";
+      return `${n} קבצים`;
     },
 
     ownerVisibleAssets(): IEventAsset[] {
       return this.$store.getters["event/getOwnerVisibleAssets"];
     },
 
-    blockedAssets(): IEventAsset[] {
-      return this.$store.getters["event/getBlockedAssets"];
-    },
-
-    hasBlockedAssets(): boolean {
-      return this.$store.getters["event/hasBlockedAssets"];
-    },
-
     hasPendingAssets(): boolean {
       return this.$store.getters["event/hasPendingAssets"];
     },
 
-    modalAssets(): IEventAsset[] {
-      const assets = [...this.ownerVisibleAssets];
-      if (this.showBlockedAssets) {
-        assets.push(...this.blockedAssets);
-      }
-      return assets;
+    pendingCount(): number {
+      return this.$store.getters["event/getPendingAssets"]?.length || 0;
+    },
+
+    blockedCount(): number {
+      return this.$store.getters["event/getBlockedAssets"]?.length || 0;
+    },
+
+    moderationQueueCount(): number {
+      return this.pendingCount + this.blockedCount;
     },
 
     assets(): IEventAsset[] {
-      return this.modalAssets;
+      return this.ownerVisibleAssets;
     },
 
     isEventActive(): boolean {
       return this.$store.getters["event/isEventActive"];
     },
 
-    canSubmit(): boolean {
-      return (
-        this.$store.getters["event/getTotalManagedAssetsIds"] && this.action
-      );
+    selectionActive(): boolean {
+      return this.selectMode || this.totalManagedAssetsIds > 0;
     },
 
-    mode(): EventAssetsManagementModesType | null {
-      return this.$store.getters["event/getManagedAssetsMode"];
-    },
-
-    isDownloadMode(): boolean {
-      return this.mode === EventAssetsManagementModesEnum.DOWNLOAD;
-    },
-
-    isDeleteMode(): boolean {
-      return this.mode === EventAssetsManagementModesEnum.DELETE;
-    },
-
-    isBlockMode(): boolean {
-      return this.mode === EventAssetsManagementModesEnum.BLOCK;
+    canAct(): boolean {
+      return this.totalManagedAssetsIds > 0 && !this.loading;
     },
 
     totalManagedAssetsIds(): number {
@@ -390,14 +433,6 @@ export default defineComponent({
       );
     },
 
-    canDownload(): boolean {
-      return this.isDownloadMode && this.managedAssetsIds.length > 0;
-    },
-
-    canDelete(): boolean {
-      return this.isDeleteMode && this.managedAssetsIds.length > 0;
-    },
-
     processFileName(): string {
       return this.$store.getters["event/getEventProcessFileName"];
     },
@@ -417,6 +452,12 @@ export default defineComponent({
 
     currentAsset(): IEventAsset {
       return this.assets[this.currentAssetIndex];
+    },
+
+    currentAssetFileName(): string {
+      if (!this.currentAsset || !this.event) return "file";
+      const extension = this.currentAsset.type === "image" ? "jpg" : "mp4";
+      return `${this.event.name}-${this.currentAssetIndex + 1}.${extension}`;
     },
 
     isCurrentAssetBlocked(): boolean {
@@ -452,6 +493,22 @@ export default defineComponent({
       this.isOpen = !this.isOpen;
     },
 
+    toggleModeration() {
+      this.moderationTouched = true;
+      this.moderationOpen = !this.moderationOpen;
+    },
+
+    enterSelectMode() {
+      this.selectMode = true;
+    },
+
+    exitSelectMode() {
+      this.selectMode = false;
+      this.pickedAll = false;
+      this.$store.dispatch("event/toggleAllAssetsInAssetsManagement", false);
+      this.$store.dispatch("event/setModeForAssetsManagement", null);
+    },
+
     updateCounter() {
       this.counter = Time.countdownTimer(this.disabledTime);
       if (this.counter === "00:00:00:00" && this.intervalId) {
@@ -460,13 +517,24 @@ export default defineComponent({
       }
     },
 
-    async submit() {
-      console.log(
-        { action: this.action, mode: this.mode },
-        EventAssetsManagementModesEnum.DOWNLOAD
-      );
+    async runAction(action: EventAssetsManagementModesType) {
+      if (!this.canAct) return;
 
-      switch (this.mode) {
+      if (action === EventAssetsManagementModesEnum.DELETE) {
+        if (!window.confirm("למחוק את הקבצים שנבחרו? לא ניתן לשחזר.")) {
+          return;
+        }
+      }
+
+      if (action === EventAssetsManagementModesEnum.BLOCK) {
+        if (!window.confirm("לחסום את הקבצים שנבחרו מהאלבום החי?")) {
+          return;
+        }
+      }
+
+      await this.$store.dispatch("event/setModeForAssetsManagement", action);
+
+      switch (action) {
         case EventAssetsManagementModesEnum.DOWNLOAD:
           await this.startDownloadFilesProcess();
           break;
@@ -482,6 +550,10 @@ export default defineComponent({
         default:
           break;
       }
+
+      this.selectMode = false;
+      this.pickedAll = false;
+      await this.$store.dispatch("event/setModeForAssetsManagement", null);
     },
 
     toggleAllAssets(val = null as boolean | null) {
@@ -493,22 +565,23 @@ export default defineComponent({
     },
 
     startPollingProcessStatus() {
+      if (this.processPollingId) {
+        return;
+      }
       this.processPollingId = setInterval(async () => {
-        console.log("this.pollingCounter", this.pollingCounter);
-
         if (this.pollingCounter >= 30) {
-          // Stop after 30 attempts (7.5 minutes)
           this.stopPollingProcessStatus();
           return;
         }
         await this.$store.dispatch("event/getDownloadAssetsProcess");
         this.pollingCounter++;
-      }, 15000); // Poll every 15 seconds
+      }, 15000);
     },
 
     stopPollingProcessStatus() {
       if (this.processPollingId) {
         clearInterval(this.processPollingId);
+        this.processPollingId = undefined;
       }
     },
 
@@ -517,7 +590,6 @@ export default defineComponent({
       const success = await this.$store.dispatch("event/downloadAssets");
       if (success) {
         this.resetPolling();
-        this.startPollingProcessStatus();
       }
       this.loading = false;
     },
@@ -549,27 +621,19 @@ export default defineComponent({
       this.loading = false;
 
       if (success && assetId) {
-        if (this.hasBlockedAssets) {
-          this.showBlockedAssets = true;
-        }
         this.isModalOpened = false;
       }
     },
 
     resetPolling() {
-      this.startPollingProcessStatus();
+      this.stopPollingProcessStatus();
       this.pollingCounter = 0;
+      this.startPollingProcessStatus();
     },
 
-    
     openModal(assetIndex: number) {
       this.isModalOpened = true;
       this.currentAssetIndex = assetIndex;
-    },
-
-    openBlockedModal(blockedIndex: number) {
-      this.isModalOpened = true;
-      this.currentAssetIndex = this.ownerVisibleAssets.length + blockedIndex;
     },
 
     async unblockAsset(assetId: number) {
@@ -578,14 +642,8 @@ export default defineComponent({
       }
 
       this.unblockingAssetId = assetId;
-      const success = await this.$store.dispatch("event/unblockAssets", [
-        assetId,
-      ]);
+      await this.$store.dispatch("event/unblockAssets", [assetId]);
       this.unblockingAssetId = null;
-
-      if (success && this.blockedAssets.length === 0) {
-        this.showBlockedAssets = false;
-      }
     },
 
     startAssetsPolling() {
@@ -604,50 +662,45 @@ export default defineComponent({
 
     changeAsset(newIndex: number) {
       if (newIndex < 0) {
-        this.currentAssetIndex = this.modalAssets.length - 1;
-      } else if (newIndex >= this.modalAssets.length) {
+        this.currentAssetIndex = this.assets.length - 1;
+      } else if (newIndex >= this.assets.length) {
         this.currentAssetIndex = 0;
       } else {
         this.currentAssetIndex = newIndex;
       }
     },
 
-    keysListen() {
-      window.addEventListener("keydown", (e) => {
-        if (!this.isModalOpened) {
-          return
+    onKeydown(e: KeyboardEvent) {
+      if (!this.isModalOpened) {
+        if (e.key === "Escape" && this.selectionActive) {
+          this.exitSelectMode();
         }
-        
-        if (e.key === "ArrowRight") {
-          this.changeAsset(this.currentAssetIndex - 1);
-        } else if (e.key === "ArrowLeft") {
-          this.changeAsset(this.currentAssetIndex + 1);
-        } else if (e.key === "Escape") {
-          this.isModalOpened = false;
-        }
-      });
+        return;
+      }
+
+      if (e.key === "ArrowRight") {
+        this.changeAsset(this.currentAssetIndex - 1);
+      } else if (e.key === "ArrowLeft") {
+        this.changeAsset(this.currentAssetIndex + 1);
+      } else if (e.key === "Escape") {
+        this.isModalOpened = false;
+      }
     },
 
     doNone() {
       // do nothing
-    }
+    },
   },
 
   mounted() {
     this.updateCounter();
     this.intervalId = setInterval(this.updateCounter, 1000);
-    // If there's an active download process, start polling
     if (this.isDownloadProcessPreparing) {
       this.startPollingProcessStatus();
     }
-    this.action = this.mode as string;
 
-    if (this.action) {
-      this.$refs.actionSelect &&
-        (this.$refs.actionSelect as any).setValue(this.action);
-    }
-
-    this.keysListen();
+    this.keydownHandler = this.onKeydown.bind(this);
+    window.addEventListener("keydown", this.keydownHandler);
   },
 
   beforeUnmount() {
@@ -656,166 +709,531 @@ export default defineComponent({
     }
     this.stopPollingProcessStatus();
     this.stopAssetsPolling();
+    if (this.keydownHandler) {
+      window.removeEventListener("keydown", this.keydownHandler);
+      this.keydownHandler = null;
+    }
   },
 });
 </script>
 
 <style lang="scss" scoped>
 .event-assets {
-  h1 small {
-    font-size: 0.5em;
-  }
-
-  .assets-top {
-    min-height: fit-content;
-  }
-
-  .assets-body {
-    flex: 1;
-    min-height: 0;
-    margin-top: 20px;
-    max-height: 75vh;
-    overflow-y: auto;
-  }
-
-  .assets-content {
-    min-height: fit-content;
-  }
-
-  .blocked-assets-section {
-    border-top: 1px solid #f0d4d6;
-    padding-top: 16px;
-  }
-
-  .blocked-warning,
-  .blocked-empty {
-    border: 1px solid #f68589;
-    color: #8a2f35;
-    line-height: 1.5;
-  }
-
-  .blocked-empty {
-    text-align: center;
-  }
-
-  .blocked-toggle {
-    display: inline-block;
-  }
-
-  .blocked-toggle-input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    pointer-events: none;
-  }
-
-  .blocked-toggle-chip {
-    gap: 8px;
-    padding: 8px 14px;
-    border: 1px solid #f0d4d6;
-    background: #fff;
-    color: #8a2f35;
-    font-size: 0.9rem;
-    font-weight: 600;
-    line-height: 1;
-    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    user-select: none;
-  }
-
-  .blocked-toggle:hover .blocked-toggle-chip {
-    border-color: #f68589;
-    box-shadow: 0 2px 8px rgba(246, 133, 137, 0.18);
-  }
-
-  .blocked-toggle--active .blocked-toggle-chip {
-    background: #fdf0f1;
-    border-color: #f68589;
-    box-shadow: 0 2px 10px rgba(246, 133, 137, 0.22);
-  }
-
-  .blocked-toggle-icon {
-    font-size: 1.1rem;
-    line-height: 1;
-    color: #c62828;
-  }
-
-  .blocked-toggle--active .blocked-toggle-icon {
-    color: #a31515;
-  }
-
-  .blocked-toggle-badge {
-    min-width: 22px;
-    height: 22px;
-    padding: 0 7px;
-    border-radius: 999px;
-    background: #c62828;
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .blocked-toggle--active .blocked-toggle-badge {
-    background: #a31515;
-  }
-
-  .choose-all-text {
-    margin-inline-start: 10px;
-  }
-
-  .download-button-wrapper {
-    margin: 10px 0;
-  }
-
-  .actions {
-    margin-inline-end: 10px;
-    max-height: fit-content;
-    width: 30%;
-
-    .action-select-wrapper {
-      width: 100%;
-      margin-left: 10px;
-    }
-
-    @media only screen and (max-width: 600px) {
-      width: 100%;
-      margin-top: 10px;
-      margin-inline-end: 0;
-
-      .action-button-wrapper {
-        margin-right: 10px;
-      }
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: var(--font, Heebo, sans-serif);
+  color: var(--ink, #161310);
+  min-height: 0;
 }
 
-.collapse-container {
-  border-radius: 4px;
-  overflow: hidden;
-  max-width: 500px;
-  margin-bottom: 5px;
+.page-head .kicker,
+.moderation-toggle .kicker {
+  color: var(--rose, #dc5b66);
+  font-weight: 800;
+  margin: 0;
 }
 
-.collapse-button {
-  width: 100%;
-  background-color: #f7f7f7;
-  color: #333;
-  padding: 10px;
-  font-size: 16px;
+.page-head h1 {
+  margin: 4px 0 0;
+  font-weight: 900;
+  font-size: clamp(1.55rem, 2.4vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.lede {
+  margin: 8px 0 0;
+  color: var(--muted, #5e564e);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  max-width: 52ch;
+}
+
+.meta-note {
+  margin: 10px 0 0;
+  color: var(--muted, #5e564e);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.meta-note strong {
+  color: #8a7040;
+  font-variant-numeric: tabular-nums;
+}
+
+.how-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink, #161310);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
-  border: none;
-  outline: none;
+}
+
+.how-body {
+  margin-top: 8px;
+  max-width: 48ch;
+}
+
+.how-body p {
+  margin: 0;
+  color: var(--muted, #5e564e);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.upload-strip {
+  background: rgba(22, 19, 16, 0.02);
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 18px;
+  padding: 14px 16px;
+
+  :deep(.upload-media) {
+    max-width: none;
+    margin-top: 0;
+  }
+
+  :deep(.upload-label) {
+    margin-bottom: 8px;
+    font-size: 0.88rem;
+  }
+
+  :deep(.dropzone) {
+    min-height: 72px;
+    padding: 12px 14px;
+    gap: 2px;
+  }
+
+  :deep(.dropzone input[type="file"]) {
+    display: none !important;
+  }
+
+  :deep(.dropzone-icon) {
+    margin-bottom: 0;
+  }
+}
+
+.assets-toolbar {
+  position: sticky;
+  top: calc(var(--nav, 72px) + 8px);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.14));
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assets-toolbar--active {
+  border-color: rgba(220, 91, 102, 0.4);
+  box-shadow:
+    0 0 0 1px rgba(220, 91, 102, 0.12),
+    var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+}
+
+.toolbar-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.selection-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.selection-count {
+  color: var(--ink, #161310);
+  font-size: 0.92rem;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+.selection-picked {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(220, 91, 102, 0.12);
+  color: #b13c48;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.selection-hint {
+  color: var(--muted, #5e564e);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  background: rgba(22, 19, 16, 0.04);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink, #161310);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-inline-start: auto;
+}
+
+.toolbar-action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(22, 19, 16, 0.035);
+  transition: opacity 0.2s ease;
+
+  &:not(.is-ready) {
+    opacity: 0.55;
+  }
+}
+
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink, #161310);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.tb-btn--select {
+  background: var(--rose, #dc5b66);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(220, 91, 102, 0.28);
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.04);
+  }
+
+  &:disabled {
+    background: rgba(22, 19, 16, 0.12);
+    color: var(--muted, #5e564e);
+    box-shadow: none;
+    filter: none;
+  }
+}
+
+.tb-btn--download {
+  background: #1f7a45;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #19663a;
+  }
+
+  &:disabled {
+    background: rgba(31, 122, 69, 0.22);
+    color: rgba(31, 122, 69, 0.7);
+  }
+}
+
+.tb-btn--neutral {
+  background: #fff;
+  border-color: rgba(22, 19, 16, 0.14);
+  color: var(--ink, #161310);
+
+  &:hover:not(:disabled) {
+    border-color: rgba(22, 19, 16, 0.28);
+    background: rgba(22, 19, 16, 0.03);
+  }
+
+  &:disabled {
+    background: rgba(255, 255, 255, 0.55);
+    color: rgba(22, 19, 16, 0.38);
+    border-color: rgba(22, 19, 16, 0.08);
+  }
+}
+
+.tb-btn--warn {
+  background: rgba(220, 91, 102, 0.12);
+  color: #b13c48;
+
+  &:hover:not(:disabled) {
+    background: rgba(220, 91, 102, 0.18);
+  }
+
+  &:disabled {
+    background: rgba(220, 91, 102, 0.08);
+    color: rgba(177, 60, 72, 0.45);
+  }
+}
+
+.tb-btn--danger {
+  background: #9b1c1c;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #861818;
+  }
+
+  &:disabled {
+    background: rgba(155, 28, 28, 0.18);
+    color: rgba(155, 28, 28, 0.55);
+  }
+}
+
+.tb-btn--ghost {
+  color: var(--muted, #5e564e);
+  padding-inline: 10px;
+
+  &:hover:not(:disabled) {
+    color: var(--ink, #161310);
+    background: rgba(22, 19, 16, 0.05);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.zip-download {
+  text-decoration: none;
+}
+
+.lb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 84px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: progress;
+    transform: none;
+  }
+}
+
+.lb-btn--download {
+  background: #1f7a45;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(31, 122, 69, 0.28);
+
+  &:hover:not(:disabled) {
+    background: #19663a;
+  }
+}
+
+.lb-btn--ghost {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink, #161310);
+  border-color: rgba(255, 255, 255, 0.2);
+
+  &:hover:not(:disabled) {
+    background: #fff;
+  }
+}
+
+.lb-btn--block {
+  background: rgba(220, 91, 102, 0.95);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(220, 91, 102, 0.3);
+
+  &:hover:not(:disabled) {
+    background: #c94d58;
+  }
+}
+
+.lb-btn--restore {
+  background: #1f7a45;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #19663a;
+  }
+}
+
+.assets-body {
+  min-height: 220px;
+}
+
+.assets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 200px));
+  gap: 12px;
+  align-content: start;
+  justify-content: start;
+}
+
+.assets-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 220px;
+  padding: 28px 16px;
   text-align: center;
+  border: 1px dashed var(--line, rgba(22, 19, 16, 0.18));
+  border-radius: 18px;
+  background: rgba(22, 19, 16, 0.02);
+  color: var(--ink, #161310);
+  font-weight: 700;
 }
 
-.collapse-button:hover {
-  background-color: #eaeaea;
+.assets-empty-hint {
+  margin: 0;
+  color: var(--muted, #5e564e);
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
-/* Smooth transition */
+.moderation-shell {
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 18px;
+  background: #fffcfa;
+  overflow: hidden;
+}
+
+.moderation-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: start;
+}
+
+.moderation-toggle-text strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.moderation-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge--pending {
+  background: rgba(230, 168, 23, 0.18);
+  color: #8a5a00;
+}
+
+.badge--blocked {
+  background: rgba(198, 40, 40, 0.14);
+  color: #9b1c1c;
+}
+
+.badge--idle {
+  background: rgba(22, 19, 16, 0.06);
+  color: var(--muted, #5e564e);
+}
+
+.moderation-panel {
+  border-top: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+}
+
+.moderation-section {
+  margin: 0;
+}
+
 .collapse-enter-active,
 .collapse-leave-active {
   transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
@@ -830,9 +1248,79 @@ export default defineComponent({
 
 .collapse-enter-to,
 .collapse-leave-from {
-  max-height: 200px;
-  /* Adjust as needed for content */
+  max-height: 120px;
   opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .assets-toolbar {
+    top: calc(var(--nav, 72px) + 44px);
+  }
+
+  .assets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 180px));
+  }
+}
+
+@media (max-width: 600px) {
+  .event-assets {
+    gap: 14px;
+  }
+
+  .assets-toolbar {
+    top: calc(var(--nav, 72px) + 40px);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .toolbar-main {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    margin-inline-start: 0;
+  }
+
+  .toolbar-action-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .tb-btn {
+    min-height: 40px;
+  }
+
+  .tb-btn--select,
+  .tb-btn--ghost,
+  .zip-download {
+    flex: 1 1 auto;
+  }
+
+  .zip-download {
+    width: 100%;
+    text-align: center;
+  }
+
+  .assets-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    justify-content: stretch;
+  }
+
+  .upload-strip {
+    padding: 12px;
+  }
+
+  .upload-strip :deep(.dropzone) {
+    flex-direction: column;
+    min-height: 96px;
+  }
 }
 </style>
 

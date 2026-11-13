@@ -1,24 +1,36 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import FaqList from "../components/FaqList.astro";
-import { FAQ_GROUPS, FAQ_ITEMS } from "../data/faq";
+import RelatedLinks from "../components/RelatedLinks.astro";
+import { ALL_FAQ_ITEMS, FAQ_GROUPS, PRICING_FAQ_ITEMS } from "../data/faq";
 import { faqNode, graph, organizationNode } from "../lib/schema";
 
 const title = "שאלות נפוצות | SnapShare";
 const description =
-  "איך האורחים מעלים תמונות בלי אפליקציה, האם האלבום חי, ואיך מורידים את כל הקבצים בסוף האירוע.";
+  "איך האורחים מעלים תמונות בלי אפליקציה, האם האלבום חי, כמה עולה מסלול, ואיך מורידים את כל הקבצים בסוף האירוע.";
+
+const relatedLinks = [
+  { slug: "/digital-wedding-album", anchor: "אלבום דיגיטלי לחתונה" },
+  { slug: "/bar-bat-mitzvah-digital-album", anchor: "אלבום דיגיטלי לבר ובת מצווה" },
+  { slug: "/corporate-event-photo-sharing", anchor: "שיתוף תמונות באירוע עסקי" },
+  { slug: "/qr-photo-sharing", anchor: "שיתוף תמונות עם QR" },
+  { slug: "/how-it-works", anchor: "איך זה עובד" },
+  { slug: "/pricing", anchor: "מחירים ומסלולים" },
+  { slug: "/contact-us", anchor: "יש שאלה? כתבו לנו" },
+  { slug: "/order", anchor: "פתחו אירוע ניסיון בחינם" },
+];
 ---
 <BaseLayout
   title={title}
   description={description}
   path="/faq"
-  schema={graph([organizationNode(), faqNode(FAQ_ITEMS)])}
+  schema={graph([organizationNode(), faqNode(ALL_FAQ_ITEMS)])}
 >
   <section id="faq">
     <div class="wrap">
       <p class="sec-kicker">שאלות נפוצות</p>
       <h1 class="sec-title">התשובות הקצרות.</h1>
-      <p class="sec-sub">שאלות על המוצר. שאלות על המחיר נמצאות ב<a href="/pricing">עמוד המחירים</a>.</p>
+      <p class="sec-sub">שאלות על המוצר ועל המחיר. לפירוט המסלולים: <a href="/pricing">עמוד המחירים</a>.</p>
       {FAQ_GROUPS.map((group) => (
         <div class="faq-group">
           <h2>{group.title}</h2>
@@ -27,11 +39,30 @@ const description =
       ))}
     </div>
   </section>
+  <section id="pricing-faq">
+    <div class="wrap">
+      <p class="sec-kicker">שאלות על המחיר</p>
+      <h2 class="sec-title">לפני שסוגרים מסלול.</h2>
+      <FaqList items={PRICING_FAQ_ITEMS} />
+      <div class="faq-related">
+        <RelatedLinks links={relatedLinks} />
+      </div>
+    </div>
+  </section>
 </BaseLayout>
 <style>
-  #faq > .wrap { width: min(820px, calc(100% - 40px)); }
+  #faq > .wrap,
+  #pricing-faq > .wrap { width: min(820px, calc(100% - 40px)); }
   .faq-group { margin-top: 28px; }
   .faq-group h2 { font-weight: 900; margin-bottom: 8px; }
   .sec-sub a { color: inherit; font-weight: 800; }
-  #faq .faq-list { max-width: none; }
+  #faq .faq-list,
+  #pricing-faq .faq-list { max-width: none; }
+  .faq-related {
+    margin-top: 36px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 22px;
+  }
 </style>

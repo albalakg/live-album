@@ -1,6 +1,6 @@
 # Manual photo approval — backend spec
 
-The Vue app already sends this. The Laravel API in `albalakg/snapshare-server` does not implement it yet. Do not invent a second moderation status in the frontend.
+Gal approved this contract. It is being implemented in `albalakg/snapshare-server` on its own branch and pull request. This repo does not change that server. The Vue app already speaks the contract below; do not invent a second moderation status or a new approve URL.
 
 ## What the app already does
 
@@ -27,7 +27,7 @@ Hide stays:
 `POST /api/events/{event}/assets/hide`  
 `{ "assets": [id] }`
 
-Guest album and the live screen already render only assets whose moderation status is active. Pending photos stay in the host queue at `/event/moderation` and do not appear on the stage or in the guest gallery.
+Guest album and the live screen already render only assets whose moderation status is active. Pending photos stay in the host review section on `/event/assets` and do not appear on the stage or in the guest gallery.
 
 ## Data
 

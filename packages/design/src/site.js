@@ -28,6 +28,58 @@ export const PRICES = {
   currency: "ILS",
 };
 
+/**
+ * Shared plan facts for marketing + order UI.
+ * Used as the always-on fallback when the subscriptions API is slow or down.
+ * Prices match PRICES — not the unapproved ₪399 proposal.
+ */
+export const PLAN_FACTS = [
+  {
+    slug: "demo",
+    nameHe: "ניסיון",
+    nameApi: "נסיון",
+    price: PRICES.trial,
+    priceLabel: "חינם",
+    priceSub: "בלי כרטיס אשראי",
+    features: ["10 קבצים", "48 שעות", "בלי כרטיס אשראי"],
+    cta: "נסו בחינם",
+    featured: false,
+    files_allowed: 10,
+    storage_hours: 48,
+  },
+  {
+    slug: "classic",
+    nameHe: "קלאסי",
+    nameApi: "קלאסי",
+    price: PRICES.classic,
+    priceLabel: null,
+    priceSub: "תשלום אחד לאירוע, בלי מנוי",
+    features: ["עד 1,000 קבצים", "האירוע נשמר כ-6 חודשים", "מסך חי כלול"],
+    cta: "בחירת קלאסיק",
+    featured: true,
+    badge: "מומלץ",
+    files_allowed: 1000,
+    storage_hours: 4320,
+  },
+  {
+    slug: "premium",
+    nameHe: "פרימיום",
+    nameApi: "פרימיום",
+    price: PRICES.premium,
+    priceLabel: null,
+    priceSub: "תשלום אחד לאירוע, בלי מנוי",
+    features: ["עד 5,000 קבצים", "האירוע נשמר כשנה", "מסך חי כלול"],
+    cta: "בחירת פרימיום",
+    featured: false,
+    files_allowed: 5000,
+    storage_hours: 8760,
+  },
+];
+
+export function planFactBySlug(slug) {
+  return PLAN_FACTS.find((plan) => plan.slug === slug) || null;
+}
+
 /** Launch-sale strikethrough (1.3×) stays off. Real discount codes are unrelated. */
 export const SHOW_LAUNCH_SALE_STRIKETHROUGH = false;
 

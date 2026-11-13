@@ -1,89 +1,35 @@
 <template>
-  <div
-    class="event-details display--flex flex--wrap justify--space-between width--full"
-  >
+  <div class="event-details">
+    <header class="details-head">
+      <p class="kicker">ניהול אירוע</p>
+      <h1>פרטי האירוע</h1>
+      <p class="lede">שם, תאריך וכיסוי. סטטוס האירוע מתעדכן כאן.</p>
+    </header>
+
     <div
-      class="event-right padding--medium display--flex direction--column justify--space-between"
+      class="event-cover"
+      :class="{ 'event-cover--empty': !eventImage }"
+      :style="coverStyle"
+      role="img"
+      :aria-label="eventImage ? 'תמונת האירוע' : 'אין תמונת אירוע'"
     >
-      <EventDetailsForm />
-      <div class="upload-page-wrapper padding--medium bg--white brs--medium">
-        <div
-          class="display--flex flex--wrap justify--space-between align--center"
-        >
-          <div class="display--flex align--center width--full-mobile">
-            <div class="icon-wrapper">
-              <MainIcon
-                clickable
-                icon="content_copy"
-                @onClick="copyUrl(`/event/uploads/${eventPath}`, 'uploadPage')"
-              />
-            </div>
-            <small>{{ copyUploadText }}</small>
-          </div>
-          <div class="width--full-mobile upload-page-link">
-            <router-link target="_blank" :to="`/event/uploads/${eventPath}`">
-              <BaseButton text="צפייה בעמוד העלאות" />
-            </router-link>
-          </div>
-        </div>
-        <div>
-          <small class="hint" v-if="isEventInProgress"
-            >העמוד פעיל לאורחים כעת</small
-          >
-          <small class="hint" v-else-if="isEventActive"
-            >העמוד כבר אינו זמין יותר</small
-          >
-          <small class="hint" v-else>
-            העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small
-          >
-        </div>
-        <div
-          class="display--flex flex--wrap justify--space-between align--center margin--top-medium"
-        >
-          <div class="display--flex align--center width--full-mobile">
-            <div class="icon-wrapper">
-              <MainIcon
-                clickable
-                icon="content_copy"
-                @onClick="copyUrl(`/event/open-gallery/${eventPath}`, 'galleryPage')"
-              />
-            </div>
-            <small>{{ copyGalleryText }}</small>
-          </div>
-          <div class="width--full-mobile upload-page-link">
-            <router-link
-              target="_blank"
-              :to="`/event/open-gallery/${eventPath}`"
-            >
-              <BaseButton text="עמוד האלבום לאורחים" />
-            </router-link>
-          </div>
-        </div>
-        <div>
-          <small class="hint" v-if="isEventAvailable"
-            >העמוד פעיל לאורחים כעת</small
-          >
-          <small class="hint" v-else>
-            העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</small
-          >
-        </div>
+      <div v-if="!eventImage" class="event-cover__placeholder">
+        <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+        <span>תמונת אירוע</span>
       </div>
     </div>
-    <div
-      class="event-left padding--medium brs--medium display--flex direction--column justify--space-between"
-    >
+
+    <div class="stats-row">
       <EventInfoCard />
-      <EventSubscriptionCard />
     </div>
+
+    <EventDetailsForm />
   </div>
 </template>
 
 <script lang="ts">
 import EventDetailsForm from "@/components/event/EventDetailsForm.vue";
 import EventInfoCard from "@/components/event/EventInfoCard.vue";
-import EventSubscriptionCard from "@/components/event/EventSubscriptionCard.vue";
-import BaseButton from "@/components/library/buttons/BaseButton.vue";
-import MainIcon from "@/components/library/general/MainIcon.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -92,97 +38,16 @@ export default defineComponent({
   components: {
     EventDetailsForm,
     EventInfoCard,
-    EventSubscriptionCard,
-    BaseButton,
-    MainIcon,
-  },
-
-  data() {
-    return {
-      textCopied: {
-        uploadPage: false,
-        galleryPage: false,
-      } as Record<string, boolean>,
-    };
   },
 
   computed: {
-    eventPath(): string {
-      return this.$store.getters["event/getEventPath"];
+    eventImage(): string {
+      return this.$store.getters["event/getEventImage"] || "";
     },
 
-    isEventAvailable(): string {
-      return this.$store.getters["event/isEventAvailable"];
-    },
-
-    isEventActive(): string {
-      return this.$store.getters["event/isEventActive"];
-    },
-
-    isEventInProgress(): string {
-      return this.$store.getters["event/isEventInProgress"];
-    },
-
-    copyUploadText(): string {
-      return this.textCopied.uploadPage ? "הקישור הועתק" : "לחצו להעתקת הקישור";
-    },
-
-    copyGalleryText(): string {
-      return this.textCopied.galleryPage ? "הקישור הועתק" : "לחצו להעתקת הקישור";
-    },
-  },
-
-  methods: {
-    copyUrl(url: string, pageType: string) {
-      this.copyTextToClipboard(window.location.origin + url, pageType);
-    },
-
-    fallbackCopyTextToClipboard(text: string, pageType: string) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-
-      // Avoid scrolling to bottom
-      textArea.style.top = "0";
-      textArea.style.left = "0";
-      textArea.style.position = "fixed";
-
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        const successful = document.execCommand("copy");
-        if (successful) {
-          this.textCopied[pageType] = true;
-          setTimeout(() => {
-            this.textCopied[pageType] = false;
-          }, 2000);
-        }
-      } catch (err) {
-        console.error("Fallback: Oops, unable to copy", err);
-      }
-
-      document.body.removeChild(textArea);
-    },
-
-    copyTextToClipboard(text: string, pageType: string) {
-      if (!navigator.clipboard) {
-        this.fallbackCopyTextToClipboard(text, pageType);
-        return;
-      }
-
-      navigator.clipboard.writeText(text).then(
-        () => {
-          this.textCopied[pageType] = true;
-          setTimeout(() => {
-            this.textCopied[pageType] = false;
-          }, 2000);
-        },
-        (err) => {
-          console.error("Async: Could not copy text: ", err);
-          this.fallbackCopyTextToClipboard(text, pageType);
-        }
-      );
+    coverStyle(): Record<string, string> {
+      if (!this.eventImage) return {};
+      return { backgroundImage: `url(${this.eventImage})` };
     },
   },
 });
@@ -190,49 +55,86 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-details {
-  .icon-wrapper {
-    width: 30px;
-    height: 30px;
-    margin-inline-end: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.details-head .kicker {
+  color: var(--rose, #dc5b66);
+  font-weight: 800;
+  margin: 0;
+}
+
+.details-head h1 {
+  margin: 4px 0 0;
+  font-weight: 900;
+  font-size: clamp(1.55rem, 2.4vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.lede {
+  margin: 8px 0 0;
+  color: var(--muted, #5e564e);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  max-width: 52ch;
+}
+
+.event-cover {
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  background-position: center;
+  background-size: cover;
+  background-color: #1c1814;
+  overflow: hidden;
+}
+
+.event-cover--empty {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(220, 91, 102, 0.42), transparent 52%),
+    radial-gradient(circle at 82% 78%, rgba(201, 163, 106, 0.48), transparent 48%),
+    linear-gradient(155deg, #2a221c 0%, #3a2f28 48%, #1c1814 100%);
+  border: 1px solid rgba(201, 163, 106, 0.28);
+}
+
+.event-cover__placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(255, 252, 250, 0.88);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 8px rgba(18, 16, 14, 0.35);
+}
+
+.event-cover__placeholder .material-symbols-outlined {
+  font-size: 2rem;
+  opacity: 0.9;
+}
+
+@media (max-width: 420px) {
+  .details-head h1 {
+    white-space: normal;
   }
 
-  .event-right {
-    width: 30%;
-    min-height: 40%;
-
-    @media only screen and (max-width: 1600px) {
-      width: 40%;
-    }
-
-    @media only screen and (max-width: 600px) {
-      width: 100%;
-
-      .upload-page-wrapper {
-        margin-top: 20px;
-
-        .upload-page-link {
-          margin-top: 10px;
-        }
-      }
-    }
+  .event-cover {
+    aspect-ratio: 4 / 3;
   }
+}
 
-  .event-left {
-    width: 40%;
-    min-height: 40%;
-
-    @media only screen and (max-width: 600px) {
-      width: 100%;
-      margin-top: 30px;
-    }
-
-    & > div {
-      height: calc(50% - 40px);
-
-      @media only screen and (max-width: 600px) {
-        height: fit-content;
-      }
-    }
-  }
+.stats-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  max-width: 560px;
 }
 </style>

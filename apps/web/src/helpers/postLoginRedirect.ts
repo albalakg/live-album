@@ -42,5 +42,5 @@ export function resolvePostLoginRoute(
     return "/event";
   }
 
-  return "/";
+  return "/event";
 }

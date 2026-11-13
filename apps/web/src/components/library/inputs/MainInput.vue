@@ -221,11 +221,40 @@ export default defineComponent({
     .inner-input {
         padding: 10px 15px;
         position: relative;
-        background-color: white;
+        background-color: #fffcfa;
+        border: 1px solid rgba(22, 19, 16, 0.16);
+        border-radius: 14px;
+        box-shadow: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+        &:focus-within {
+            border-color: #8a7040;
+            box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.35);
+        }
 
         input {
             font-size: 1em;
-            background-color: transparent
+            background-color: transparent;
+            border: 0;
+            outline: none;
+            box-shadow: none;
+
+            /* Chrome autofill paints a light-blue box on the inner <input>;
+               stretch an inset shadow in the field background so the control
+               still reads as one clean box. */
+            &:-webkit-autofill,
+            &:-webkit-autofill:hover,
+            &:-webkit-autofill:focus,
+            &:-webkit-autofill:active,
+            &:autofill {
+                -webkit-box-shadow: 0 0 0 1000px #fffcfa inset !important;
+                box-shadow: 0 0 0 1000px #fffcfa inset !important;
+                -webkit-text-fill-color: #161310 !important;
+                caret-color: #161310;
+                background-color: transparent !important;
+                background-image: none !important;
+                transition: background-color 99999s ease-in-out 0s;
+            }
         }
 
         .input-size-small {
@@ -256,9 +285,10 @@ export default defineComponent({
         }
     }
 
-    .input-error {
-        border: 2px solid #f68589;
-        background: #f6858988;
+    &.input-error .inner-input {
+        border-color: #c94a56;
+        box-shadow: 0 0 0 3px rgba(220, 91, 102, 0.22);
+        background: rgba(220, 91, 102, 0.06);
     }
 }
 </style>

@@ -1,5 +1,6 @@
 ---
 import Rich from "./Rich.astro";
+import RelatedLinks from "./RelatedLinks.astro";
 import { applyPendingClaims } from "../lib/pendingClaims";
 import { appPath } from "../lib/appUrl";
 
@@ -78,12 +79,9 @@ const faqs = faq
     </section>
   )}
   {internalLinks.length > 0 && (
-    <nav class="landing-links" aria-label="עמודים קשורים">
-      <h2>עוד ב-SnapShare</h2>
-      <ul>
-        {internalLinks.map((link) => <li><a href={appPath(link.slug)}>{link.anchor}</a></li>)}
-      </ul>
-    </nav>
+    <div class="landing-links">
+      <RelatedLinks links={internalLinks} />
+    </div>
   )}
   <p class="landing-cta">
     <a class="btn btn-primary" href={appPath(ctaTarget)}>{ctaLabel}</a>
@@ -99,11 +97,11 @@ const faqs = faq
     border-radius: 22px;
     padding: 22px;
   }
-  .landing-section h2, .landing-section h3, .landing-links h2 { font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px; }
-  .landing-section h2, .landing-links h2 { font-size: 1.45rem; }
+  .landing-section h2, .landing-section h3 { font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px; }
+  .landing-section h2 { font-size: 1.45rem; }
   .landing-section h3 { font-size: 1.15rem; }
   .landing-section p, .landing-section li { color: var(--muted); margin: 8px 0; }
-  .landing-section ul, .landing-links ul { padding-inline-start: 1.2rem; }
-  .landing-section a, .landing-links a { color: var(--ink); font-weight: 800; }
+  .landing-section ul { padding-inline-start: 1.2rem; }
+  .landing-section a { color: var(--ink); font-weight: 800; }
   .landing-cta { margin-top: 22px; }
 </style>

@@ -454,23 +454,19 @@ a {
 }
 
 .vue-notification-group {
-  top: 85px !important;
+  z-index: 10050 !important;
 }
 
-.vue-notification.error {
-  background: #f58589 !important;
-  border-left-color: #e5565b !important;
-}
-
+/* Legacy notification skins — app uses .snap-toast exclusively */
+.vue-notification,
+.vue-notification-template,
+.notification-title,
 .notification-content {
-  font-weight: 700 !important;
-}
-
-.vue-notification-template {
-  border-radius: 8px;
-  box-shadow: -3px 3px 3px #222a;
-  text-align: right !important;
-  direction: rtl;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 ::-webkit-scrollbar-track {

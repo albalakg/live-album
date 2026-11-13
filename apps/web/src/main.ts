@@ -19,6 +19,7 @@ import axios from "axios";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 import Notifications from '@kyvg/vue3-notification'
+import { notify as safeNotify } from '@/helpers/notify'
 import { useBreakpoints } from './composables/useBreakpoints';
 
 axios.defaults.baseURL = process.env.VUE_APP_SERVER_BASE_URL + "/api/";
@@ -33,4 +34,6 @@ if (session?.token) {
 const app = createApp(App);
 app.component('VueDatePicker', VueDatePicker);
 app.config.globalProperties.$bp = useBreakpoints();
-app.use(store).use(router).use(Notifications).mount("#app");
+app.use(store).use(router).use(Notifications);
+app.config.globalProperties.$notify = safeNotify;
+app.mount("#app");

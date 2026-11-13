@@ -4,7 +4,9 @@
   padding-bottom: 0;
 }
 .app-content .moderation {
-  padding: 28px 20px 48px;
+  padding: 4px 0 12px;
+  background: transparent;
+  min-height: 0;
 }
 
 /* Shared chrome for the Vue app. Marketing pages live in Astro. */
@@ -40,15 +42,10 @@ body, #app {
   bottom: auto !important;
 }
 
+/* Legacy pink footer chrome — app footer now uses .app-footer */
 .footer.bg--pink {
   background: var(--espresso, #12100e) !important;
   color: rgba(247, 242, 235, 0.78) !important;
-}
-.footer.bg--pink p,
-.footer.bg--pink h3,
-.footer.bg--pink h4,
-.footer.bg--pink a {
-  color: rgba(247, 242, 235, 0.86) !important;
 }
 
 .login,
@@ -133,27 +130,6 @@ body, #app {
   width: min(1100px, calc(100% - 40px));
   padding-bottom: 48px;
 }
-.order-steps {
-  display: flex;
-  gap: 8px;
-  list-style: none;
-  margin: 8px 0 20px;
-  padding: 0;
-  justify-content: center;
-}
-.order-steps li {
-  border: 1px solid rgba(22, 19, 16, 0.12);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-weight: 700;
-  color: #5e564e;
-  background: #fffcfa;
-}
-.order-steps li.on {
-  background: #12100e;
-  color: #f7f2eb;
-  border-color: #12100e;
-}
 
 .sidebar.bg--gray,
 .event-content.bg--gray {
@@ -161,21 +137,12 @@ body, #app {
   border: 1px solid rgba(22, 19, 16, 0.08);
 }
 
-.main-button .inner-button.bg--green,
-.main-button .inner-button.bg--pink {
-  background: linear-gradient(135deg, #dc5b66, #c9a36a) !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-}
 .main-button {
   border-radius: 999px !important;
 }
 
-.pricing-card {
-  background: var(--paper, #fffcfa);
-  border: 1px solid rgba(22, 19, 16, 0.1);
-  border-radius: 22px;
-  color: var(--ink, #161310);
+.order .plans {
+  margin-top: 8px;
 }
 .dp__input_wrap {
   box-shadow: none !important;
@@ -192,4 +159,115 @@ body, #app {
   outline: none !important;
   border-color: #8a7040 !important;
   box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.35) !important;
+}
+.order-pay-error .sandbox-note {
+  max-width: 36rem;
+  margin: 8px auto 0;
+  color: #5e564e;
+  text-align: center;
+}
+.sidebar.bg--gray {
+  background: #fffcfa !important;
+  border-radius: 22px;
+}
+
+/* Host event shell: avoid stacking old utility gray/pink chrome */
+.event-main .event-content.bg--gray,
+.event-main .sidebar.bg--gray {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.main-button.disabled {
+  opacity: 1 !important;
+  background: rgba(22, 19, 16, 0.1) !important;
+  box-shadow: none !important;
+  color: #5e564e !important;
+}
+
+/* App-wide mock toast — kill legacy pink/default bars */
+.vue-notification,
+.vue-notification-template,
+.notification-title,
+.notification-content {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+.snap-toast-host.vue-notification-group {
+  top: auto !important;
+  bottom: 24px !important;
+  z-index: 10050 !important;
+}
+.snap-toast-host .vue-notification-wrapper {
+  margin: 8px 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+.snap-toast-host .vue-notification-wrapper:not(:has(.snap-toast)) {
+  display: none !important;
+  margin: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+.snap-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  direction: rtl;
+  background: #1c1814;
+  color: #fffcfa;
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 16px 40px rgba(18, 16, 14, 0.28);
+  border: 1px solid rgba(255, 252, 250, 0.08);
+  cursor: pointer;
+  min-width: min(360px, calc(100vw - 32px));
+}
+.snap-toast__icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  color: #c9a36a;
+  flex: none;
+  margin-top: 1px;
+}
+.snap-toast--success .snap-toast__icon {
+  color: #2fbe6a;
+}
+.snap-toast--error .snap-toast__icon,
+.snap-toast--warn .snap-toast__icon {
+  color: #f58589;
+}
+.snap-toast__body {
+  min-width: 0;
+}
+.snap-toast__body strong {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.snap-toast__body p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: rgba(255, 252, 250, 0.92);
+}
+@media (max-width: 600px) {
+  .snap-toast-host.vue-notification-group {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    bottom: 88px !important;
+    width: min(360px, calc(100vw - 24px)) !important;
+  }
+  .snap-toast {
+    min-width: 0;
+    width: 100%;
+  }
 }

@@ -1,0 +1,263 @@
+---
+import { appPath } from "../lib/appUrl";
+
+interface Link {
+  slug: string;
+  anchor: string;
+}
+
+interface Props {
+  links: Link[];
+  title?: string;
+}
+
+const { links, title = "עוד ב-SnapShare" } = Astro.props;
+
+const UTILITY_SLUGS = new Set(["/how-it-works", "/pricing", "/order", "/contact-us"]);
+
+const topicLinks = links.filter((link) => !UTILITY_SLUGS.has(link.slug.split("?")[0]));
+const utilityLinks = links.filter((link) => {
+  const path = link.slug.split("?")[0];
+  return UTILITY_SLUGS.has(path) && path !== "/order";
+});
+const ctaLink = links.find((link) => link.slug.split("?")[0] === "/order") ?? null;
+
+const ICONS: Record<string, string> = {
+  "/digital-wedding-album":
+    '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z"/><circle cx="9" cy="11" r="1.4"/><path d="m7 16 3.2-3.2 2.3 2.3 2.2-2.1L17 16"/>',
+  "/bar-bat-mitzvah-digital-album":
+    '<path d="M12 3.5 14.2 8l4.8.5-3.6 3.3.9 4.7L12 14.4 7.7 16.5l.9-4.7L5 8.5 9.8 8 12 3.5Z"/>',
+  "/corporate-event-photo-sharing":
+    '<rect x="3.5" y="7" width="17" height="12" rx="2"/><path d="M8 7V5.8A1.8 1.8 0 0 1 9.8 4h4.4A1.8 1.8 0 0 1 16 5.8V7"/><path d="M8 12h8M8 15h5"/>',
+  "/henna-engagement-birthday-album":
+    '<path d="M12 20s-6.5-4.1-6.5-9A3.5 3.5 0 0 1 12 8.2 3.5 3.5 0 0 1 18.5 11c0 4.9-6.5 9-6.5 9Z"/>',
+  "/live-photo-wall":
+    '<rect x="2.5" y="4.5" width="19" height="13" rx="2"/><path d="M8 21h8M12 17.5V21"/><path d="m7.5 12.5 2.5 2 3.5-4 3 3"/>',
+  "/qr-photo-sharing":
+    '<path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Z"/><path d="M14 14h2.5v2.5H14V14Zm3.5 0H20v2.5h-2.5V14ZM14 17.5h2.5V20H14v-2.5Zm3.5 0H20V20h-2.5v-2.5Z"/>',
+  "/how-it-works":
+    '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8h.01"/>',
+  "/pricing":
+    '<path d="M12 3.5v17M15.5 7.2c-.7-1.1-2-1.8-3.5-1.8-2.2 0-4 1.5-4 3.4s1.8 3.4 4 3.4 4 1.4 4 3.3-1.8 3.4-4 3.4c-1.6 0-3-.8-3.7-2"/>',
+  "/contact-us":
+    '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H9l-4 3v-3.5A2.5 2.5 0 0 1 4 14.5v-8Z"/>',
+};
+
+const DEFAULT_ICON =
+  '<path d="M7 12h10M13 8l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>';
+
+function iconFor(slug: string): string {
+  return ICONS[slug.split("?")[0]] ?? DEFAULT_ICON;
+}
+---
+{links.length > 0 && (
+  <nav class="related" aria-label="עמודים קשורים">
+    <h2 class="related-title">{title}</h2>
+
+    {topicLinks.length > 0 && (
+      <ul class="related-grid">
+        {topicLinks.map((link) => (
+          <li>
+            <a class="related-card" href={appPath(link.slug)}>
+              <span class="related-ico" aria-hidden="true" set:html={`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${iconFor(link.slug)}</svg>`} />
+              <span class="related-label">{link.anchor}</span>
+              <span class="related-chev" aria-hidden="true">←</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {(utilityLinks.length > 0 || ctaLink) && (
+      <div class="related-utils">
+        {utilityLinks.length > 0 && (
+          <ul class="related-pills">
+            {utilityLinks.map((link) => (
+              <li>
+                <a class="related-pill" href={appPath(link.slug)}>
+                  <span class="related-pill-ico" aria-hidden="true" set:html={`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${iconFor(link.slug)}</svg>`} />
+                  <span>{link.anchor}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        {ctaLink && (
+          <a class="btn btn-primary related-cta" href={appPath(ctaLink.slug)}>
+            {ctaLink.anchor}
+            <span class="chev" aria-hidden="true">←</span>
+          </a>
+        )}
+      </div>
+    )}
+  </nav>
+)}
+
+<style>
+  .related {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .related-title {
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    font-size: 1.45rem;
+    margin: 0;
+  }
+  .related-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .related-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 72px;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: var(--ink);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--accent) 8%, var(--paper)), var(--paper));
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    box-shadow: none;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+  .related-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+    box-shadow: var(--shadow-sm);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, var(--paper)), var(--paper));
+  }
+  .related-card:focus-visible {
+    outline: 2px solid rgba(201, 163, 106, 0.95);
+    outline-offset: 3px;
+  }
+  .related-ico {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: color-mix(in srgb, var(--accent-2) 35%, #8a7040);
+    flex: none;
+  }
+  .related-ico :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+  .related-label {
+    font-weight: 800;
+    font-size: 0.98rem;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .related-chev {
+    color: var(--faint);
+    font-size: 0.95rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .related-card:hover .related-chev {
+    color: var(--ink);
+    transform: translateX(-3px);
+  }
+  .related-utils {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    padding-top: 4px;
+  }
+  .related-pills {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1 1 auto;
+  }
+  .related-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 0.92rem;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      transform 0.15s ease;
+  }
+  .related-pill:hover {
+    border-color: color-mix(in srgb, var(--ink) 35%, var(--line));
+    background: #fff;
+    transform: translateY(-1px);
+  }
+  .related-pill:focus-visible {
+    outline: 2px solid rgba(201, 163, 106, 0.95);
+    outline-offset: 3px;
+  }
+  .related-pill-ico {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: color-mix(in srgb, var(--accent-2) 30%, #8a7040);
+    flex: none;
+  }
+  .related-pill-ico :global(svg) {
+    width: 13px;
+    height: 13px;
+  }
+  .related-cta {
+    flex: 0 0 auto;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+    padding-block: 12px;
+  }
+  .related-cta:focus-visible {
+    outline: 2px solid rgba(201, 163, 106, 0.95);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 720px) {
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+    .related-utils {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .related-pills {
+      width: 100%;
+    }
+    .related-pill {
+      width: 100%;
+      justify-content: flex-start;
+    }
+    .related-cta {
+      width: 100%;
+    }
+  }
+</style>

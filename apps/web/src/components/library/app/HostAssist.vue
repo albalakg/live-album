@@ -95,16 +95,27 @@ export default defineComponent({
 .assist { position: fixed; z-index: 80; bottom: 22px; left: 22px; }
 .assist-fab {
   display: inline-flex;
-  border: 1.5px solid #c9a36a;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 999px;
-  background: #fffcfa;
-  color: #12100e;
+  background: #fff;
+  color: var(--ink, #161310);
   font-family: var(--font, Heebo, sans-serif);
   font-weight: 800;
-  padding: 12px 16px;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  padding: 14px 28px;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(18, 16, 14, 0.22);
+  box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assist-fab:hover {
+  border-color: var(--ink, #161310);
+  transform: translateY(-2px);
 }
 .assist-fab--wa {
   position: fixed;
@@ -139,11 +150,23 @@ export default defineComponent({
 .assist-send {
   border: 0;
   border-radius: 999px;
-  background: var(--rose, #dc5b66);
+  background: linear-gradient(
+    135deg,
+    var(--accent-2, #dc5b66),
+    var(--accent, #c9a36a)
+  );
   color: #fff;
   font-weight: 800;
-  padding: 10px 14px;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  padding: 14px 28px;
   cursor: pointer;
+  box-shadow: 0 10px 28px var(--glow, rgba(201, 163, 106, 0.45));
+  transition: transform 0.2s ease;
+}
+
+.assist-send:hover:not(:disabled) {
+  transform: translateY(-2px);
 }
 .assist-status { min-height: 1.2em; color: var(--muted, #5e564e); font-size: 0.9rem; }
 </style>

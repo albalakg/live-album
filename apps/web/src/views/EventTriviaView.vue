@@ -1,11 +1,22 @@
 <template>
   <div class="trivia-admin">
-    <div v-if="!loaded" class="card loading-card">טוען את הטריוויה...</div>
+    <div v-if="!loaded && !loadError" class="card loading-card" role="status">
+      טוען את הטריוויה...
+    </div>
+
+    <div v-else-if="loadError" class="card error-card" role="alert">
+      <p class="title--medium">לא הצלחנו לטעון את הטריוויה</p>
+      <p class="hint">{{ loadError }}</p>
+      <button type="button" class="retry-btn" :disabled="loading" @click="load">
+        {{ loading ? "טוען..." : "נסו שוב" }}
+      </button>
+    </div>
 
     <template v-else>
       <header class="page-head">
         <div>
-          <h1 class="title--large">טריוויה</h1>
+          <p class="kicker">משחק חי</p>
+          <h1>טריוויה</h1>
           <p class="lede">הגדירו מתי המשחק עולה למסך, כתבו שאלות, ועקבו אחרי הניקוד.</p>
         </div>
         <span class="status" :class="form.status">{{ statusLabel }}</span>
@@ -20,7 +31,7 @@
           role="tab"
           :class="{ active: tab === item.id }"
           :aria-selected="tab === item.id"
-          @click="tab = item.id"
+          @click="setTab(item.id)"
         >
           {{ item.label }}
           <span v-if="item.count !== null" class="tab-count">{{ item.count }}</span>
@@ -341,7 +352,10 @@ import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
 import MainInput from "@/components/library/inputs/MainInput.vue";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import Time from "@/helpers/time";
-import { notify } from "@kyvg/vue3-notification";
+import { notify } from "@/helpers/notify";
+
+type TriviaTabId = "settings" | "questions" | "results";
+const TRIVIA_TABS: TriviaTabId[] = ["settings", "questions", "results"];
 
 interface TriviaOptionForm {
   key: string;
@@ -418,13 +432,15 @@ export default defineComponent({
   data() {
     return {
       loaded: false,
+      loading: false,
+      loadError: "" as string,
       savingSettings: false,
       savingQuestions: false,
       actingAction: null as "show" | "results" | "photos" | null,
       refreshing: false,
       copied: false,
       copyTimer: null as ReturnType<typeof setTimeout> | null,
-      tab: "settings" as "settings" | "questions" | "results",
+      tab: "settings" as TriviaTabId,
       openQuestionKey: null as string | null,
       invalidKeys: [] as string[],
       openPlayerId: null as number | null,
@@ -476,12 +492,25 @@ export default defineComponent({
       return labels[this.form.status] || "טיוטה";
     },
 
-    tabs(): { id: "settings" | "questions" | "results"; label: string; count: number | null }[] {
+    tabs(): { id: TriviaTabId; label: string; count: number | null }[] {
       return [
         { id: "settings", label: "הגדרות", count: null },
         { id: "questions", label: "שאלות", count: this.questions.length },
         { id: "results", label: "תוצאות", count: this.report?.summary.player_count ?? 0 },
       ];
+    },
+  },
+
+  watch: {
+    "$route.query.tab": {
+      immediate: true,
+      handler(value: unknown) {
+        const raw = Array.isArray(value) ? value[0] : value;
+        const next = typeof raw === "string" ? raw : "";
+        this.tab = TRIVIA_TABS.includes(next as TriviaTabId)
+          ? (next as TriviaTabId)
+          : "settings";
+      },
     },
   },
 
@@ -494,6 +523,17 @@ export default defineComponent({
   },
 
   methods: {
+    setTab(id: TriviaTabId) {
+      this.tab = id;
+      const query = { ...this.$route.query } as Record<string, unknown>;
+      if (id === "settings") {
+        delete query.tab;
+      } else {
+        query.tab = id;
+      }
+      this.$router.replace({ query: query as never }).catch(() => undefined);
+    },
+
     dateFormat(date: Date): string {
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -536,17 +576,30 @@ export default defineComponent({
     },
 
     async load() {
+      this.loading = true;
+      this.loadError = "";
       try {
-        const [game, report] = await Promise.all([
-          axios.get(`events/${this.eventId}/trivia/admin`),
-          axios.get(`events/${this.eventId}/trivia/admin/report`),
-        ]);
+        const game = await axios.get(`events/${this.eventId}/trivia/admin`);
         this.applyGame(game.data.data);
-        this.report = report.data.data;
-      } catch (error) {
-        this.fail(error, "לא הצלחנו לטעון את הטריוויה");
-      } finally {
         this.loaded = true;
+        try {
+          const report = await axios.get(
+            `events/${this.eventId}/trivia/admin/report`
+          );
+          this.report = report.data.data;
+        } catch (reportError) {
+          this.report = null;
+          this.fail(reportError, "לא הצלחנו לטעון תוצאות");
+        }
+      } catch (error) {
+        this.loadError = ErrorsHandler.getErrorMessage(
+          error,
+          "לא הצלחנו לטעון את הטריוויה"
+        );
+        this.fail(error, "לא הצלחנו לטעון את הטריוויה");
+        this.loaded = false;
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -722,6 +775,8 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 16px;
+  font-family: var(--font, Heebo, sans-serif);
+  color: var(--ink, #161310);
 }
 
 .page-head {
@@ -731,37 +786,57 @@ export default defineComponent({
   gap: 16px;
 }
 
+.kicker {
+  color: var(--rose, #dc5b66);
+  font-weight: 800;
+  margin: 0;
+}
+
+.page-head h1 {
+  margin: 4px 0 0;
+  font-weight: 900;
+  font-size: clamp(1.55rem, 2.4vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
 .lede,
 .hint {
-  color: var(--dark-gray);
-  font-size: 14px;
+  color: var(--muted, #5e564e);
+  font-size: 0.92rem;
   line-height: 1.5;
 }
 
 .lede {
-  margin-top: 4px;
+  margin-top: 8px;
+  max-width: 52ch;
 }
 
 .status {
   flex-shrink: 0;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #fff;
+  background: rgba(22, 19, 16, 0.05);
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   font-size: 13px;
   font-weight: 700;
 }
 
 .status.scheduled {
-  background: #fff4d6;
+  background: rgba(201, 163, 106, 0.18);
+  border-color: rgba(201, 163, 106, 0.35);
+  color: #8a7040;
 }
 
 .status.live {
-  background: #ffe1e3;
+  background: rgba(220, 91, 102, 0.14);
+  border-color: rgba(220, 91, 102, 0.32);
   color: #b4232c;
 }
 
 .status.results {
-  background: #e5f3dc;
+  background: rgba(47, 190, 106, 0.14);
+  border-color: rgba(47, 190, 106, 0.3);
   color: #2f6b22;
 }
 
@@ -769,7 +844,8 @@ export default defineComponent({
   display: flex;
   gap: 6px;
   padding: 6px;
-  background: #fff;
+  background: #fffcfa;
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 16px;
 }
 
@@ -786,25 +862,26 @@ export default defineComponent({
   cursor: pointer;
   font: inherit;
   font-weight: 700;
-  color: var(--dark-gray);
+  color: var(--muted, #5e564e);
 }
 
 .tab.active {
-  background: var(--pink);
-  color: #fff;
+  background: color-mix(in srgb, var(--accent, #c9a36a) 18%, #fffcfa);
+  color: var(--ink, #161310);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #c9a36a) 45%, transparent);
 }
 
 .tab-count {
   min-width: 22px;
   padding: 1px 6px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(22, 19, 16, 0.08);
   font-size: 12px;
 }
 
 .tab.active .tab-count {
-  background: rgba(255, 255, 255, 0.28);
-  color: #fff;
+  background: rgba(201, 163, 106, 0.28);
+  color: #8a7040;
 }
 
 .stack {
@@ -814,16 +891,40 @@ export default defineComponent({
 }
 
 .card {
-  background: #fff;
-  border-radius: 16px;
+  background: #fffcfa;
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 18px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.loading-card {
-  color: var(--dark-gray);
+.loading-card,
+.error-card {
+  color: var(--muted, #5e564e);
+}
+
+.error-card .title--medium {
+  margin: 0;
+  color: var(--ink, #161310);
+}
+
+.retry-btn {
+  align-self: flex-start;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  color: #fff;
+}
+
+.retry-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 
 .enable-row {
@@ -880,9 +981,9 @@ export default defineComponent({
 }
 
 .mode.active {
-  border-color: var(--pink);
-  background: #fff6f6;
-  box-shadow: inset 0 0 0 1px var(--pink);
+  border-color: var(--accent, #c9a36a);
+  background: color-mix(in srgb, var(--accent, #c9a36a) 12%, #fffcfa);
+  box-shadow: inset 0 0 0 1px var(--accent, #c9a36a);
 }
 
 .mode:disabled {
@@ -946,7 +1047,7 @@ textarea,
 .inline-link {
   border: 0;
   background: none;
-  color: var(--pink);
+  color: #8a7040;
   cursor: pointer;
   font: inherit;
   font-weight: 700;
@@ -954,7 +1055,7 @@ textarea,
 
 .copy-btn,
 .add-btn {
-  background: var(--pink);
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
   color: #fff;
   border-radius: 12px;
   padding: 10px 16px;
@@ -1005,7 +1106,7 @@ textarea,
 }
 
 .question.invalid {
-  border-color: var(--pink);
+  border-color: var(--rose, #dc5b66);
 }
 
 .question-head {
@@ -1316,7 +1417,7 @@ th {
 }
 
 .bar .hard {
-  background: var(--pink);
+  background: var(--rose, #dc5b66);
 }
 
 @media (max-width: 720px) {

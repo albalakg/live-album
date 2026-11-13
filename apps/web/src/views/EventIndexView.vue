@@ -1,20 +1,24 @@
 <template>
-  <template v-if="$store.getters['event/getEvent']">
+  <div v-if="!hasEvent" class="host-empty">
+    <p class="kicker">האירועים שלי</p>
+    <h1>עוד אין אירוע.</h1>
+    <p>הרשימה ריקה. פותחים ניסיון חינם, בלי כרטיס אשראי, או בוחרים מסלול בתשלום אחד.</p>
+    <router-link class="host-empty-cta" to="/order">נסו בחינם</router-link>
+  </div>
+  <template v-else-if="$store.getters['event/getEvent']">
     <template v-if="isFullScreen">
       <transition name="fade" mode="out-in">
         <router-view></router-view>
       </transition>
     </template>
-    <div class="event-main display--flex padding--medium" v-else>
-      <div class="event-sidebar" v-if="$bp.isMediumAndUp">
+    <div class="event-main" v-else>
+      <aside class="event-sidebar">
         <Sidebar :items="items" />
-      </div>
-      <div class="event-mobile-bar" v-else>
+      </aside>
+      <nav class="event-mobile-nav" aria-label="ניווט האירוע">
         <MobileScrollBar :items="items" />
-      </div>
-      <div
-        class="event-content bg--gray padding--large padding--none-mobile brs--medium"
-      >
+      </nav>
+      <div class="event-content">
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -38,13 +42,10 @@ export default defineComponent({
     MobileScrollBar,
   },
 
-  mounted() {
-    if (!this.$store.getters["event/hasActiveEvent"]) {
-      this.$router.push({ name: "home" });
-    }
-  },
-
   computed: {
+    hasEvent(): boolean {
+      return Boolean(this.$store.getters["event/getEvent"]);
+    },
     isFullScreen(): boolean {
       return (
         this.$route.path.includes("uploads") ||
@@ -60,8 +61,23 @@ export default defineComponent({
           isActive: false,
         },
         {
-          text: "האלבום",
+          text: "אלבום חי",
           path: "/event/gallery",
+          isActive: false,
+        },
+        {
+          text: "עמוד העלאה",
+          path: "/event/upload",
+          isActive: false,
+        },
+        {
+          text: "QR",
+          path: "/event/qr",
+          isActive: false,
+        },
+        {
+          text: "האלבום",
+          path: "/event/album",
           isActive: false,
         },
         {
@@ -70,13 +86,8 @@ export default defineComponent({
           isActive: false,
         },
         {
-          text: "בדיקת תוכן",
-          path: "/event/moderation",
-          isActive: false,
-        },
-        {
-          text: "כרטיס QR",
-          path: "/event/qr",
+          text: "חבילה",
+          path: "/event/plan",
           isActive: false,
         },
         {
@@ -106,42 +117,137 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-main {
-  min-height: calc(100vh - 124px);
-  height: fit-content;
-  width: calc(100% - 24px);
+  --host-sidebar: 260px;
+  --host-nav: 72px;
+  min-height: calc(100vh - 99px);
+  width: 100%;
+  max-width: none;
+  margin: 0;
   position: relative;
   z-index: 11;
+  display: block;
+  padding-block: 24px 40px;
+  padding-inline-start: calc(var(--host-sidebar) + 20px);
+  padding-inline-end: 24px;
+  box-sizing: border-box;
+}
 
-  .event-sidebar {
-    width: 20%;
-    min-width: 250px;
+.event-sidebar {
+  position: fixed;
+  top: var(--host-nav);
+  inset-inline-start: 0;
+  width: var(--host-sidebar);
+  height: calc(100vh - var(--host-nav));
+  z-index: 20;
+  overflow: hidden;
+}
+
+.event-mobile-nav {
+  display: none;
+}
+
+.event-content {
+  min-width: 0;
+  width: 100%;
+  background: var(--paper, #fffcfa);
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+  box-sizing: border-box;
+}
+
+@media (max-width: 1440px) {
+  .event-main {
+    --host-sidebar: 240px;
+    padding-inline-end: 20px;
   }
+}
 
-  .event-mobile-bar {
-    width: 100%;
-    position: fixed;
-    bottom: 62px;
-    left: 0;
-    z-index: 100;
+@media (max-width: 1100px) {
+  .event-main {
+    --host-sidebar: 210px;
+    padding-inline-start: calc(var(--host-sidebar) + 16px);
+    padding-inline-end: 16px;
   }
 
   .event-content {
-    width: 78%;
-    margin-inline-start: 40px;
-    min-width: 0;
-    max-width: 100%;
-
-    @media only screen and (max-width: 600px) {
-      width: 100%;
-      margin: 0 auto;
-      min-height: fit-content;
-    }
+    padding: 20px;
   }
+}
+
+@media (max-width: 900px) {
+  .event-main {
+    width: 100%;
+    padding: 8px 12px 40px;
+  }
+
+  .event-sidebar {
+    display: none;
+  }
+
+  .event-mobile-nav {
+    display: block;
+    position: sticky;
+    top: calc(var(--nav, 72px) - 4px);
+    z-index: 40;
+    margin: 0 -4px 4px;
+  }
+
+  .event-content {
+    padding: 16px;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .event-main {
+    width: 100%;
+    padding: 0 0 88px;
+  }
+
+  .event-content {
+    border-radius: 0;
+    border-inline: 0;
+    box-shadow: none;
+    padding: 14px 14px 28px;
+  }
+}
+
+.host-empty {
+  width: min(640px, calc(100% - 32px));
+  margin: 48px auto;
+  background: #fffcfa;
+  border-radius: 28px;
+  padding: 36px 28px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+  text-align: center;
+}
+.host-empty .kicker {
+  color: #dc5b66;
+  font-weight: 800;
+}
+.host-empty h1 {
+  font-weight: 900;
+  margin: 8px 0;
+}
+.host-empty p {
+  color: #5e564e;
+}
+.host-empty-cta {
+  display: inline-flex;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  color: #fff !important;
+  font-weight: 800;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 12px 22px;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.35s ease;
 }
 .fade-enter-from,
 .fade-leave-to {
