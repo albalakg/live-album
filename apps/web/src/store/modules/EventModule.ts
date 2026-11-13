@@ -679,6 +679,7 @@ const EventModule = {
               context.state.assetsManagement.assetsIds
             );
             context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
+            context.commit("SET_MODE_FOR_ASSETS_MANAGEMENT", null);
             resolve(res.data);
           })
           .catch((err) => {
@@ -715,6 +716,7 @@ const EventModule = {
               context.state.assetsManagement.assetsIds
             );
             context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
+            context.commit("SET_MODE_FOR_ASSETS_MANAGEMENT", null);
             resolve(res.data);
           })
           .catch((err) => {
@@ -802,6 +804,7 @@ const EventModule = {
             });
             context.commit("BLOCK_FILES", ids);
             context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
+            context.commit("SET_MODE_FOR_ASSETS_MANAGEMENT", null);
             await context.dispatch("getEventGalleryAssets");
             resolve(res.data);
           })
@@ -830,6 +833,8 @@ const EventModule = {
           })
           .then((res) => {
             context.commit("SET_DOWNLOAD_ASSET_PROCESS", res.data.data);
+            context.commit("TOGGLE_ALL_ASSETS_IN_ASSETS_MANAGEMENT", false);
+            context.commit("SET_MODE_FOR_ASSETS_MANAGEMENT", null);
             resolve(true);
           })
           .catch((err) => {

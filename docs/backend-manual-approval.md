@@ -27,7 +27,7 @@ Hide stays:
 `POST /api/events/{event}/assets/hide`  
 `{ "assets": [id] }`
 
-Guest album and the live screen already render only assets whose moderation status is active. Pending photos stay in the host queue at `/event/moderation` and do not appear on the stage or in the guest gallery.
+Guest album and the live screen already render only assets whose moderation status is active. Pending photos stay in the host review section on `/event/assets` and do not appear on the stage or in the guest gallery.
 
 ## Data
 

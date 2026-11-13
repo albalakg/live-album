@@ -128,6 +128,8 @@ export default defineComponent({
   padding: 48px 0 28px;
   font-size: 0.95rem;
   position: relative;
+  /* Above .event-main (z-index 11) so the fixed host sidebar doesn't clip the footer */
+  z-index: 12;
 }
 
 .wrap {

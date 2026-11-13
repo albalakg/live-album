@@ -143,20 +143,35 @@ export default defineComponent({
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     text-decoration: none;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
     border-radius: 999px;
-    padding: 10px 18px;
+    padding: 14px 28px;
     white-space: nowrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .snap-btn.ghost {
-    border: 1.5px solid rgba(22, 19, 16, 0.14);
-    color: #161310;
+    border: 1.5px solid var(--line, rgba(22, 19, 16, 0.11));
+    background: transparent;
+    color: var(--ink, #161310);
+}
+.snap-btn.ghost:hover {
+    border-color: var(--ink, #161310);
 }
 .snap-btn.primary {
+    border: 0;
     color: #fff;
-    background: linear-gradient(135deg, #dc5b66, #c9a36a);
-    box-shadow: 0 10px 28px rgba(220, 91, 102, 0.28);
+    background: linear-gradient(
+        135deg,
+        var(--accent-2, #dc5b66),
+        var(--accent, #c9a36a)
+    );
+    box-shadow: 0 10px 28px var(--glow, rgba(201, 163, 106, 0.45));
+}
+.snap-btn.primary:hover {
+    transform: translateY(-2px);
 }
 </style>

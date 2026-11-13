@@ -1,99 +1,90 @@
 <template>
-  <div class="event-gallery">
+  <div class="gallery-page">
     <header class="page-head">
       <p class="kicker">מסך חי</p>
       <h1>אלבום חי</h1>
-      <p class="lede">פריסת המסך, מה מוצג באולם, וקישור לתצוגה המלאה.</p>
+      <p class="lede">
+        בחירת פריסה למסך באולם, מה מוצג עליו, וקישור לתצוגה המלאה.
+      </p>
     </header>
 
-    <div class="gallery-top display--flex justify--space-between align--center">
-      <div class="display--flex align--center" v-if="$bp.isMediumAndUp">
-        <div class="width--full-mobile">
-          <router-link to="/event/gallery/full-screen">
-            <MainButton text="צפייה במסך החי" class="gallery-button" />
-          </router-link>
-        </div>
-        <div class="display--flex align--center width--full-mobile">
-          <div class="icon-wrapper">
-            <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
-          </div>
-          <small>{{ copyText }}</small>
-        </div>
-      </div>
-      <template v-else>
-        <div class="width--full-mobile margin--top-large">
-          <div class="width--full-mobile">
-            <router-link to="/event/gallery/full-screen">
-              <MainButton text="צפייה במסך החי" class="gallery-button" />
-            </router-link>
-          </div>
-          <div
-            class="display--flex align--center width--full-mobile margin--top-small"
+    <section class="links-card">
+      <h2>תצוגת המסך החי</h2>
+      <div class="link-row">
+        <div class="link-meta">
+          <button
+            type="button"
+            class="icon-btn"
+            aria-label="העתקת קישור האלבום החי"
+            @click="copyUrl()"
           >
-            <div class="icon-wrapper">
-              <MainIcon clickable icon="content_copy" @onClick="copyUrl()" />
-            </div>
+            <MainIcon icon="content_copy" />
+          </button>
+          <div>
+            <strong>קישור לאלבום החי</strong>
             <small>{{ copyText }}</small>
           </div>
         </div>
-      </template>
-      <span v-if="$bp.isMediumAndUp" class="title--small"
-        >סה"כ {{ totalAssets }} קבצים</span
-      >
-    </div>
-    <div class="gallery-content brs--medium">
-      <!-- <EventGallery rounded hideMenu /> -->
-      <div class="width--three-corner width--full-mobile gallery-wrapper">
-        <component :is="form.selectedAlbum"></component>
+        <div class="link-actions">
+          <span class="file-count">סה״כ {{ totalAssets }} קבצים</span>
+          <router-link
+            class="ghost-btn"
+            to="/event/gallery/full-screen"
+            target="_blank"
+          >
+            צפייה במסך החי
+          </router-link>
+        </div>
       </div>
-      <div
-        class="width--corner bg--white brs--medium padding--medium flex--column align--center justify--center width--full-mobile"
-      >
-        <h1 class="title--large">אלבום תמונות</h1>
-        <br />
-        <MainSelect
-          :options="albumsSelectOptions"
-          v-model="form.selectedAlbum"
-          ref="actionSelect"
-          placeholder="בחר את האלבום"
-          title="בחר את האלבום"
-        />
-        <br />
-        <!-- <MainInput
-          v-model="form.imageDisplayTime"
-          type="number"
-          size="medium"
-          title="זמן תצוגת תמונה (שניות)"
-        />
-        <br />
-        <MainInput
-          v-model="form.videoDisplayTime"
-          type="number"
-          size="medium"
-          title="זמן תצוגת וידאו (שניות)"
-        />
-        <br> -->
-        <MainButton :loading="loading" text="שמור פריסה" @onClick="submit()" />
+    </section>
+
+    <form class="settings-form" @submit.prevent="submit">
+      <section class="layout-card">
+        <h2>פריסת האלבום</h2>
+        <p class="section-lede">איך התמונות יופיעו על המסך באולם.</p>
+        <div class="layout-options" role="radiogroup" aria-label="פריסת האלבום">
+          <button
+            v-for="option in albumsSelectOptions"
+            :key="option.value"
+            type="button"
+            class="layout-option"
+            :class="{ 'layout-option--active': form.selectedAlbum === option.value }"
+            role="radio"
+            :aria-checked="form.selectedAlbum === option.value"
+            @click="form.selectedAlbum = option.value"
+          >
+            <span class="layout-preview" :data-layout="option.preview" aria-hidden="true">
+              <span v-for="n in option.slots" :key="n" class="layout-slot" />
+            </span>
+            <span class="layout-copy">
+              <strong>{{ option.label }}</strong>
+              <small>{{ option.hint }}</small>
+            </span>
+          </button>
+        </div>
         <div
           v-if="hasBlockedAssets"
-          class="blocked-gallery-toggle margin--top-medium width--full"
+          class="blocked-gallery-toggle"
         >
-          <label class="blocked-toggle pointer display--flex align--center">
+          <label class="blocked-toggle">
             <input
               type="checkbox"
               :checked="showBlockedGalleryAssets"
               @change="toggleBlockedGalleryAssets"
             />
-            <span class="margin--right-small">הצג תמונות חסומות בתצוגה המקדימה</span>
+            <span>הצג תמונות חסומות בתצוגה המקדימה</span>
           </label>
-          <small class="blocked-toggle-note display--block margin--top-small">
+          <small class="blocked-toggle-note">
             לצפייה בלבד — תמונות חסומות לא מוצגות לאורחים עד שתבטלו את החסימה.
           </small>
         </div>
-      </div>
-    </div>
+        <div class="form-actions">
+          <MainButton :loading="loading" text="שמור פריסה" />
+        </div>
+      </section>
+    </form>
 
-    <form class="live-settings" @submit.prevent="saveLiveConfig">
+    <form class="settings-form" @submit.prevent="saveLiveConfig">
       <EventSwitchPanel
         title="מה מוצג באלבום החי"
         lede="שליטה על תמונות אורחים, תמונות שלכם, וכרטיס QR על המסך."
@@ -110,18 +101,11 @@
 
 <script lang="ts">
 import MainButton from "@/components/library/buttons/MainButton.vue";
-import EventGallerySingle from "@/components/event/EventGallerySingle.vue";
-import EventGallerySplitScreen from "@/components/event/EventGallerySplitScreen.vue";
-import EventGalleryRandom from "@/components/event/EventGalleryRandom.vue";
-import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
 import EventSwitchPanel, {
   SwitchItem,
 } from "@/components/event/EventSwitchPanel.vue";
-
 import MainIcon from "@/components/library/general/MainIcon.vue";
 import { defineComponent } from "vue";
-import MainSelect from "@/components/library/inputs/MainSelect.vue";
-import MainInput from "@/components/library/inputs/MainInput.vue";
 import { IEvent } from "@/helpers/interfaces";
 
 type LiveConfigKey =
@@ -129,31 +113,49 @@ type LiveConfigKey =
   | "preview_owners_assets_in_gallery"
   | "preview_qr_in_gallery";
 
+type AlbumOption = {
+  value: string;
+  label: string;
+  hint: string;
+  preview: "single" | "random" | "split";
+  slots: number;
+};
+
 export default defineComponent({
   name: "EventGalleryView",
 
   components: {
     MainButton,
-    EventGallerySingle,
     MainIcon,
-    MainSelect,
-    EventGalleryRandom,
-    EventGalleryGrid3X3,
-    EventGallerySplitScreen,
-    MainInput,
     EventSwitchPanel,
   },
 
   data() {
     return {
-      galleryPollIntervalId: null as ReturnType<typeof setInterval> | null,
       textCopied: false as boolean,
       albumsSelectOptions: [
-        { value: "EventGallerySingle", label: "אלבום תמונות רגיל" },
-        { value: "EventGalleryRandom", label: "אלבום תמונות קופצות" },
-        { value: "EventGallerySplitScreen", label: "אלבום תמונות חלוקה מסך" },
-        // { value: "EventGalleryGrid3X3", label: "אלבום תמונות רשת 3x3" },
-      ] as { value: string; label: string }[],
+        {
+          value: "EventGallerySingle",
+          label: "אלבום רגיל",
+          hint: "תמונה אחת גדולה שמתחלפת",
+          preview: "single",
+          slots: 1,
+        },
+        {
+          value: "EventGalleryRandom",
+          label: "אלבום קופץ",
+          hint: "כמה תמונות מופיעות יחד בתנועה",
+          preview: "random",
+          slots: 4,
+        },
+        {
+          value: "EventGallerySplitScreen",
+          label: "חלוקת מסך",
+          hint: "שתי תמונות זו לצד זו",
+          preview: "split",
+          slots: 2,
+        },
+      ] as AlbumOption[],
       loading: false as boolean,
       configLoading: false as boolean,
       liveConfig: {
@@ -180,8 +182,6 @@ export default defineComponent({
       ] as SwitchItem[],
       form: {
         selectedAlbum: "EventGallerySingle" as string,
-        // imageDisplayTime: 3 as number,
-        // videoDisplayTime: 8 as number,
       },
     };
   },
@@ -189,17 +189,7 @@ export default defineComponent({
   created() {
     this.$store.dispatch("event/getEventGalleryAssets");
     this.$store.dispatch("event/getEventAssets");
-    this.galleryPollIntervalId = setInterval(() => {
-      this.$store.dispatch("event/getEventGalleryAssets");
-    }, 10000);
     this.setForm();
-  },
-
-  beforeUnmount() {
-    if (this.galleryPollIntervalId) {
-      clearInterval(this.galleryPollIntervalId);
-      this.galleryPollIntervalId = null;
-    }
   },
 
   computed: {
@@ -214,7 +204,7 @@ export default defineComponent({
     eventPath(): string {
       return this.$store.getters["event/getEventPath"];
     },
-    
+
     event(): IEvent {
       return this.$store.getters["event/getEvent"];
     },
@@ -233,13 +223,15 @@ export default defineComponent({
       immediate: true,
       handler() {
         this.syncLiveConfig();
+        this.setForm();
       },
     },
   },
 
   methods: {
     setForm() {
-      this.form.selectedAlbum = this.event.config.displayed_gallery || "EventGallerySingle";
+      this.form.selectedAlbum =
+        this.event?.config?.displayed_gallery || "EventGallerySingle";
     },
 
     syncLiveConfig() {
@@ -288,12 +280,9 @@ export default defineComponent({
     fallbackCopyTextToClipboard(text: string) {
       const textArea = document.createElement("textarea");
       textArea.value = text;
-
-      // Avoid scrolling to bottom
       textArea.style.top = "0";
       textArea.style.left = "0";
       textArea.style.position = "fixed";
-
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
@@ -337,14 +326,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.event-gallery {
-  width: 100%;
-  min-height: fit-content;
-  font-family: var(--font, Heebo, sans-serif);
-  color: var(--ink, #161310);
+.gallery-page {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
+  width: 100%;
+  font-family: var(--font, Heebo, sans-serif);
+  color: var(--ink, #161310);
 }
 
 .page-head .kicker {
@@ -369,70 +357,225 @@ export default defineComponent({
   max-width: 52ch;
 }
 
-.gallery-top {
-  min-height: 50px;
-  width: 100%;
-  gap: 12px;
-
-  .icon-wrapper {
-    margin-inline-start: 10px;
-  }
-}
-
-.live-settings {
+.links-card,
+.layout-card,
+.settings-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.form-actions {
-  max-width: 260px;
-  margin-inline-start: auto;
-  width: 100%;
+.links-card,
+.layout-card {
+  background: rgba(22, 19, 16, 0.02);
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 18px;
+  padding: 18px;
 }
 
-.gallery-content {
-  min-height: fit-content;
-  margin-top: 12px;
-  width: 100%;
+.links-card h2,
+.layout-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.section-lede {
+  margin: -4px 0 0;
+  color: var(--muted, #5e564e);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.link-meta,
+.link-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.link-actions {
+  flex-wrap: wrap;
+}
+
+.link-meta strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.link-meta small {
+  color: var(--muted, #5e564e);
+}
+
+.file-count {
+  color: var(--muted, #5e564e);
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.16));
+  border-radius: 12px;
+  background: #fffcfa;
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.9fr);
-  gap: 16px;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+  transition: border-color 0.2s ease;
+}
+
+.icon-btn:hover {
+  border-color: var(--ink, #161310);
+}
+
+.ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 999px;
+  padding: 14px 28px;
+  text-decoration: none;
+  background: transparent;
+  color: var(--ink, #161310);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.ghost-btn:hover {
+  border-color: var(--ink, #161310);
+}
+
+.layout-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 
   @media only screen and (max-width: 900px) {
     grid-template-columns: 1fr;
-
-    .gallery-wrapper {
-      min-height: 220px;
-    }
   }
 }
 
-.gallery-content > .bg--white,
-.gallery-content > div:last-child {
-  background: #fffcfa !important;
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 18px;
-  box-shadow: none;
+.layout-option {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: start;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.12));
+  background: #fffcfa;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.layout-option:hover {
+  border-color: rgba(22, 19, 16, 0.28);
+}
+
+.layout-option--active {
+  border-color: var(--rose, #dc5b66);
+  background: rgba(220, 91, 102, 0.06);
+  transform: translateY(-1px);
+}
+
+.layout-preview {
+  display: grid;
+  gap: 6px;
+  height: 88px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #1c1814;
+}
+
+.layout-preview[data-layout="single"] {
+  grid-template-columns: 1fr;
+}
+
+.layout-preview[data-layout="split"] {
+  grid-template-columns: 1fr 1fr;
+}
+
+.layout-preview[data-layout="random"] {
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.layout-preview[data-layout="random"] .layout-slot:nth-child(1) {
+  grid-row: 1 / 3;
+}
+
+.layout-slot {
+  display: block;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(220, 91, 102, 0.55), rgba(201, 163, 106, 0.45));
+  opacity: 0.9;
+}
+
+.layout-copy strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.layout-copy small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted, #5e564e);
+  line-height: 1.35;
 }
 
 .blocked-gallery-toggle {
-  text-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
 }
 
 .blocked-toggle {
+  display: flex;
+  align-items: center;
   gap: 8px;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .blocked-toggle input {
   accent-color: #dc5b66;
-  margin-inline-start: 0;
-  margin-inline-end: 8px;
+  margin: 0;
 }
 
 .blocked-toggle-note {
   color: var(--muted, #5e564e);
   line-height: 1.4;
+  font-size: 0.82rem;
+}
+
+.form-actions {
+  max-width: 280px;
+  margin-inline-start: auto;
+  width: 100%;
 }
 </style>

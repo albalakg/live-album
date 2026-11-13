@@ -137,12 +137,6 @@ body, #app {
   border: 1px solid rgba(22, 19, 16, 0.08);
 }
 
-.main-button .inner-button.bg--green,
-.main-button .inner-button.bg--pink {
-  background: linear-gradient(135deg, #dc5b66, #c9a36a) !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-}
 .main-button {
   border-radius: 999px !important;
 }
@@ -185,14 +179,10 @@ body, #app {
   box-shadow: none !important;
 }
 
-.main-button.disabled,
-.main-button.disabled .inner-button {
+.main-button.disabled {
   opacity: 1 !important;
   background: rgba(22, 19, 16, 0.1) !important;
   box-shadow: none !important;
-  color: #5e564e !important;
-}
-.main-button.disabled .title--medium {
   color: #5e564e !important;
 }
 

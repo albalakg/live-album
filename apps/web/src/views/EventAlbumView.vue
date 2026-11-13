@@ -202,24 +202,42 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 14px 28px;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.92rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
   white-space: nowrap;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+    background 0.2s ease;
 }
 
 .ghost-btn {
-  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.16));
+  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.11));
+  background: transparent;
   color: var(--ink, #161310);
 }
 
+.ghost-btn:hover {
+  border-color: var(--ink, #161310);
+}
+
 .primary-link {
-  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  background: linear-gradient(
+    135deg,
+    var(--accent-2, #dc5b66),
+    var(--accent, #c9a36a)
+  );
   color: #fff !important;
   border: 0;
   width: fit-content;
+  box-shadow: 0 10px 28px var(--glow, rgba(201, 163, 106, 0.45));
+}
+
+.primary-link:hover {
+  transform: translateY(-2px);
 }
 
 .hint {

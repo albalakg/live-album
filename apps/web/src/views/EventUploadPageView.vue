@@ -293,14 +293,18 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.16));
+  gap: 8px;
+  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 14px 28px;
   text-decoration: none;
+  background: transparent;
   color: var(--ink, #161310);
-  font-weight: 700;
-  font-size: 0.92rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
   white-space: nowrap;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
 .ghost-btn:hover {
@@ -314,7 +318,7 @@ export default defineComponent({
 }
 
 .form-actions {
-  max-width: 220px;
+  max-width: 280px;
   margin-inline-start: auto;
   width: 100%;
 }

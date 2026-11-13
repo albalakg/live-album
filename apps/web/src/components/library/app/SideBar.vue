@@ -1,18 +1,5 @@
 <template>
   <div class="sidebar">
-    <div
-      class="event-image"
-      :class="{ 'event-image--empty': !eventImage }"
-      :style="coverStyle"
-      role="img"
-      :aria-label="eventImage ? 'תמונת האירוע' : 'אין תמונת אירוע'"
-    >
-      <div v-if="!eventImage" class="event-image__placeholder">
-        <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
-        <span>תמונת אירוע</span>
-      </div>
-    </div>
-
     <div class="sidebar-title">
       <p class="sidebar-kicker">האירוע של</p>
       <h2>{{ eventName || "—" }}</h2>
@@ -50,17 +37,8 @@ export default defineComponent({
   },
 
   computed: {
-    eventImage(): string {
-      return this.$store.getters["event/getEventImage"] || "";
-    },
-
     eventName(): string {
       return this.$store.getters["event/getEventName"] || "";
-    },
-
-    coverStyle(): Record<string, string> {
-      if (!this.eventImage) return {};
-      return { backgroundImage: `url(${this.eventImage})` };
     },
   },
 });
@@ -68,53 +46,27 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sidebar {
-  background: var(--paper, #fffcfa);
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 22px;
-  padding: 16px;
-  box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
-}
-
-.event-image {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 16px;
-  background-position: center;
-  background-size: cover;
-  background-color: #1c1814;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  background: var(--paper, #fffcfa);
+  border: 0;
+  border-inline-end: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  border-radius: 0;
+  padding: 20px 16px;
+  box-shadow: none;
   overflow: hidden;
 }
 
-.event-image--empty {
-  background:
-    radial-gradient(circle at 28% 18%, rgba(220, 91, 102, 0.42), transparent 52%),
-    radial-gradient(circle at 82% 78%, rgba(201, 163, 106, 0.48), transparent 48%),
-    linear-gradient(155deg, #2a221c 0%, #3a2f28 48%, #1c1814 100%);
-  border: 1px solid rgba(201, 163, 106, 0.28);
-}
-
-.event-image__placeholder {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: rgba(255, 252, 250, 0.88);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 8px rgba(18, 16, 14, 0.35);
-}
-
-.event-image__placeholder .material-symbols-outlined {
-  font-size: 1.75rem;
-  opacity: 0.9;
-}
-
 .sidebar-title {
+  flex: none;
   text-align: center;
-  margin: 16px 0 14px;
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line, rgba(22, 19, 16, 0.11));
 }
 
 .sidebar-kicker {
@@ -136,6 +88,9 @@ export default defineComponent({
 }
 
 .sidebar-nav {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 4px;

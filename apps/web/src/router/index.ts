@@ -157,8 +157,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "moderation",
-        name: "eventModeration",
-        component: () => import("../views/EventModerationView.vue"),
+        redirect: { name: "eventAssets" },
       },
       {
         path: "qr",

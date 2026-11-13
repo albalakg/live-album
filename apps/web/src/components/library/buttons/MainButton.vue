@@ -1,13 +1,18 @@
 <template>
-    <button class="main-button pointer shadow--small" :class="`padding--${size} bg--light-${color} brs--${borderRadius} ${animation ? 'main-button-animation' : ''} ${disabled ? 'disabled' : ''} ${loading ? 'main-button-loading' : ''} ${readonly ? 'main-button-readonly' : ''}`" :tabindex="tabIndex" @click="onClick()">
-        <div class="inner-button text--center" :class="`bg--${color} padding--${getInnerSize} brs--${getInnerBorderRadius}`">
-            <span class="title--medium text--white" v-if="loading">
-                טוען...
-            </span>
-            <span class="title--medium text--white" v-else>
-                {{ text }}
-            </span>
-        </div>
+    <button
+        type="button"
+        class="main-button"
+        :class="{
+            disabled,
+            'main-button-loading': loading,
+            'main-button-readonly': readonly,
+            'main-button-animation': animation,
+        }"
+        :tabindex="tabIndex"
+        :disabled="disabled || loading"
+        @click="onClick()"
+    >
+        <span>{{ loading ? 'טוען...' : text }}</span>
     </button>
 </template>
 
@@ -64,30 +69,6 @@ export default defineComponent({
         },
     },
 
-    data() {
-        return {
-
-        };
-    },
-
-    computed: {
-        getInnerBorderRadius(): string {
-            if (this.borderRadius === 'x-large') {
-                return 'large';
-            }
-
-            if (this.borderRadius === 'large') {
-                return 'medium';
-            }
-
-            return 'small';
-        },
-
-        getInnerSize(): string {
-            return this.size;
-        },
-    },
-
     methods: {
         onClick() {
             if(this.readonly || this.disabled || this.loading) {
@@ -101,37 +82,55 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+/* Match marketing homepage .btn.btn-primary */
 .main-button {
-    width: 100%;
-    transition: transform .2s ease;
-    z-index: 2;
-    position: relative;
-    border-radius: 999px;
-    background: transparent;
-    box-shadow: none;
-    /* Match GoogleSignInButton height: neutralize nested utility padding */
-    padding: 0 !important;
-}
-.main-button .inner-button {
-    background: linear-gradient(135deg, #dc5b66, #c9a36a) !important;
-    border-radius: 999px !important;
-    box-shadow: 0 10px 28px rgba(220, 91, 102, 0.28);
-    /* Same vertical rhythm as .google-sign-in-button (14px 18px + border) */
-    padding: 14px 18px !important;
-    min-height: 52px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    border-radius: 999px;
+    padding: 14px 28px;
+    min-height: 52px;
+    white-space: nowrap;
     box-sizing: border-box;
+    color: #fff;
+    background: linear-gradient(
+        135deg,
+        var(--accent-2, #dc5b66),
+        var(--accent, #c9a36a)
+    );
+    box-shadow: 0 10px 28px var(--glow, rgba(201, 163, 106, 0.45));
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    position: relative;
+    z-index: 2;
 }
 
-.main-button:focus {
-    scale: 1.03;
+.main-button:hover:not(.disabled):not(.main-button-loading):not(.main-button-readonly) {
+    transform: translateY(-2px);
+}
+
+.main-button:active:not(.disabled):not(.main-button-loading):not(.main-button-readonly) {
+    transform: translateY(0);
+}
+
+.main-button:focus-visible {
+    outline: 3px solid var(--accent-2, #dc5b66);
+    outline-offset: 3px;
 }
 
 .main-button-loading {
     pointer-events: none;
-    opacity: .6;
+    opacity: 0.6;
 }
 
 .main-button-readonly {
@@ -139,10 +138,18 @@ export default defineComponent({
     pointer-events: none;
 }
 
-.main-button-animation {
-    transition: .3s transform linear, .3s scale linear;
+.main-button.disabled {
+    opacity: 1;
+    cursor: not-allowed;
+    color: #5e564e;
+    background: rgba(22, 19, 16, 0.1);
+    box-shadow: none;
+}
 
-    &:hover {
+.main-button-animation {
+    transition: 0.3s transform linear, 0.3s scale linear;
+
+    &:hover:not(.disabled):not(.main-button-loading):not(.main-button-readonly) {
         transform: translateY(3px);
         scale: 1.02;
     }

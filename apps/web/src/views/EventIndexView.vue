@@ -71,11 +71,6 @@ export default defineComponent({
           isActive: false,
         },
         {
-          text: "בדיקת תוכן",
-          path: "/event/moderation",
-          isActive: false,
-        },
-        {
           text: "QR",
           path: "/event/qr",
           isActive: false,
@@ -123,23 +118,28 @@ export default defineComponent({
 <style lang="scss" scoped>
 .event-main {
   --host-sidebar: 260px;
-  min-height: calc(100vh - 124px);
+  --host-nav: 72px;
+  min-height: calc(100vh - 99px);
   width: 100%;
   max-width: none;
   margin: 0;
   position: relative;
   z-index: 11;
-  display: grid;
-  grid-template-columns: var(--host-sidebar) minmax(0, 1fr);
-  gap: 20px;
-  padding: 16px 24px 40px;
-  align-items: start;
+  display: block;
+  padding-block: 24px 40px;
+  padding-inline-start: calc(var(--host-sidebar) + 20px);
+  padding-inline-end: 24px;
   box-sizing: border-box;
 }
 
 .event-sidebar {
-  position: sticky;
-  top: calc(var(--nav, 72px) + 12px);
+  position: fixed;
+  top: var(--host-nav);
+  inset-inline-start: 0;
+  width: var(--host-sidebar);
+  height: calc(100vh - var(--host-nav));
+  z-index: 20;
+  overflow: hidden;
 }
 
 .event-mobile-nav {
@@ -148,25 +148,27 @@ export default defineComponent({
 
 .event-content {
   min-width: 0;
+  width: 100%;
   background: var(--paper, #fffcfa);
   border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 22px;
   padding: 24px;
   box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+  box-sizing: border-box;
 }
 
 @media (max-width: 1440px) {
   .event-main {
     --host-sidebar: 240px;
-    padding-inline: 20px;
+    padding-inline-end: 20px;
   }
 }
 
 @media (max-width: 1100px) {
   .event-main {
     --host-sidebar: 210px;
-    gap: 16px;
-    padding-inline: 16px;
+    padding-inline-start: calc(var(--host-sidebar) + 16px);
+    padding-inline-end: 16px;
   }
 
   .event-content {
@@ -176,7 +178,6 @@ export default defineComponent({
 
 @media (max-width: 900px) {
   .event-main {
-    grid-template-columns: 1fr;
     width: 100%;
     padding: 8px 12px 40px;
   }

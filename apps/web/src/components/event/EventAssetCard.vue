@@ -1,76 +1,66 @@
 <template>
   <div
-    @click.stop="$emit('onClick', assetIndex)"
+    @click.stop="onTileClick"
     class="gallery-asset-wrapper"
     :class="{
-      'padding--small': !modalView,
-      'padding--no-right': !modalView && isFirstOfLine && !$bp.isMobile,
       'gallery-asset-wrapper--modal': modalView,
-      assetIndex: true,
+      'gallery-asset-wrapper--selected': isPicked,
+      'gallery-asset-wrapper--selecting': selectionActive && bulkSelectable,
+      'gallery-asset-wrapper--blocked': isBlocked,
     }"
   >
     <div
-      class="gallery-asset position--relative bg--dark height--full width--full brs--medium"
+      class="gallery-asset"
       :class="{ 'gallery-asset--blocked': isBlocked }"
     >
-      <div
+      <button
         v-if="bulkSelectable"
-        class="gallery-asset-chip padding--x-small brs--large"
-        @click.stop
+        type="button"
+        class="tile-check"
+        :class="{
+          'tile-check--visible': showSelectionChrome,
+          'tile-check--on': isPicked,
+        }"
+        :disabled="loading"
+        :aria-pressed="isPicked"
+        :title="isPicked ? 'הסרה מהבחירה' : 'בחירת קובץ'"
+        @click.stop="togglePickedAssets(asset.id)"
       >
-        <MainCheckbox
-          :disabled="loading || !mode"
-          :ref="`asset-checkbox-${asset.id}`"
-          @onClick="togglePickedAssets(asset.id)"
-          title="לחצו בשביל לבחור"
-          :value="isPicked"
-        />
-      </div>
-      <a
-        :href="asset.fullPath"
-        :download="fileName"
-        class="gallery-download-icon"
-      >
-        <MainIcon bgColor="#fff8" icon="download" animation size="1.3em" />
-      </a>
-      <a :href="asset.fullPath" target="_blank" class="gallery-view-icon">
-        <MainIcon
-          animation
-          icon="open_in_new"
-          size="1.3em"
-          title="פתיחה במסך מלא"
-          bgColor="#fff8"
-        />
-      </a>
-      <span v-if="showVisibilityIcon" class="gallery-visible-icon">
-        <MainIcon
-          animation
-          :bgColor="asset.is_displayed ? '#fff8' : '#f68589cc'"
-          :icon="asset.is_displayed ? 'visibility' : 'visibility_off'"
-          :title="asset.is_displayed ? 'מוצג בגלריה' : 'מוסתר מהגלריה'"
-          size="1.3em"
-        />
-      </span>
+        <span class="material-symbols-outlined" aria-hidden="true">check</span>
+      </button>
+
       <span
-        v-if="moderationBadgeText && !showBlockedFooter"
-        class="gallery-moderation-badge"
+        v-if="showVisibilityIcon"
+        class="tile-status"
+        :class="{ 'tile-status--hidden': !asset.is_displayed }"
+        :title="asset.is_displayed ? 'מוצג בגלריה' : 'מוסתר מהגלריה'"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ asset.is_displayed ? "visibility" : "visibility_off" }}
+        </span>
+      </span>
+
+      <span
+        v-else-if="moderationBadgeText && !showBlockedFooter"
+        class="tile-badge"
         :class="moderationBadgeClass"
         :title="moderationBadgeTitle"
       >
         {{ moderationBadgeText }}
       </span>
+
       <div
         v-if="isBlocked"
         class="gallery-blocked-overlay"
         :class="{ 'gallery-blocked-overlay--with-footer': showBlockedFooter }"
       >
-        <MainIcon icon="block" size="2.2em" color="#fff" :background="false" />
+        <span class="material-symbols-outlined blocked-glyph" aria-hidden="true">
+          block
+        </span>
       </div>
+
       <div v-if="showBlockedFooter" class="gallery-blocked-footer">
-        <span
-          class="gallery-blocked-label"
-          :title="moderationBadgeTitle"
-        >
+        <span class="gallery-blocked-label" :title="moderationBadgeTitle">
           חסום
         </span>
         <button
@@ -82,40 +72,33 @@
         </button>
       </div>
 
-      <EventAssetModal />
-
-      <!-- Image -->
-      <div class="height--full width--full" @click="openAssetModal()">
+      <div class="media-surface">
         <img
           v-if="asset.type === 'image'"
           :src="asset.fullPath"
           alt="event image"
-          class="album-asset brs--medium"
+          class="album-asset"
           loading="lazy"
         />
 
-        <!-- Video -->
         <div
           v-else-if="asset.type === 'video'"
-          class="video-wrapper brs--medium"
+          class="video-wrapper"
           @mouseenter="playVideo"
           @mouseleave="pauseVideo"
         >
           <video
             ref="videoEl"
             :src="asset.fullPath"
-            class="album-asset brs--medium"
+            class="album-asset"
             muted
             :controls="controls"
             :autoplay="autoplay"
           ></video>
           <div v-if="!isPlaying && !controls" class="video-overlay">
-            <MainIcon
-              icon="play_circle"
-              size="3em"
-              color="#ddd"
-              :background="false"
-            />
+            <span class="material-symbols-outlined" aria-hidden="true">
+              play_circle
+            </span>
           </div>
         </div>
       </div>
@@ -128,21 +111,11 @@ import {
   AssetModerationStatusEnum,
   getAssetModerationStatus,
 } from "@/helpers/enums";
-import { IEvent, IEventAsset } from "@/helpers/interfaces";
+import { IEventAsset } from "@/helpers/interfaces";
 import { defineComponent, PropType } from "vue";
-import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
-import MainIcon from "../library/general/MainIcon.vue";
-import { EventAssetsManagementModesType } from "@/helpers/types";
-import EventAssetModal from "./EventAssetModal.vue";
 
 export default defineComponent({
   name: "EventAssetCard",
-
-  components: {
-    MainCheckbox,
-    MainIcon,
-    EventAssetModal,
-  },
 
   emits: ["onClick", "open-asset-modal", "onUnblock"],
 
@@ -177,6 +150,16 @@ export default defineComponent({
       default: true,
     },
 
+    selectionActive: {
+      type: Boolean,
+      default: false,
+    },
+
+    selectOnTileClick: {
+      type: Boolean,
+      default: false,
+    },
+
     allowUnblock: {
       type: Boolean,
       default: false,
@@ -208,23 +191,6 @@ export default defineComponent({
       return this.assetsIds.includes(this.asset.id);
     },
 
-    isFirstOfLine(): boolean {
-      return this.assetIndex % 5 == 0;
-    },
-
-    mode(): EventAssetsManagementModesType | null {
-      return this.$store.getters["event/getManagedAssetsMode"];
-    },
-
-    event(): IEvent {
-      return this.$store.getters["event/getEvent"];
-    },
-
-    fileName(): string {
-      const extension = this.asset.type === "image" ? "jpg" : "mp4";
-      return `${this.event.name}-${this.assetIndex}.${extension}`;
-    },
-
     normalizedModerationStatus(): AssetModerationStatusEnum {
       return getAssetModerationStatus(this.asset);
     },
@@ -240,8 +206,14 @@ export default defineComponent({
     showVisibilityIcon(): boolean {
       return (
         this.bulkSelectable &&
-        this.normalizedModerationStatus === AssetModerationStatusEnum.ACTIVE
+        !this.modalView &&
+        this.normalizedModerationStatus === AssetModerationStatusEnum.ACTIVE &&
+        !this.asset.is_displayed
       );
+    },
+
+    showSelectionChrome(): boolean {
+      return this.selectionActive || this.isPicked;
     },
 
     moderationBadgeText(): string {
@@ -251,8 +223,8 @@ export default defineComponent({
     },
 
     moderationBadgeClass(): string {
-      if (this.isPending) return "gallery-moderation-badge--pending";
-      if (this.isBlocked) return "gallery-moderation-badge--blocked";
+      if (this.isPending) return "tile-badge--pending";
+      if (this.isBlocked) return "tile-badge--blocked";
       return "";
     },
 
@@ -287,7 +259,16 @@ export default defineComponent({
   },
 
   methods: {
+    onTileClick() {
+      if (this.selectOnTileClick && this.bulkSelectable && !this.modalView) {
+        this.togglePickedAssets(this.asset.id);
+        return;
+      }
+      this.$emit("onClick", this.assetIndex);
+    },
+
     togglePickedAssets(assetId: number) {
+      if (this.loading) return;
       if (this.isPicked) {
         this.$store.dispatch("event/removeAssetFromAssetsManagement", assetId);
       } else {
@@ -319,177 +300,302 @@ export default defineComponent({
         this.isPlaying = false;
       }
     },
-
-    openAssetModal() {
-      if (this.modalView) return;
-      this.$emit("open-asset-modal", this.asset);
-    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
 .gallery-asset-wrapper {
-  text-align: center;
-  height: calc((70vw - 64px) / 5);
-  width: calc(20% - 32px);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #161310;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 
-  @media only screen and (max-width: 600px) {
-    width: calc(50% - 12px);
-    height: 150px;
-    padding: 6px;
-  }
-
-  .gallery-asset-chip {
-    background-color: #222d;
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    z-index: 1;
-  }
-
-  .album-asset {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .gallery-download-icon,
-  .gallery-view-icon,
-  .gallery-visible-icon {
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    z-index: 2;
-    text-align: center;
-  }
-
-  .gallery-view-icon {
-    left: 40px;
-  }
-
-  .gallery-visible-icon {
-    left: 70px;
-  }
-
-  .gallery-moderation-badge {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    z-index: 3;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 999px;
-    color: #fff;
-  }
-
-  .gallery-moderation-badge--pending {
-    background-color: #e6a817cc;
-  }
-
-  .gallery-moderation-badge--blocked {
-    background-color: #c62828cc;
-  }
-
-  .gallery-asset--blocked .album-asset {
-    filter: grayscale(0.45) brightness(0.85);
-  }
-
-  .gallery-blocked-overlay {
+  &::after {
+    content: "";
     position: absolute;
     inset: 0;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
     background: linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.2) 0%,
-      rgba(0, 0, 0, 0.45) 100%
+      rgba(22, 19, 16, 0.22) 0%,
+      transparent 32%,
+      transparent 70%,
+      rgba(22, 19, 16, 0.18) 100%
     );
-    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
 
-    &--with-footer {
-      align-items: flex-start;
-      padding-top: 28%;
-      background: linear-gradient(
-        180deg,
-        rgba(0, 0, 0, 0.15) 0%,
-        rgba(0, 0, 0, 0.35) 55%,
-        rgba(0, 0, 0, 0.7) 100%
-      );
+  &:hover,
+  &:focus-within,
+  &.gallery-asset-wrapper--selecting,
+  &.gallery-asset-wrapper--selected {
+    &::after {
+      opacity: 1;
     }
   }
 
-  .gallery-blocked-footer {
-    position: absolute;
-    inset-inline: 0;
-    bottom: 0;
-    z-index: 4;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 8px 10px;
-    background: rgba(18, 18, 18, 0.82);
-    backdrop-filter: blur(4px);
+  &:hover {
+    transform: translateY(-1px);
   }
 
-  .gallery-blocked-label {
-    flex-shrink: 0;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 999px;
-    color: #fff;
-    background-color: #c62828;
-    white-space: nowrap;
+  &:focus-within .tile-check,
+  &:hover .tile-check,
+  .tile-check--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.gallery-asset-wrapper--selected {
+  border-color: rgba(220, 91, 102, 0.7);
+  box-shadow: 0 0 0 2px rgba(220, 91, 102, 0.28);
+}
+
+.gallery-asset {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #161310;
+}
+
+.tile-check {
+  position: absolute;
+  inset-inline-end: 10px;
+  top: 10px;
+  z-index: 4;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 252, 250, 0.75);
+  background: rgba(255, 252, 250, 0.82);
+  color: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease,
+    transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(18, 16, 14, 0.16);
+
+  .material-symbols-outlined {
+    font-size: 1rem;
+    font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" 20;
+    line-height: 1;
   }
 
-  .gallery-unblock-button {
-    flex-shrink: 0;
-    border: none;
-    border-radius: 999px;
-    padding: 5px 12px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #fff;
-    background-color: #2e7d32;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-    transition: background-color 0.15s ease, transform 0.15s ease;
-
-    &:hover:not(:disabled) {
-      background-color: #388e3c;
-      transform: translateY(-1px);
-    }
-
-    &:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
+  &:hover:not(:disabled) {
+    transform: scale(1.04);
+    background: #fffcfa;
   }
 
-  .video-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.tile-check--on {
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  border-color: transparent;
+  color: #fff;
+}
+
+.tile-check--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tile-status {
+  position: absolute;
+  inset-inline-start: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(220, 91, 102, 0.92);
+  border: 1px solid transparent;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(18, 16, 14, 0.1);
+
+  .material-symbols-outlined {
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+}
+
+.tile-status--hidden {
+  background: rgba(220, 91, 102, 0.92);
+  border-color: transparent;
+  color: #fff;
+}
+
+.tile-badge {
+  position: absolute;
+  inset-inline-end: 10px;
+  bottom: 10px;
+  z-index: 3;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(18, 16, 14, 0.1);
+}
+
+.tile-badge--pending {
+  background: rgba(230, 168, 23, 0.92);
+  color: #fff;
+}
+
+.tile-badge--blocked {
+  background: rgba(198, 40, 40, 0.92);
+  color: #fff;
+}
+
+.gallery-asset--blocked .album-asset {
+  filter: grayscale(0.45) brightness(0.85);
+}
+
+.gallery-blocked-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+  pointer-events: none;
+
+  &--with-footer {
+    align-items: flex-start;
+    padding-top: 28%;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.35) 55%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+  }
+}
+
+.blocked-glyph {
+  font-size: 2.2rem;
+  color: #fff;
+  opacity: 0.92;
+}
+
+.gallery-blocked-footer {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(22, 19, 16, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.gallery-blocked-label {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+  background-color: #c62828;
+  white-space: nowrap;
+}
+
+.gallery-unblock-button {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fff;
+  background-color: #2e7d32;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #388e3c;
+    transform: translateY(-1px);
   }
 
-  .video-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    background-color: #0008;
-    z-index: 3;
-    pointer-events: none;
-    opacity: 0.9;
-    border-radius: 50%;
-    padding: 1px 4px 4px 4px;
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.media-surface {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.album-asset {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 14px;
+}
+
+.video-wrapper {
+  position: absolute;
+  inset: 0;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(22, 19, 16, 0.55);
+  color: #fffcfa;
+  box-shadow: 0 4px 16px rgba(18, 16, 14, 0.25);
+
+  .material-symbols-outlined {
+    font-size: 1.85rem;
+    line-height: 1;
   }
 }
 
@@ -498,15 +604,41 @@ export default defineComponent({
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  padding: 0;
+  aspect-ratio: auto;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+
+  &::after {
+    display: none;
+  }
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
 
   .gallery-asset {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
     min-height: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .media-surface {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    overflow: visible;
   }
 
   .album-asset {
@@ -515,14 +647,36 @@ export default defineComponent({
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    border-radius: 4px;
   }
 
   .video-wrapper {
+    position: relative;
+    inset: auto;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
+  }
+
+  .tile-check,
+  .tile-status,
+  .tile-badge {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  .gallery-asset-wrapper:not(.gallery-asset-wrapper--modal) {
+    &::after {
+      opacity: 0.4;
+    }
+
+    .tile-check {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 }
 </style>

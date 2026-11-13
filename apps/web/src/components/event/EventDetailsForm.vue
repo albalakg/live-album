@@ -380,7 +380,7 @@ export default defineComponent({
 }
 
 .form-actions {
-  max-width: 220px;
+  max-width: 280px;
   margin-inline-start: auto;
   width: 100%;
 }

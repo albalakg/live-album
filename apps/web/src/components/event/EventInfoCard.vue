@@ -331,16 +331,11 @@ export default defineComponent({
   line-height: 1.35;
 }
 
-:deep(.main-button.disabled),
-:deep(.main-button.disabled .inner-button) {
+:deep(.main-button.disabled) {
   opacity: 1;
   background: rgba(22, 19, 16, 0.08) !important;
   color: var(--muted, #5e564e) !important;
   box-shadow: none !important;
   cursor: not-allowed;
-}
-
-:deep(.main-button.disabled .title--medium) {
-  color: var(--muted, #5e564e) !important;
 }
 </style>
