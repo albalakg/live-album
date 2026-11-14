@@ -395,7 +395,11 @@ export default defineComponent({
     },
     "$route.query.pay"() {
       if (this.wantsPaymentStep() && this.form.subscription !== "demo") {
-        this.openPaymentStep(false);
+        if (this.wantsPaymentError()) {
+          this.showPaymentErrorState();
+        } else {
+          this.openPaymentStep(false);
+        }
       }
     },
     isLogged(newVal: boolean) {
@@ -422,7 +426,11 @@ export default defineComponent({
     }
     await this.restoreDiscount();
     if (this.wantsPaymentStep() && this.form.subscription !== "demo") {
-      await this.openPaymentStep(false);
+      if (this.wantsPaymentError()) {
+        this.showPaymentErrorState();
+      } else {
+        await this.openPaymentStep(false);
+      }
     } else {
       await this.scrollToSelectedPlan();
     }
@@ -436,6 +444,11 @@ export default defineComponent({
     wantsPaymentStep(): boolean {
       const pay = this.$route.query.pay;
       return pay === "1" || pay === "true";
+    },
+
+    wantsPaymentError(): boolean {
+      const err = this.$route.query.error;
+      return err === "1" || err === "true";
     },
 
     formatMoney(value: number): string {
@@ -611,9 +624,22 @@ export default defineComponent({
       this.actionLoadingSlug = "";
     },
 
+    showPaymentErrorState() {
+      this.viewMode = "payment";
+      this.paymentRequested = true;
+      this.paymentLoading = false;
+      this.paymentSrc = "";
+      this.paymentIframeReady = false;
+      this.loadError = "payment-unavailable";
+    },
+
     async openPaymentStep(requestPayment: boolean) {
       this.viewMode = "payment";
       this.paymentRequested = true;
+      if (this.wantsPaymentError()) {
+        this.showPaymentErrorState();
+        return;
+      }
       if (!this.isLogged) {
         this.paymentLoading = false;
         this.paymentSrc = "";
@@ -1005,6 +1031,15 @@ export default defineComponent({
   padding: 24px 12px;
   font-weight: 700;
   color: var(--ink);
+  position: relative;
+  margin: 0;
+  max-width: none;
+}
+
+.order-pay-error p {
+  margin: 0;
+  max-width: 28rem;
+  line-height: 1.5;
 }
 
 .order-pay-guest__link {

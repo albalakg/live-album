@@ -1,3 +1,5 @@
+import { reactive } from "vue";
+
 interface Breakpoints {
   isMobile: boolean;
   isMedium: boolean;
@@ -10,7 +12,7 @@ interface Breakpoints {
 }
 
 export function useBreakpoints() {
-  const breakpoints = {
+  const breakpoints = reactive<Breakpoints>({
     isMobile: false,
     isMedium: false,
     isLarge: false,
@@ -19,7 +21,7 @@ export function useBreakpoints() {
     isMediumAndDown: false,
     isLargeAndUp: false,
     isLargeAndDown: false,
-  };
+  });
 
   const updateBreakpoints = () => {
     const width = window.innerWidth;

@@ -59,22 +59,22 @@
 
       <section class="quick">
         <router-link class="qcard" to="/event/gallery/full-screen">
-          <span class="ico" aria-hidden="true">▣</span>
+          <span class="ico" aria-hidden="true" v-html="actionIcons.live"></span>
           <strong>פתיחת המסך החי</strong>
           <small>על מסך האולם או המחשב</small>
         </router-link>
         <router-link class="qcard" to="/event/upload">
-          <span class="ico" aria-hidden="true">▣</span>
+          <span class="ico" aria-hidden="true" v-html="actionIcons.upload"></span>
           <strong>עמוד העלאה</strong>
           <small>איך האורחים רואים את העמוד</small>
         </router-link>
         <router-link class="qcard" to="/event/qr">
-          <span class="ico" aria-hidden="true">▣</span>
+          <span class="ico" aria-hidden="true" v-html="actionIcons.qr"></span>
           <strong>כרטיס QR</strong>
           <small>הורדה והדפסה לשולחנות</small>
         </router-link>
         <router-link class="qcard" to="/event/moderation">
-          <span class="ico" aria-hidden="true">▣</span>
+          <span class="ico" aria-hidden="true" v-html="actionIcons.mod"></span>
           <strong>בדיקת תוכן</strong>
           <small>{{ pendingCount }} ממתינים</small>
         </router-link>
@@ -100,8 +100,21 @@ import { StatusEnum } from "@/helpers/enums";
 import { notify } from "@/helpers/notify";
 import Time from "@/helpers/time";
 
+const ACTION_ICONS = {
+  live: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect fill="none" x="3" y="5" width="18" height="12" rx="2"/><path fill="none" d="M8 21h8M12 17v4"/></svg>`,
+  upload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect fill="none" x="7" y="2.5" width="10" height="19" rx="2.5"/><path fill="none" d="M11 18.5h2"/></svg>`,
+  qr: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect fill="none" x="4" y="4" width="7" height="7" rx="1.2"/><rect fill="none" x="13" y="4" width="7" height="7" rx="1.2"/><rect fill="none" x="4" y="13" width="7" height="7" rx="1.2"/><path d="M14 14h2v2h-2zm3 0h3v3h-2v2h-3v-3h2z" fill="currentColor" stroke="none"/></svg>`,
+  mod: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M12 3 5 6v5c0 5 3.2 8.6 7 10 3.8-1.4 7-5 7-10V6z"/><path fill="none" d="M9.5 12.2 11.2 14l3.5-4"/></svg>`,
+};
+
 export default defineComponent({
   name: "EventHomeView",
+
+  data() {
+    return {
+      actionIcons: ACTION_ICONS,
+    };
+  },
 
   computed: {
     shotEmpty(): boolean {
@@ -307,6 +320,27 @@ export default defineComponent({
   text-decoration: none;
   color: inherit;
   box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+}
+.qcard .ico {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(201, 163, 106, 0.16);
+  color: #161310;
+  margin-bottom: 4px;
+}
+.qcard .ico :deep(svg) {
+  width: 22px;
+  height: 22px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+}
+.qcard .ico :deep(svg [fill="currentColor"]) {
+  fill: currentColor;
+  stroke: none;
 }
 .qcard strong {
   display: block;

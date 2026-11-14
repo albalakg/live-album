@@ -8,10 +8,25 @@
     <div
       v-else
       class="rail-cover"
+      :class="{ 'is-empty': !hasCoverImage }"
       :style="coverStyle"
       :title="eventName || ''"
       aria-hidden="true"
-    ></div>
+    >
+      <svg
+        v-if="!hasCoverImage"
+        class="rail-cover-ph"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+      >
+        <rect fill="none" x="3" y="5" width="18" height="14" rx="2" />
+        <circle fill="none" cx="9" cy="10.5" r="1.6" />
+        <path fill="none" d="m6.5 17 3.2-3.4 2.3 2.2 3-3.3L17.5 17" />
+      </svg>
+    </div>
 
     <nav class="sidebar-nav" :aria-label="rail ? 'תפריט האירוע' : 'תפריט האירוע'">
       <router-link
@@ -56,10 +71,13 @@ export default defineComponent({
     eventName(): string {
       return this.$store.getters["event/getEventName"] || "";
     },
+    hasCoverImage(): boolean {
+      return Boolean(this.$store.getters["event/getEventImage"]);
+    },
     coverStyle(): Record<string, string> {
       const img = this.$store.getters["event/getEventImage"] || "";
       if (!img) {
-        return { background: "var(--deep, #12100e)" };
+        return {};
       }
       return {
         backgroundImage: `url(${img})`,
@@ -105,6 +123,22 @@ export default defineComponent({
   margin-bottom: 10px;
   box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
   flex: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.rail-cover.is-empty {
+  background: linear-gradient(145deg, #ebe4da, #f7f1e8);
+  color: #8a8278;
+  border: 1px solid rgba(22, 19, 16, 0.1);
+  box-shadow: none;
+}
+
+.rail-cover-ph {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .sidebar-title {
@@ -174,6 +208,21 @@ export default defineComponent({
 .rail-link.on {
   background: var(--deep, #12100e);
   color: #fff;
+
+  :deep(.rail-ico),
+  :deep(.rail-ico svg),
+  :deep(.rail-ico svg *) {
+    color: #fff;
+  }
+
+  :deep(.rail-ico svg) {
+    stroke: #fff;
+  }
+
+  :deep(.rail-ico svg [fill="currentColor"]) {
+    fill: #fff;
+    stroke: none;
+  }
 }
 
 .rail-tip {
