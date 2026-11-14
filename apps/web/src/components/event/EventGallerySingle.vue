@@ -80,6 +80,14 @@ export default defineComponent({
         assets(): IEventAsset[] {
             return this.$store.getters['event/getDisplayGalleryAssets'] as IEventAsset[];
         },
+        imageDisplayMs(): number {
+            const seconds = Number(this.$store.getters['event/getEvent']?.config?.image_display_time);
+            return (Number.isFinite(seconds) && seconds > 0 ? seconds : 3) * 1000;
+        },
+        videoDisplayMs(): number {
+            const seconds = Number(this.$store.getters['event/getEvent']?.config?.video_display_time);
+            return (Number.isFinite(seconds) && seconds > 0 ? seconds : 8) * 1000;
+        },
     },
 
     methods: {
@@ -133,13 +141,13 @@ export default defineComponent({
                 if (!videoElement.ended) {
                     this.nextAsset();
                 }
-            }, 8000); // Move to next asset after 8 seconds if the video has not ended
+            }, this.videoDisplayMs);
         },
         resetInterval(): void {
             if (this.intervalId) {
                 clearInterval(this.intervalId);
             }
-            this.intervalId = setInterval(this.updateSessionAsset, 3000); // Updates the displayed asset every 3 seconds
+            this.intervalId = setInterval(this.updateSessionAsset, this.imageDisplayMs);
         },
     },
 });

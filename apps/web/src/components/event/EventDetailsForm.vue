@@ -46,6 +46,18 @@
               </button>
             </div>
           </div>
+
+          <label class="field">
+            <span>טקסט ברכה</span>
+            <textarea
+              v-model="form.welcome_text"
+              class="txt area"
+              rows="3"
+              maxlength="255"
+              placeholder="תעלו ותשתפו"
+            ></textarea>
+            <small class="hint">מופיע לאורחים בעמוד ההעלאה.</small>
+          </label>
         </div>
 
         <div
@@ -81,32 +93,6 @@
       </div>
     </div>
 
-    <div class="card switches-card">
-      <h2>תצוגה לאורחים</h2>
-      <div class="switch-list">
-        <label v-for="item in mainSwitches" :key="item.key" class="switch-row">
-          <div>
-            <strong>{{ item.title }}</strong>
-            <small>{{ item.hint }}</small>
-          </div>
-          <input type="checkbox" v-model="config[item.key]" />
-        </label>
-      </div>
-
-      <details class="more">
-        <summary>הגדרות נוספות</summary>
-        <div class="switch-list">
-          <label v-for="item in moreSwitches" :key="item.key" class="switch-row">
-            <div>
-              <strong>{{ item.title }}</strong>
-              <small>{{ item.hint }}</small>
-            </div>
-            <input type="checkbox" v-model="config[item.key]" />
-          </label>
-        </div>
-      </details>
-    </div>
-
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" :disabled="loading">
         {{ loading ? "שומר..." : "שמירה" }}
@@ -122,16 +108,6 @@ import Time from "@/helpers/time";
 import { notify } from "@/helpers/notify";
 import { QR_EVENT_TYPES } from "@/helpers/qrCardCatalog";
 
-type ConfigKey =
-  | "preview_site_display_name"
-  | "preview_site_display_date"
-  | "preview_site_display_image"
-  | "video_upload_enabled"
-  | "manual_photo_approval"
-  | "preview_guests_assets_in_gallery"
-  | "preview_owners_assets_in_gallery"
-  | "preview_link_to_album_page_from_upload_page";
-
 export default defineComponent({
   name: "EventDetailsForm",
 
@@ -142,17 +118,8 @@ export default defineComponent({
         starts_at: "" as string,
         image: null as File | null,
         event_type: "" as string,
+        welcome_text: "" as string,
       },
-      config: {
-        preview_site_display_name: true,
-        preview_site_display_date: true,
-        preview_site_display_image: true,
-        video_upload_enabled: true,
-        manual_photo_approval: false,
-        preview_guests_assets_in_gallery: true,
-        preview_owners_assets_in_gallery: true,
-        preview_link_to_album_page_from_upload_page: true,
-      } as Record<ConfigKey, boolean>,
       errors: {
         name: "" as string,
         starts_at: "" as string,
@@ -164,18 +131,7 @@ export default defineComponent({
       format: "dd/MM/yyyy HH:mm",
       loading: false as boolean,
       eventTypes: QR_EVENT_TYPES,
-      mainSwitches: [
-        { key: "preview_site_display_name", title: "הצגת שם האירוע", hint: "בעמוד ההעלאה ובמסך החי" },
-        { key: "preview_site_display_date", title: "הצגת התאריך", hint: "ליד שם האירוע" },
-        { key: "preview_site_display_image", title: "הצגת תמונת הכיסוי", hint: "כרקע בעמוד ההעלאה" },
-      ] as { key: ConfigKey; title: string; hint: string }[],
-      moreSwitches: [
-        { key: "video_upload_enabled", title: "העלאת סרטונים", hint: "כבוי — אורחים מעלים רק תמונות" },
-        { key: "manual_photo_approval", title: "אישור ידני לפני פרסום", hint: "כל קובץ ימתין לבדיקה שלכם לפני העלייה לאלבום" },
-        { key: "preview_guests_assets_in_gallery", title: "תמונות אורחים באלבום החי", hint: "כבוי — רק התמונות שלכם על המסך" },
-        { key: "preview_owners_assets_in_gallery", title: "התמונות שלכם באלבום החי", hint: "תמונות שהעליתם כמארחים" },
-        { key: "preview_link_to_album_page_from_upload_page", title: "קישור לאלבום מעמוד ההעלאה", hint: "מוסיף כפתור «צפו באלבום» לאורחים" },
-      ] as { key: ConfigKey; title: string; hint: string }[],
+      savedSnapshot: "" as string,
     };
   },
 
@@ -210,6 +166,17 @@ export default defineComponent({
       }
       return "";
     },
+    isDirty(): boolean {
+      return this.currentSnapshot !== this.savedSnapshot || Boolean(this.form.image);
+    },
+    currentSnapshot(): string {
+      return JSON.stringify({
+        name: this.form.name,
+        starts_at: this.form.starts_at || "",
+        event_type: this.form.event_type || "",
+        welcome_text: this.form.welcome_text || "",
+      });
+    },
   },
 
   methods: {
@@ -217,14 +184,12 @@ export default defineComponent({
       this.form.name = this.event?.name ?? "";
       this.form.starts_at = this.event?.starts_at ?? "";
       this.form.event_type = this.event?.event_type || "";
+      this.form.welcome_text = this.event?.config?.welcome_text || "";
       this.imageExists = Boolean(this.event?.image);
-      const cfg = this.event?.config || {};
-      (Object.keys(this.config) as ConfigKey[]).forEach((key) => {
-        if (cfg[key] !== undefined && cfg[key] !== null) {
-          this.config[key] = Boolean(cfg[key]);
-        }
-      });
       if (!this.form.image) this.revokeLocalPreview();
+      this.$nextTick(() => {
+        this.savedSnapshot = this.currentSnapshot;
+      });
     },
 
     openFilePicker() {
@@ -271,22 +236,23 @@ export default defineComponent({
       }
 
       this.loading = true;
-      const configPayload: Record<string, string> = {};
-      (Object.keys(this.config) as ConfigKey[]).forEach((key) => {
-        configPayload[key] = this.config[key] ? "true" : "false";
-      });
-
       const payload: Record<string, unknown> = {
         name: this.form.name,
         image: this.form.image,
         event_type: this.form.event_type || null,
-        config: configPayload,
+        config: {
+          welcome_text: this.form.welcome_text || "",
+        },
       };
       if (this.isPending) payload.starts_at = Time.toUTC(this.form.starts_at);
 
-      await this.$store.dispatch("event/update", payload);
+      const result = await this.$store.dispatch("event/update", payload);
       this.loading = false;
-      notify({ text: "הפרטים נשמרו", type: "success" });
+      if (result) {
+        this.form.image = null;
+        this.revokeLocalPreview();
+        this.setEvent();
+      }
     },
   },
 });
@@ -333,6 +299,10 @@ export default defineComponent({
   padding: 12px 14px;
   font: inherit;
   background: #fffcfa;
+}
+.area {
+  resize: vertical;
+  min-height: 88px;
 }
 .hint {
   color: #5e564e;
@@ -420,46 +390,6 @@ export default defineComponent({
   font-weight: 800;
   cursor: pointer;
   font-family: inherit;
-}
-.switches-card h2 {
-  margin: 0 0 14px;
-  font-size: 1.22rem;
-  font-weight: 800;
-}
-.switch-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.switch-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 0;
-  border-top: 1px solid rgba(22, 19, 16, 0.08);
-}
-.switch-row:first-child {
-  border-top: 0;
-}
-.switch-row strong {
-  display: block;
-}
-.switch-row small {
-  color: #5e564e;
-}
-.switch-row input {
-  width: 44px;
-  height: 26px;
-}
-.more {
-  margin-top: 12px;
-}
-.more summary {
-  cursor: pointer;
-  font-weight: 800;
-  color: #5e564e;
-  padding: 10px 0;
 }
 .form-actions {
   display: flex;

@@ -352,6 +352,10 @@ import {
 } from "@/helpers/enums";
 import { IEventAsset, IEventDownloadAssetsProcess } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
+import type {
+  NavigationGuardNext,
+  RouteLocationNormalized,
+} from "vue-router";
 import Time from "@/helpers/time";
 import MainCheckbox from "@/components/library/inputs/MainCheckbox.vue";
 import EventAssetCard from "@/components/event/EventAssetCard.vue";
@@ -396,6 +400,7 @@ export default defineComponent({
       approvalConfig: {
         manual_photo_approval: false,
       } as Record<string, boolean>,
+      savedApproval: false as boolean,
       approvalSwitches: [
         {
           key: "manual_photo_approval",
@@ -416,6 +421,20 @@ export default defineComponent({
   created() {
     this.syncFilterFromRoute();
     this.loadAssets();
+  },
+
+  beforeRouteLeave(
+    _to: RouteLocationNormalized,
+    _from: RouteLocationNormalized,
+    next: NavigationGuardNext
+  ) {
+    const dirty =
+      this.approvalConfig.manual_photo_approval !== this.savedApproval;
+    if (dirty && !window.confirm("יש שינויים שלא נשמרו. לעזוב בלי לשמור?")) {
+      next(false);
+      return;
+    }
+    next();
   },
 
   watch: {
@@ -440,9 +459,9 @@ export default defineComponent({
     event: {
       immediate: true,
       handler() {
-        this.approvalConfig.manual_photo_approval = Boolean(
-          this.event?.config?.manual_photo_approval
-        );
+        const value = Boolean(this.event?.config?.manual_photo_approval);
+        this.approvalConfig.manual_photo_approval = value;
+        this.savedApproval = value;
       },
     },
 
@@ -671,10 +690,17 @@ export default defineComponent({
 
     async saveManualApproval() {
       this.approvalLoading = true;
-      await this.$store.dispatch("event/update", {
-        config: { ...this.approvalConfig },
+      const result = await this.$store.dispatch("event/update", {
+        config: {
+          manual_photo_approval: this.approvalConfig.manual_photo_approval
+            ? "true"
+            : "false",
+        },
       });
       this.approvalLoading = false;
+      if (result) {
+        this.savedApproval = this.approvalConfig.manual_photo_approval;
+      }
     },
 
     async approveAsset(assetId: number) {

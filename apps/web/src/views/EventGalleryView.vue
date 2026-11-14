@@ -83,6 +83,34 @@
         :values="liveConfig"
         @toggle="toggleLive"
       />
+      <details class="more">
+        <summary>הגדרות נוספות</summary>
+        <p class="section-lede timing-lede">
+          כמה זמן כל תמונה וסרטון נשארים על המסך באלבום החי.
+        </p>
+        <div class="timing-grid">
+          <label class="field">
+            <span>שניות לתמונה</span>
+            <input
+              class="txt"
+              type="number"
+              min="1"
+              max="120"
+              v-model.number="timing.image_display_time"
+            />
+          </label>
+          <label class="field">
+            <span>שניות לסרטון</span>
+            <input
+              class="txt"
+              type="number"
+              min="1"
+              max="300"
+              v-model.number="timing.video_display_time"
+            />
+          </label>
+        </div>
+      </details>
       <div class="form-actions">
         <MainButton :loading="configLoading" text="שמור הגדרות תצוגה" />
       </div>
@@ -97,6 +125,10 @@ import EventSwitchPanel, {
 } from "@/components/event/EventSwitchPanel.vue";
 import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 import { defineComponent } from "vue";
+import type {
+  NavigationGuardNext,
+  RouteLocationNormalized,
+} from "vue-router";
 import { IEvent } from "@/helpers/interfaces";
 
 type LiveConfigKey =
@@ -160,6 +192,10 @@ export default defineComponent({
         preview_owners_assets_in_gallery: false,
         preview_qr_in_gallery: false,
       } as Record<LiveConfigKey, boolean>,
+      timing: {
+        image_display_time: 3 as number,
+        video_display_time: 8 as number,
+      },
       liveSwitches: [
         {
           key: "preview_guests_assets_in_gallery",
@@ -180,6 +216,8 @@ export default defineComponent({
       form: {
         selectedAlbum: "EventGallerySingle" as string,
       },
+      savedLayout: "EventGallerySingle" as string,
+      savedLiveSnapshot: "" as string,
     };
   },
 
@@ -187,6 +225,18 @@ export default defineComponent({
     this.$store.dispatch("event/getEventGalleryAssets");
     this.$store.dispatch("event/getEventAssets");
     this.setForm();
+  },
+
+  beforeRouteLeave(
+    _to: RouteLocationNormalized,
+    _from: RouteLocationNormalized,
+    next: NavigationGuardNext
+  ) {
+    if (this.isDirty && !window.confirm("יש שינויים שלא נשמרו. לעזוב בלי לשמור?")) {
+      next(false);
+      return;
+    }
+    next();
   },
 
   computed: {
@@ -213,6 +263,21 @@ export default defineComponent({
     showBlockedGalleryAssets(): boolean {
       return this.$store.getters["event/showBlockedGalleryAssets"];
     },
+
+    liveSnapshot(): string {
+      return JSON.stringify({
+        ...this.liveConfig,
+        image_display_time: this.timing.image_display_time,
+        video_display_time: this.timing.video_display_time,
+      });
+    },
+
+    isDirty(): boolean {
+      return (
+        this.form.selectedAlbum !== this.savedLayout ||
+        this.liveSnapshot !== this.savedLiveSnapshot
+      );
+    },
   },
 
   watch: {
@@ -229,6 +294,7 @@ export default defineComponent({
     setForm() {
       this.form.selectedAlbum =
         this.event?.config?.displayed_gallery || "EventGallerySingle";
+      this.savedLayout = this.form.selectedAlbum;
     },
 
     syncLiveConfig() {
@@ -239,6 +305,11 @@ export default defineComponent({
         cfg?.preview_owners_assets_in_gallery ?? false;
       this.liveConfig.preview_qr_in_gallery =
         cfg?.preview_qr_in_gallery ?? false;
+      this.timing.image_display_time = Number(cfg?.image_display_time) || 3;
+      this.timing.video_display_time = Number(cfg?.video_display_time) || 8;
+      this.$nextTick(() => {
+        this.savedLiveSnapshot = this.liveSnapshot;
+      });
     },
 
     toggleLive(key: string) {
@@ -248,16 +319,29 @@ export default defineComponent({
 
     async saveLiveConfig() {
       this.configLoading = true;
-      await this.$store.dispatch("event/update", {
-        config: { ...this.liveConfig },
+      const config: Record<string, string | number> = {};
+      (Object.keys(this.liveConfig) as LiveConfigKey[]).forEach((key) => {
+        config[key] = this.liveConfig[key] ? "true" : "false";
       });
+      config.image_display_time = this.timing.image_display_time;
+      config.video_display_time = this.timing.video_display_time;
+      const result = await this.$store.dispatch("event/update", { config });
       this.configLoading = false;
+      if (result) {
+        this.savedLiveSnapshot = this.liveSnapshot;
+      }
     },
 
     async submit() {
       this.loading = true;
-      await this.$store.dispatch("event/updateGallerySettings", this.form);
+      const result = await this.$store.dispatch(
+        "event/updateGallerySettings",
+        this.form
+      );
       this.loading = false;
+      if (result) {
+        this.savedLayout = this.form.selectedAlbum;
+      }
     },
 
     toggleBlockedGalleryAssets(event: Event) {
@@ -517,5 +601,57 @@ export default defineComponent({
   max-width: 280px;
   margin-inline-start: auto;
   width: 100%;
+}
+
+.more {
+  background: #fff;
+  border-radius: 22px;
+  padding: 14px 18px 18px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.06);
+}
+
+.more summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: #5e564e;
+  padding: 6px 0 10px;
+}
+
+.timing-lede {
+  margin-bottom: 12px;
+}
+
+.timing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field > span {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #8a8278;
+}
+
+.txt {
+  border: 1.5px solid rgba(22, 19, 16, 0.11);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  background: #fffcfa;
+}
+
+@media (max-width: 700px) {
+  .timing-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

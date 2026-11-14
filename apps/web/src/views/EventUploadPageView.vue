@@ -16,14 +16,6 @@
           @toggle="toggle"
         />
 
-        <div class="field welcome">
-          <span>
-            טקסט ברכה
-            <em class="neu">הצעה חדשה</em>
-          </span>
-          <textarea v-model="welcomeText" rows="3" maxlength="255"></textarea>
-        </div>
-
         <details class="more">
           <summary>הגדרות נוספות</summary>
           <EventSwitchPanel
@@ -59,7 +51,7 @@
           <div class="phone-content">
             <h3 v-if="config.preview_site_display_name">{{ eventName }}</h3>
             <p v-if="config.preview_site_display_date" class="date">{{ eventDate }}</p>
-            <p class="welcome-preview">{{ welcomeText || "תעלו ותשתפו" }}</p>
+            <p class="welcome-preview">{{ welcomePreview }}</p>
             <button type="button" class="phone-cta">העלאה</button>
             <button
               v-if="config.preview_link_to_album_page_from_upload_page"
@@ -78,13 +70,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import type {
+  NavigationGuardNext,
+  RouteLocationNormalized,
+} from "vue-router";
 import MainButton from "@/components/library/buttons/MainButton.vue";
 import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 import EventSwitchPanel, {
   SwitchItem,
 } from "@/components/event/EventSwitchPanel.vue";
 import { IEvent } from "@/helpers/interfaces";
-import { notify } from "@/helpers/notify";
 
 type ConfigKey =
   | "preview_site_display_image"
@@ -101,7 +96,6 @@ export default defineComponent({
   data() {
     return {
       loading: false,
-      welcomeText: "",
       config: {
         preview_site_display_image: false,
         preview_site_display_name: false,
@@ -138,7 +132,20 @@ export default defineComponent({
           hint: "קישור לאלבום מעמוד ההעלאה",
         },
       ] as SwitchItem[],
+      savedSnapshot: "" as string,
     };
+  },
+
+  beforeRouteLeave(
+    _to: RouteLocationNormalized,
+    _from: RouteLocationNormalized,
+    next: NavigationGuardNext
+  ) {
+    if (this.isDirty && !window.confirm("יש שינויים שלא נשמרו. לעזוב בלי לשמור?")) {
+      next(false);
+      return;
+    }
+    next();
   },
 
   computed: {
@@ -157,6 +164,9 @@ export default defineComponent({
     eventImage(): string {
       return this.$store.getters["event/getEventImage"] || "";
     },
+    welcomePreview(): string {
+      return this.event?.config?.welcome_text || "תעלו ותשתפו";
+    },
     phoneBgStyle(): Record<string, string> {
       if (this.config.preview_site_display_image && this.eventImage) {
         return {
@@ -169,6 +179,12 @@ export default defineComponent({
     },
     uploadPageUrl(): string {
       return `${window.location.origin}/event/uploads/${this.eventPath}`;
+    },
+    currentSnapshot(): string {
+      return JSON.stringify(this.config);
+    },
+    isDirty(): boolean {
+      return this.currentSnapshot !== this.savedSnapshot;
     },
   },
 
@@ -193,7 +209,9 @@ export default defineComponent({
       this.config.video_upload_enabled = cfg?.video_upload_enabled ?? true;
       this.config.preview_link_to_album_page_from_upload_page =
         cfg?.preview_link_to_album_page_from_upload_page ?? false;
-      this.welcomeText = cfg?.welcome_text || "";
+      this.$nextTick(() => {
+        this.savedSnapshot = this.currentSnapshot;
+      });
     },
 
     toggle(key: string) {
@@ -207,10 +225,13 @@ export default defineComponent({
       (Object.keys(this.config) as ConfigKey[]).forEach((key) => {
         configPayload[key] = this.config[key] ? "true" : "false";
       });
-      configPayload.welcome_text = this.welcomeText;
-      await this.$store.dispatch("event/update", { config: configPayload });
+      const result = await this.$store.dispatch("event/update", {
+        config: configPayload,
+      });
       this.loading = false;
-      notify({ text: "ההגדרות נשמרו", type: "success" });
+      if (result) {
+        this.savedSnapshot = this.currentSnapshot;
+      }
     },
   },
 });
@@ -238,42 +259,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 18px;
-}
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: #fff;
-  border-radius: 22px;
-  padding: 18px 20px;
-  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
-}
-.field > span {
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: 800;
-  color: #8a8278;
-}
-.neu {
-  display: inline-block;
-  margin-inline-start: 8px;
-  background: #fff4f4;
-  color: #9a3036;
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-style: normal;
-  font-size: 0.72rem;
-  letter-spacing: 0;
-  text-transform: none;
-}
-textarea {
-  border: 1.5px solid rgba(22, 19, 16, 0.11);
-  border-radius: 14px;
-  padding: 12px 14px;
-  font: inherit;
-  resize: vertical;
-  background: #fffcfa;
 }
 .more summary {
   cursor: pointer;

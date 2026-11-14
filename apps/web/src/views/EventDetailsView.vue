@@ -4,24 +4,41 @@
       <div>
         <h1>פרטי האירוע</h1>
         <p class="lede">
-          שם, תאריך ותמונת כיסוי יופיעו לאורחים בעמוד ההעלאה ובמסך החי.
+          שם, תאריך, סוג, תמונת כיסוי וטקסט ברכה — המידע הכללי של האירוע.
         </p>
       </div>
     </header>
 
-    <EventDetailsForm />
+    <EventDetailsForm ref="detailsForm" />
   </div>
 </template>
 
 <script lang="ts">
 import EventDetailsForm from "@/components/event/EventDetailsForm.vue";
 import { defineComponent } from "vue";
+import type {
+  NavigationGuardNext,
+  RouteLocationNormalized,
+} from "vue-router";
 
 export default defineComponent({
   name: "EventDetailsView",
 
   components: {
     EventDetailsForm,
+  },
+
+  beforeRouteLeave(
+    _to: RouteLocationNormalized,
+    _from: RouteLocationNormalized,
+    next: NavigationGuardNext
+  ) {
+    const form = this.$refs.detailsForm as { isDirty?: boolean } | undefined;
+    if (form?.isDirty && !window.confirm("יש שינויים שלא נשמרו. לעזוב בלי לשמור?")) {
+      next(false);
+      return;
+    }
+    next();
   },
 });
 </script>
