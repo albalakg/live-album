@@ -976,54 +976,62 @@
   text-align: center;
 }
 
-/* Modals / drawers — teleported but class-prefixed */
+/* Modals / drawers — teleported above site sticky nav (DesktopBar 100 / MobileBar 10000) */
 .tb-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 11000;
   background: rgba(18, 16, 14, 0.35);
   backdrop-filter: blur(4px);
 }
 .tb-modal-wrap {
   position: fixed;
   inset: 0;
-  z-index: 81;
-  display: grid;
-  place-items: center;
+  z-index: 11001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 24px;
+  box-sizing: border-box;
   pointer-events: none;
 }
 .tb-modal {
   pointer-events: auto;
-  width: min(1120px, 96vw);
-  max-height: min(900px, 94vh);
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  width: min(1120px, 100%);
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
   background: var(--tb-paper, #fffcfa);
   border-radius: 32px;
-  padding: 36px 40px 40px;
+  padding: 0;
   box-shadow: var(--tb-shadow, 0 24px 60px rgba(18, 16, 14, 0.16));
   direction: rtl;
   color: var(--tb-ink, #161310);
   font-family: var(--font, Heebo, sans-serif);
+  box-sizing: border-box;
 }
 .tb-modal.gallery {
-  width: min(1180px, 96vw);
-  padding: 28px 36px 32px;
+  width: min(1180px, 100%);
 }
 .tb-modal.templates {
-  width: min(960px, 96vw);
+  width: min(960px, 100%);
 }
 .tb-modal-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 8px;
+  flex: none;
   position: sticky;
   top: 0;
   background: var(--tb-paper, #fffcfa);
   z-index: 2;
-  padding-bottom: 4px;
+  padding: 28px 36px 12px;
+}
+.tb-modal.gallery .tb-modal-head {
+  padding: 24px 32px 10px;
 }
 .tb-modal-head h2 {
   margin: 0;
@@ -1034,8 +1042,19 @@
 .tb-modal .lede {
   color: var(--tb-muted, #5e564e);
   font-size: 1rem;
-  margin: 0 0 16px;
+  margin: 6px 0 0;
   line-height: 1.55;
+}
+.tb-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 28px 28px 36px;
+  box-sizing: border-box;
+}
+.tb-modal.gallery .tb-modal-body {
+  padding: 4px 24px 28px 32px;
 }
 .tb-modal-close {
   width: 40px;
@@ -1179,7 +1198,7 @@
 .tb-preview-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 70;
+  z-index: 11000;
   background: rgba(18, 16, 14, 0.25);
   backdrop-filter: blur(4px);
 }
@@ -1188,17 +1207,21 @@
   right: 0;
   left: 0;
   bottom: 0;
-  z-index: 71;
+  z-index: 11001;
   height: min(64vh, 740px);
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
   background: var(--tb-paper, #fffcfa);
   border-radius: 28px 28px 0 0;
   box-shadow: 0 -20px 60px rgba(18, 16, 14, 0.16);
   display: flex;
   flex-direction: column;
   padding: 12px 32px 24px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
   direction: rtl;
   color: var(--tb-ink, #161310);
   font-family: var(--font, Heebo, sans-serif);
+  box-sizing: border-box;
 }
 .tb-drawer-handle {
   width: 48px;
@@ -1321,7 +1344,7 @@
 .tb-dryrun {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 11020;
   background: #000;
   display: flex;
   flex-direction: column;
@@ -1555,14 +1578,57 @@
   }
   .tb-preview-drawer {
     height: 78vh;
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
     padding: 8px 14px 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  }
+  .tb-modal-head {
+    padding: 20px 18px 10px;
+  }
+  .tb-modal.gallery .tb-modal-head {
+    padding: 20px 18px 10px;
+  }
+  .tb-modal-body,
+  .tb-modal.gallery .tb-modal-body {
+    padding: 4px 14px 20px 18px;
   }
   .tb-modal {
-    padding: 22px 18px;
     border-radius: 24px;
   }
   .tb-tpl-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .tb-modal-wrap {
+    padding: 0;
+    align-items: stretch;
+  }
+  .tb-modal,
+  .tb-modal.gallery,
+  .tb-modal.templates {
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .tb-modal-head,
+  .tb-modal.gallery .tb-modal-head {
+    padding: 18px 16px 10px;
+  }
+  .tb-modal-body,
+  .tb-modal.gallery .tb-modal-body {
+    padding: 4px 12px 20px 16px;
+  }
+  .tb-modal-head h2 {
+    font-size: 1.4rem;
   }
 }
 
