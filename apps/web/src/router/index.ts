@@ -213,6 +213,41 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/DesignView.vue"),
   },
   {
+    path: "/design/landing",
+    name: "designLandingIndex",
+    beforeEnter: Guard.guest,
+    component: () => import("@/views/DesignLandingIndexView.vue"),
+  },
+  {
+    path: "/design/landing/:id",
+    name: "designLanding",
+    beforeEnter: (to, from, next) => {
+      const id = String(to.params.id || "");
+      const known = [
+        "wedding-1",
+        "wedding-2",
+        "barmitzvah-1",
+        "barmitzvah-2",
+        "birthday-1",
+        "birthday-2",
+        "brit-1",
+        "brit-2",
+        "corporate-1",
+        "corporate-2",
+        "party-1",
+        "party-2",
+        "festival-1",
+        "festival-2",
+      ];
+      if (!known.includes(id)) {
+        next({ name: "designLandingIndex", replace: true });
+        return;
+      }
+      Guard.guest(to, from, next);
+    },
+    component: () => import("@/views/DesignLandingView.vue"),
+  },
+  {
     path: "/:path(.*)*",
     name: "notFound",
     component: () => import("@/views/NotFoundView.vue"),

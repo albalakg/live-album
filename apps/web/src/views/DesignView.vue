@@ -7,6 +7,15 @@
     <br>
 
     <section>
+      <h2>עמוד האירוע</h2>
+      <p>
+        <router-link to="/design/landing">גלריית 14 טמפלטי הנחיתה</router-link>
+      </p>
+    </section>
+
+    <br>
+
+    <section>
       <h2>כפתורים</h2>
       <div class="padding--large width--sixth">
         <MainButton text="הזמן עכשיו" />
