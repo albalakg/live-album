@@ -83,13 +83,11 @@
       <section class="card links">
         <h2>קישורי שיתוף</h2>
         <div class="link-row" v-for="link in shareLinks" :key="link.path">
-          <div class="copy-slot">
-            <CopyLinkButton :text="`${origin}${link.path}`" />
-          </div>
-          <div>
+          <div class="link-meta">
             <strong>{{ link.label }}</strong>
             <small dir="ltr">{{ origin }}{{ link.path }}</small>
           </div>
+          <CopyLinkButton :text="`${origin}${link.path}`" />
         </div>
       </section>
     </template>
@@ -349,6 +347,7 @@ export default defineComponent({
 }
 .link-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 14px;
   padding: 12px 0;
@@ -357,17 +356,23 @@ export default defineComponent({
 .link-row:first-of-type {
   border-top: 0;
 }
+.link-meta {
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+}
 .link-row strong {
   display: block;
 }
 .link-row small {
+  display: block;
   color: #8a8278;
-  word-break: break-all;
-}
-.copy-slot {
-  margin-inline-start: auto;
-  order: -1;
-  flex: none;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .banner.error {
   background: #fff4f4;

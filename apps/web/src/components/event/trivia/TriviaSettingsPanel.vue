@@ -135,8 +135,15 @@
         </label>
         <div class="tb-field" style="margin-top: 8px">
           <span>קישור לאורחים</span>
-          <div style="display: flex; gap: 8px; margin-top: 6px; align-items: center">
-            <input type="text" readonly :value="guestUrl" style="flex: 1" @focus="($event.target as HTMLInputElement).select()" />
+          <div class="tb-link-row">
+            <input
+              type="text"
+              readonly
+              dir="ltr"
+              :value="guestUrl"
+              class="tb-link-input"
+              @focus="($event.target as HTMLInputElement).select()"
+            />
             <CopyLinkButton :text="guestUrl" />
           </div>
         </div>
@@ -177,4 +184,24 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.tb-link-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.tb-link-input {
+  flex: 1;
+  min-width: 0;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
 

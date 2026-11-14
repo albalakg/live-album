@@ -12,10 +12,8 @@
       <h2>תצוגת המסך החי</h2>
       <div class="link-row">
         <div class="link-meta">
-          <CopyLinkButton :text="liveAlbumUrl" />
-          <div>
-            <strong>קישור לאלבום החי</strong>
-          </div>
+          <strong>קישור לאלבום החי</strong>
+          <small class="link-url" dir="ltr">{{ liveAlbumUrl }}</small>
         </div>
         <div class="link-actions">
           <span class="file-count">סה״כ {{ totalAssets }} קבצים</span>
@@ -26,6 +24,7 @@
           >
             צפייה במסך החי
           </router-link>
+          <CopyLinkButton :text="liveAlbumUrl" />
         </div>
       </div>
     </section>
@@ -342,21 +341,36 @@ export default defineComponent({
   flex-wrap: wrap;
 }
 
-.link-meta,
+.link-meta {
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+}
+
 .link-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 0;
-}
-
-.link-actions {
+  flex: none;
   flex-wrap: wrap;
 }
 
 .link-meta strong {
   display: block;
   font-size: 0.95rem;
+}
+
+.link-url {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted, #5e564e);
+  font-size: 0.82rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .file-count {

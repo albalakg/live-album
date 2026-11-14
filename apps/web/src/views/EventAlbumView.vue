@@ -13,18 +13,19 @@
       <h2>אלבום האורחים</h2>
       <div class="link-row">
         <div class="link-meta">
-          <CopyLinkButton :text="guestAlbumUrl" />
-          <div>
-            <strong>עמוד האלבום לאורחים</strong>
-          </div>
+          <strong>עמוד האלבום לאורחים</strong>
+          <small class="link-url" dir="ltr">{{ guestAlbumUrl }}</small>
         </div>
-        <router-link
-          class="ghost-btn"
-          target="_blank"
-          :to="`/event/open-gallery/${eventPath}`"
-        >
-          פתיחת האלבום
-        </router-link>
+        <div class="link-actions">
+          <router-link
+            class="ghost-btn"
+            target="_blank"
+            :to="`/event/open-gallery/${eventPath}`"
+          >
+            פתיחת האלבום
+          </router-link>
+          <CopyLinkButton :text="guestAlbumUrl" />
+        </div>
       </div>
       <p class="hint" v-if="isEventAvailable">העמוד פעיל לאורחים כעת</p>
       <p class="hint" v-else>העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</p>
@@ -129,15 +130,35 @@ export default defineComponent({
 }
 
 .link-meta {
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+}
+
+.link-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 0;
+  flex: none;
+  flex-wrap: wrap;
 }
 
 .link-meta strong {
   display: block;
   font-size: 0.95rem;
+}
+
+.link-url {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted, #5e564e);
+  font-size: 0.82rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ghost-btn,

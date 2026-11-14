@@ -41,10 +41,11 @@
         <section class="links-card">
           <h2>קישור לעמוד העלאות</h2>
           <div class="link-row">
-            <CopyLinkButton :text="uploadPageUrl" />
-            <div>
+            <div class="link-meta">
               <strong>עמוד העלאות</strong>
+              <small class="link-url" dir="ltr">{{ uploadPageUrl }}</small>
             </div>
+            <CopyLinkButton :text="uploadPageUrl" />
           </div>
         </section>
       </form>
@@ -292,8 +293,29 @@ textarea {
 }
 .link-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
+}
+.link-meta {
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+}
+.link-meta strong {
+  display: block;
+}
+.link-url {
+  display: block;
+  margin-top: 2px;
+  color: #8a8278;
+  font-size: 0.82rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .phone-wrap {
   position: sticky;
