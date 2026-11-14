@@ -27,6 +27,13 @@
       <UploadMedia />
     </section>
 
+    <div class="type-filters" role="tablist" aria-label="סינון סוג">
+      <button type="button" class="chip" :class="{ on: typeFilter === 'all' }" @click="typeFilter = 'all'">הכל</button>
+      <button type="button" class="chip" :class="{ on: typeFilter === 'photo' }" @click="typeFilter = 'photo'">תמונות</button>
+      <button type="button" class="chip" :class="{ on: typeFilter === 'video' }" @click="typeFilter = 'video'">סרטונים</button>
+      <button type="button" class="chip" :class="{ on: typeFilter === 'fav' }" @click="typeFilter = 'fav'">מועדפים</button>
+    </div>
+
     <div
       class="assets-toolbar"
       :class="{ 'assets-toolbar--active': selectionActive }"
@@ -306,6 +313,7 @@ export default defineComponent({
       moderationOpen: false as boolean,
       moderationTouched: false as boolean,
       selectMode: false as boolean,
+      typeFilter: "all" as "all" | "photo" | "video" | "fav",
       keydownHandler: null as ((e: KeyboardEvent) => void) | null,
     };
   },
@@ -370,7 +378,15 @@ export default defineComponent({
     },
 
     ownerVisibleAssets(): IEventAsset[] {
-      return this.$store.getters["event/getOwnerVisibleAssets"];
+      let assets = this.$store.getters["event/getOwnerVisibleAssets"] || [];
+      if (this.typeFilter === "photo") {
+        assets = assets.filter((a: IEventAsset) => a.type === "image" || a.type === "photo");
+      } else if (this.typeFilter === "video") {
+        assets = assets.filter((a: IEventAsset) => a.type === "video");
+      } else if (this.typeFilter === "fav") {
+        assets = assets.filter((a: IEventAsset) => Boolean(a.is_favorite));
+      }
+      return assets;
     },
 
     hasPendingAssets(): boolean {
@@ -787,6 +803,28 @@ export default defineComponent({
   color: var(--muted, #5e564e);
   font-size: 0.88rem;
   line-height: 1.5;
+}
+
+.type-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.type-filters .chip {
+  appearance: none;
+  border: 1.5px solid rgba(22, 19, 16, 0.11);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+.type-filters .chip.on {
+  background: #12100e;
+  color: #fff;
+  border-color: #12100e;
 }
 
 .upload-strip {

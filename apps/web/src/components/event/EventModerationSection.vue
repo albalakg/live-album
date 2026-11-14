@@ -21,20 +21,34 @@
       </div>
     </form>
 
+    <div class="bulk-bar" v-if="selectedIds.length">
+      <span>{{ selectedIds.length }} נבחרו</span>
+      <button type="button" class="bulk-approve" :disabled="busyBulk" @click="bulkApprove">
+        אישור {{ selectedIds.length }}
+      </button>
+      <button type="button" class="ghost" @click="selectedIds = []">ביטול בחירה</button>
+    </div>
+
     <div class="queues">
       <section>
         <h3>ממתינות <span>{{ pending.length }}</span></h3>
         <p v-if="pending.length === 0" class="empty">אין תמונות ממתינות.</p>
         <ul v-else class="cards">
-          <li v-for="asset in pending" :key="asset.id">
+          <li v-for="asset in pending" :key="asset.id" :class="{ sel: selectedIds.includes(asset.id) }">
             <figure>
               <img v-if="asset.type !== 'video'" :src="asset.fullPath" alt="תמונה ממתינה" />
               <video v-else :src="asset.fullPath" muted></video>
+              <button
+                type="button"
+                class="pick"
+                :aria-pressed="selectedIds.includes(asset.id)"
+                @click="toggleSelect(asset.id)"
+              ></button>
             </figure>
             <div class="actions">
               <button type="button" :disabled="busyId === asset.id" @click="approve(asset.id)">אישור</button>
               <button type="button" class="ghost" :disabled="busyId === asset.id" @click="hide(asset.id)">
-                {{ asset.is_displayed ? "הסתר" : "הצג" }}
+                הסתרה
               </button>
             </div>
           </li>
@@ -79,6 +93,8 @@ export default defineComponent({
   data() {
     return {
       busyId: null as number | null,
+      busyBulk: false,
+      selectedIds: [] as number[],
       approvalLoading: false,
       approvalConfig: {
         manual_photo_approval: false,
@@ -127,10 +143,26 @@ export default defineComponent({
       });
       this.approvalLoading = false;
     },
+    toggleSelect(id: number) {
+      if (this.selectedIds.includes(id)) {
+        this.selectedIds = this.selectedIds.filter((x) => x !== id);
+      } else {
+        this.selectedIds = [...this.selectedIds, id];
+      }
+    },
     async approve(id: number) {
       this.busyId = id;
       await this.$store.dispatch("event/approveAssets", [id]);
+      this.selectedIds = this.selectedIds.filter((x) => x !== id);
       this.busyId = null;
+    },
+    async bulkApprove() {
+      if (!this.selectedIds.length) return;
+      this.busyBulk = true;
+      const ids = [...this.selectedIds];
+      await this.$store.dispatch("event/approveAssets", ids);
+      this.selectedIds = [];
+      this.busyBulk = false;
     },
     async hide(id: number) {
       this.busyId = id;
@@ -184,13 +216,51 @@ h3 span {
   padding: 2px 8px;
 }
 .cards { list-style: none; display: grid; gap: 12px; padding: 0; margin: 12px 0 0; }
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+  font-weight: 800;
+}
+.bulk-approve {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: #12100e;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
 .cards li {
   background: var(--paper, #fff);
   border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 16px;
   overflow: hidden;
 }
+.cards li.sel {
+  box-shadow: 0 0 0 3px #c9a36a;
+}
 figure { margin: 0; position: relative; }
+.pick {
+  position: absolute;
+  top: 10px;
+  inset-inline-start: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: rgba(18, 16, 14, 0.35);
+  cursor: pointer;
+}
+.pick[aria-pressed="true"] {
+  background: #c9a36a;
+}
 img, video { width: 100%; height: 180px; object-fit: cover; display: block; background: #111; }
 small {
   position: absolute;

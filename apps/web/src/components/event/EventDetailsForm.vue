@@ -1,97 +1,139 @@
 <template>
   <form @submit.prevent="submit()" class="event-form">
-    <header class="form-head">
-      <h2>עריכת פרטי האירוע</h2>
-      <p>שם, תאריך ותמונת כיסוי בלבד. שאר ההגדרות בכרטיסיות שלהן.</p>
-    </header>
+    <div class="card details-card">
+      <div class="details-grid">
+        <div class="fields">
+          <label class="field">
+            <span>שם האירוע</span>
+            <input v-model="form.name" class="txt" type="text" />
+            <small v-if="errors.name" class="hint hint--error">{{ errors.name }}</small>
+          </label>
 
-    <div class="form-grid">
-      <MainInput
-        v-model="form.name"
-        title="שם האירוע"
-        :hasError="Boolean(errors.name)"
-      />
+          <div class="field" :class="{ disabled: !isPending }">
+            <span>תאריך ושעה</span>
+            <VueDatePicker
+              :disabled="!isPending"
+              class="date-picker"
+              :min-date="minDate"
+              locale="he"
+              :format="format"
+              v-model="form.starts_at"
+              select-text="בחר"
+              cancel-text="בטל"
+              :day-names="days"
+            />
+            <small class="hint" v-show="!isPending">
+              ניתן לשנות את התאריך רק בסטטוס ממתין
+            </small>
+            <small class="hint hint--error" v-if="errors.starts_at">{{ errors.starts_at }}</small>
+          </div>
 
-      <div class="date-field" :class="{ disabled: !isPending }">
-        <p class="field-label">תאריך האירוע</p>
-        <VueDatePicker
-          :disabled="!isPending"
-          class="date-picker"
-          :class="{ disabled: !isPending }"
-          :min-date="minDate"
-          locale="he"
-          :format="format"
-          v-model="form.starts_at"
-          select-text="בחר"
-          cancel-text="בטל"
-          :day-names="days"
-        ></VueDatePicker>
-        <small class="hint" v-show="isPending">
-          בחרו תאריך ושעה מדוייקת של תחילת האירוע
-        </small>
-        <small class="hint" v-show="!isPending">
-          ניתן לשנות את התאריך רק בסטטוס ממתין
-        </small>
-        <small class="hint hint--error" v-if="errors.starts_at">
-          {{ errors.starts_at }}
-        </small>
+          <div class="field">
+            <span>
+              סוג האירוע
+              <em class="neu">הצעה חדשה</em>
+            </span>
+            <div class="type-pills">
+              <button
+                v-for="t in eventTypes"
+                :key="t.id"
+                type="button"
+                class="pill"
+                :class="{ on: form.event_type === t.id }"
+                @click="form.event_type = t.id"
+              >
+                {{ t.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="cover"
+          :class="{ 'cover--empty': !previewUrl, 'is-dragging': isDragging }"
+          :style="previewUrl ? { backgroundImage: `url(${previewUrl})` } : undefined"
+          role="button"
+          tabindex="0"
+          @dragenter.prevent="isDragging = true"
+          @dragover.prevent="isDragging = true"
+          @dragleave.prevent="isDragging = false"
+          @drop.prevent="onDrop"
+          @click="openFilePicker"
+          @keydown.enter.prevent="openFilePicker"
+          @keydown.space.prevent="openFilePicker"
+        >
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
+            hidden
+            @change="onFileInput"
+          />
+          <div v-if="!previewUrl" class="cover-empty">
+            <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
+            <strong>העלאת תמונת כיסוי</strong>
+            <span>לחצו או גררו תמונה לכאן</span>
+          </div>
+          <button v-else type="button" class="cover-swap" @click.stop="openFilePicker">
+            החלפת תמונת הכיסוי
+          </button>
+        </div>
       </div>
     </div>
 
-    <div
-      class="cover-dropzone"
-      :class="{ 'is-dragging': isDragging, 'has-preview': Boolean(previewUrl) }"
-      @dragenter.prevent="isDragging = true"
-      @dragover.prevent="isDragging = true"
-      @dragleave.prevent="isDragging = false"
-      @drop.prevent="onDrop"
-      @click="openFilePicker"
-      role="button"
-      tabindex="0"
-      @keydown.enter.prevent="openFilePicker"
-      @keydown.space.prevent="openFilePicker"
-    >
-      <input
-        ref="fileInput"
-        type="file"
-        accept="image/*"
-        hidden
-        @change="onFileInput"
-      />
-      <div
-        class="cover-preview"
-        v-if="previewUrl"
-        :style="{ backgroundImage: `url(${previewUrl})` }"
-      ></div>
-      <div class="cover-copy">
-        <span class="material-symbols-outlined" aria-hidden="true">upload</span>
-        <strong>תמונת האירוע</strong>
-        <span>גררו לכאן או לחצו לבחירה. מומלץ ברזולוציה של מכשיר נייד.</span>
-        <em v-if="uploadedLabel">{{ uploadedLabel }}</em>
+    <div class="card switches-card">
+      <h2>תצוגה לאורחים</h2>
+      <div class="switch-list">
+        <label v-for="item in mainSwitches" :key="item.key" class="switch-row">
+          <div>
+            <strong>{{ item.title }}</strong>
+            <small>{{ item.hint }}</small>
+          </div>
+          <input type="checkbox" v-model="config[item.key]" />
+        </label>
       </div>
+
+      <details class="more">
+        <summary>הגדרות נוספות</summary>
+        <div class="switch-list">
+          <label v-for="item in moreSwitches" :key="item.key" class="switch-row">
+            <div>
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.hint }}</small>
+            </div>
+            <input type="checkbox" v-model="config[item.key]" />
+          </label>
+        </div>
+      </details>
     </div>
 
     <div class="form-actions">
-      <MainButton :loading="loading" text="שמור" />
+      <button type="submit" class="btn btn-primary" :disabled="loading">
+        {{ loading ? "שומר..." : "שמירה" }}
+      </button>
     </div>
   </form>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import MainButton from "../library/buttons/MainButton.vue";
-import MainInput from "../library/inputs/MainInput.vue";
 import { IEvent } from "@/helpers/interfaces";
 import Time from "@/helpers/time";
 import { notify } from "@/helpers/notify";
+import { QR_EVENT_TYPES } from "@/helpers/qrCardCatalog";
+
+type ConfigKey =
+  | "preview_site_display_name"
+  | "preview_site_display_date"
+  | "preview_site_display_image"
+  | "video_upload_enabled"
+  | "manual_photo_approval"
+  | "preview_guests_assets_in_gallery"
+  | "preview_owners_assets_in_gallery"
+  | "preview_link_to_album_page_from_upload_page";
 
 export default defineComponent({
   name: "EventDetailsForm",
-
-  components: {
-    MainButton,
-    MainInput,
-  },
 
   data() {
     return {
@@ -99,7 +141,18 @@ export default defineComponent({
         name: "" as string,
         starts_at: "" as string,
         image: null as File | null,
+        event_type: "" as string,
       },
+      config: {
+        preview_site_display_name: true,
+        preview_site_display_date: true,
+        preview_site_display_image: true,
+        video_upload_enabled: true,
+        manual_photo_approval: false,
+        preview_guests_assets_in_gallery: true,
+        preview_owners_assets_in_gallery: true,
+        preview_link_to_album_page_from_upload_page: true,
+      } as Record<ConfigKey, boolean>,
       errors: {
         name: "" as string,
         starts_at: "" as string,
@@ -110,6 +163,19 @@ export default defineComponent({
       days: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
       format: "dd/MM/yyyy HH:mm",
       loading: false as boolean,
+      eventTypes: QR_EVENT_TYPES,
+      mainSwitches: [
+        { key: "preview_site_display_name", title: "הצגת שם האירוע", hint: "בעמוד ההעלאה ובמסך החי" },
+        { key: "preview_site_display_date", title: "הצגת התאריך", hint: "ליד שם האירוע" },
+        { key: "preview_site_display_image", title: "הצגת תמונת הכיסוי", hint: "כרקע בעמוד ההעלאה" },
+      ] as { key: ConfigKey; title: string; hint: string }[],
+      moreSwitches: [
+        { key: "video_upload_enabled", title: "העלאת סרטונים", hint: "כבוי — אורחים מעלים רק תמונות" },
+        { key: "manual_photo_approval", title: "אישור ידני לפני פרסום", hint: "כל קובץ ימתין לבדיקה שלכם לפני העלייה לאלבום" },
+        { key: "preview_guests_assets_in_gallery", title: "תמונות אורחים באלבום החי", hint: "כבוי — רק התמונות שלכם על המסך" },
+        { key: "preview_owners_assets_in_gallery", title: "התמונות שלכם באלבום החי", hint: "תמונות שהעליתם כמארחים" },
+        { key: "preview_link_to_album_page_from_upload_page", title: "קישור לאלבום מעמוד ההעלאה", hint: "מוסיף כפתור «צפו באלבום» לאורחים" },
+      ] as { key: ConfigKey; title: string; hint: string }[],
     };
   },
 
@@ -131,24 +197,17 @@ export default defineComponent({
     minDate(): Date {
       return new Date();
     },
-
     event(): IEvent {
       return this.$store.getters["event/getEvent"];
     },
-
     isPending(): boolean {
       return this.$store.getters["event/isEventPending"];
     },
-
     previewUrl(): string {
       if (this.localPreviewUrl) return this.localPreviewUrl;
-      if (this.imageExists && this.event?.fullPath) return this.event.fullPath;
-      return "";
-    },
-
-    uploadedLabel(): string {
-      if (this.form.image?.name) return this.form.image.name;
-      if (this.imageExists) return "קיים קובץ באירוע";
+      if (this.imageExists && this.event?.image && this.event?.fullPath) {
+        return this.event.fullPath;
+      }
       return "";
     },
   },
@@ -157,10 +216,15 @@ export default defineComponent({
     setEvent() {
       this.form.name = this.event?.name ?? "";
       this.form.starts_at = this.event?.starts_at ?? "";
-      this.imageExists = !!this.event?.image;
-      if (!this.form.image) {
-        this.revokeLocalPreview();
-      }
+      this.form.event_type = this.event?.event_type || "";
+      this.imageExists = Boolean(this.event?.image);
+      const cfg = this.event?.config || {};
+      (Object.keys(this.config) as ConfigKey[]).forEach((key) => {
+        if (cfg[key] !== undefined && cfg[key] !== null) {
+          this.config[key] = Boolean(cfg[key]);
+        }
+      });
+      if (!this.form.image) this.revokeLocalPreview();
     },
 
     openFilePicker() {
@@ -176,9 +240,7 @@ export default defineComponent({
     onDrop(event: DragEvent) {
       this.isDragging = false;
       const file = event.dataTransfer?.files?.[0];
-      if (file && file.type.startsWith("image/")) {
-        this.setImageFile(file);
-      }
+      if (file && file.type.startsWith("image/")) this.setImageFile(file);
     },
 
     setImageFile(file: File) {
@@ -196,51 +258,35 @@ export default defineComponent({
     },
 
     async submit() {
-      const errors = this.validateForm();
-      if (Object.values(errors).some((error) => error !== "")) {
-        Object.values(errors).forEach((error) => {
-          if (error) {
-            notify({
-              text: error,
-              type: "error",
-              duration: 5000,
-            });
-          }
+      this.errors = { name: "", starts_at: "" };
+      if (!this.form.name) this.errors.name = "שם האירוע הינו שדה חובה";
+      if (this.isPending && !this.form.starts_at) {
+        this.errors.starts_at = "תאריך האירוע הינו שדה חובה";
+      }
+      if (Object.values(this.errors).some(Boolean)) {
+        Object.values(this.errors).forEach((error) => {
+          if (error) notify({ text: error, type: "error", duration: 5000 });
         });
         return;
       }
 
       this.loading = true;
-      const payload = {
+      const configPayload: Record<string, string> = {};
+      (Object.keys(this.config) as ConfigKey[]).forEach((key) => {
+        configPayload[key] = this.config[key] ? "true" : "false";
+      });
+
+      const payload: Record<string, unknown> = {
         name: this.form.name,
         image: this.form.image,
-      } as Record<string, unknown>;
-
-      if (this.isPending) {
-        payload.starts_at = Time.toUTC(this.form.starts_at);
-      }
+        event_type: this.form.event_type || null,
+        config: configPayload,
+      };
+      if (this.isPending) payload.starts_at = Time.toUTC(this.form.starts_at);
 
       await this.$store.dispatch("event/update", payload);
       this.loading = false;
-    },
-
-    validateForm() {
-      this.errors = {
-        name: "",
-        starts_at: "",
-      };
-
-      if (!this.form.name) {
-        this.errors.name = "שם האירוע הינו שדה חובה";
-      } else if (!/.{1,100}$/.test(this.form.name)) {
-        this.errors.name = "שם האירוע צריך להכיל בין 1 ל 100 תווים";
-      }
-
-      if (this.isPending && !this.form.starts_at) {
-        this.errors.starts_at = "תאריך האירוע הינו שדה חובה";
-      }
-
-      return this.errors;
+      notify({ text: "הפרטים נשמרו", type: "success" });
     },
   },
 });
@@ -251,166 +297,198 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 4px 0 8px;
 }
-
-.form-head h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
+.card {
+  background: #fff;
+  border-radius: 26px;
+  padding: 28px 32px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
 }
-
-.form-head p {
-  margin: 4px 0 0;
-  color: var(--muted, #5e564e);
-  font-size: 0.92rem;
-}
-
-.form-grid {
+.details-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
+  gap: 24px;
+  align-items: start;
+}
+.fields {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
-
-@media (max-width: 720px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-
-.field-label {
-  margin: 0 0 6px;
-  font-weight: 700;
-  font-size: 0.95rem;
+.field > span {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #8a8278;
 }
-
-.date-field.disabled {
-  opacity: 0.78;
+.txt {
+  border: 1.5px solid rgba(22, 19, 16, 0.11);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  background: #fffcfa;
 }
-
 .hint {
-  display: block;
-  margin-top: 6px;
-  color: var(--muted, #5e564e);
+  color: #5e564e;
 }
-
 .hint--error {
   color: #c94a56;
   font-weight: 700;
 }
-
-.cover-dropzone {
-  position: relative;
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
-  gap: 14px;
-  align-items: center;
-  min-height: 120px;
-  padding: 14px;
-  border: 1.5px dashed rgba(22, 19, 16, 0.22);
-  border-radius: 18px;
-  background: rgba(22, 19, 16, 0.02);
+.neu {
+  display: inline-block;
+  margin-inline-start: 8px;
+  background: #fff4f4;
+  color: #9a3036;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.type-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pill {
+  border: 1.5px solid rgba(22, 19, 16, 0.11);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  font-family: inherit;
 }
-
-.cover-dropzone.is-dragging,
-.cover-dropzone:focus-visible {
-  border-color: #8a7040;
-  box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.35);
-  background: rgba(201, 163, 106, 0.08);
-  outline: none;
+.pill.on {
+  background: #12100e;
+  color: #fff;
+  border-color: #12100e;
 }
-
-.cover-preview {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  max-height: 140px;
-  border-radius: 14px;
-  background-size: cover;
-  background-position: center;
-  background-color: #1c1814;
+.cover {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #f3eee6 center / cover no-repeat;
+  min-height: 280px;
+  cursor: pointer;
 }
-
-.cover-dropzone:not(.has-preview) {
-  grid-template-columns: 1fr;
-  text-align: center;
+.cover--empty {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(220, 91, 102, 0.28), transparent 52%),
+    radial-gradient(circle at 82% 78%, rgba(201, 163, 106, 0.34), transparent 48%),
+    linear-gradient(160deg, #efe7db, #e4d8c8);
+  display: grid;
+  place-items: center;
+}
+.cover-empty {
+  display: grid;
   justify-items: center;
+  gap: 6px;
+  color: #161310;
+  text-align: center;
+  padding: 20px;
 }
-
-.cover-copy {
+.cover-empty .material-symbols-outlined {
+  font-size: 42px;
+  color: #c9a36a;
+}
+.cover-empty strong {
+  font-size: 1.05rem;
+}
+.cover-empty span:last-child {
+  color: #5e564e;
+  font-size: 0.92rem;
+}
+.cover-swap {
+  position: absolute;
+  inset-inline: 12px;
+  bottom: 12px;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(18, 16, 14, 0.72);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
+.switches-card h2 {
+  margin: 0 0 14px;
+  font-size: 1.22rem;
+  font-weight: 800;
+}
+.switch-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 0;
+  gap: 12px;
 }
-
-.cover-copy .material-symbols-outlined {
-  color: #8a7040;
-  font-size: 1.4rem;
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(22, 19, 16, 0.08);
 }
-
-.cover-copy strong {
-  font-size: 1rem;
+.switch-row:first-child {
+  border-top: 0;
 }
-
-.cover-copy span {
-  color: var(--muted, #5e564e);
-  font-size: 0.88rem;
-  line-height: 1.4;
+.switch-row strong {
+  display: block;
 }
-
-.cover-copy em {
-  font-style: normal;
-  font-weight: 700;
-  color: var(--ink, #161310);
-  font-size: 0.85rem;
+.switch-row small {
+  color: #5e564e;
 }
-
-@media (max-width: 520px) {
-  .cover-dropzone.has-preview {
+.switch-row input {
+  width: 44px;
+  height: 26px;
+}
+.more {
+  margin-top: 12px;
+}
+.more summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: #5e564e;
+  padding: 10px 0;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  color: #fff;
+}
+.btn[disabled] {
+  opacity: 0.5;
+}
+@media (max-width: 900px) {
+  .details-grid {
     grid-template-columns: 1fr;
   }
-
-  .cover-preview {
-    max-height: 180px;
-    aspect-ratio: 16 / 10;
+  .cover {
+    order: -1;
+    max-width: 420px;
+    margin-inline: auto;
+    width: 100%;
   }
-}
-
-.form-actions {
-  max-width: 280px;
-  margin-inline-start: auto;
-  width: 100%;
-}
-
-:deep(.dp__input_wrap) {
-  border-radius: 14px;
-  box-shadow: none;
-
-  input {
-    direction: rtl;
-    border-radius: 14px;
-    padding: 12px 14px;
-    border: 1px solid rgba(22, 19, 16, 0.16);
-    background: #fffcfa;
-  }
-
-  .dp--clear-btn {
-    left: 25px;
-    width: fit-content;
-  }
-}
-
-:deep(.dp__input:focus),
-:deep(.dp__input:focus-visible) {
-  outline: none;
-  border-color: #8a7040 !important;
-  box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.35) !important;
-}
-
-:deep(.dp__menu) {
-  min-width: unset;
 }
 </style>

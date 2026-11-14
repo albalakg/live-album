@@ -127,6 +127,15 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: "",
+        name: "eventHome",
+        component: () => import("../views/EventHomeView.vue"),
+      },
+      {
+        path: "home",
+        redirect: { name: "eventHome" },
+      },
+      {
+        path: "details",
         name: "eventDetails",
         component: () => import("../views/EventDetailsView.vue"),
       },
@@ -157,7 +166,8 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "moderation",
-        redirect: { name: "eventAssets" },
+        name: "eventModeration",
+        component: () => import("../views/EventModerationView.vue"),
       },
       {
         path: "qr",

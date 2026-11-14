@@ -1,61 +1,87 @@
 <template>
-  <div
-    class="event-qr display--flex justify--space-between height--full brs--medium flex--wrap padding--medium-mobile"
-  >
-    <div class="width--corner width--full-mobile">
-      <p class="kicker">שיתוף</p>
-      <h1 class="title--large">QR</h1>
-      <p class="qr-lede">בחרו עיצוב, ערכו טקסט, והורידו כרטיס או קוד להדפסה ושיתוף.</p>
-      <template v-if="$bp.isMobile">
-        <br />
-        <p class="text--center">מומלץ להוריד מהמחשב</p>
-      </template>
-      <br />
-      <QrCardGallery selectable :selected="selectedQR" @select="onSelectDesign" />
-      <MainSelect
-        :options="QROptions"
-        v-model="selectedQR"
-        ref="actionSelect"
-        placeholder="בחר עיצוב כרטיס QR"
-        title="בחר עיצוב כרטיס QR"
-      />
-      <br />
-      <MainInput
-        v-model="cardText"
-        placeholder="הטקסט שיופיע בכרטיס"
-        title="הטקסט שיופיע בכרטיס"
-      />
-      <br />
-      <MainButton
-        :loading="isSaving"
-        text="שמור"
-        @onClick="saveSettings()"
-      />
-    
-      <br />
-      <br />
-      <MainButton :text="downloadCardText" @onClick="downloadCard()" />
-      <br />
-      <br />
-      <MainButton :text="downloadQRText" @onClick="downloadQRCode()" />
-      <br />
-      <br />
-      <MainButton
-        :disabled="isSaving || isDefaultSelection"
-        text="חזרה לברירת המחדל"
-        @onClick="resetToDefaults()"
-      />
-    </div>
-    <div
-      ref="eventCard"
-      class="event-qr-card height--full bg--white brs--medium"
-      :style="`background-image: url('/assets/${selectedQR}')`"
-    >
-      <EventQR class="qr-code" :background="background" />
-      <div class="card-text">
-        <p class="title--large">
-          {{ cardText }}
+  <div class="qr-page">
+    <header class="page-head">
+      <div>
+        <h1>כרטיס QR</h1>
+        <p class="lede">
+          בחרו כרטיס, ראו אותו עם הקוד ושם האירוע, והורידו להדפסה. הספריות החדשות כוללות צבעי קוד וטקסט.
         </p>
+      </div>
+      <div class="head-actions">
+        <button type="button" class="btn btn-ghost" @click="downloadQRCode">
+          {{ downloadQRText }}
+        </button>
+        <button type="button" class="btn btn-primary" @click="downloadCard">
+          {{ downloadCardText }}
+        </button>
+      </div>
+    </header>
+
+    <div class="page">
+      <div class="qr-layout">
+        <div>
+          <QrCardGallery
+            selectable
+            :selected="selectedQR"
+            :event-name="eventName"
+            @select="onSelectDesign"
+          />
+        </div>
+
+        <div class="qr-preview-col">
+          <div
+            ref="eventCard"
+            class="qr-live"
+            :class="{ inv: selectedCard?.inverted }"
+          >
+            <img class="bg" :src="`/assets/${selectedQR}`" alt="" />
+            <div class="qr-ov">
+              <EventQR
+                ref="qrComp"
+                :background="qrBackground"
+                :foreground="qrForeground"
+                :inverted="Boolean(selectedCard?.inverted)"
+                :size="168"
+              />
+            </div>
+            <div class="qr-name" :style="{ color: textColor }">
+              {{ eventName }}
+            </div>
+          </div>
+
+          <div class="card meta-card">
+            <h3>{{ selectedCard?.label || "כרטיס" }}</h3>
+            <p class="hint">
+              צבע הקוד
+              <span dir="ltr">{{ qrForeground }}</span>
+            </p>
+            <div class="field" v-if="!selectedCard?.hideCta">
+              <span>משפט על הכרטיס</span>
+              <input class="txt" v-model="cardText" type="text" />
+            </div>
+            <p v-else class="sample-note">
+              בכרטיס הזה המשפט מודפס על הרקע עצמו, לכן השדה מוסתר.
+            </p>
+            <div class="meta-actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                :disabled="isSaving"
+                @click="saveSettings"
+              >
+                שמירת הכרטיס
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost"
+                :disabled="isSaving || isDefaultSelection"
+                @click="resetToDefaults"
+              >
+                חזרה לברירת מחדל
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -65,25 +91,23 @@
 import { IEvent } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
 import html2canvas from "html2canvas";
-import MainButton from "@/components/library/buttons/MainButton.vue";
-import MainSelect from "@/components/library/inputs/MainSelect.vue";
-import MainInput from "@/components/library/inputs/MainInput.vue";
 import EventQR from "@/components/event/EventQR.vue";
 import QrCardGallery from "@/components/event/QrCardGallery.vue";
 import {
   DEFAULT_QR_CARD_DESIGN,
   DEFAULT_QR_CARD_TEXT,
   isValidQrCardDesign,
-  QR_CARD_OPTIONS,
 } from "@/helpers/qrCardOptions";
+import {
+  findQrCardByFile,
+  type QrCardDesign,
+} from "@/helpers/qrCardCatalog";
+import { notify } from "@/helpers/notify";
 
 export default defineComponent({
   name: "EventQRCardView",
 
   components: {
-    MainButton,
-    MainSelect,
-    MainInput,
     EventQR,
     QrCardGallery,
   },
@@ -93,9 +117,7 @@ export default defineComponent({
       isDownloadingQR: false as boolean,
       isDownloadingCard: false as boolean,
       isSaving: false as boolean,
-      background: "transparent" as string,
       selectedQR: DEFAULT_QR_CARD_DESIGN as string,
-      QROptions: QR_CARD_OPTIONS.map((option) => ({ ...option })),
       cardText: DEFAULT_QR_CARD_TEXT as string,
     };
   },
@@ -119,12 +141,32 @@ export default defineComponent({
       return this.$store.getters["event/getEvent"];
     },
 
+    eventName(): string {
+      return this.$store.getters["event/getEventName"] || "האירוע שלכם";
+    },
+
+    selectedCard(): QrCardDesign | undefined {
+      return findQrCardByFile(this.selectedQR);
+    },
+
+    qrForeground(): string {
+      return this.selectedCard?.qrColor || "#000000";
+    },
+
+    qrBackground(): string {
+      return this.selectedCard?.qrBackground || "transparent";
+    },
+
+    textColor(): string {
+      return this.selectedCard?.textColor || "#161310";
+    },
+
     downloadCardText(): string {
-      return this.isDownloadingCard ? "מוריד..." : "הורדה של הכרטיס כתמונה";
+      return this.isDownloadingCard ? "מוריד..." : "הורדה והדפסה";
     },
 
     downloadQRText(): string {
-      return this.isDownloadingQR ? "מוריד..." : "הורדה של ה QR בלבד";
+      return this.isDownloadingQR ? "מוריד..." : "הורדת הקוד בלבד";
     },
 
     isDefaultSelection(): boolean {
@@ -151,11 +193,18 @@ export default defineComponent({
 
     async saveSettings() {
       this.isSaving = true;
-      await this.$store.dispatch("event/updateQrCardSettings", {
-        design: this.selectedQR,
-        text: this.cardText.trim(),
-      });
-      this.isSaving = false;
+      try {
+        await this.$store.dispatch("event/updateQrCardSettings", {
+          design: this.selectedQR,
+          text: this.cardText.trim(),
+        });
+        notify({ text: "הכרטיס נשמר", type: "success" });
+      } catch (error) {
+        console.error(error);
+        notify({ text: "שמירת הכרטיס נכשלה", type: "error" });
+      } finally {
+        this.isSaving = false;
+      }
     },
 
     async resetToDefaults() {
@@ -167,26 +216,17 @@ export default defineComponent({
     async downloadCard() {
       try {
         const cardElement = this.$refs.eventCard as HTMLElement;
-        if (!cardElement) {
-          console.error("Event card element not found.");
-          return;
-        }
-
+        if (!cardElement) return;
         this.isDownloadingCard = true;
-
-        // Scale up for higher resolution (2x or 3x)
-        const scaleFactor = 3; // Increase for better print quality
         const canvas = await html2canvas(cardElement, {
-          scale: scaleFactor,
+          scale: 3,
           useCORS: true,
-          logging: false, // Disable console logs for cleaner debugging
-          backgroundColor: null, // Maintain transparency if needed
+          logging: false,
+          backgroundColor: null,
         });
-
-        // Convert canvas to high-quality JPEG
         const link = document.createElement("a");
         link.download = "event-card-high-quality.jpeg";
-        link.href = canvas.toDataURL("image/jpeg", 1.0); // Max quality
+        link.href = canvas.toDataURL("image/jpeg", 1.0);
         link.click();
       } catch (error) {
         console.error("Failed to download the event card as an image:", error);
@@ -197,19 +237,19 @@ export default defineComponent({
 
     downloadQRCode() {
       try {
-        const qrCodeComponent = this.$refs.qrSvg as any;
-        const svgElement = qrCodeComponent.$el;
+        const qrComp = this.$refs.qrComp as any;
+        const svgElement =
+          qrComp?.$refs?.qrSvg?.$el ||
+          qrComp?.$el?.querySelector?.("svg");
         if (!svgElement) {
           console.error("QR Code SVG not found.");
           return;
         }
-
         this.isDownloadingQR = true;
         const svgData = new XMLSerializer().serializeToString(svgElement);
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         const img = new Image();
-
         img.onload = () => {
           canvas.width = img.width;
           canvas.height = img.height;
@@ -218,83 +258,198 @@ export default defineComponent({
           link.download = "qr-code.jpeg";
           link.href = canvas.toDataURL("image/jpeg");
           link.click();
+          this.isDownloadingQR = false;
         };
-
-        img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
+        img.onerror = () => {
+          this.isDownloadingQR = false;
+        };
+        img.src = `data:image/svg+xml;base64,${btoa(
+          unescape(encodeURIComponent(svgData))
+        )}`;
       } catch (error) {
         console.error("Failed to download the QR code as an image:", error);
+        this.isDownloadingQR = false;
       }
-
-      this.isDownloadingQR = false;
     },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.kicker {
-  color: var(--rose, #dc5b66);
-  font-weight: 800;
+.qr-page {
+  color: var(--ink, #161310);
+}
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0 8px;
+}
+.page-head h1 {
+  font-size: clamp(1.8rem, 3vw, 2.55rem);
+  letter-spacing: -0.04em;
+  font-weight: 900;
+  line-height: 1.1;
   margin: 0;
 }
-
-.qr-lede {
-  margin: 8px 0 16px;
+.lede {
   color: var(--muted, #5e564e);
-  font-size: 0.95rem;
-  line-height: 1.45;
-  max-width: 42ch;
+  margin-top: 8px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 42em;
+  font-weight: 500;
 }
-
-.event-qr-card {
-  width: 40%;
-  background-position: center;
-  background-size: 100% 100%;
-  position: relative;
-
-  @media only screen and (max-width: 600px) {
-    width: 100%;
-    height: 400px;
-    margin-top: 15px;
-  }
-
-  .qr-code {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 25%;
-    margin: auto;
-    text-align: center;
-  }
-
-  .card-text {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 45%;
-    margin: auto;
-    text-align: center;
-
-    p {
-      max-width: 40%;
-      margin: auto;
-    }
-  }
+.head-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
-
-.download-btn {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #79ae60;
-  color: white;
-  border: none;
-  border-radius: 4px;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-weight: 800;
+  font-size: 0.98rem;
+  border: 0;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #68a153;
+  font-family: inherit;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(201, 163, 106, 0.45);
+}
+.btn-ghost {
+  background: #fff;
+  color: var(--ink, #161310);
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+}
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+.page {
+  padding: 8px 0 48px;
+}
+.qr-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.85fr);
+  gap: 28px;
+  align-items: start;
+}
+.qr-preview-col {
+  position: relative;
+  top: 0;
+}
+.qr-live {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+  aspect-ratio: 3 / 4.2;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(18, 16, 14, 0.16);
+  background: #12100e;
+}
+.qr-live .bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.qr-ov {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  transform: translateX(-50%);
+  background: transparent !important;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.qr-ov :deep(.qr-code),
+.qr-ov :deep(svg) {
+  background: transparent !important;
+}
+.qr-name {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 14%;
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  background: none !important;
+  text-shadow: none;
+}
+.meta-card {
+  margin-top: 18px;
+  background: #fff;
+  border-radius: 26px;
+  padding: 20px 22px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+}
+.meta-card h3 {
+  margin: 0;
+  font-size: 1.22rem;
+  font-weight: 800;
+}
+.hint {
+  color: var(--muted, #5e564e);
+  margin: 6px 0 0;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.field > span {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #8a8278;
+}
+.txt {
+  border: 1.5px solid rgba(22, 19, 16, 0.11);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  background: #fffcfa;
+}
+.sample-note {
+  margin-top: 12px;
+  color: var(--muted, #5e564e);
+  font-size: 0.92rem;
+}
+.meta-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+@media (max-width: 1024px) {
+  .qr-layout {
+    grid-template-columns: 1fr;
+  }
+  .qr-preview-col {
+    position: static;
+    order: -1;
+  }
+  .page-head {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>

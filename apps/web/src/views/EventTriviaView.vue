@@ -10,7 +10,33 @@
       </button>
     </div>
 
-    <template v-else>
+    <div v-else-if="showEntry && $route.query.empty === '1'" class="tb-entry empty">
+      <h1>טריוויה</h1>
+      <div class="tb-entry-card">
+        <h2>עוד אין טריוויה לאירוע</h2>
+        <p>צרו משחק קצר שהאורחים ישחקו מהטלפון.</p>
+        <button type="button" class="tb-btn tb-btn-primary" @click="openBuilder">יצירת טריוויה</button>
+      </div>
+    </div>
+
+    <div v-else-if="showEntry" class="tb-entry">
+      <header class="tb-page-head">
+        <div>
+          <h1>טריוויה</h1>
+          <p class="tb-lede">דלת כניסה לבונה המאושר. כאן רואים סיכום ופותחים את העריכה המלאה.</p>
+        </div>
+      </header>
+      <div class="tb-entry-card">
+        <h2>{{ game.title || "טריוויה לאירוע" }}</h2>
+        <p>{{ questions.length }} שאלות · {{ statusLabel }} · ערכת {{ game.theme || "elegant" }}</p>
+        <div class="tb-entry-actions">
+          <button type="button" class="tb-btn tb-btn-primary" @click="openBuilder">פתיחת הבונה</button>
+          <button type="button" class="tb-btn tb-btn-ghost" @click="togglePreview">תצוגה מקדימה</button>
+        </div>
+      </div>
+    </div>
+
+    <template v-else-if="loaded">
       <header class="tb-page-head">
         <div>
           <h1>טריוויה</h1>
@@ -245,6 +271,7 @@ export default defineComponent({
       loaded: false,
       loading: false,
       loadError: "" as string,
+      showEntry: this.$route.query.builder !== "1",
       tab: "build" as BuilderTabId,
       mobPane: "edit" as MobilePaneId,
       questions: [] as TriviaBuilderQuestion[],
@@ -515,6 +542,15 @@ export default defineComponent({
   },
 
   methods: {
+    openBuilder() {
+      this.showEntry = false;
+      if (this.$route.query.builder !== "1") {
+        this.$router.replace({
+          query: { ...this.$route.query, builder: "1" },
+        });
+      }
+    },
+
     setTab(id: BuilderTabId) {
       this.tab = id;
       const query = { ...this.$route.query } as Record<string, unknown>;
@@ -1039,4 +1075,34 @@ export default defineComponent({
 
 <style lang="scss">
 @import "@/styles/trivia-builder.scss";
+
+.tb-entry {
+  padding: 8px 0 40px;
+}
+.tb-entry-card {
+  margin-top: 18px;
+  background: #fff;
+  border-radius: 26px;
+  padding: 32px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+  max-width: 560px;
+}
+.tb-entry-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+.tb-entry-card p {
+  color: #5e564e;
+  margin: 0 0 18px;
+}
+.tb-entry-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tb-entry.empty .tb-entry-card {
+  text-align: center;
+  margin-inline: auto;
+}
 </style>

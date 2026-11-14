@@ -138,10 +138,8 @@
                     טוען את עמוד התשלום…
                   </p>
                   <div v-else-if="loadError" class="order-pay-state order-pay-error">
-                    <p>{{ loadError }}</p>
-                    <p v-if="isDevBuild" class="sandbox-note">
-                      אין מפתחות PayPlus בסביבה המקומית, אז לא נטען iframe ולא
-                      מתבצע חיוב.
+                    <p>
+                      משהו השתבש בטעינת התשלום. נסו שוב או פנו אלינו בוואטסאפ.
                     </p>
                     <button
                       type="button"
@@ -640,7 +638,8 @@ export default defineComponent({
 
       const plan = this.currentPlan;
       if (!plan || plan.slug === "demo") {
-        this.loadError = "לא נמצא מסלול תשלום.";
+        console.error("Order payment: missing paid plan", plan);
+        this.loadError = "payment-unavailable";
         this.paymentLoading = false;
         return;
       }
@@ -654,9 +653,10 @@ export default defineComponent({
         })) as IStoreOrderResult;
 
         if ("error" in res && res.error) {
-          this.loadError = res.error;
+          console.error("Order payment error:", res.error);
+          this.loadError = "payment-unavailable";
           this.$notify({
-            text: res.error,
+            text: "משהו השתבש בטעינת התשלום. נסו שוב או פנו אלינו בוואטסאפ.",
             type: "error",
             duration: 7000,
           });
@@ -667,8 +667,12 @@ export default defineComponent({
           this.paymentIframeKey += 1;
           this.paymentSrc = res.payment_page_link;
         } else {
-          this.loadError = "לא ניתן לטעון את עמוד התשלום.";
+          console.error("Order payment: unexpected response", res);
+          this.loadError = "payment-unavailable";
         }
+      } catch (error) {
+        console.error("Order payment exception:", error);
+        this.loadError = "payment-unavailable";
       } finally {
         this.paymentLoading = false;
       }

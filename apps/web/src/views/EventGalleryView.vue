@@ -155,6 +155,13 @@ export default defineComponent({
           preview: "split",
           slots: 2,
         },
+        {
+          value: "EventGalleryGrid3X3",
+          label: "רשת 3×3",
+          hint: "הצעה חדשה · תשע תמונות יחד",
+          preview: "split",
+          slots: 9,
+        },
       ] as AlbumOption[],
       loading: false as boolean,
       configLoading: false as boolean,

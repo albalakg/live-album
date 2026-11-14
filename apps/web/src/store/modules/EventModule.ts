@@ -229,6 +229,7 @@ const EventModule = {
     },
 
     getEventImage(state: IEventModuleState): string {
+      if (!state.event?.image) return "";
       return state.event?.fullPath ?? "";
     },
 
@@ -1154,14 +1155,51 @@ const EventModule = {
         axios
           .post(`events/${context.state.event.id}/assets/unblock`, { assets: assetIds })
           .then(async (res) => {
-            notify({ text: "התמונה אושרה ותופיע באלבום", type: "success", duration: 4000 });
+            notify({
+              text:
+                assetIds.length > 1
+                  ? `${assetIds.length} תמונות אושרו`
+                  : "התמונה אושרה ותופיע באלבום",
+              type: "success",
+              duration: 4000,
+            });
             context.commit("UNBLOCK_FILES", assetIds);
             await context.dispatch("getEventGalleryAssets");
+            await context.dispatch("getEventAssets");
             resolve(res.data);
           })
           .catch((err) => {
             notify({
               text: ErrorsHandler.getErrorMessage(err, "מצטערים אך הייתה תקלה באישור התמונה"),
+              type: "error",
+              duration: 5000,
+            });
+            resolve(null);
+          });
+      });
+    },
+
+    favoriteAssets(
+      context: {
+        state: IEventModuleState;
+        commit: (mutation: string, payload?: unknown) => void;
+        dispatch: (action: string, payload?: unknown) => Promise<unknown>;
+      },
+      payload: { assets: number[]; is_favorite: boolean }
+    ) {
+      if (context.state.preview) {
+        return Promise.resolve(true);
+      }
+      return new Promise((resolve) => {
+        axios
+          .post(`events/${context.state.event.id}/assets/favorite`, payload)
+          .then(async (res) => {
+            await context.dispatch("getEventAssets");
+            resolve(res.data);
+          })
+          .catch((err) => {
+            notify({
+              text: ErrorsHandler.getErrorMessage(err, "לא הצלחנו לעדכן מועדפים"),
               type: "error",
               duration: 5000,
             });

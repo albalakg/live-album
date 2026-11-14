@@ -1,58 +1,85 @@
 <template>
   <div class="upload-page">
     <header class="page-head">
-      <p class="kicker">אורחים</p>
-      <h1>עמוד העלאה לאורחים</h1>
-      <p class="lede">תצוגה בעמוד ההעלאות, הרשאות אורחים, וקישור לשיתוף.</p>
+      <div>
+        <h1>עמוד העלאה לאורחים</h1>
+        <p class="lede">הגדרות תצוגה עם תצוגה מקדימה חיה בטלפון.</p>
+      </div>
     </header>
 
-    <section class="links-card">
-      <h2>קישור לעמוד העלאות</h2>
-      <div class="link-row">
-        <div class="link-meta">
-          <button
-            type="button"
-            class="icon-btn"
-            aria-label="העתקת קישור עמוד העלאות"
-            @click="copyUrl(`/event/uploads/${eventPath}`, 'uploadPage')"
-          >
-            <MainIcon icon="content_copy" />
-          </button>
-          <div>
-            <strong>עמוד העלאות</strong>
-            <small>{{ copyUploadText }}</small>
+    <div class="layout">
+      <form class="settings" @submit.prevent="submit">
+        <EventSwitchPanel
+          title="תצוגה בעמוד העלאות"
+          :items="displaySwitches"
+          :values="config"
+          @toggle="toggle"
+        />
+
+        <div class="field welcome">
+          <span>
+            טקסט ברכה
+            <em class="neu">הצעה חדשה</em>
+          </span>
+          <textarea v-model="welcomeText" rows="3" maxlength="255"></textarea>
+        </div>
+
+        <details class="more">
+          <summary>הגדרות נוספות</summary>
+          <EventSwitchPanel
+            title="הרשאות אורחים"
+            :items="permissionSwitches"
+            :values="config"
+            @toggle="toggle"
+          />
+        </details>
+
+        <div class="form-actions">
+          <MainButton :loading="loading" text="שמור" />
+        </div>
+
+        <section class="links-card">
+          <h2>קישור לעמוד העלאות</h2>
+          <div class="link-row">
+            <button
+              type="button"
+              class="icon-btn"
+              aria-label="העתקת קישור עמוד העלאות"
+              @click="copyUrl(`/event/uploads/${eventPath}`)"
+            >
+              <MainIcon icon="content_copy" />
+            </button>
+            <div>
+              <strong>עמוד העלאות</strong>
+              <small>{{ copyUploadText }}</small>
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <aside class="phone-wrap" aria-label="תצוגה מקדימה">
+        <div class="phone">
+          <div
+            class="phone-bg"
+            :style="phoneBgStyle"
+          ></div>
+          <div class="phone-content">
+            <h3 v-if="config.preview_site_display_name">{{ eventName }}</h3>
+            <p v-if="config.preview_site_display_date" class="date">{{ eventDate }}</p>
+            <p class="welcome-preview">{{ welcomeText || "תעלו ותשתפו" }}</p>
+            <button type="button" class="phone-cta">העלאה</button>
+            <button
+              v-if="config.preview_link_to_album_page_from_upload_page"
+              type="button"
+              class="phone-link"
+            >
+              צפו באלבום
+            </button>
+            <small v-if="config.video_upload_enabled">אפשר גם סרטון</small>
           </div>
         </div>
-        <router-link
-          class="ghost-btn"
-          target="_blank"
-          :to="`/event/uploads/${eventPath}`"
-        >
-          צפייה בעמוד
-        </router-link>
-      </div>
-      <p class="hint" v-if="isEventInProgress">העמוד פעיל לאורחים כעת</p>
-      <p class="hint" v-else-if="isEventActive">העמוד כבר אינו זמין יותר</p>
-      <p class="hint" v-else>העמוד יהיה פעיל לאורחים רק לאחר שהאירוע יתחיל</p>
-    </section>
-
-    <form class="settings-form" @submit.prevent="submit">
-      <EventSwitchPanel
-        title="תצוגה בעמוד העלאות"
-        :items="displaySwitches"
-        :values="config"
-        @toggle="toggle"
-      />
-      <EventSwitchPanel
-        title="הרשאות אורחים"
-        :items="permissionSwitches"
-        :values="config"
-        @toggle="toggle"
-      />
-      <div class="form-actions">
-        <MainButton :loading="loading" text="שמור" />
-      </div>
-    </form>
+      </aside>
+    </div>
   </div>
 </template>
 
@@ -64,6 +91,7 @@ import EventSwitchPanel, {
   SwitchItem,
 } from "@/components/event/EventSwitchPanel.vue";
 import { IEvent } from "@/helpers/interfaces";
+import { notify } from "@/helpers/notify";
 
 type ConfigKey =
   | "preview_site_display_image"
@@ -81,6 +109,7 @@ export default defineComponent({
     return {
       loading: false,
       textCopied: false,
+      welcomeText: "",
       config: {
         preview_site_display_image: false,
         preview_site_display_name: false,
@@ -91,30 +120,30 @@ export default defineComponent({
       displaySwitches: [
         {
           key: "preview_site_display_image",
-          title: "הצגת תמונת האירוע",
-          hint: "להציג את תמונת הכיסוי בעמוד העלאות",
+          title: "תמונת כיסוי ברקע",
+          hint: "כרקע של עמוד ההעלאה",
         },
         {
           key: "preview_site_display_name",
-          title: "הצגת שם האירוע",
-          hint: "להציג את שם האירוע בעמוד העלאות",
+          title: "שם האירוע",
+          hint: "בראש העמוד",
         },
         {
           key: "preview_site_display_date",
-          title: "הצגת תאריך האירוע",
-          hint: "להציג את תאריך האירוע בעמוד העלאות",
+          title: "התאריך",
+          hint: "ליד שם האירוע",
         },
       ] as SwitchItem[],
       permissionSwitches: [
         {
           key: "video_upload_enabled",
-          title: "העלאת סרטונים",
-          hint: "לאפשר לאורחים ולבעלי האירוע להעלות סרטונים",
+          title: "אפשרות להעלות סרטון",
+          hint: "כבוי — רק תמונות",
         },
         {
           key: "preview_link_to_album_page_from_upload_page",
-          title: "קישור לאלבום מעמוד העלאות",
-          hint: "להציג כפתור מעבר מעמוד ההעלאות לעמוד האלבום",
+          title: "כפתור «צפו באלבום»",
+          hint: "קישור לאלבום מעמוד ההעלאה",
         },
       ] as SwitchItem[],
     };
@@ -127,11 +156,24 @@ export default defineComponent({
     eventPath(): string {
       return this.$store.getters["event/getEventPath"];
     },
-    isEventActive(): boolean {
-      return this.$store.getters["event/isEventActive"];
+    eventName(): string {
+      return this.$store.getters["event/getEventName"] || "";
     },
-    isEventInProgress(): boolean {
-      return this.$store.getters["event/isEventInProgress"];
+    eventDate(): string {
+      return this.$store.getters["event/getEventDate"] || "";
+    },
+    eventImage(): string {
+      return this.$store.getters["event/getEventImage"] || "";
+    },
+    phoneBgStyle(): Record<string, string> {
+      if (this.config.preview_site_display_image && this.eventImage) {
+        return {
+          backgroundImage: `url(${this.eventImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        };
+      }
+      return { background: "#12100e" };
     },
     copyUploadText(): string {
       return this.textCopied ? "הקישור הועתק" : "לחצו להעתקת הקישור";
@@ -159,6 +201,7 @@ export default defineComponent({
       this.config.video_upload_enabled = cfg?.video_upload_enabled ?? true;
       this.config.preview_link_to_album_page_from_upload_page =
         cfg?.preview_link_to_album_page_from_upload_page ?? false;
+      this.welcomeText = cfg?.welcome_text || "";
     },
 
     toggle(key: string) {
@@ -168,158 +211,186 @@ export default defineComponent({
 
     async submit() {
       this.loading = true;
-      await this.$store.dispatch("event/update", { config: { ...this.config } });
+      const configPayload: Record<string, string> = {};
+      (Object.keys(this.config) as ConfigKey[]).forEach((key) => {
+        configPayload[key] = this.config[key] ? "true" : "false";
+      });
+      configPayload.welcome_text = this.welcomeText;
+      await this.$store.dispatch("event/update", { config: configPayload });
       this.loading = false;
+      notify({ text: "ההגדרות נשמרו", type: "success" });
     },
 
-    copyUrl(url: string) {
-      const full = window.location.origin + url;
-      const done = () => {
+    async copyUrl(url: string) {
+      try {
+        await navigator.clipboard.writeText(window.location.origin + url);
         this.textCopied = true;
+        notify({ text: "הקישור הועתק", type: "success" });
         setTimeout(() => {
           this.textCopied = false;
         }, 2000);
-      };
-      if (!navigator.clipboard) {
-        const area = document.createElement("textarea");
-        area.value = full;
-        area.style.position = "fixed";
-        area.style.left = "0";
-        area.style.top = "0";
-        document.body.appendChild(area);
-        area.focus();
-        area.select();
-        try {
-          if (document.execCommand("copy")) done();
-        } finally {
-          document.body.removeChild(area);
-        }
-        return;
+      } catch (e) {
+        console.error(e);
       }
-      navigator.clipboard.writeText(full).then(done).catch(() => {
-        /* ignore */
-      });
     },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.upload-page {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.page-head .kicker {
-  color: var(--rose, #dc5b66);
-  font-weight: 800;
-  margin: 0;
-}
-
 .page-head h1 {
-  margin: 4px 0 0;
+  margin: 0;
+  font-size: clamp(1.9rem, 3vw, 2.55rem);
   font-weight: 900;
-  font-size: clamp(1.55rem, 2.4vw, 2rem);
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  letter-spacing: -0.04em;
 }
-
 .lede {
   margin: 8px 0 0;
-  color: var(--muted, #5e564e);
-  font-size: 0.95rem;
-  line-height: 1.45;
-  max-width: 52ch;
+  color: #5e564e;
 }
-
-.links-card,
-.settings-form {
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 28px;
+  margin-top: 18px;
+  align-items: start;
+}
+.settings {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
 }
-
-.links-card {
-  background: rgba(22, 19, 16, 0.02);
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 18px;
-  padding: 18px;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
 }
-
-.links-card h2 {
-  margin: 0;
-  font-size: 1.05rem;
+.field > span {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   font-weight: 800;
+  color: #8a8278;
 }
-
+.neu {
+  display: inline-block;
+  margin-inline-start: 8px;
+  background: #fff4f4;
+  color: #9a3036;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+textarea {
+  border: 1.5px solid rgba(22, 19, 16, 0.11);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  resize: vertical;
+  background: #fffcfa;
+}
+.more summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: #5e564e;
+  margin-bottom: 10px;
+}
+.links-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+}
+.links-card h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+}
 .link-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
 }
-
-.link-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.link-meta strong {
-  display: block;
-  font-size: 0.95rem;
-}
-
-.link-meta small {
-  color: var(--muted, #5e564e);
-}
-
 .icon-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.16));
+  border: 0;
+  background: #f3eee6;
   border-radius: 12px;
-  background: #fffcfa;
-  display: grid;
-  place-items: center;
+  width: 42px;
+  height: 42px;
   cursor: pointer;
-  flex: none;
 }
-
-.ghost-btn {
-  display: inline-flex;
+.phone-wrap {
+  position: sticky;
+  top: 88px;
+}
+.phone {
+  position: relative;
+  width: 280px;
+  height: 560px;
+  margin-inline: auto;
+  border-radius: 36px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(18, 16, 14, 0.2);
+  border: 10px solid #12100e;
+}
+.phone-bg {
+  position: absolute;
+  inset: 0;
+}
+.phone-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 8px;
-  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 999px;
-  padding: 14px 28px;
-  text-decoration: none;
-  background: transparent;
-  color: var(--ink, #161310);
-  font-weight: 800;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  padding: 28px 18px 36px;
+  background: linear-gradient(180deg, transparent 20%, rgba(18, 16, 14, 0.72));
+  color: #fff;
+  text-align: center;
 }
-
-.ghost-btn:hover {
-  border-color: var(--ink, #161310);
-}
-
-.hint {
+.phone-content h3 {
   margin: 0;
-  color: var(--muted, #5e564e);
-  font-size: 0.85rem;
+  font-size: 1.35rem;
+  font-weight: 900;
 }
-
-.form-actions {
-  max-width: 280px;
-  margin-inline-start: auto;
+.date,
+.welcome-preview {
+  margin: 0;
+  opacity: 0.92;
+}
+.phone-cta,
+.phone-link {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 800;
+  font-family: inherit;
+}
+.phone-cta {
+  background: linear-gradient(135deg, #dc5b66, #c9a36a);
+  color: #fff;
   width: 100%;
+}
+.phone-link {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  width: 100%;
+}
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .phone-wrap {
+    order: -1;
+    position: static;
+  }
 }
 </style>

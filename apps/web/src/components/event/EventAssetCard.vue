@@ -29,6 +29,19 @@
         <span class="material-symbols-outlined" aria-hidden="true">check</span>
       </button>
 
+      <button
+        v-if="!modalView"
+        type="button"
+        class="tile-fav"
+        :class="{ on: asset.is_favorite }"
+        :title="asset.is_favorite ? 'הסרה ממועדפים' : 'הוספה למועדפים'"
+        @click.stop="toggleFavorite"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          {{ asset.is_favorite ? "favorite" : "favorite_border" }}
+        </span>
+      </button>
+
       <span
         v-if="showVisibilityIcon"
         class="tile-status"
@@ -276,6 +289,13 @@ export default defineComponent({
       }
     },
 
+    async toggleFavorite() {
+      await this.$store.dispatch("event/favoriteAssets", {
+        assets: [this.asset.id],
+        is_favorite: !this.asset.is_favorite,
+      });
+    },
+
     async playVideo() {
       if (this.controls) return;
 
@@ -418,6 +438,30 @@ export default defineComponent({
 .tile-check--visible {
   opacity: 1;
   pointer-events: auto;
+}
+
+.tile-fav {
+  position: absolute;
+  inset-inline-start: 10px;
+  top: 10px;
+  z-index: 4;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 252, 250, 0.82);
+  color: #8a8278;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(18, 16, 14, 0.16);
+}
+.tile-fav.on {
+  color: #dc5b66;
+}
+.tile-fav .material-symbols-outlined {
+  font-size: 1.05rem;
+  font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" 20;
 }
 
 .tile-status {

@@ -11,14 +11,14 @@
         <router-view></router-view>
       </transition>
     </template>
-    <div class="event-main" :class="{ 'focus-mode': isTriviaFocus }" v-else>
-      <aside class="event-sidebar" :class="{ 'is-rail': isTriviaFocus }">
-        <Sidebar :items="items" :rail="isTriviaFocus" />
+    <div class="event-main" v-else>
+      <aside class="event-sidebar is-rail">
+        <Sidebar :items="items" :rail="true" />
       </aside>
       <nav class="event-mobile-nav" aria-label="ניווט האירוע">
         <MobileScrollBar :items="items" />
       </nav>
-      <div class="event-content" :class="{ 'focus-content': isTriviaFocus }">
+      <div class="event-content">
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -52,65 +52,41 @@ export default defineComponent({
         this.$route.path.includes("full-screen")
       );
     },
-    isTriviaFocus(): boolean {
-      return this.$route.path === "/event/trivia";
+    pendingCount(): number {
+      return (this.$store.getters["event/getPendingAssets"] || []).length;
     },
 
     items(): IMobileScrollBarItem[] {
+      const pending = this.pendingCount;
       const items = [
+        { text: "סקירה", path: "/event", isActive: false },
+        { text: "פרטי האירוע", path: "/event/details", isActive: false },
+        { text: "אלבום חי", path: "/event/gallery", isActive: false },
+        { text: "עמוד העלאה", path: "/event/upload", isActive: false },
         {
-          text: "פרטי האירוע",
-          path: "/event",
+          text: "בדיקת תוכן",
+          path: "/event/moderation",
           isActive: false,
+          badge: pending > 0 ? pending : undefined,
         },
-        {
-          text: "אלבום חי",
-          path: "/event/gallery",
-          isActive: false,
-        },
-        {
-          text: "עמוד העלאה",
-          path: "/event/upload",
-          isActive: false,
-        },
-        {
-          text: "QR",
-          path: "/event/qr",
-          isActive: false,
-        },
-        {
-          text: "האלבום",
-          path: "/event/album",
-          isActive: false,
-        },
-        {
-          text: "כל הקבצים",
-          path: "/event/assets",
-          isActive: false,
-        },
-        {
-          text: "חבילה",
-          path: "/event/plan",
-          isActive: false,
-        },
-        {
-          text: "טריוויה",
-          path: "/event/trivia",
-          isActive: false,
-        },
+        { text: "כרטיס QR", path: "/event/qr", isActive: false },
+        { text: "כל הקבצים", path: "/event/assets", isActive: false },
+        { text: "טריוויה", path: "/event/trivia", isActive: false },
+        { text: "חבילה", path: "/event/plan", isActive: false },
         ...(isWhatsAppEnabled()
-          ? [
-              {
-                text: "WhatsApp",
-                path: "/event/whatsapp",
-                isActive: false,
-              },
-            ]
+          ? [{ text: "WhatsApp", path: "/event/whatsapp", isActive: false }]
           : []),
       ];
 
       return items.map((item) => {
-        item.isActive = item.path === this.$route.path;
+        if (item.path === "/event") {
+          item.isActive =
+            this.$route.path === "/event" || this.$route.path === "/event/";
+        } else {
+          item.isActive =
+            this.$route.path === item.path ||
+            this.$route.path.startsWith(item.path + "/");
+        }
         return item;
       });
     },
@@ -120,25 +96,19 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .event-main {
-  --host-sidebar: 260px;
+  --host-sidebar: 72px;
   --host-nav: 72px;
-  min-height: calc(100vh - 99px);
+  min-height: calc(100vh - 72px);
   width: 100%;
   max-width: none;
   margin: 0;
   position: relative;
   z-index: 11;
   display: block;
-  padding-block: 24px 40px;
-  padding-inline-start: calc(var(--host-sidebar) + 20px);
+  padding-block: 12px 28px;
+  padding-inline-start: calc(var(--host-sidebar) + 16px);
   padding-inline-end: 24px;
   box-sizing: border-box;
-}
-
-.event-main.focus-mode {
-  --host-sidebar: 72px;
-  padding-inline-start: calc(var(--host-sidebar) + 12px);
-  padding-block: 12px 20px;
   background: #f3eee6;
 }
 
@@ -149,10 +119,6 @@ export default defineComponent({
   width: var(--host-sidebar);
   height: calc(100vh - var(--host-nav));
   z-index: 20;
-  overflow: hidden;
-}
-
-.event-sidebar.is-rail {
   overflow: visible;
 }
 
@@ -163,101 +129,34 @@ export default defineComponent({
 .event-content {
   min-width: 0;
   width: 100%;
-  background: var(--paper, #fffcfa);
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  border-radius: 22px;
-  padding: 24px;
-  box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 8px 16px 32px;
+  box-shadow: none;
   box-sizing: border-box;
 }
 
-.event-content.focus-content {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  padding: 0;
-  border-radius: 0;
-}
-
-@media (max-width: 1440px) {
-  .event-main:not(.focus-mode) {
-    --host-sidebar: 240px;
-    padding-inline-end: 20px;
-  }
-}
-
-@media (max-width: 1100px) {
-  .event-main:not(.focus-mode) {
-    --host-sidebar: 210px;
-    padding-inline-start: calc(var(--host-sidebar) + 16px);
-    padding-inline-end: 16px;
-  }
-
-  .event-content:not(.focus-content) {
-    padding: 20px;
-  }
-}
-
-/* Focus-mode rail hides under ~820px (SPEC §6) */
-@media (max-width: 820px) {
-  .event-main.focus-mode {
-    --host-sidebar: 0px;
-    padding: 8px 12px 40px;
-  }
-
-  .event-main.focus-mode .event-sidebar {
-    display: none;
-  }
-
-  .event-main.focus-mode .event-mobile-nav {
-    display: block;
-  }
-}
-
 @media (max-width: 900px) {
-  .event-main:not(.focus-mode) {
-    width: 100%;
-    padding: 8px 12px 40px;
-  }
-
-  .event-main:not(.focus-mode) .event-sidebar {
-    display: none;
-  }
-
-  .event-main:not(.focus-mode) .event-mobile-nav {
-    display: block;
-    position: sticky;
-    top: calc(var(--nav, 72px) - 4px);
-    z-index: 40;
-    margin: 0 -4px 4px;
-  }
-
-  .event-content:not(.focus-content) {
-    padding: 16px;
-    border-radius: 18px;
-  }
-}
-
-@media (max-width: 820px) {
-  .event-main.focus-mode .event-mobile-nav {
-    position: sticky;
-    top: calc(var(--nav, 72px) - 4px);
-    z-index: 40;
-    margin: 0 -4px 4px;
-  }
-}
-
-@media (max-width: 600px) {
   .event-main {
     width: 100%;
-    padding: 0 0 88px;
+    padding: 8px 12px 88px;
   }
 
-  .event-content:not(.focus-content) {
-    border-radius: 0;
-    border-inline: 0;
-    box-shadow: none;
-    padding: 14px 14px 28px;
+  .event-sidebar {
+    display: none;
+  }
+
+  .event-mobile-nav {
+    display: block;
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    background: rgba(243, 238, 230, 0.94);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(22, 19, 16, 0.11);
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
   }
 }
 
