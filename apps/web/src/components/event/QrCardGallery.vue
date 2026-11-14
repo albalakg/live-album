@@ -102,6 +102,7 @@
             :event-name="eventName"
             :text-color="card.textColor || '#161310'"
             :show-tagline="!card.hideCta"
+            :inverted="Boolean(card.inverted)"
             tagline="סרקו והעלו תמונות"
           >
             <template #qr>
@@ -273,7 +274,7 @@ export default defineComponent({
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 36px;
+  width: 48px;
   pointer-events: none;
   z-index: 1;
   opacity: 0;
@@ -285,7 +286,7 @@ export default defineComponent({
   inset-inline-start: 0;
   background: linear-gradient(
     to left,
-    var(--qr-filter-fade, #f6f1ea) 35%,
+    var(--qr-filter-fade, #f6f1ea) 55%,
     transparent
   );
 }
@@ -295,7 +296,7 @@ export default defineComponent({
   inset-inline-end: 0;
   background: linear-gradient(
     to right,
-    var(--qr-filter-fade, #f6f1ea) 35%,
+    var(--qr-filter-fade, #f6f1ea) 55%,
     transparent
   );
 }
@@ -303,7 +304,7 @@ export default defineComponent({
 :global(html:not([dir="rtl"])) .chips-fade::before {
   background: linear-gradient(
     to right,
-    var(--qr-filter-fade, #f6f1ea) 18%,
+    var(--qr-filter-fade, #f6f1ea) 40%,
     transparent
   );
 }
@@ -311,7 +312,7 @@ export default defineComponent({
 :global(html:not([dir="rtl"])) .chips-fade::after {
   background: linear-gradient(
     to left,
-    var(--qr-filter-fade, #f6f1ea) 18%,
+    var(--qr-filter-fade, #f6f1ea) 40%,
     transparent
   );
 }
@@ -328,7 +329,7 @@ export default defineComponent({
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
@@ -345,19 +346,37 @@ export default defineComponent({
 .chip {
   appearance: none;
   flex: 0 0 auto;
-  height: 32px;
+  height: 30px;
   box-sizing: border-box;
   border: 1.5px solid rgba(22, 19, 16, 0.16);
   background: rgba(255, 255, 255, 0.55);
   color: #161310;
   font-family: inherit;
-  font-size: 0.8125rem; /* 13px */
+  font-size: 0.78rem;
   font-weight: 700;
   line-height: 1;
   border-radius: 999px;
-  padding: 0 11px;
+  padding: 0 9px;
   cursor: pointer;
   white-space: nowrap;
+}
+
+/* Wide desktop: wrap the longer event-type row so chips are not clipped */
+@media (min-width: 1200px) {
+  .qr-filters {
+    max-height: none;
+  }
+
+  .filter-row[data-filter="event"] .chips-scroll {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    row-gap: 6px;
+  }
+
+  .filter-row[data-filter="event"] .chips-fade::before,
+  .filter-row[data-filter="event"] .chips-fade::after {
+    display: none;
+  }
 }
 
 .chip:focus-visible {

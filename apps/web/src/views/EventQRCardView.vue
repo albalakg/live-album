@@ -40,6 +40,7 @@
               :text-color="textColor"
               :show-tagline="showCardTagline"
               :tagline="cardTagline"
+              :inverted="Boolean(selectedCard?.inverted)"
             >
               <template #qr>
                 <EventQR
