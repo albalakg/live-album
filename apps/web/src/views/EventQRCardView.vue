@@ -35,18 +35,24 @@
             :class="{ inv: selectedCard?.inverted }"
           >
             <img class="bg" :src="`/assets/${selectedQR}`" alt="" />
-            <div class="qr-ov">
-              <EventQR
-                ref="qrComp"
-                :background="qrBackground"
-                :foreground="qrForeground"
-                :inverted="Boolean(selectedCard?.inverted)"
-                :size="168"
-              />
-            </div>
-            <div class="qr-name" :style="{ color: textColor }">
-              {{ eventName }}
-            </div>
+            <QrCardFrame
+              :event-name="eventName"
+              :text-color="textColor"
+              :show-tagline="showCardTagline"
+              :tagline="cardTagline"
+            >
+              <template #qr>
+                <EventQR
+                  ref="qrComp"
+                  :background="qrBackground"
+                  :foreground="qrForeground"
+                  :inverted="Boolean(selectedCard?.inverted)"
+                  :size="280"
+                  :margin="4"
+                  keep-quiet-zone
+                />
+              </template>
+            </QrCardFrame>
           </div>
 
           <div class="card meta-card">
@@ -92,6 +98,7 @@ import { IEvent } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
 import html2canvas from "html2canvas";
 import EventQR from "@/components/event/EventQR.vue";
+import QrCardFrame from "@/components/event/QrCardFrame.vue";
 import QrCardGallery from "@/components/event/QrCardGallery.vue";
 import {
   DEFAULT_QR_CARD_DESIGN,
@@ -109,6 +116,7 @@ export default defineComponent({
 
   components: {
     EventQR,
+    QrCardFrame,
     QrCardGallery,
   },
 
@@ -174,6 +182,16 @@ export default defineComponent({
         this.selectedQR === DEFAULT_QR_CARD_DESIGN &&
         this.cardText.trim() === DEFAULT_QR_CARD_TEXT
       );
+    },
+
+    /** Classic templates without baked-in CTA get a live tagline under the name. */
+    showCardTagline(): boolean {
+      return !this.selectedCard?.hideCta;
+    },
+
+    cardTagline(): string {
+      const trimmed = this.cardText.trim();
+      return trimmed || "סרקו והעלו תמונות";
     },
   },
 
@@ -363,34 +381,6 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-.qr-ov {
-  position: absolute;
-  left: 50%;
-  top: 28%;
-  transform: translateX(-50%);
-  background: transparent !important;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-.qr-ov :deep(.qr-code),
-.qr-ov :deep(svg) {
-  background: transparent !important;
-}
-.qr-name {
-  position: absolute;
-  left: 10%;
-  right: 10%;
-  bottom: 14%;
-  text-align: center;
-  font-weight: 900;
-  font-size: clamp(1rem, 2.2vw, 1.35rem);
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-  background: none !important;
-  text-shadow: none;
 }
 .meta-card {
   margin-top: 18px;

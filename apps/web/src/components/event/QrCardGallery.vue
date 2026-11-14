@@ -97,17 +97,25 @@
       >
         <div class="qr-thumb">
           <img :src="`/assets/${card.file}`" :alt="card.label" />
-          <div class="mini-qr" :class="{ inv: card.inverted }">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <path :fill="card.qrColor || '#000000'" d="M6 6h20v20H6zm6 6v8h8v-8zM38 6h20v20H38zm6 6v8h8v-8zM6 38h20v20H6zm6 6v8h8v-8zM38 38h6v6h-6zm10 0h10v6H48zm-10 10h6v10h-6zm10 4h10v6H48z"/>
-            </svg>
-          </div>
-          <div
-            class="mini-name"
-            :style="{ color: card.textColor || '#161310' }"
+          <QrCardFrame
+            mini
+            :event-name="eventName"
+            :text-color="card.textColor || '#161310'"
+            :show-tagline="!card.hideCta"
+            tagline="סרקו והעלו תמונות"
           >
-            {{ eventName }}
-          </div>
+            <template #qr>
+              <div class="mini-qr" :class="{ inv: card.inverted }">
+                <svg viewBox="0 0 64 64" aria-hidden="true">
+                  <rect width="64" height="64" fill="#fff" />
+                  <path
+                    :fill="card.qrColor || '#000000'"
+                    d="M6 6h20v20H6zm6 6v8h8v-8zM38 6h20v20H38zm6 6v8h8v-8zM6 38h20v20H6zm6 6v8h8v-8zM38 38h6v6h-6zm10 0h10v6H48zm-10 10h6v10h-6zm10 4h10v6H48z"
+                  />
+                </svg>
+              </div>
+            </template>
+          </QrCardFrame>
         </div>
         <h4>{{ card.label }}</h4>
         <p>{{ styleLabel(card.style) }}</p>
@@ -122,6 +130,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import QrCardFrame from "@/components/event/QrCardFrame.vue";
 import {
   filterQrCards,
   QR_EVENT_TYPES,
@@ -148,6 +157,7 @@ function measureFade(el: HTMLElement | undefined | null): FadeState {
 
 export default defineComponent({
   name: "QrCardGallery",
+  components: { QrCardFrame },
   props: {
     selectable: { type: Boolean, default: false },
     selected: { type: String, default: "" },
@@ -400,31 +410,16 @@ export default defineComponent({
 }
 
 .mini-qr {
-  position: absolute;
-  left: 50%;
-  top: 28%;
-  width: 34%;
-  transform: translateX(-50%);
-  background: transparent !important;
+  width: 100%;
+  background: #fff !important;
+  line-height: 0;
 }
 
 .mini-qr svg {
   width: 100%;
   height: auto;
   display: block;
-  background: transparent !important;
-}
-
-.mini-name {
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  bottom: 12%;
-  text-align: center;
-  font-size: 0.62rem;
-  font-weight: 800;
-  line-height: 1.2;
-  background: none !important;
+  background: #fff !important;
 }
 
 .qr-card h4 {
