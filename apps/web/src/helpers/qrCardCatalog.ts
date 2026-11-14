@@ -10,6 +10,26 @@ export const QR_STYLES = [
   { id: "corporate", label: "אירועי חברה" },
 ] as const;
 
+/**
+ * Style chips shown in the template picker.
+ * baby / festival / corporate duplicate event-type filters (every card with
+ * those styles is already tagged with the matching eventTypes), so they are
+ * omitted from the style row but kept in QR_STYLES for labels + typing.
+ */
+/** Style ids exposed as filter chips (excludes event-type duplicates). */
+const QR_STYLE_FILTER_ID_SET = new Set([
+  "flowers",
+  "nature",
+  "gold",
+  "marble",
+  "minimal",
+  "playful",
+]);
+
+export const QR_STYLE_FILTERS = QR_STYLES.filter((item) =>
+  QR_STYLE_FILTER_ID_SET.has(item.id)
+);
+
 export const QR_EVENT_TYPES = [
   { id: "wedding", label: "חתונה" },
   { id: "barmitzvah", label: "בר / בת מצווה" },

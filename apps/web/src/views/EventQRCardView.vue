@@ -441,7 +441,11 @@ export default defineComponent({
 }
 @media (max-width: 1024px) {
   .qr-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .qr-layout > * {
+    min-width: 0;
+    max-width: 100%;
   }
   .qr-preview-col {
     position: static;
