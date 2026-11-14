@@ -81,17 +81,33 @@
         }"
         :aria-current="item.isActive ? 'page' : undefined"
         :aria-label="collapsed ? item.text : undefined"
+        @mouseenter="collapsed && showRailTip($event, item.text)"
+        @mouseleave="hideRailTip"
+        @focus="collapsed && showRailTip($event, item.text)"
+        @blur="hideRailTip"
       >
         <SideBarItem :item="item" :collapsed="collapsed" />
-        <span v-if="collapsed" class="rail-tip">{{ item.text }}</span>
       </router-link>
     </nav>
+
+    <Teleport to="body">
+      <div
+        v-if="collapsed && tip.visible"
+        class="rail-tip-portal"
+        :style="tipStyle"
+        role="tooltip"
+      >
+        {{ tip.text }}
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import SideBarItem from "./SideBarItem.vue";
+
+const TIP_GAP_PX = 8;
 
 export default defineComponent({
   name: "SideBar",
@@ -113,6 +129,19 @@ export default defineComponent({
 
   emits: ["toggle"],
 
+  data() {
+    return {
+      tip: {
+        visible: false,
+        text: "",
+        top: 0,
+        left: 0,
+        isRtl: true,
+        overRail: true,
+      },
+    };
+  },
+
   computed: {
     eventName(): string {
       return this.$store.getters["event/getEventName"] || "";
@@ -130,6 +159,61 @@ export default defineComponent({
         backgroundSize: "cover",
         backgroundPosition: "center",
       };
+    },
+    tipStyle(): Record<string, string> {
+      // Default: tip toward content. overRail flips it into the rail column
+      // (outside page text) while keeping an ~8px gap from the item.
+      const towardContent = this.tip.isRtl
+        ? "translate(-100%, -50%)"
+        : "translate(0, -50%)";
+      const towardRail = this.tip.isRtl
+        ? "translate(0, -50%)"
+        : "translate(-100%, -50%)";
+      return {
+        top: `${this.tip.top}px`,
+        left: `${this.tip.left}px`,
+        transform: this.tip.overRail ? towardRail : towardContent,
+      };
+    },
+  },
+
+  watch: {
+    collapsed(value: boolean) {
+      if (!value) this.hideRailTip();
+    },
+  },
+
+  beforeUnmount() {
+    this.hideRailTip();
+  },
+
+  methods: {
+    showRailTip(event: Event, text: string) {
+      const el = event.currentTarget as HTMLElement | null;
+      if (!el || !text) return;
+      const rect = el.getBoundingClientRect();
+      const isRtl =
+        typeof document !== "undefined" &&
+        (document.documentElement.dir === "rtl" ||
+          getComputedStyle(document.documentElement).direction === "rtl");
+
+      // Side tip with ~8px gap, kept inside the sidebar/gutter (not over page text).
+      // RTL: tip to the left of the item but shifted to stay over the rail column.
+      const left = isRtl ? rect.left - TIP_GAP_PX : rect.right + TIP_GAP_PX;
+
+      this.tip = {
+        visible: true,
+        text,
+        top: rect.top + rect.height / 2,
+        left,
+        isRtl,
+        overRail: false,
+      };
+    },
+
+    hideRailTip() {
+      this.tip.visible = false;
+      this.tip.text = "";
     },
   },
 });
@@ -175,16 +259,16 @@ export default defineComponent({
   cursor: pointer;
   flex: none;
   transition: background 0.15s, color 0.15s;
+}
 
-  &:hover {
-    background: rgba(22, 19, 16, 0.06);
-    color: var(--ink, #161310);
-  }
+.sidebar-toggle:hover {
+  background: rgba(22, 19, 16, 0.06);
+  color: var(--ink, #161310);
+}
 
-  &:focus-visible {
-    outline: 2px solid var(--ink, #161310);
-    outline-offset: 2px;
-  }
+.sidebar-toggle:focus-visible {
+  outline: 2px solid var(--ink, #161310);
+  outline-offset: 2px;
 }
 
 .sidebar--expanded .sidebar-toggle {
@@ -199,65 +283,61 @@ export default defineComponent({
 }
 
 .rail-cover {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: var(--deep, #12100e) center / cover no-repeat;
+  width: 46px;
+  height: 46px;
   margin: 0 auto 8px;
-  box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
+  border-radius: 14px;
+  background: rgba(22, 19, 16, 0.06);
+  background-repeat: no-repeat;
   flex: none;
-  display: grid;
-  place-items: center;
   overflow: hidden;
 }
 
 .sidebar--expanded .rail-cover {
-  width: 56px;
-  height: 56px;
+  width: 100%;
+  height: 120px;
+  border-radius: 16px;
+  margin: 0 0 10px;
 }
 
 .rail-cover.is-empty {
-  background: linear-gradient(145deg, #ebe4da, #f7f1e8);
-  color: #8a8278;
-  border: 1px solid rgba(22, 19, 16, 0.1);
-  box-shadow: none;
+  display: grid;
+  place-items: center;
+  color: var(--muted, #5e564e);
 }
 
 .rail-cover-ph {
   width: 22px;
   height: 22px;
-  display: block;
 }
 
 .sidebar-event-name {
-  margin: 0 4px 10px;
-  padding: 0 4px 10px;
-  border-bottom: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  font-family: var(--brand, Outfit, Heebo, sans-serif);
+  margin: 0 0 10px;
+  padding: 0 4px;
+  font-size: 0.92rem;
   font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: -0.02em;
+  line-height: 1.25;
   color: var(--ink, #161310);
-  line-height: 1.3;
-  text-align: center;
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar-nav {
-  flex: 1;
-  min-height: 0;
-  overflow-x: visible;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 100%;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: visible;
+  flex: 1 1 auto;
+  padding: 0;
+  margin: 0;
 }
 
 .sidebar--collapsed .sidebar-nav {
-  overflow: visible;
   align-items: center;
-  gap: 6px;
+  overflow: visible;
 }
 
 .side-bar-link {
@@ -317,36 +397,22 @@ export default defineComponent({
     stroke: none;
   }
 }
+</style>
 
-.rail-tip {
-  position: absolute;
-  /* In RTL, inline-start is the right edge; 100%+ places tip to the left of the rail */
-  inset-inline-start: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
+<style lang="scss">
+/* Teleported to body — above page content, not clipped by overflow */
+.rail-tip-portal {
+  position: fixed;
+  z-index: 10050;
   background: var(--deep, #12100e);
   color: #fff;
+  font-family: var(--font, Heebo, sans-serif);
   font-size: 0.78rem;
   font-weight: 750;
   padding: 5px 10px;
   border-radius: 8px;
   white-space: nowrap;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-  z-index: 80;
   box-shadow: 0 8px 20px rgba(18, 16, 14, 0.18);
-}
-
-.rail-link:hover .rail-tip,
-.rail-link:focus-visible .rail-tip,
-.rail-link:focus .rail-tip {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rail-tip {
-    transition: none;
-  }
 }
 </style>

@@ -92,7 +92,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.assist { position: fixed; z-index: 80; bottom: 22px; left: 22px; }
+/* Sit on the inline-start side (RTL: physical right) so it does not cover
+   share-link copy icons, which sit on the inline-end / physical-left edge. */
+.assist {
+  position: fixed;
+  z-index: 80;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  inset-inline-start: calc(var(--host-sidebar, 0px) + 22px);
+  inset-inline-end: auto;
+}
 .assist-fab {
   display: inline-flex;
   align-items: center;
@@ -120,8 +128,11 @@ export default defineComponent({
 .assist-fab--wa {
   position: fixed;
   z-index: 80;
-  bottom: 22px;
-  left: 22px;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  inset-inline-start: calc(var(--host-sidebar, 0px) + 22px);
+  inset-inline-end: auto;
+  left: auto;
+  right: auto;
   background: #1fad4f;
   color: #fff;
   border-color: transparent;
@@ -129,7 +140,7 @@ export default defineComponent({
 .assist-panel {
   position: absolute;
   bottom: 58px;
-  left: 0;
+  inset-inline-start: 0;
   width: min(320px, calc(100vw - 32px));
   background: var(--paper, #fff);
   color: var(--ink, #161310);
@@ -169,4 +180,13 @@ export default defineComponent({
   transform: translateY(-2px);
 }
 .assist-status { min-height: 1.2em; color: var(--muted, #5e564e); font-size: 0.9rem; }
+
+@media (max-width: 900px) {
+  .assist,
+  .assist-fab--wa {
+    /* Above mobile event nav; keep clear of share-link copy icons on the left */
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    inset-inline-start: 16px;
+  }
+}
 </style>

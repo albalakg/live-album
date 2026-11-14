@@ -1,13 +1,13 @@
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: 12000;
+  z-index: 20000;
   box-sizing: border-box;
   padding: max(12px, env(safe-area-inset-top, 0px))
     max(12px, env(safe-area-inset-right, 0px))
     max(12px, env(safe-area-inset-bottom, 0px))
     max(12px, env(safe-area-inset-left, 0px));
-  background-color: rgba(0, 0, 0, 0.92);
+  background-color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -179,16 +179,19 @@
   }
 }
 
-/* Hide floating contact / WhatsApp while lightbox is open */
+/* Hide floating contact / WhatsApp / chrome while lightbox is open */
 body.lightbox-open .assist,
-body.lightbox-open .assist-fab {
+body.lightbox-open .assist-fab,
+body.lightbox-open .mobile-bar,
+body.lightbox-open .event-mobile-nav {
   visibility: hidden !important;
   pointer-events: none !important;
 }
 
 @media only screen and (max-width: 600px) {
   .lightbox {
-    padding-bottom: 0;
+    padding: 0;
+    background-color: #000;
 
     .lightbox-content--with-actions {
       padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
@@ -209,11 +212,14 @@ body.lightbox-open .assist-fab {
     }
 
     .lightbox-close {
+      top: max(12px, env(safe-area-inset-top, 0px));
+      right: max(12px, env(safe-area-inset-right, 0px));
       font-size: 1.45rem;
     }
 
-    /* Horizontal action bar — no boxed panel */
+    /* Solid full-width bar pinned to the bottom — hides page content behind pills */
     .lightbox-actions {
+      position: fixed;
       left: 0;
       right: 0;
       bottom: 0;
@@ -228,10 +234,11 @@ body.lightbox-open .assist-fab {
       padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
       border: 0;
       border-radius: 0;
-      background: transparent;
+      background: rgba(0, 0, 0, 0.92);
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
       box-shadow: none;
+      z-index: 31;
     }
   }
 }

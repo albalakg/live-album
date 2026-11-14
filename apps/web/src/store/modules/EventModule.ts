@@ -319,8 +319,26 @@ const EventModule = {
         return;
       }
 
-      if (event.assets != null) {
-        event.assets = asAssetArray(event.assets);
+      // Login/profile uses Event::assets() (ACTIVE-only, often without status).
+      // That relation is NOT the moderation source of truth — only getEventAssets
+      // / SET_FILES is. Ignore status-less relation payloads; keep a prior full list.
+      const previousAssets = state.event?.assets;
+      if (Array.isArray(event.assets)) {
+        const rawAssets = event.assets as Array<Record<string, unknown>>;
+        const lacksModerationMeta = rawAssets.some(
+          (a) => a && a.status == null && a.moderation_status == null
+        );
+        if (lacksModerationMeta) {
+          if (previousAssets?.length) {
+            event.assets = previousAssets;
+          } else {
+            delete (event as { assets?: unknown }).assets;
+          }
+        } else {
+          event.assets = asAssetArray(event.assets);
+        }
+      } else if (previousAssets?.length) {
+        event.assets = previousAssets;
       }
       const raw = event as IEvent & {
         subscription?: { name?: SubscriptionTypesEnum | string };

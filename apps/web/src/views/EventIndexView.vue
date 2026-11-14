@@ -83,6 +83,18 @@ export default defineComponent({
 
   created() {
     this.sidebarCollapsed = readSidebarCollapsed();
+    this.syncHostSidebarCssVar();
+    // Single source of truth for pending = getPendingAssets (API status=PENDING).
+    // Login/base-info often omits pending assets; load the full list once here.
+    if (this.$store.getters["event/getEvent"]?.id) {
+      this.$store.dispatch("event/getEventAssets");
+    }
+  },
+
+  beforeUnmount() {
+    if (typeof document !== "undefined") {
+      document.documentElement.style.removeProperty("--host-sidebar");
+    }
   },
 
   computed: {
@@ -142,10 +154,29 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    sidebarWidthPx: {
+      immediate: true,
+      handler() {
+        this.syncHostSidebarCssVar();
+      },
+    },
+  },
+
   methods: {
+    syncHostSidebarCssVar() {
+      if (typeof document === "undefined") return;
+      const mobile =
+        typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches;
+      document.documentElement.style.setProperty(
+        "--host-sidebar",
+        mobile ? "0px" : `${this.sidebarWidthPx}px`
+      );
+    },
     toggleSidebar() {
       this.sidebarCollapsed = !this.sidebarCollapsed;
       writeSidebarCollapsed(this.sidebarCollapsed);
+      this.syncHostSidebarCssVar();
     },
   },
 });
@@ -162,12 +193,17 @@ export default defineComponent({
   position: relative;
   z-index: 11;
   display: block;
-  padding-block: 12px 28px;
+  padding-block: 12px 96px;
   padding-inline-start: calc(var(--host-sidebar) + 16px);
   padding-inline-end: 24px;
   box-sizing: border-box;
   background: #f3eee6;
   transition: padding-inline-start 0.2s ease;
+
+  /* Collapsed rail: leave room for teleported tooltips (~8px gap + tip width) */
+  &.is-sidebar-collapsed {
+    padding-inline-start: calc(var(--host-sidebar) + 148px);
+  }
 }
 
 .event-sidebar {
@@ -208,7 +244,7 @@ export default defineComponent({
 @media (max-width: 900px) {
   .event-main {
     width: 100%;
-    padding: 8px 12px 88px;
+    padding: 8px 12px 120px;
     transition: none;
   }
 

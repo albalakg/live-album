@@ -505,7 +505,8 @@ export default defineComponent({
     },
 
     assetsCountLabel(): string {
-      const n = this.totalAssets;
+      // Active-filter count (pending/blocked/photo/…) — not total album size.
+      const n = this.ownerVisibleAssets.length;
       if (n === 1) return "קובץ אחד";
       if (n === 2) return "2 קבצים";
       return `${n} קבצים`;
