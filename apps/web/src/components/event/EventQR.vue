@@ -144,8 +144,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+/* Off-screen export SVG — html2canvas / serializers still see it; never in layout */
 .qr-export {
-  display: none !important;
+  position: fixed !important;
+  left: -10000px !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  z-index: -1 !important;
 }
 .qr-code {
   display: grid;

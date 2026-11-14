@@ -7,14 +7,6 @@
           בחרו כרטיס, ראו אותו עם הקוד ושם האירוע, והורידו להדפסה. הספריות החדשות כוללות צבעי קוד וטקסט.
         </p>
       </div>
-      <div class="head-actions">
-        <button type="button" class="btn btn-ghost" @click="downloadQRCode">
-          {{ downloadQRText }}
-        </button>
-        <button type="button" class="btn btn-primary" @click="downloadCard">
-          {{ downloadCardText }}
-        </button>
-      </div>
     </header>
 
     <div class="page">
@@ -69,6 +61,7 @@
             <p v-else class="sample-note">
               בכרטיס הזה המשפט מודפס על הרקע עצמו, לכן השדה מוסתר.
             </p>
+
             <div class="meta-actions">
               <button
                 type="button"
@@ -76,20 +69,71 @@
                 :disabled="isSaving"
                 @click="saveSettings"
               >
-                שמירת הכרטיס
+                שמירה
               </button>
+
+              <div class="meta-actions__downloads">
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  :disabled="isDownloadingCard"
+                  @click="downloadCard"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true"
+                    >download</span
+                  >
+                  {{ downloadCardText }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-ghost"
+                  :disabled="isDownloadingQR"
+                  @click="downloadQRCode"
+                >
+                  {{ downloadQRText }}
+                </button>
+              </div>
+
               <button
                 type="button"
-                class="btn btn-ghost"
+                class="btn-reset"
                 :disabled="isSaving || isDefaultSelection"
                 @click="resetToDefaults"
               >
-                חזרה לברירת מחדל
+                איפוס לברירת המחדל
               </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Off-screen export clone: html2canvas still renders it; never in layout -->
+    <div
+      ref="exportCard"
+      class="qr-export-card"
+      aria-hidden="true"
+      :class="{ inv: selectedCard?.inverted }"
+    >
+      <img class="bg" :src="`/assets/${selectedQR}`" alt="" />
+      <QrCardFrame
+        :event-name="eventName"
+        :text-color="textColor"
+        :show-tagline="showCardTagline"
+        :tagline="cardTagline"
+        :inverted="Boolean(selectedCard?.inverted)"
+      >
+        <template #qr>
+          <EventQR
+            :background="qrBackground"
+            :foreground="qrForeground"
+            :inverted="Boolean(selectedCard?.inverted)"
+            :size="280"
+            :margin="4"
+            keep-quiet-zone
+          />
+        </template>
+      </QrCardFrame>
     </div>
   </div>
 </template>
@@ -171,11 +215,11 @@ export default defineComponent({
     },
 
     downloadCardText(): string {
-      return this.isDownloadingCard ? "מוריד..." : "הורדה והדפסה";
+      return this.isDownloadingCard ? "מוריד..." : "הורדת הכרטיס";
     },
 
     downloadQRText(): string {
-      return this.isDownloadingQR ? "מוריד..." : "הורדת הקוד בלבד";
+      return this.isDownloadingQR ? "מוריד..." : "הורדת QR בלבד";
     },
 
     isDefaultSelection(): boolean {
@@ -234,7 +278,9 @@ export default defineComponent({
 
     async downloadCard() {
       try {
-        const cardElement = this.$refs.eventCard as HTMLElement;
+        const cardElement =
+          (this.$refs.exportCard as HTMLElement) ||
+          (this.$refs.eventCard as HTMLElement);
         if (!cardElement) return;
         this.isDownloadingCard = true;
         const canvas = await html2canvas(cardElement, {
@@ -297,6 +343,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .qr-page {
   color: var(--ink, #161310);
+  overflow-x: clip;
+  max-width: 100%;
 }
 .page-head {
   display: flex;
@@ -320,40 +368,78 @@ export default defineComponent({
   max-width: 42em;
   font-weight: 500;
 }
-.head-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border-radius: 999px;
-  padding: 12px 22px;
+  padding: 0 22px;
+  height: 40px;
   font-weight: 800;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   border: 0;
   cursor: pointer;
   font-family: inherit;
+  width: auto;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.btn .material-symbols-outlined {
+  font-size: 1.2rem;
+  line-height: 1;
 }
 .btn-primary {
   background: linear-gradient(135deg, #dc5b66, #c9a36a);
   color: #fff;
   box-shadow: 0 8px 22px rgba(201, 163, 106, 0.45);
 }
-.btn-ghost {
+.btn-outline {
   background: #fff;
   color: var(--ink, #161310);
-  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
+  border: 1.5px solid rgba(22, 19, 16, 0.18);
+  box-shadow: none;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--ink, #161310);
+  border: 1.5px solid transparent;
+  box-shadow: none;
+}
+.btn-ghost:hover {
+  background: rgba(22, 19, 16, 0.05);
 }
 .btn[disabled] {
   opacity: 0.45;
   cursor: default;
 }
+.btn-reset {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 4px 2px;
+  margin: 0;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #8a8278;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  width: fit-content;
+  align-self: flex-start;
+}
+.btn-reset:hover:not([disabled]) {
+  color: var(--ink, #161310);
+}
+.btn-reset[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  text-decoration: none;
+}
 .page {
   padding: 8px 0 48px;
+  overflow-x: clip;
 }
 .qr-layout {
   display: grid;
@@ -364,6 +450,9 @@ export default defineComponent({
 .qr-preview-col {
   position: relative;
   top: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .qr-live {
   position: relative;
@@ -373,10 +462,12 @@ export default defineComponent({
   aspect-ratio: 3 / 4.2;
   border-radius: 22px;
   overflow: hidden;
+  isolation: isolate;
   box-shadow: 0 24px 60px rgba(18, 16, 14, 0.16);
   background: #12100e;
 }
-.qr-live .bg {
+.qr-live .bg,
+.qr-export-card .bg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -426,9 +517,30 @@ export default defineComponent({
 }
 .meta-actions {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
   margin-top: 16px;
+}
+.meta-actions__downloads {
+  display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+/* Off-screen export node — still painted for html2canvas, out of layout/viewport */
+.qr-export-card {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 420px;
+  aspect-ratio: 3 / 4.2;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  z-index: -1;
+  background: #12100e;
 }
 @media (max-width: 1024px) {
   .qr-layout {
@@ -445,6 +557,23 @@ export default defineComponent({
   .page-head {
     flex-direction: column;
     align-items: stretch;
+  }
+  .meta-actions__downloads {
+    width: 100%;
+  }
+  .meta-actions__downloads .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+@media (max-width: 420px) {
+  .meta-actions__downloads {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .meta-actions__downloads .btn,
+  .meta-actions > .btn-primary {
+    width: 100%;
   }
 }
 </style>
