@@ -1,0 +1,232 @@
+{
+  "version": 1,
+  "note": "Placeholder stock until real AI/landing assets land. Paths are relative to /landing/ai/{type}/.",
+  "templates": {
+    "wedding-1": "wedding",
+    "wedding-2": "wedding",
+    "barmitzvah-1": "barmitzvah",
+    "barmitzvah-2": "barmitzvah",
+    "birthday-1": "birthday",
+    "birthday-2": "birthday",
+    "brit-1": "brit",
+    "brit-2": "brit",
+    "corporate-1": "corporate",
+    "corporate-2": "corporate",
+    "party-1": "party",
+    "party-2": "party",
+    "festival-1": "festival",
+    "festival-2": "festival"
+  },
+  "pools": {
+    "wedding": {
+      "hero": {
+        "file": "hero.jpg",
+        "alt": "רקע חתונה דקורטיבי"
+      },
+      "album-1": {
+        "file": "album-1.jpg",
+        "alt": "עיטור פרחוני לחתונה"
+      },
+      "album-2": {
+        "file": "album-2.jpg",
+        "alt": "מרקם זהב רך"
+      },
+      "album-3": {
+        "file": "album-3.jpg",
+        "alt": "פרחים לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.jpg",
+        "alt": "רקע שנהב"
+      },
+      "album-5": {
+        "file": "album-5.jpg",
+        "alt": "עיטור בוקה"
+      },
+      "album-6": {
+        "file": "album-6.jpg",
+        "alt": "פרחים וזהב"
+      }
+    },
+    "barmitzvah": {
+      "hero": {
+        "file": "hero.jpg",
+        "alt": "רקע בר/בת מצווה דקורטיבי"
+      },
+      "album-1": {
+        "file": "album-1.jpg",
+        "alt": "עיטור טורקיז"
+      },
+      "album-2": {
+        "file": "album-2.jpg",
+        "alt": "זהב חגיגי"
+      },
+      "album-3": {
+        "file": "album-3.jpg",
+        "alt": "דפוס נייר גזור"
+      },
+      "album-4": {
+        "file": "album-4.jpg",
+        "alt": "רקע טקסי"
+      },
+      "album-5": {
+        "file": "album-5.jpg",
+        "alt": "עיטור כוכבים"
+      },
+      "album-6": {
+        "file": "album-6.jpg",
+        "alt": "מרקם חגיגי"
+      }
+    },
+    "birthday": {
+      "hero": {
+        "file": "hero.jpg",
+        "alt": "רקע יום הולדת דקורטיבי"
+      },
+      "album-1": {
+        "file": "album-1.jpg",
+        "alt": "בלונים לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.jpg",
+        "alt": "קונפטי דקורטיבי"
+      },
+      "album-3": {
+        "file": "album-3.jpg",
+        "alt": "עיטור חגיגי"
+      },
+      "album-4": {
+        "file": "album-4.jpg",
+        "alt": "רקע צבעוני"
+      },
+      "album-5": {
+        "file": "album-5.jpg",
+        "alt": "סרטים וקישוט"
+      },
+      "album-6": {
+        "file": "album-6.jpg",
+        "alt": "אווירת מסיבה"
+      }
+    },
+    "brit": {
+      "hero": {
+        "file": "hero.jpg",
+        "alt": "רקע ברית דקורטיבי"
+      },
+      "album-1": {
+        "file": "album-1.jpg",
+        "alt": "עלי זית"
+      },
+      "album-2": {
+        "file": "album-2.jpg",
+        "alt": "עיטור רך"
+      },
+      "album-3": {
+        "file": "album-3.jpg",
+        "alt": "חבל כביסה דקורטיבי"
+      },
+      "album-4": {
+        "file": "album-4.jpg",
+        "alt": "דובי איור"
+      },
+      "album-5": {
+        "file": "album-5.jpg",
+        "alt": "סוס נדנדה איור"
+      },
+      "album-6": {
+        "file": "album-6.jpg",
+        "alt": "רקע חמים"
+      }
+    },
+    "corporate": {
+      "hero": {
+        "file": "hero.jpg",
+        "alt": "רקע אירוע חברה דקורטיבי"
+      },
+      "album-1": {
+        "file": "album-1.jpg",
+        "alt": "זכוכית ופלדה"
+      },
+      "album-2": {
+        "file": "album-2.jpg",
+        "alt": "דפוס גיאומטרי"
+      },
+      "album-3": {
+        "file": "album-3.jpg",
+        "alt": "רקע מקצועי"
+      },
+      "album-4": {
+        "file": "album-4.jpg",
+        "alt": "זהב ערב"
+      },
+      "album-5": {
+        "file": "album-5.jpg",
+        "alt": "קווים נקיים"
+      },
+      "album-6": {
+        "file": "album-6.jpg",
+        "alt": "אווירת כנס"
+      }
+    },
+    "party": {
+      "hero": {
+        "file": "hero.jpg",
+        "alt": "רקע מסיבה דקורטיבי"
+      },
+      "album-1": {
+        "file": "album-1.jpg",
+        "alt": "ניאון דקורטיבי"
+      },
+      "album-2": {
+        "file": "album-2.jpg",
+        "alt": "אורות מסיבה"
+      },
+      "album-3": {
+        "file": "album-3.jpg",
+        "alt": "רטרו שמשות"
+      },
+      "album-4": {
+        "file": "album-4.jpg",
+        "alt": "קונפטי צבעוני"
+      },
+      "album-5": {
+        "file": "album-5.jpg",
+        "alt": "רקע לילה"
+      },
+      "album-6": {
+        "file": "album-6.jpg",
+        "alt": "אווירת רחבה"
+      }
+    },
+    "festival": {
+      "hero": {
+        "file": "hero.jpg",
+        "alt": "רקע פסטיבל דקורטיבי"
+      },
+      "album-1": {
+        "file": "album-1.jpg",
+        "alt": "שקיעה דקורטיבית"
+      },
+      "album-2": {
+        "file": "album-2.jpg",
+        "alt": "אופק שטח"
+      },
+      "album-3": {
+        "file": "album-3.jpg",
+        "alt": "מקרמה"
+      },
+      "album-4": {
+        "file": "album-4.jpg",
+        "alt": "אורות חמים"
+      },
+      "album-5": {
+        "file": "album-5.jpg",
+        "alt": "בוהו דקורטיבי"
+      },
+      "album-6": {
+        "file": "album-6.jpg",
+        "alt": "שטח פתוח"
+      }
+    }
+  }
+}
