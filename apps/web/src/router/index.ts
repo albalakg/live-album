@@ -68,8 +68,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/preview/moderation",
-    name: "previewModeration",
-    component: () => import("@/views/EventModerationView.vue"),
+    redirect: { path: "/event/assets", query: { filter: "pending" } },
   },
   {
     path: "/order",
@@ -167,7 +166,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "moderation",
         name: "eventModeration",
-        component: () => import("../views/EventModerationView.vue"),
+        redirect: { path: "/event/assets", query: { filter: "pending" } },
       },
       {
         path: "qr",

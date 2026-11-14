@@ -63,14 +63,13 @@ export default defineComponent({
         { text: "פרטי האירוע", path: "/event/details", isActive: false },
         { text: "אלבום חי", path: "/event/gallery", isActive: false },
         { text: "עמוד העלאה", path: "/event/upload", isActive: false },
+        { text: "כרטיס QR", path: "/event/qr", isActive: false },
         {
-          text: "בדיקת תוכן",
-          path: "/event/moderation",
+          text: "כל הקבצים",
+          path: "/event/assets",
           isActive: false,
           badge: pending > 0 ? pending : undefined,
         },
-        { text: "כרטיס QR", path: "/event/qr", isActive: false },
-        { text: "כל הקבצים", path: "/event/assets", isActive: false },
         { text: "טריוויה", path: "/event/trivia", isActive: false },
         { text: "חבילה", path: "/event/plan", isActive: false },
         ...(isWhatsAppEnabled()

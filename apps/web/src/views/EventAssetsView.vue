@@ -28,10 +28,28 @@
     </section>
 
     <div class="type-filters" role="tablist" aria-label="סינון סוג">
-      <button type="button" class="chip" :class="{ on: typeFilter === 'all' }" @click="typeFilter = 'all'">הכל</button>
-      <button type="button" class="chip" :class="{ on: typeFilter === 'photo' }" @click="typeFilter = 'photo'">תמונות</button>
-      <button type="button" class="chip" :class="{ on: typeFilter === 'video' }" @click="typeFilter = 'video'">סרטונים</button>
-      <button type="button" class="chip" :class="{ on: typeFilter === 'fav' }" @click="typeFilter = 'fav'">מועדפים</button>
+      <button type="button" class="chip" :class="{ on: typeFilter === 'all' }" @click="setTypeFilter('all')">הכל</button>
+      <button type="button" class="chip" :class="{ on: typeFilter === 'photo' }" @click="setTypeFilter('photo')">תמונות</button>
+      <button type="button" class="chip" :class="{ on: typeFilter === 'video' }" @click="setTypeFilter('video')">סרטונים</button>
+      <button type="button" class="chip" :class="{ on: typeFilter === 'fav' }" @click="setTypeFilter('fav')">מועדפים</button>
+      <button
+        type="button"
+        class="chip chip--pending"
+        :class="{ on: typeFilter === 'pending' }"
+        @click="setTypeFilter('pending')"
+      >
+        ממתינים לבדיקה
+        <span v-if="pendingCount" class="chip-badge">{{ pendingCount }}</span>
+      </button>
+      <button
+        type="button"
+        class="chip"
+        :class="{ on: typeFilter === 'blocked' }"
+        @click="setTypeFilter('blocked')"
+      >
+        חסומות
+        <span v-if="blockedCount" class="chip-badge chip-badge--blocked">{{ blockedCount }}</span>
+      </button>
     </div>
 
     <div
@@ -113,6 +131,14 @@
             </button>
             <button
               type="button"
+              class="tb-btn tb-btn--approve"
+              :disabled="!canAct || !selectionHasPending"
+              @click="bulkApprove"
+            >
+              אישור
+            </button>
+            <button
+              type="button"
               class="tb-btn tb-btn--warn"
               :disabled="!canAct"
               @click="runAction('block')"
@@ -150,8 +176,10 @@
 
     <section class="assets-body" aria-label="ספריית מדיה">
       <div v-if="!ownerVisibleAssets.length" class="assets-empty">
-        <p>עדיין אין קבצים להצגה.</p>
-        <p class="assets-empty-hint">העלו תמונות או סרטונים למעלה.</p>
+        <p v-if="typeFilter === 'pending'">אין תמונות ממתינות לבדיקה.</p>
+        <p v-else-if="typeFilter === 'blocked'">אין תמונות חסומות.</p>
+        <p v-else>עדיין אין קבצים להצגה.</p>
+        <p v-if="typeFilter === 'all'" class="assets-empty-hint">העלו תמונות או סרטונים למעלה.</p>
       </div>
       <div v-else class="assets-grid">
         <EventAssetCard
@@ -163,40 +191,28 @@
           :asset="asset"
           :selectionActive="selectionActive"
           :selectOnTileClick="selectionActive"
+          :allow-moderation-actions="true"
+          :allow-unblock="typeFilter === 'blocked'"
+          :approve-loading="approvingAssetId === asset.id"
+          :block-loading="blockingAssetId === asset.id"
+          :unblock-loading="unblockingAssetId === asset.id"
           @onClick="openModal"
+          @onApprove="approveAsset"
+          @onBlock="blockAssets"
+          @onUnblock="unblockAsset"
         />
       </div>
     </section>
 
-    <section class="moderation-shell">
-      <button
-        type="button"
-        class="moderation-toggle"
-        :aria-expanded="moderationOpen"
-        @click="toggleModeration"
-      >
-        <div class="moderation-toggle-text">
-          <p class="kicker">בדיקת תוכן</p>
-          <strong>תור בדיקה</strong>
-        </div>
-        <div class="moderation-badges">
-          <span v-if="pendingCount" class="badge badge--pending">
-            {{ pendingCount }} ממתינות
-          </span>
-          <span v-if="blockedCount" class="badge badge--blocked">
-            {{ blockedCount }} חסומות
-          </span>
-          <span v-if="!pendingCount && !blockedCount" class="badge badge--idle">
-            ריק
-          </span>
-          <MainIcon
-            :icon="moderationOpen ? 'expand_less' : 'expand_more'"
-            size="1.35em"
-          />
-        </div>
-      </button>
-      <div v-show="moderationOpen" class="moderation-panel">
-        <EventModerationSection class="moderation-section" />
+    <section class="approval-shell" aria-label="אישור ידני">
+      <EventSwitchPanel
+        title="אישור ידני"
+        :items="approvalSwitches"
+        :values="approvalConfig"
+        @toggle="toggleApproval"
+      />
+      <div class="approval-actions">
+        <MainButton :loading="approvalLoading" text="שמור הגדרה" @onClick="saveManualApproval" />
       </div>
     </section>
 
@@ -294,6 +310,15 @@
               פתיחה
             </a>
             <button
+              v-if="isCurrentAssetPending"
+              type="button"
+              class="lb-btn lb-btn--approve"
+              :disabled="approvingAssetId === currentAsset.id"
+              @click="approveAsset(currentAsset.id)"
+            >
+              {{ approvingAssetId === currentAsset.id ? "טוען..." : "אישור" }}
+            </button>
+            <button
               v-if="isCurrentAssetBlocked"
               type="button"
               class="lb-btn lb-btn--restore"
@@ -333,7 +358,10 @@ import EventAssetCard from "@/components/event/EventAssetCard.vue";
 import { EventAssetsManagementModesType } from "@/helpers/types";
 import MainIcon from "@/components/library/general/MainIcon.vue";
 import UploadMedia from "@/components/library/inputs/UploadMedia.vue";
-import EventModerationSection from "@/components/event/EventModerationSection.vue";
+import MainButton from "@/components/library/buttons/MainButton.vue";
+import EventSwitchPanel, {
+  SwitchItem,
+} from "@/components/event/EventSwitchPanel.vue";
 
 export default defineComponent({
   name: "EventAssetsView",
@@ -343,7 +371,8 @@ export default defineComponent({
     EventAssetCard,
     MainIcon,
     UploadMedia,
-    EventModerationSection,
+    MainButton,
+    EventSwitchPanel,
   },
 
   data() {
@@ -359,11 +388,21 @@ export default defineComponent({
       currentAssetIndex: 0 as number,
       unblockingAssetId: null as number | null,
       blockingAssetId: null as number | null,
+      approvingAssetId: null as number | null,
       assetsPollIntervalId: null as ReturnType<typeof setInterval> | null,
-      moderationOpen: false as boolean,
-      moderationTouched: false as boolean,
       selectMode: false as boolean,
-      typeFilter: "all" as "all" | "photo" | "video" | "fav",
+      typeFilter: "all" as "all" | "photo" | "video" | "fav" | "pending" | "blocked",
+      approvalLoading: false as boolean,
+      approvalConfig: {
+        manual_photo_approval: false,
+      } as Record<string, boolean>,
+      approvalSwitches: [
+        {
+          key: "manual_photo_approval",
+          title: "אישור ידני לתמונות",
+          hint: "מרגע ההפעלה, תמונות חדשות מחכות לאישור לפני האלבום והמסך",
+        },
+      ] as SwitchItem[],
       keydownHandler: null as ((e: KeyboardEvent) => void) | null,
       lightboxMediaSrc: "" as string,
       lightboxMediaLoading: false as boolean,
@@ -375,12 +414,14 @@ export default defineComponent({
   },
 
   created() {
+    this.syncFilterFromRoute();
     this.loadAssets();
   },
 
   watch: {
-    "$route.path"(path: string) {
-      if (path === "/event/assets") {
+    "$route.fullPath"() {
+      if (this.$route.path === "/event/assets" || this.$route.path.startsWith("/event/assets")) {
+        this.syncFilterFromRoute();
         this.loadAssets();
       }
     },
@@ -396,12 +437,12 @@ export default defineComponent({
       },
     },
 
-    moderationQueueCount: {
+    event: {
       immediate: true,
-      handler(count: number) {
-        if (!this.moderationTouched) {
-          this.moderationOpen = count > 0;
-        }
+      handler() {
+        this.approvalConfig.manual_photo_approval = Boolean(
+          this.event?.config?.manual_photo_approval
+        );
       },
     },
 
@@ -449,13 +490,22 @@ export default defineComponent({
     },
 
     ownerVisibleAssets(): IEventAsset[] {
-      let assets = this.$store.getters["event/getOwnerVisibleAssets"] || [];
-      if (this.typeFilter === "photo") {
-        assets = assets.filter((a: IEventAsset) => a.type === "image" || a.type === "photo");
-      } else if (this.typeFilter === "video") {
-        assets = assets.filter((a: IEventAsset) => a.type === "video");
-      } else if (this.typeFilter === "fav") {
-        assets = assets.filter((a: IEventAsset) => Boolean(a.is_favorite));
+      let assets: IEventAsset[];
+      if (this.typeFilter === "blocked") {
+        assets = this.$store.getters["event/getBlockedAssets"] || [];
+      } else if (this.typeFilter === "pending") {
+        assets = this.$store.getters["event/getPendingAssets"] || [];
+      } else {
+        assets = this.$store.getters["event/getOwnerVisibleAssets"] || [];
+        if (this.typeFilter === "photo") {
+          assets = assets.filter(
+            (a: IEventAsset) => a.type === "image" || a.type === "photo"
+          );
+        } else if (this.typeFilter === "video") {
+          assets = assets.filter((a: IEventAsset) => a.type === "video");
+        } else if (this.typeFilter === "fav") {
+          assets = assets.filter((a: IEventAsset) => Boolean(a.is_favorite));
+        }
       }
       return assets;
     },
@@ -472,8 +522,10 @@ export default defineComponent({
       return this.$store.getters["event/getBlockedAssets"]?.length || 0;
     },
 
-    moderationQueueCount(): number {
-      return this.pendingCount + this.blockedCount;
+    selectionHasPending(): boolean {
+      const ids = new Set(this.managedAssetsIds);
+      const pending = this.$store.getters["event/getPendingAssets"] || [];
+      return pending.some((a: IEventAsset) => ids.has(a.id));
     },
 
     assets(): IEventAsset[] {
@@ -562,6 +614,14 @@ export default defineComponent({
       );
     },
 
+    isCurrentAssetPending(): boolean {
+      if (!this.currentAsset) return false;
+      return (
+        getAssetModerationStatus(this.currentAsset) ===
+        AssetModerationStatusEnum.PENDING
+      );
+    },
+
     canBlockCurrentAsset(): boolean {
       if (!this.currentAsset || this.isCurrentAssetBlocked) {
         return false;
@@ -576,6 +636,24 @@ export default defineComponent({
   },
 
   methods: {
+    syncFilterFromRoute() {
+      const raw = String(this.$route.query.filter || "");
+      if (raw === "pending" || raw === "blocked") {
+        this.typeFilter = raw;
+      }
+    },
+
+    setTypeFilter(filter: "all" | "photo" | "video" | "fav" | "pending" | "blocked") {
+      this.typeFilter = filter;
+      const query = { ...this.$route.query } as Record<string, string>;
+      if (filter === "pending" || filter === "blocked") {
+        query.filter = filter;
+      } else {
+        delete query.filter;
+      }
+      this.$router.replace({ query }).catch(() => undefined);
+    },
+
     loadAssets() {
       return this.$store.dispatch("event/getEventAssets");
     },
@@ -584,9 +662,41 @@ export default defineComponent({
       this.isOpen = !this.isOpen;
     },
 
-    toggleModeration() {
-      this.moderationTouched = true;
-      this.moderationOpen = !this.moderationOpen;
+    toggleApproval(key: string) {
+      this.approvalConfig[key] = !this.approvalConfig[key];
+    },
+
+    async saveManualApproval() {
+      this.approvalLoading = true;
+      await this.$store.dispatch("event/update", {
+        config: { ...this.approvalConfig },
+      });
+      this.approvalLoading = false;
+    },
+
+    async approveAsset(assetId: number) {
+      if (this.approvingAssetId) return;
+      this.approvingAssetId = assetId;
+      await this.$store.dispatch("event/approveAssets", [assetId]);
+      this.approvingAssetId = null;
+      if (this.isModalOpened && this.currentAsset?.id === assetId) {
+        this.closeModal();
+      }
+    },
+
+    async bulkApprove() {
+      if (!this.canAct || !this.selectionHasPending) return;
+      const pendingIds = new Set(
+        (this.$store.getters["event/getPendingAssets"] || []).map(
+          (a: IEventAsset) => a.id
+        )
+      );
+      const ids = this.managedAssetsIds.filter((id: number) => pendingIds.has(id));
+      if (!ids.length) return;
+      this.loading = true;
+      await this.$store.dispatch("event/approveAssets", ids);
+      this.loading = false;
+      this.exitSelectMode();
     },
 
     enterSelectMode() {
@@ -1041,6 +1151,27 @@ export default defineComponent({
   font-family: inherit;
   cursor: pointer;
 }
+.type-filters .chip-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  margin-inline-start: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #e6a817;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.type-filters .chip-badge--blocked {
+  background: #c62828;
+}
+.type-filters .chip--pending.on .chip-badge {
+  background: #fff;
+  color: #b8860b;
+}
 .type-filters .chip.on {
   background: #12100e;
   color: #fff;
@@ -1368,6 +1499,17 @@ export default defineComponent({
   }
 }
 
+.lb-btn--approve,
+.tb-btn--approve {
+  background: #12100e;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(18, 16, 14, 0.22);
+
+  &:hover:not(:disabled) {
+    background: #2a2622;
+  }
+}
+
 .lb-btn--block {
   background: rgba(220, 91, 102, 0.95);
   color: #fff;
@@ -1422,7 +1564,22 @@ export default defineComponent({
   font-size: 0.9rem;
 }
 
+.approval-shell {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 720px;
+}
+
+.approval-actions {
+  max-width: 280px;
+  margin-inline-start: auto;
+  width: 100%;
+}
+
 .moderation-shell {
+  display: none;
   border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 18px;
   background: #fffcfa;

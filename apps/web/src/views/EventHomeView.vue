@@ -73,9 +73,9 @@
           <strong>כרטיס QR</strong>
           <small>הורדה והדפסה לשולחנות</small>
         </router-link>
-        <router-link class="qcard" to="/event/moderation">
+        <router-link class="qcard" to="/event/assets?filter=pending">
           <span class="ico" aria-hidden="true" v-html="actionIcons.mod"></span>
-          <strong>בדיקת תוכן</strong>
+          <strong>ממתינים לבדיקה</strong>
           <small>{{ pendingCount }} ממתינים</small>
         </router-link>
       </section>

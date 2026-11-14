@@ -54,7 +54,7 @@
       </span>
 
       <span
-        v-else-if="moderationBadgeText && !showBlockedFooter"
+        v-else-if="moderationBadgeText && !showBlockedFooter && !showPendingFooter"
         class="tile-badge"
         :class="moderationBadgeClass"
         :title="moderationBadgeTitle"
@@ -70,6 +70,28 @@
         <span class="material-symbols-outlined blocked-glyph" aria-hidden="true">
           block
         </span>
+      </div>
+
+      <div v-if="showPendingFooter" class="gallery-mod-footer gallery-mod-footer--pending">
+        <span class="gallery-mod-label" :title="moderationBadgeTitle">בבדיקה</span>
+        <div class="gallery-mod-actions">
+          <button
+            type="button"
+            class="gallery-mod-btn gallery-mod-btn--approve"
+            :disabled="approveLoading || blockLoading"
+            @click.stop="$emit('onApprove', asset.id)"
+          >
+            {{ approveLoading ? "..." : "אישור" }}
+          </button>
+          <button
+            type="button"
+            class="gallery-mod-btn gallery-mod-btn--block"
+            :disabled="approveLoading || blockLoading"
+            @click.stop="$emit('onBlock', asset.id)"
+          >
+            {{ blockLoading ? "..." : "חסום" }}
+          </button>
+        </div>
       </div>
 
       <div v-if="showBlockedFooter" class="gallery-blocked-footer">
@@ -130,7 +152,7 @@ import { defineComponent, PropType } from "vue";
 export default defineComponent({
   name: "EventAssetCard",
 
-  emits: ["onClick", "open-asset-modal", "onUnblock"],
+  emits: ["onClick", "open-asset-modal", "onUnblock", "onApprove", "onBlock"],
 
   props: {
     loading: {
@@ -179,6 +201,21 @@ export default defineComponent({
     },
 
     unblockLoading: {
+      type: Boolean,
+      default: false,
+    },
+
+    allowModerationActions: {
+      type: Boolean,
+      default: false,
+    },
+
+    approveLoading: {
+      type: Boolean,
+      default: false,
+    },
+
+    blockLoading: {
       type: Boolean,
       default: false,
     },
@@ -259,6 +296,10 @@ export default defineComponent({
 
     showBlockedFooter(): boolean {
       return this.allowUnblock && this.isBlocked;
+    },
+
+    showPendingFooter(): boolean {
+      return this.allowModerationActions && this.isPending && !this.modalView;
     },
   },
 
@@ -551,7 +592,8 @@ export default defineComponent({
   opacity: 0.92;
 }
 
-.gallery-blocked-footer {
+.gallery-blocked-footer,
+.gallery-mod-footer {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
@@ -563,6 +605,50 @@ export default defineComponent({
   padding: 8px 10px;
   background: rgba(22, 19, 16, 0.82);
   backdrop-filter: blur(6px);
+}
+
+.gallery-mod-label {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+  background-color: #e6a817;
+  white-space: nowrap;
+}
+
+.gallery-mod-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.gallery-mod-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.gallery-mod-btn--approve {
+  background: #fff;
+  color: #161310;
+}
+
+.gallery-mod-btn--block {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.gallery-mod-btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
 }
 
 .gallery-blocked-label {
