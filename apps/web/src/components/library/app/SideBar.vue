@@ -9,58 +9,27 @@
     <button
       type="button"
       class="sidebar-toggle"
-      :aria-label="collapsed ? 'פתיחת תפריט' : 'סגירת תפריט'"
+      :title="toggleLabel"
+      :aria-label="toggleLabel"
       :aria-expanded="!collapsed"
       aria-controls="event-sidebar-nav"
       @click="$emit('toggle')"
     >
       <svg
         class="sidebar-toggle-ico"
+        :class="{ 'sidebar-toggle-ico--collapsed': collapsed }"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="1.8"
+        stroke-width="2.2"
         stroke-linecap="round"
         stroke-linejoin="round"
         aria-hidden="true"
       >
-        <!-- panel + chevron: collapsed → points left (open); expanded → points right (close) -->
-        <rect fill="none" x="3.5" y="4" width="17" height="16" rx="2.2" />
-        <path fill="none" d="M9.5 4v16" />
-        <path
-          v-if="collapsed"
-          fill="none"
-          d="M15.2 9.2 12.5 12l2.7 2.8"
-        />
-        <path
-          v-else
-          fill="none"
-          d="M14.8 9.2 17.5 12l-2.7 2.8"
-        />
+        <!-- Expanded: points into the rail / right (close). Collapsed: flips left (open). -->
+        <path fill="none" d="M9.5 7.5 14 12l-4.5 4.5" />
       </svg>
     </button>
-
-    <div
-      class="rail-cover"
-      :class="{ 'is-empty': !hasCoverImage, 'rail-cover--sm': collapsed }"
-      :style="coverStyle"
-      :title="eventName || ''"
-      aria-hidden="true"
-    >
-      <svg
-        v-if="!hasCoverImage"
-        class="rail-cover-ph"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.6"
-        stroke-linecap="round"
-      >
-        <rect fill="none" x="3" y="5" width="18" height="14" rx="2" />
-        <circle fill="none" cx="9" cy="10.5" r="1.6" />
-        <path fill="none" d="m6.5 17 3.2-3.4 2.3 2.2 3-3.3L17.5 17" />
-      </svg>
-    </div>
 
     <p v-if="!collapsed && eventName" class="sidebar-event-name">{{ eventName }}</p>
 
@@ -146,19 +115,8 @@ export default defineComponent({
     eventName(): string {
       return this.$store.getters["event/getEventName"] || "";
     },
-    hasCoverImage(): boolean {
-      return Boolean(this.$store.getters["event/getEventImage"]);
-    },
-    coverStyle(): Record<string, string> {
-      const img = this.$store.getters["event/getEventImage"] || "";
-      if (!img) {
-        return {};
-      }
-      return {
-        backgroundImage: `url(${img})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      };
+    toggleLabel(): string {
+      return this.collapsed ? "פתיחת תפריט" : "סגירת תפריט";
     },
     tipStyle(): Record<string, string> {
       // Default: tip toward content. overRail flips it into the rail column
@@ -221,6 +179,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sidebar {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -232,38 +191,49 @@ export default defineComponent({
   border: 0;
   border-inline-end: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 0;
-  padding: 12px 10px 18px;
+  padding: 14px 10px 18px;
   box-shadow: none;
   overflow: visible;
 }
 
 .sidebar--collapsed {
   align-items: center;
-  padding: 12px 0 18px;
+  padding: 14px 0 18px;
   gap: 6px;
   background: transparent;
 }
 
+/* Floating circular control on the content-facing edge (inline-end).
+   Half over the border; never consumes a rail row. Below rail tips (10050)
+   and WhatsApp assist (80) via stacking context of .event-sidebar (20). */
 .sidebar-toggle {
+  position: absolute;
+  inset-inline-end: -14px;
+  top: 32%;
+  z-index: 5;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
-  margin: 0 auto 4px;
+  width: 28px;
+  height: 28px;
+  margin: 0;
   padding: 0;
-  border: 0;
-  border-radius: 14px;
-  background: transparent;
-  color: var(--muted, #5e564e);
+  border: 1px solid rgba(22, 19, 16, 0.12);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink, #161310);
   cursor: pointer;
   flex: none;
-  transition: background 0.15s, color 0.15s;
+  box-shadow: 0 2px 8px rgba(18, 16, 14, 0.12);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease,
+    color 0.15s ease, background 0.15s ease;
 }
 
 .sidebar-toggle:hover {
-  background: rgba(22, 19, 16, 0.06);
-  color: var(--ink, #161310);
+  transform: scale(1.08);
+  border-color: rgba(22, 19, 16, 0.28);
+  box-shadow: 0 3px 10px rgba(18, 16, 14, 0.16);
+  color: #0c0b09;
 }
 
 .sidebar-toggle:focus-visible {
@@ -271,50 +241,22 @@ export default defineComponent({
   outline-offset: 2px;
 }
 
-.sidebar--expanded .sidebar-toggle {
-  margin-inline-start: 0;
-  margin-inline-end: auto;
-}
-
 .sidebar-toggle-ico {
-  width: 22px;
-  height: 22px;
+  width: 14px;
+  height: 14px;
   display: block;
+  transition: transform 0.18s ease;
 }
 
-.rail-cover {
-  width: 46px;
-  height: 46px;
-  margin: 0 auto 8px;
-  border-radius: 14px;
-  background: rgba(22, 19, 16, 0.06);
-  background-repeat: no-repeat;
-  flex: none;
-  overflow: hidden;
-}
-
-.sidebar--expanded .rail-cover {
-  width: 100%;
-  height: 120px;
-  border-radius: 16px;
-  margin: 0 0 10px;
-}
-
-.rail-cover.is-empty {
-  display: grid;
-  place-items: center;
-  color: var(--muted, #5e564e);
-}
-
-.rail-cover-ph {
-  width: 22px;
-  height: 22px;
+/* Expanded chevron points into the rail (inline-start). Collapsed flips toward content. */
+.sidebar-toggle-ico--collapsed {
+  transform: scaleX(-1);
 }
 
 .sidebar-event-name {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   padding: 0 4px;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 800;
   line-height: 1.25;
   color: var(--ink, #161310);
@@ -395,6 +337,13 @@ export default defineComponent({
   :deep(.rail-ico svg [fill="currentColor"]) {
     fill: #fff;
     stroke: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-toggle,
+  .sidebar-toggle-ico {
+    transition: none;
   }
 }
 </style>
