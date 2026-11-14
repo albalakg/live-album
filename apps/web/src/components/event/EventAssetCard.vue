@@ -665,7 +665,7 @@ export default defineComponent({
   }
 
   .gallery-asset {
-    position: relative;
+    position: relative !important;
     display: flex;
     align-items: center;
     justify-content: center;

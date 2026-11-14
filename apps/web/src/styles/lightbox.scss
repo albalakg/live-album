@@ -1,7 +1,7 @@
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 12000;
   box-sizing: border-box;
   padding: max(12px, env(safe-area-inset-top, 0px))
     max(12px, env(safe-area-inset-right, 0px))
@@ -11,6 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 
   .lightbox-content {
     position: relative;
@@ -30,6 +31,23 @@
     padding-bottom: 72px;
   }
 
+  .lightbox-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .lightbox-content--with-actions .lightbox-stage {
+    max-height: calc(100% - 8px);
+  }
+
   .lightbox-asset {
     display: block;
     width: auto;
@@ -39,10 +57,39 @@
     object-fit: contain;
     border-radius: 8px;
     user-select: none;
+    -webkit-user-drag: none;
   }
 
-  .lightbox-content--with-actions .lightbox-asset {
-    max-height: calc(100% - 8px);
+  .lightbox-asset.is-loading {
+    opacity: 0;
+  }
+
+  .lightbox-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: lightbox-spin 0.7s linear infinite;
+    z-index: 2;
+  }
+
+  .lightbox-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    font-weight: 600;
+    z-index: 2;
   }
 
   .lightbox-icon {
@@ -118,6 +165,12 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes lightbox-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

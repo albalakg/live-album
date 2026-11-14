@@ -21,47 +21,82 @@
     <p v-if="!loading && assets.length === 0" class="empty">עוד אין תמונות באלבום.</p>
     <GuestAlbumCta />
   </div>
-  <div v-if="isModalOpened && currentAsset" class="lightbox" @click="isModalOpened = false">
-    <button
-      type="button"
-      class="lightbox-close lightbox-icon"
-      aria-label="סגירה"
-      @click.stop="isModalOpened = false"
+  <Teleport to="body">
+    <div
+      v-if="isModalOpened && currentAsset"
+      ref="lightboxRoot"
+      class="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="תצוגת מדיה"
+      tabindex="-1"
+      @click="closeModal"
+      @keydown="onLightboxKeydown"
+      @touchstart.passive="onLightboxTouchStart"
+      @touchend.passive="onLightboxTouchEnd"
     >
-      &times;
-    </button>
-    <button
-      type="button"
-      @click.stop="changeAsset(currentAssetIndex + 1)"
-      class="lightbox-next lightbox-icon"
-      aria-label="הקודם"
-    >
-      &#10094;
-    </button>
-    <button
-      type="button"
-      @click.stop="changeAsset(currentAssetIndex - 1)"
-      class="lightbox-prev lightbox-icon"
-      aria-label="הבא"
-    >
-      &#10095;
-    </button>
-    <div class="lightbox-content" @click.stop>
-      <img
-        v-if="currentAsset.type !== 'video'"
-        class="lightbox-asset"
-        :src="currentAsset.fullPath"
-        alt=""
-      />
-      <video
-        v-else
-        class="lightbox-asset"
-        :src="currentAsset.fullPath"
-        controls
-        autoplay
-      ></video>
+      <button
+        type="button"
+        class="lightbox-close lightbox-icon"
+        aria-label="סגירה"
+        @click.stop="closeModal"
+      >
+        &times;
+      </button>
+      <button
+        type="button"
+        class="lightbox-next lightbox-icon"
+        aria-label="הקודם"
+        @click.stop="changeAsset(currentAssetIndex + 1)"
+      >
+        &#10094;
+      </button>
+      <button
+        type="button"
+        class="lightbox-prev lightbox-icon"
+        aria-label="הבא"
+        @click.stop="changeAsset(currentAssetIndex - 1)"
+      >
+        &#10095;
+      </button>
+      <div class="lightbox-content" @click.stop>
+        <div class="lightbox-stage">
+          <div
+            v-if="lightboxMediaLoading"
+            class="lightbox-spinner"
+            aria-hidden="true"
+          />
+          <p v-if="lightboxMediaFailed" class="lightbox-error" role="status">
+            לא ניתן לטעון את הקובץ
+          </p>
+          <img
+            v-if="currentAsset.type !== 'video'"
+            :key="'lb-img-' + currentAsset.id + '-' + lightboxMediaSrc"
+            class="lightbox-asset"
+            :class="{ 'is-loading': lightboxMediaLoading }"
+            :src="lightboxMediaSrc"
+            alt=""
+            @load="onLightboxMediaLoad"
+            @error="onLightboxMediaError"
+          />
+          <video
+            v-else
+            :key="'lb-vid-' + currentAsset.id + '-' + lightboxMediaSrc"
+            ref="lightboxVideo"
+            class="lightbox-asset"
+            :class="{ 'is-loading': lightboxMediaLoading }"
+            :src="lightboxMediaSrc"
+            controls
+            playsinline
+            webkit-playsinline
+            autoplay
+            @loadeddata="onLightboxMediaLoad"
+            @error="onLightboxMediaError"
+          />
+        </div>
+      </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script lang="ts">
@@ -81,6 +116,12 @@ export default defineComponent({
       seenIds: new Set<number>(),
       seenReady: false,
       pollId: null as ReturnType<typeof setInterval> | null,
+      lightboxMediaSrc: "" as string,
+      lightboxMediaLoading: false as boolean,
+      lightboxMediaFailed: false as boolean,
+      lightboxUsedThumbFallback: false as boolean,
+      lightboxFocusBefore: null as HTMLElement | null,
+      lightboxTouchX: null as number | null,
     };
   },
   computed: {
@@ -92,6 +133,21 @@ export default defineComponent({
     },
     currentAsset(): IEventAsset {
       return this.assets[this.currentAssetIndex];
+    },
+  },
+  watch: {
+    isModalOpened(open: boolean) {
+      if (open) {
+        this.$nextTick(() => this.activateLightboxFocus());
+      } else {
+        this.pauseLightboxVideo();
+        this.restoreLightboxFocus();
+      }
+    },
+    currentAssetIndex() {
+      if (!this.isModalOpened) return;
+      this.pauseLightboxVideo();
+      this.resetLightboxMediaSrc();
     },
   },
   async created() {
@@ -127,8 +183,143 @@ export default defineComponent({
       this.freshIds = fresh;
     },
     openModal(assetIndex: number) {
-      this.isModalOpened = true;
       this.currentAssetIndex = assetIndex;
+      this.resetLightboxMediaSrc();
+      this.isModalOpened = true;
+    },
+    closeModal() {
+      this.pauseLightboxVideo();
+      this.isModalOpened = false;
+    },
+    assetThumbUrl(asset: IEventAsset | null | undefined): string {
+      if (!asset) return "";
+      return (
+        asset.thumbPath ||
+        asset.thumbnail ||
+        asset.thumb_url ||
+        asset.thumbnail_url ||
+        ""
+      );
+    },
+    resetLightboxMediaSrc() {
+      const asset = this.currentAsset;
+      this.lightboxUsedThumbFallback = false;
+      this.lightboxMediaFailed = false;
+      this.lightboxMediaLoading = Boolean(asset?.fullPath);
+      this.lightboxMediaSrc = asset?.fullPath || this.assetThumbUrl(asset) || "";
+      if (!this.lightboxMediaSrc) {
+        this.lightboxMediaLoading = false;
+        this.lightboxMediaFailed = true;
+      }
+    },
+    onLightboxMediaLoad() {
+      this.lightboxMediaLoading = false;
+      this.lightboxMediaFailed = false;
+    },
+    onLightboxMediaError() {
+      const thumb = this.assetThumbUrl(this.currentAsset);
+      if (
+        !this.lightboxUsedThumbFallback &&
+        thumb &&
+        thumb !== this.lightboxMediaSrc
+      ) {
+        this.lightboxUsedThumbFallback = true;
+        this.lightboxMediaLoading = true;
+        this.lightboxMediaFailed = false;
+        this.lightboxMediaSrc = thumb;
+        return;
+      }
+      this.lightboxMediaLoading = false;
+      this.lightboxMediaFailed = true;
+    },
+    pauseLightboxVideo() {
+      const video = this.$refs.lightboxVideo as HTMLVideoElement | undefined;
+      if (video) {
+        try {
+          video.pause();
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+    lightboxFocusables(): HTMLElement[] {
+      const root = this.$refs.lightboxRoot as HTMLElement | undefined;
+      if (!root) return [];
+      return Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], video, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => {
+        if (el.hasAttribute("disabled")) return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== "none" && style.visibility !== "hidden";
+      });
+    },
+    activateLightboxFocus() {
+      const active = document.activeElement;
+      this.lightboxFocusBefore =
+        active instanceof HTMLElement ? active : null;
+      const root = this.$refs.lightboxRoot as HTMLElement | undefined;
+      root?.focus({ preventScroll: true });
+    },
+    restoreLightboxFocus() {
+      const prev = this.lightboxFocusBefore;
+      this.lightboxFocusBefore = null;
+      if (prev && typeof prev.focus === "function") {
+        try {
+          prev.focus({ preventScroll: true });
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+    trapLightboxFocus(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      const focusables = this.lightboxFocusables();
+      if (!focusables.length) {
+        e.preventDefault();
+        (this.$refs.lightboxRoot as HTMLElement | undefined)?.focus();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === first || active === this.$refs.lightboxRoot)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    },
+    onLightboxKeydown(e: KeyboardEvent) {
+      if (!this.isModalOpened) return;
+      if (e.key === "Tab") {
+        this.trapLightboxFocus(e);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        this.changeAsset(this.currentAssetIndex - 1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        this.changeAsset(this.currentAssetIndex + 1);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        this.closeModal();
+      }
+    },
+    onLightboxTouchStart(e: TouchEvent) {
+      this.lightboxTouchX = e.changedTouches[0]?.clientX ?? null;
+    },
+    onLightboxTouchEnd(e: TouchEvent) {
+      if (this.lightboxTouchX == null) return;
+      const endX = e.changedTouches[0]?.clientX ?? this.lightboxTouchX;
+      const delta = endX - this.lightboxTouchX;
+      this.lightboxTouchX = null;
+      if (Math.abs(delta) < 50) return;
+      if (delta > 0) this.changeAsset(this.currentAssetIndex - 1);
+      else this.changeAsset(this.currentAssetIndex + 1);
     },
     changeAsset(newIndex: number) {
       if (newIndex < 0) this.currentAssetIndex = this.assets.length - 1;
@@ -139,7 +330,7 @@ export default defineComponent({
       if (!this.isModalOpened) return;
       if (e.key === "ArrowRight") this.changeAsset(this.currentAssetIndex - 1);
       else if (e.key === "ArrowLeft") this.changeAsset(this.currentAssetIndex + 1);
-      else if (e.key === "Escape") this.isModalOpened = false;
+      else if (e.key === "Escape") this.closeModal();
     },
   },
 });

@@ -200,34 +200,84 @@
       </div>
     </section>
 
-    <div v-if="isModalOpened" class="lightbox" @click="isModalOpened = false">
-      <span class="lightbox-close lightbox-icon">&times;</span>
-      <button
-        @click.stop="changeAsset(currentAssetIndex + 1)"
-        class="lightbox-next lightbox-icon"
+    <Teleport to="body">
+      <div
+        v-if="isModalOpened && currentAsset"
+        ref="lightboxRoot"
+        class="lightbox"
+        role="dialog"
+        aria-modal="true"
+        aria-label="תצוגת מדיה"
+        tabindex="-1"
+        @click="closeModal"
+        @keydown="onLightboxKeydown"
+        @touchstart.passive="onLightboxTouchStart"
+        @touchend.passive="onLightboxTouchEnd"
       >
-        &#10094;
-      </button>
-      <button
-        @click.stop="changeAsset(currentAssetIndex - 1)"
-        class="lightbox-prev lightbox-icon"
-      >
-        &#10095;
-      </button>
-      <div class="lightbox-content lightbox-content--with-actions" @click.stop>
-        <EventAssetCard
-          class="lightbox-asset"
-          modalView
-          :bulkSelectable="false"
-          :loading="loading"
-          :assetIndex="0"
-          :asset="currentAsset"
-          @onClick="doNone"
-          controls
-          autoplay
-        />
-        <div class="lightbox-actions" role="group" aria-label="פעולות קובץ">
-          <template v-if="currentAsset">
+        <button
+          type="button"
+          class="lightbox-close lightbox-icon"
+          aria-label="סגירה"
+          @click.stop="closeModal"
+        >
+          &times;
+        </button>
+        <button
+          type="button"
+          class="lightbox-next lightbox-icon"
+          aria-label="הקודם"
+          @click.stop="changeAsset(currentAssetIndex + 1)"
+        >
+          &#10094;
+        </button>
+        <button
+          type="button"
+          class="lightbox-prev lightbox-icon"
+          aria-label="הבא"
+          @click.stop="changeAsset(currentAssetIndex - 1)"
+        >
+          &#10095;
+        </button>
+        <div class="lightbox-content lightbox-content--with-actions" @click.stop>
+          <div class="lightbox-stage">
+            <div
+              v-if="lightboxMediaLoading"
+              class="lightbox-spinner"
+              aria-hidden="true"
+            />
+            <p
+              v-if="lightboxMediaFailed"
+              class="lightbox-error"
+              role="status"
+            >
+              לא ניתן לטעון את הקובץ
+            </p>
+            <img
+              v-if="!isCurrentAssetVideo"
+              :key="'lb-img-' + currentAsset.id + '-' + lightboxMediaSrc"
+              class="lightbox-asset"
+              :class="{ 'is-loading': lightboxMediaLoading }"
+              :src="lightboxMediaSrc"
+              alt=""
+              @load="onLightboxMediaLoad"
+              @error="onLightboxMediaError"
+            />
+            <video
+              v-else
+              :key="'lb-vid-' + currentAsset.id + '-' + lightboxMediaSrc"
+              ref="lightboxVideo"
+              class="lightbox-asset"
+              :class="{ 'is-loading': lightboxMediaLoading }"
+              :src="lightboxMediaSrc"
+              controls
+              playsinline
+              webkit-playsinline
+              autoplay
+              @loadeddata="onLightboxMediaLoad"
+              @error="onLightboxMediaError"
+            />
+          </div>
+          <div class="lightbox-actions" role="group" aria-label="פעולות קובץ">
             <a
               class="lb-btn lb-btn--download"
               :href="currentAsset.fullPath"
@@ -243,28 +293,28 @@
             >
               פתיחה
             </a>
-          </template>
-          <button
-            v-if="isCurrentAssetBlocked"
-            type="button"
-            class="lb-btn lb-btn--restore"
-            :disabled="unblockingAssetId === currentAsset.id"
-            @click="unblockAsset(currentAsset.id)"
-          >
-            {{ unblockingAssetId === currentAsset.id ? "טוען..." : "בטל חסימה" }}
-          </button>
-          <button
-            v-else-if="canBlockCurrentAsset"
-            type="button"
-            class="lb-btn lb-btn--block"
-            :disabled="blockingAssetId === currentAsset.id"
-            @click="blockAssets(currentAsset.id)"
-          >
-            {{ blockingAssetId === currentAsset.id ? "טוען..." : "חסום" }}
-          </button>
+            <button
+              v-if="isCurrentAssetBlocked"
+              type="button"
+              class="lb-btn lb-btn--restore"
+              :disabled="unblockingAssetId === currentAsset.id"
+              @click="unblockAsset(currentAsset.id)"
+            >
+              {{ unblockingAssetId === currentAsset.id ? "טוען..." : "בטל חסימה" }}
+            </button>
+            <button
+              v-else-if="canBlockCurrentAsset"
+              type="button"
+              class="lb-btn lb-btn--block"
+              :disabled="blockingAssetId === currentAsset.id"
+              @click="blockAssets(currentAsset.id)"
+            >
+              {{ blockingAssetId === currentAsset.id ? "טוען..." : "חסום" }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
@@ -315,6 +365,12 @@ export default defineComponent({
       selectMode: false as boolean,
       typeFilter: "all" as "all" | "photo" | "video" | "fav",
       keydownHandler: null as ((e: KeyboardEvent) => void) | null,
+      lightboxMediaSrc: "" as string,
+      lightboxMediaLoading: false as boolean,
+      lightboxMediaFailed: false as boolean,
+      lightboxUsedThumbFallback: false as boolean,
+      lightboxFocusBefore: null as HTMLElement | null,
+      lightboxTouchX: null as number | null,
     };
   },
 
@@ -362,6 +418,21 @@ export default defineComponent({
       if (this.isDownloadProcessFinished && this.processPollingId) {
         this.stopPollingProcessStatus();
       }
+    },
+
+    isModalOpened(open: boolean) {
+      if (open) {
+        this.$nextTick(() => this.activateLightboxFocus());
+      } else {
+        this.pauseLightboxVideo();
+        this.restoreLightboxFocus();
+      }
+    },
+
+    currentAssetIndex() {
+      if (!this.isModalOpened) return;
+      this.pauseLightboxVideo();
+      this.resetLightboxMediaSrc();
     },
   },
 
@@ -468,6 +539,10 @@ export default defineComponent({
 
     currentAsset(): IEventAsset {
       return this.assets[this.currentAssetIndex];
+    },
+
+    isCurrentAssetVideo(): boolean {
+      return this.currentAsset?.type === "video";
     },
 
     currentAssetFileName(): string {
@@ -637,7 +712,7 @@ export default defineComponent({
       this.loading = false;
 
       if (success && assetId) {
-        this.isModalOpened = false;
+        this.closeModal();
       }
     },
 
@@ -648,8 +723,157 @@ export default defineComponent({
     },
 
     openModal(assetIndex: number) {
-      this.isModalOpened = true;
       this.currentAssetIndex = assetIndex;
+      this.resetLightboxMediaSrc();
+      this.isModalOpened = true;
+    },
+
+    closeModal() {
+      this.pauseLightboxVideo();
+      this.isModalOpened = false;
+    },
+
+    assetThumbUrl(asset: IEventAsset | null | undefined): string {
+      if (!asset) return "";
+      return (
+        asset.thumbPath ||
+        asset.thumbnail ||
+        asset.thumb_url ||
+        asset.thumbnail_url ||
+        ""
+      );
+    },
+
+    resetLightboxMediaSrc() {
+      const asset = this.currentAsset;
+      this.lightboxUsedThumbFallback = false;
+      this.lightboxMediaFailed = false;
+      this.lightboxMediaLoading = Boolean(asset?.fullPath);
+      this.lightboxMediaSrc = asset?.fullPath || this.assetThumbUrl(asset) || "";
+      if (!this.lightboxMediaSrc) {
+        this.lightboxMediaLoading = false;
+        this.lightboxMediaFailed = true;
+      }
+    },
+
+    onLightboxMediaLoad() {
+      this.lightboxMediaLoading = false;
+      this.lightboxMediaFailed = false;
+    },
+
+    onLightboxMediaError() {
+      const thumb = this.assetThumbUrl(this.currentAsset);
+      if (
+        !this.lightboxUsedThumbFallback &&
+        thumb &&
+        thumb !== this.lightboxMediaSrc
+      ) {
+        this.lightboxUsedThumbFallback = true;
+        this.lightboxMediaLoading = true;
+        this.lightboxMediaFailed = false;
+        this.lightboxMediaSrc = thumb;
+        return;
+      }
+      this.lightboxMediaLoading = false;
+      this.lightboxMediaFailed = true;
+    },
+
+    pauseLightboxVideo() {
+      const video = this.$refs.lightboxVideo as HTMLVideoElement | undefined;
+      if (video) {
+        try {
+          video.pause();
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+
+    lightboxFocusables(): HTMLElement[] {
+      const root = this.$refs.lightboxRoot as HTMLElement | undefined;
+      if (!root) return [];
+      return Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], video, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => {
+        if (el.hasAttribute("disabled")) return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== "none" && style.visibility !== "hidden";
+      });
+    },
+
+    activateLightboxFocus() {
+      const active = document.activeElement;
+      this.lightboxFocusBefore =
+        active instanceof HTMLElement ? active : null;
+      const root = this.$refs.lightboxRoot as HTMLElement | undefined;
+      root?.focus({ preventScroll: true });
+    },
+
+    restoreLightboxFocus() {
+      const prev = this.lightboxFocusBefore;
+      this.lightboxFocusBefore = null;
+      if (prev && typeof prev.focus === "function") {
+        try {
+          prev.focus({ preventScroll: true });
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+
+    trapLightboxFocus(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      const focusables = this.lightboxFocusables();
+      if (!focusables.length) {
+        e.preventDefault();
+        (this.$refs.lightboxRoot as HTMLElement | undefined)?.focus();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === first || active === this.$refs.lightboxRoot)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    },
+
+    onLightboxKeydown(e: KeyboardEvent) {
+      if (!this.isModalOpened) return;
+      if (e.key === "Tab") {
+        this.trapLightboxFocus(e);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        this.changeAsset(this.currentAssetIndex - 1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        this.changeAsset(this.currentAssetIndex + 1);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        this.closeModal();
+      }
+    },
+
+    onLightboxTouchStart(e: TouchEvent) {
+      this.lightboxTouchX = e.changedTouches[0]?.clientX ?? null;
+    },
+
+    onLightboxTouchEnd(e: TouchEvent) {
+      if (this.lightboxTouchX == null) return;
+      const endX = e.changedTouches[0]?.clientX ?? this.lightboxTouchX;
+      const delta = endX - this.lightboxTouchX;
+      this.lightboxTouchX = null;
+      if (Math.abs(delta) < 50) return;
+      // RTL: swipe right → previous, swipe left → next
+      if (delta > 0) this.changeAsset(this.currentAssetIndex - 1);
+      else this.changeAsset(this.currentAssetIndex + 1);
     },
 
     async unblockAsset(assetId: number) {
@@ -693,18 +917,14 @@ export default defineComponent({
         }
         return;
       }
-
-      if (e.key === "ArrowRight") {
+      // Dialog handles its own keys while open (focus is inside Teleport).
+      if (e.key === "Escape") {
+        this.closeModal();
+      } else if (e.key === "ArrowRight") {
         this.changeAsset(this.currentAssetIndex - 1);
       } else if (e.key === "ArrowLeft") {
         this.changeAsset(this.currentAssetIndex + 1);
-      } else if (e.key === "Escape") {
-        this.isModalOpened = false;
       }
-    },
-
-    doNone() {
-      // do nothing
     },
   },
 
