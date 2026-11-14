@@ -1,0 +1,19 @@
+/* 13. Festival sunset */
+.t-festival-1 {
+  --bg: #1A0E0A; --stage: #1A0E0A; --ink: #F8EDE0; --muted: #D0B09A;
+  --accent: #FF8A3A; --accent-2: #FFD080; --hero-ink: #FFF6EC;
+  --hero-muted: rgba(255,246,236,.78);
+  --cta-bg: #FF8A3A; --cta-ink: #1A0E0A; --cta-shadow: rgba(255,138,58,.4);
+  --nav-bg: rgba(22,10,8,.82); --nav-on-bg: #FF8A3A; --nav-on-ink: #1A0E0A;
+  --font-display: "Rubik", "Heebo", sans-serif; --font-body: "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/sunset.webp");
+  --hero-scrim: linear-gradient(180deg, rgba(26,14,10,.05) 0%, rgba(26,14,10,.15) 40%, rgba(26,14,10,.88) 100%);
+  --hero-pos: center 30%;
+  --line: rgba(255,138,58,.2); --line-strong: rgba(255,208,128,.5);
+  --btn-r: 999px;
+  --hero-line: rgba(255,208,128,.5);
+}
+.t-festival-1 .block { background: #1A0E0A; }
+.t-festival-1 .block.alt { background: #241410; }
+.t-festival-1 .enames { font-weight: 800; letter-spacing: -.04em; }
+

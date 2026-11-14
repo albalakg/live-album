@@ -1,0 +1,14 @@
+/* 7. Brit soft sage */
+.t-brit-1 {
+  --bg: #F3F0E8; --stage: #E8EDE0; --ink: #2C3828; --muted: #5A6856;
+  --accent: #6B7F5A; --accent-2: #C4A882; --hero-ink: #2C3828;
+  --cta-bg: #2C3828; --cta-ink: #F3F0E8;
+  --nav-bg: rgba(243,240,232,.9); --nav-on-bg: #2C3828; --nav-on-ink: #F3F0E8;
+  --font-display: "Frank Ruhl Libre", serif; --font-body: "Assistant", "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/olive.webp");
+  --line: rgba(44,56,40,.1); --line-strong: rgba(44,56,40,.25);
+  --btn-r: 999px; --card-r: 20px;
+}
+.t-brit-1 .block.alt { background: #E6EBDA; }
+.t-brit-1 .welcome .body { font-family: "Frank Ruhl Libre", serif; font-size: 1.28rem; }
+

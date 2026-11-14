@@ -1,0 +1,15 @@
+/* 6. Birthday elegant — champagne adult evening */
+.t-birthday-2 {
+  --bg: #F6EFE6; --stage: #F1E6D8; --ink: #3B2418; --muted: #6E5446;
+  --accent: #8B3A4A; --accent-2: #C9A36A; --hero-ink: #3B2418;
+  --cta-bg: #8B3A4A; --cta-ink: #F8F0E6; --cta-shadow: rgba(139,58,74,.28);
+  --nav-bg: rgba(246,239,230,.9); --nav-on-bg: #8B3A4A; --nav-on-ink: #F8F0E6;
+  --font-display: "Frank Ruhl Libre", serif; --font-body: "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/adult.webp");
+  --stage-img: url("../../../../public/landing/art/ivory.webp");
+  --line: rgba(59,36,24,.12); --line-strong: rgba(59,36,24,.28);
+  --btn-r: 2px; --card-r: 6px;
+}
+.t-birthday-2 .block.alt { background: #EDE0D0; }
+.t-birthday-2 .welcome .body { font-family: "Frank Ruhl Libre", serif; font-size: 1.28rem; }
+

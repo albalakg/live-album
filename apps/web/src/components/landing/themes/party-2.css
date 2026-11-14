@@ -1,0 +1,14 @@
+/* 12. Party retro */
+.t-party-2 {
+  --bg: #F8EED8; --stage: #F3E4C4; --ink: #4A2818; --muted: #7A5840;
+  --accent: #D06018; --accent-2: #E8A030; --hero-ink: #4A2818;
+  --cta-bg: #D06018; --cta-ink: #FFF6E8; --cta-shadow: rgba(208,96,24,.3);
+  --nav-bg: rgba(248,238,216,.9); --nav-on-bg: #D06018; --nav-on-ink: #FFF6E8;
+  --font-display: "Secular One", "Rubik", sans-serif; --font-body: "Rubik", "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/retro.webp");
+  --line: rgba(74,40,24,.12); --line-strong: rgba(74,40,24,.28);
+  --btn-r: 8px; --card-r: 8px;
+}
+.t-party-2 .block.alt { background: #F0DDB8; }
+.t-party-2 .enames { font-weight: 400; }
+

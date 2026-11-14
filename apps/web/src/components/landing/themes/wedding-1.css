@@ -1,0 +1,16 @@
+/* 1. Wedding classic — ivory / gold / blush floral */
+.t-wedding-1 {
+  --bg: #F4EDE3; --stage: #EFE6D8; --ink: #3A2A22; --muted: #6A5850;
+  --accent: #B8894A; --accent-2: #B76E79; --hero-ink: #3A2A22;
+  --cta-bg: #3A2A22; --cta-ink: #F7F1E8; --nav-bg: rgba(244,237,227,.88);
+  --nav-on-bg: #3A2A22; --nav-on-ink: #F7F1E8;
+  --font-display: "Frank Ruhl Libre", serif; --font-body: "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/blush.webp");
+  --stage-img: url("../../../../public/landing/art/ivory.webp");
+  --line: rgba(58,42,34,.12); --line-strong: rgba(58,42,34,.28);
+  --btn-r: 999px; --card-r: 4px; --count-ink: #3A2A22;
+  --tile-r: 6px;
+}
+.t-wedding-1 .block.alt { background: #EDE3D4; }
+.t-wedding-1 .welcome .body { font-family: "Frank Ruhl Libre", serif; font-size: 1.28rem; }
+

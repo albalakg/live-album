@@ -1,0 +1,4204 @@
+{
+  "wedding-1": {
+    "template_id": "wedding-1",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Frank Ruhl Libre",
+      "scale": "M",
+      "cover": {
+        "stock": "wedding-1/hero"
+      },
+      "colors": {
+        "primary": "#B8894A",
+        "secondary": "#B76E79",
+        "accent": "#B76E79",
+        "background": "#F4EDE3",
+        "text": "#3A2A22"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "עמית וגל",
+          "event_date": "2027-06-10T19:00:00+03:00",
+          "kicker": "החתונה של",
+          "venue": "אולם הדוגמה",
+          "city": "השרון",
+          "welcome_heading": "האהובים שלנו",
+          "welcome": "אנחנו מתרגשים לחגוג אתכם את היום הזה. העלו תמונות וסרטונים מהערב — בלי אפליקציה — והם יופיעו באלבום החי ובמסך באולם.",
+          "date_he": "יום חמישי, 10 ביוני 2027",
+          "time_he": "19:00",
+          "cover": {
+            "stock": "wedding-1/hero"
+          }
+        }
+      },
+      {
+        "id": "story",
+        "type": "STORY",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "הסיפור שלנו",
+          "heading": "איך הגענו עד כאן",
+          "chapters": [
+            {
+              "title": "ההיכרות",
+              "body": "כאן המארחים כותבים, בקצרה, איך עמית וגל נפגשו. במוק הזה זה מקום שמור — בלי ביוגרפיה בדויה."
+            },
+            {
+              "title": "ההצעה",
+              "body": "וכאן, אם ירצו, כמה מילים על הרגע שבו החליטו להתחתן. הטקסט מתחלף אצל המארח."
+            }
+          ],
+          "image": {
+            "stock": "art/fl-blush-bl"
+          },
+          "image_caption": "עיטור · דוגמה"
+        }
+      },
+      {
+        "id": "couple",
+        "type": "PEOPLE",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "הזוג",
+          "heading": "עמית וגל",
+          "note": "כרטיסי השמות הם חלק מהטמפלט. תמונות הזוג, אם יופיעו, הן מהאלבום האמיתי — לא דיוקנאות שנוצרו ב־AI.",
+          "items": [
+            {
+              "initials": "ע",
+              "name": "עמית",
+              "role": "חתן"
+            },
+            {
+              "initials": "ג",
+              "name": "גל",
+              "role": "כלה"
+            }
+          ],
+          "photos": [
+            {
+              "image": {
+                "stock": "wedding-1/album-1"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "wedding-1/album-2"
+              },
+              "caption": "עמית וגל"
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "heading": "חופה, קבלת פנים וריקודים",
+          "kicker": "סדר הערב",
+          "items": [
+            {
+              "time": "19:00",
+              "label": "קבלת פנים",
+              "description": "שתייה קלה וצילומים בגן"
+            },
+            {
+              "time": "20:00",
+              "label": "חופה",
+              "description": "בחצר האולם"
+            },
+            {
+              "time": "21:00",
+              "label": "ארוחת חגיגה"
+            },
+            {
+              "time": "22:30",
+              "label": "ריקודים",
+              "description": "ופתיחת האלבום החי על המסך"
+            }
+          ]
+        }
+      },
+      {
+        "id": "dress",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "לפני שמגיעים",
+          "heading": "קוד לבוש",
+          "items": [
+            {
+              "title": "אלגנטי-חגיגי",
+              "body": "המארחים ממלאים כאן את בקשת הלבוש. במוק: ערב חגיגי, בלי הנחיה מחייבת."
+            },
+            {
+              "title": "מזג האוויר",
+              "body": "החופה בחוץ. כדאי שכבה קלה לערב, לפי העונה."
+            },
+            {
+              "title": "ילדים",
+              "body": "המארחים מציינים כאן אם הערב פתוח לילדים, ואם יש פינת משחקים."
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "אווירה",
+          "heading": "תמונות לדוגמה",
+          "style": "masonry",
+          "note": "פרחים ומרקמים מספרית ה־QR, ותמונות מאלבום עמית וגל. בלי אנשים שנוצרו ב־AI.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/fl-rich1"
+              },
+              "caption": "פרחים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "wedding-1/album-1"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "art/fl-blush-bl"
+              },
+              "caption": "פרחים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "wedding-1/album-2"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "art/fl-rich2"
+              },
+              "caption": "פרחים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "wedding-1/album-3"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "art/tx-crumple"
+              },
+              "caption": "זהב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "wedding-1/album-4"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "art/fl-bot-tl"
+              },
+              "caption": "עלה · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "איך מצטרפים",
+          "heading": "שלושה צעדים, בלי אפליקציה",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "צפו באלבום החי"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "איך מגיעים",
+          "location_name": "אולם הדוגמה",
+          "city": "השרון",
+          "note": "המפה כאן היא סקיצה לדוגמה, לא מפה חיה. ווייז וגוגל מפות יפתחו בקישור אמיתי אצל המארח."
+        }
+      },
+      {
+        "id": "wishes",
+        "type": "WISHING_WELL",
+        "enabled": false,
+        "order": 9,
+        "data": {
+          "title": "ברכות לזוג",
+          "message": "כתבו כמה מילים לעמית וגל. הברכות יופיעו כאן אחרי האישור.",
+          "gift_label": "קופת מתנות לזוג (קישור לדוגמה)",
+          "gift_note": "ביט, קופה או רשימה — המארח מדביק קישור."
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 10,
+        "data": {
+          "kicker": "אישור הגעה",
+          "heading": "מגיעים?",
+          "body": "במוק הזה האישור לא נשמר בשרת. אצל המארח זה יושב על רשימת האורחים."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "כדאי לדעת",
+          "heading": "שאלות קצרות",
+          "items": [
+            {
+              "q": "יש חניה?",
+              "a": "המארחים ממלאים כאן הוראות חניה. במוק: חניה במתחם, לפי שילוט האולם."
+            },
+            {
+              "q": "מה לובשים?",
+              "a": "ערב חגיגי. פירוט למעלה, בסעיף קוד הלבוש."
+            },
+            {
+              "q": "אפשר להביא ילדים?",
+              "a": "ההחלטה אצל המארח. כאן יופיע המשפט שהם יכתבו."
+            },
+            {
+              "q": "איך מעבירים מתנה?",
+              "a": "קישור לקופה או לביט, בסעיף הברכות. בלי מספר חשבון בדוי במוק."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "wedding-2": {
+    "template_id": "wedding-2",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "DARK",
+      "font_family": "Heebo",
+      "scale": "M",
+      "cover": {
+        "stock": "wedding-2/hero"
+      },
+      "colors": {
+        "primary": "#C9A36A",
+        "secondary": "#B4A89A",
+        "accent": "#C9A36A",
+        "background": "#14110F",
+        "text": "#F3EEE6"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "עמית וגל",
+          "event_date": "2027-06-10T19:30:00+03:00",
+          "kicker": "החתונה של",
+          "venue": "גלריה הדוגמה",
+          "city": "תל אביב",
+          "welcome_heading": "ברוכים הבאים",
+          "welcome": "הערב הזה שייך גם לכם. סרקו, צלמו, והעלו — התמונות עולות למסך בזמן אמת. בלי אפליקציה.",
+          "date_he": "יום חמישי, 10 ביוני 2027",
+          "time_he": "19:30",
+          "cover": {
+            "stock": "wedding-2/hero"
+          }
+        }
+      },
+      {
+        "id": "quote",
+        "type": "QUOTE",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "text": "הערב הזה שייך גם לכם.",
+          "credit": "עמית וגל"
+        }
+      },
+      {
+        "id": "story",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "הסיפור",
+          "heading": "עכשיו מתחילים",
+          "body": "עמוד כהה, אותיות גדולות, פחות קישוט. כאן המארחים כותבים פסקה אחת על הערב — בלי ביוגרפיה שמומצאת בשביל המוק.",
+          "layout": "wide"
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "על הסרט",
+          "heading": "רגעים לדוגמה",
+          "style": "filmstrip",
+          "note": "תמונות מאלבום עמית וגל, לצד מרקם כהה וזהב. בלי אנשים שנוצרו ב־AI.",
+          "images": [
+            {
+              "image": {
+                "stock": "wedding-2/album-1"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "art/fl-rich2"
+              },
+              "caption": "פרחים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "wedding-2/album-2"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "art/tx-crumple"
+              },
+              "caption": "זהב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "wedding-2/album-3"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "wedding-2/album-4"
+              },
+              "caption": "עמית וגל"
+            },
+            {
+              "image": {
+                "stock": "art/fl-blush-bl"
+              },
+              "caption": "פרחים · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "heading": "הערב",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "19:30",
+              "label": "קבלת פנים"
+            },
+            {
+              "time": "20:15",
+              "label": "חופה"
+            },
+            {
+              "time": "21:00",
+              "label": "שולחנות"
+            },
+            {
+              "time": "22:30",
+              "label": "רחבה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "dress",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "לבוש",
+          "heading": "שחור, זהב, פשוט",
+          "items": [
+            {
+              "title": "קוד לבוש",
+              "body": "ערב. המארחים יכולים לצמצם או להרחיב את הבקשה."
+            },
+            {
+              "title": "המקום",
+              "body": "גלריה. נעליים נוחות להליכה בין האולמות."
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "האלבום החי",
+          "heading": "מעלים, וזה על המסך",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו עכשיו",
+          "album_text": "לאלבום החי"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "גלריה הדוגמה",
+          "location_name": "גלריה הדוגמה",
+          "city": "תל אביב",
+          "note": "סקיצת מפה לדוגמה, לא ניווט חי."
+        }
+      },
+      {
+        "id": "wishes",
+        "type": "WISHING_WELL",
+        "enabled": false,
+        "order": 9,
+        "data": {
+          "title": "מילה לזוג",
+          "message": "השאירו ברכה קצרה.",
+          "gift_label": "מתנה (קישור לדוגמה)"
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "בקצרה",
+          "items": [
+            {
+              "q": "איפה חונים?",
+              "a": "המארח ממלא. במוק: לפי הוראות הגלריה."
+            },
+            {
+              "q": "יש מלתחה?",
+              "a": "כן, אם המקום מציע — המשפט הזה מתחלף."
+            },
+            {
+              "q": "מתי נפתח האלבום?",
+              "a": "מהרגע שההעלאות נפתחות, בערך שמונה שעות לפני תחילת האירוע."
+            }
+          ]
+        }
+      },
+      {
+        "id": "trivia",
+        "type": "TRIVIA_CTA",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "title": "כמה אתם מכירים את עמית וגל",
+          "body": "מצטרפים מהטלפון, התוצאות על המסך."
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "barmitzvah-1": {
+    "template_id": "barmitzvah-1",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Varela Round",
+      "scale": "M",
+      "cover": {
+        "stock": "barmitzvah-1/hero"
+      },
+      "colors": {
+        "primary": "#1F7A72",
+        "secondary": "#C9A36A",
+        "accent": "#C9A36A",
+        "background": "#F3F6F0",
+        "text": "#1A3A36"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "בר המצווה של יונתן",
+          "event_date": "2027-03-18T17:30:00+02:00",
+          "kicker": "חוגגים את",
+          "venue": "אולם הדוגמה",
+          "city": "רעננה",
+          "welcome_heading": "משפחה וחברים",
+          "welcome": "שמחים שאתם כאן עם יונתן. העלו תמונות מהחגיגה — הן יופיעו באלבום החי לכולם.",
+          "date_he": "יום חמישי, 18 במרץ 2027",
+          "time_he": "17:30",
+          "cover": {
+            "stock": "barmitzvah-1/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "לכבוד",
+          "heading": "יונתן",
+          "body": "כאן המשפחה כותבת כמה מילים על יונתן — מי הוא, מה הוא אוהב, למה הערב הזה משמח אותם. במוק אין ביוגרפיה בדויה, רק המקום לטקסט.",
+          "image": {
+            "stock": "art/tl-frame"
+          },
+          "layout": "split"
+        }
+      },
+      {
+        "id": "parasha",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "עלייה לתורה",
+          "heading": "פרשת הקריאה",
+          "body": "כאן יופיעו שם הפרשה וההפטרה, כשהמשפחה תמלא אותן. לא בחרנו פרשה בשביל התאריך שבדוגמה.",
+          "layout": "center"
+        }
+      },
+      {
+        "id": "family",
+        "type": "PEOPLE",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "יחד",
+          "heading": "המשפחה",
+          "note": "שמות וראשי תיבות לדוגמה בלבד, בלי תמונות.",
+          "items": [
+            {
+              "initials": "א",
+              "name": "אמא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "א",
+              "name": "אבא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "א",
+              "name": "אחים",
+              "role": "אם יש, יופיעו כאן"
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "heading": "סדר היום",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "17:30",
+              "label": "קבלת פנים"
+            },
+            {
+              "time": "18:15",
+              "label": "עלייה לתורה",
+              "description": "בבית הכנסת הצמוד לאולם"
+            },
+            {
+              "time": "19:30",
+              "label": "חגיגה וארוחה"
+            },
+            {
+              "time": "21:00",
+              "label": "ריקודים ומשחקים"
+            }
+          ]
+        }
+      },
+      {
+        "id": "party",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "אחר כך",
+          "heading": "החגיגה",
+          "items": [
+            {
+              "title": "רחבה",
+              "body": "מוזיקה וריקודים באולם, אחרי הארוחה."
+            },
+            {
+              "title": "משחקים",
+              "body": "אם המשפחה מזמינה פעילות — היא תופיע כאן."
+            },
+            {
+              "title": "טריוויה",
+              "body": "אפשר לפתוח משחק קצר לכבוד יונתן, על המסך."
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "אווירה",
+          "heading": "תמונות לדוגמה",
+          "style": "grid",
+          "note": "נייר גזור, בלונים וקונפטי — עיטור בלבד, בלי תמונות ילדים.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/tl-rich1"
+              },
+              "caption": "נייר גזור · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/tl-rich2"
+              },
+              "caption": "טורקיז · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/tl-frame"
+              },
+              "caption": "מסגרת · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bl-rich1"
+              },
+              "caption": "בלונים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/cf-rich"
+              },
+              "caption": "קונפטי · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/dd-rich1"
+              },
+              "caption": "ציור · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "שלושה צעדים, בלי אפליקציה",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "צפו באלבום"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "אולם הדוגמה",
+          "location_name": "אולם הדוגמה",
+          "city": "רעננה",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "gifts",
+        "type": "GIFT",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "מתנות",
+          "heading": "רשימת מתנות",
+          "body": "המשפחה מדביקה כאן קישור לרשימה, אם יש. במוק הקישור לדוגמה בלבד.",
+          "button": "לרשימה (דוגמה)"
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 11,
+        "data": {
+          "kicker": "אישור",
+          "heading": "מגיעים לחגוג?",
+          "body": "אישור הגעה לדוגמה, בלי שמירה בשרת."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "כדאי לדעת",
+          "items": [
+            {
+              "q": "יש חניה?",
+              "a": "כן, לפי שילוט האולם — המשפט מתחלף אצל המארח."
+            },
+            {
+              "q": "מה לובשים?",
+              "a": "חגיגי ונוח. אפשר לפרט חולצה לבנה לעלייה לתורה."
+            },
+            {
+              "q": "האם הערב מתאים לילדים?",
+              "a": "בר המצווה פתוח למשפחה. הפירוט אצל המארח."
+            },
+            {
+              "q": "איך מעבירים מתנה?",
+              "a": "רשימה או קופה, בסעיף המתנות."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 14,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "barmitzvah-2": {
+    "template_id": "barmitzvah-2",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "DARK",
+      "font_family": "Frank Ruhl Libre",
+      "scale": "M",
+      "cover": {
+        "stock": "barmitzvah-2/hero"
+      },
+      "colors": {
+        "primary": "#D4AF37",
+        "secondary": "#B8B0A0",
+        "accent": "#D4AF37",
+        "background": "#0E1730",
+        "text": "#F3EEE6"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "נועה",
+          "event_date": "2027-05-06T18:00:00+03:00",
+          "kicker": "בת המצווה של",
+          "venue": "אולם הדוגמה",
+          "city": "ירושלים",
+          "welcome_heading": "לנועה, באהבה",
+          "welcome": "הערב הזה נפתח בטקס וממשיך בחגיגה. אתם מוזמנים לצלם ולהעלות — התמונות יחכו לכולנו באלבום.",
+          "date_he": "יום חמישי, 6 במאי 2027",
+          "time_he": "18:00",
+          "cover": {
+            "stock": "barmitzvah-2/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "לנועה",
+          "heading": "באהבה",
+          "body": "פסקה אחת שהמשפחה כותבת לנועה. במוק השארנו את המקום פתוח, בלי סיפור חיים בדוי.",
+          "layout": "wide"
+        }
+      },
+      {
+        "id": "parasha",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "הטקס",
+          "heading": "פרשת הקריאה",
+          "body": "שם הפרשה וההפטרה יופיעו כאן, כשיתמלאו. לא שיבצנו פרשה לפי התאריך שבדוגמה.",
+          "layout": "center"
+        }
+      },
+      {
+        "id": "family",
+        "type": "PEOPLE",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "המשפחה",
+          "heading": "מי עומד לידה",
+          "note": "שמות לדוגמה, בלי תמונות.",
+          "items": [
+            {
+              "initials": "א",
+              "name": "אמא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "א",
+              "name": "אבא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "ס",
+              "name": "סבים וסבתות",
+              "role": "אם ירצו להופיע"
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "heading": "סדר הערב",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "18:00",
+              "label": "קבלת פנים"
+            },
+            {
+              "time": "18:45",
+              "label": "עלייה לתורה"
+            },
+            {
+              "time": "19:30",
+              "label": "נאומים וברכות"
+            },
+            {
+              "time": "20:30",
+              "label": "חגיגה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "אווירה",
+          "heading": "זהב על כחול",
+          "style": "masonry",
+          "note": "עיטורי חיל־הים וארט־דקו, בלי תמונות אנשים.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/ga-corner"
+              },
+              "caption": "זהב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/nv-corner"
+              },
+              "caption": "חיל־הים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/tx-crumple"
+              },
+              "caption": "רדיד · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ga-rich"
+              },
+              "caption": "ארט־דקו · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ye-rich"
+              },
+              "caption": "זהב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/tx-foil"
+              },
+              "caption": "ברק · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "האלבום החי",
+          "heading": "שלושה צעדים",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "האלבום החי"
+        }
+      },
+      {
+        "id": "wishes",
+        "type": "WISHING_WELL",
+        "enabled": false,
+        "order": 8,
+        "data": {
+          "title": "ברכות לנועה",
+          "message": "כתבו לנועה כמה מילים לערב הזה."
+        }
+      },
+      {
+        "id": "gifts",
+        "type": "GIFT",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "מתנות",
+          "heading": "רשימה, אם יש",
+          "body": "קישור לדוגמה בלבד.",
+          "button": "לרשימת המתנות (דוגמה)"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "אולם הדוגמה",
+          "location_name": "אולם הדוגמה",
+          "city": "ירושלים",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 11,
+        "data": {
+          "kicker": "אישור",
+          "heading": "מגיעים?",
+          "body": "אישור הגעה לדוגמה."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לפני הערב",
+          "items": [
+            {
+              "q": "מה לובשים?",
+              "a": "ערב חגיגי. אפשר לבקש צבע מסוים — המארח ממלא."
+            },
+            {
+              "q": "יש חניה?",
+              "a": "לפי הוראות האולם בירושלים, כשיתמלאו."
+            },
+            {
+              "q": "מתי מתחיל הטקס?",
+              "a": "לפי הלו״ז למעלה. כדאי להגיע לקבלת הפנים."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 14,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "birthday-1": {
+    "template_id": "birthday-1",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Varela Round",
+      "scale": "M",
+      "cover": {
+        "stock": "birthday-1/hero"
+      },
+      "colors": {
+        "primary": "#E15A6A",
+        "secondary": "#7B4BAA",
+        "accent": "#7B4BAA",
+        "background": "#FFF6F3",
+        "text": "#4A2040"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "תמר בת 12",
+          "event_date": "2027-04-22T16:00:00+03:00",
+          "kicker": "יום הולדת",
+          "venue": "גינת הדוגמה",
+          "city": "הרצליה",
+          "welcome_heading": "תמר בת 12",
+          "welcome": "בואו לחגוג איתה. צלמו, העלו, וכל התמונות יישארו באלבום אחד — גם אחרי שהבלונים יורדים.",
+          "date_he": "יום חמישי, 22 באפריל 2027",
+          "time_he": "16:00",
+          "cover": {
+            "stock": "birthday-1/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "חוגגים",
+          "heading": "תמר בת 12",
+          "body": "כאן ההורים כותבים כמה מילים על תמר ועל המסיבה. במוק לא המצאנו תחביבים או סיפור בית-ספר.",
+          "image": {
+            "stock": "art/bl-top"
+          },
+          "layout": "split"
+        }
+      },
+      {
+        "id": "year",
+        "type": "MILESTONES",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "השנה הזאת",
+          "heading": "אבני דרך לדוגמה",
+          "note": "המארח ממלא רגעים אמיתיים. השורות כאן הן מקום שמור בלבד.",
+          "items": [
+            {
+              "tag": "01",
+              "title": "רגע ראשון",
+              "body": "כאן יופיע רגע שהמשפחה תבחר."
+            },
+            {
+              "tag": "02",
+              "title": "רגע שני",
+              "body": "עוד מקום למילים, לא לביוגרפיה בדויה."
+            },
+            {
+              "tag": "03",
+              "title": "המסיבה",
+              "body": "ומה מחכה בגינה היום."
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "heading": "מה קורה היום",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "16:00",
+              "label": "קבלת פנים ומשחקים"
+            },
+            {
+              "time": "17:00",
+              "label": "עוגה והפתעות"
+            },
+            {
+              "time": "17:45",
+              "label": "פעילות בחצר"
+            },
+            {
+              "time": "18:30",
+              "label": "סיום ומתנות"
+            }
+          ]
+        }
+      },
+      {
+        "id": "playlist",
+        "type": "PLAYLIST",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "heading": "מה שומעים",
+          "note": "רשימה לדוגמה, לא פלייליסט אמיתי.",
+          "tracks": [
+            {
+              "song": "שיר פתיחה",
+              "art": "הרשימה של תמר",
+              "dur": "3:12"
+            },
+            {
+              "song": "ריקוד",
+              "art": "הרשימה של תמר",
+              "dur": "3:40"
+            },
+            {
+              "song": "עוגה",
+              "art": "הרשימה של תמר",
+              "dur": "2:55"
+            },
+            {
+              "song": "סיום",
+              "art": "הרשימה של תמר",
+              "dur": "3:20"
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "צבע",
+          "heading": "תמונות לדוגמה",
+          "style": "carousel",
+          "note": "בלונים, דגלונים וקונפטי. בלי תמונות ילדים.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/bl-rich1"
+              },
+              "caption": "בלונים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bl-rich2"
+              },
+              "caption": "בלונים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bl-rich3"
+              },
+              "caption": "בלונים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/cf-rich"
+              },
+              "caption": "קונפטי · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/dd-rich2"
+              },
+              "caption": "דגלנים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/cf-rich2"
+              },
+              "caption": "צבע · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "שלושה צעדים",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "צפו באלבום"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "גינת הדוגמה",
+          "location_name": "גינת הדוגמה",
+          "city": "הרצליה",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "gifts",
+        "type": "GIFT",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "מתנות",
+          "heading": "רשימה, אם יש",
+          "body": "קישור לדוגמה.",
+          "button": "לרשימה (דוגמה)"
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 10,
+        "data": {
+          "kicker": "אישור",
+          "heading": "תמר מחכה לכם",
+          "body": "אישור הגעה ליום ההולדת, בלי שמירה בשרת."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "להורים",
+          "items": [
+            {
+              "q": "מתי מסיימים?",
+              "a": "לפי הלו״ז, בסביבות 18:30. המארח יכול לעדכן."
+            },
+            {
+              "q": "צריך נעליים מיוחדות?",
+              "a": "נוח לחצר. אם יש בקשה אחרת — היא תופיע כאן."
+            },
+            {
+              "q": "יש חניה?",
+              "a": "ליד הגינה, לפי ההוראות שיתמלאו."
+            },
+            {
+              "q": "אלרגיות ואוכל?",
+              "a": "המארח מציין כאן. במוק אין תפריט בדוי."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "birthday-2": {
+    "template_id": "birthday-2",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Frank Ruhl Libre",
+      "scale": "M",
+      "cover": {
+        "stock": "birthday-2/hero"
+      },
+      "colors": {
+        "primary": "#8B3A4A",
+        "secondary": "#C9A36A",
+        "accent": "#C9A36A",
+        "background": "#F6EFE6",
+        "text": "#3B2418"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "אדם · 30",
+          "event_date": "2027-09-16T20:30:00+03:00",
+          "kicker": "מוזמנים לערב של",
+          "venue": "בר הדוגמה",
+          "city": "תל אביב",
+          "welcome_heading": "שלושים",
+          "welcome": "ערב קטן וחגיגי. תביאו את עצמכם, ואת התמונות תשאירו אצלנו — באלבום החי.",
+          "date_he": "יום חמישי, 16 בספטמבר 2027",
+          "time_he": "20:30",
+          "cover": {
+            "stock": "birthday-2/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "שלושים",
+          "heading": "ערב קטן, שולחנות נמוכים",
+          "body": "כאן אדם כותב למה הוא מזמין, ומה צפוי בבר. במוק השארנו את הפסקה כללית, בלי ביוגרפיה בדויה.",
+          "image": {
+            "stock": "art/ad-ribbon"
+          },
+          "layout": "split"
+        }
+      },
+      {
+        "id": "year",
+        "type": "MILESTONES",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "עד כאן",
+          "heading": "קווים לשנה",
+          "note": "אבני דרך שהמארח ממלא. כאן הן מקום שמור.",
+          "items": [
+            {
+              "tag": "—",
+              "title": "מה שהיה",
+              "body": "משפט שהמארח יכתוב."
+            },
+            {
+              "tag": "—",
+              "title": "מה שבא",
+              "body": "עוד משפט, אם ירצה."
+            },
+            {
+              "tag": "30",
+              "title": "הערב",
+              "body": "חברים, בר, ואלבום חי."
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "heading": "הערב",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "20:30",
+              "label": "קבלת פנים"
+            },
+            {
+              "time": "21:15",
+              "label": "ברכות וכוסות"
+            },
+            {
+              "time": "22:00",
+              "label": "מוזיקה ושולחנות"
+            }
+          ]
+        }
+      },
+      {
+        "id": "playlist",
+        "type": "PLAYLIST",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "heading": "הפסקול",
+          "note": "רשימה לדוגמה.",
+          "tracks": [
+            {
+              "song": "פתיחה שקטה",
+              "art": "רשימת הבית",
+              "dur": "3:40"
+            },
+            {
+              "song": "אמצע הערב",
+              "art": "רשימת הבית",
+              "dur": "4:05"
+            },
+            {
+              "song": "רחבה",
+              "art": "רשימת הבית",
+              "dur": "3:55"
+            },
+            {
+              "song": "סיום",
+              "art": "רשימת הבית",
+              "dur": "4:10"
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "אווירה",
+          "heading": "סרטים וזהב",
+          "style": "masonry",
+          "note": "עיטורי ערב ומארג זהב, בלי תמונות אנשים.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/ad-rich1"
+              },
+              "caption": "סרט · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ad-rich2"
+              },
+              "caption": "ערב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ad-gold"
+              },
+              "caption": "זהב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ad-ribbon"
+              },
+              "caption": "סרט · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/tx-crumple"
+              },
+              "caption": "רדיד · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/fl-blush2"
+              },
+              "caption": "פרח · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "שלושה צעדים",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו רגע",
+          "album_text": "האלבום"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "בר הדוגמה",
+          "location_name": "בר הדוגמה",
+          "city": "תל אביב",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "wishes",
+        "type": "WISHING_WELL",
+        "enabled": false,
+        "order": 9,
+        "data": {
+          "title": "מילה לאדם",
+          "message": "ברכה קצרה ליום ההולדת."
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 10,
+        "data": {
+          "kicker": "אישור",
+          "heading": "מגיעים לבר?",
+          "body": "אישור לדוגמה, בלי שמירה."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לפני שיוצאים",
+          "items": [
+            {
+              "q": "מה לובשים?",
+              "a": "ערב, נוח. המארח יכול לדייק."
+            },
+            {
+              "q": "יש חניה?",
+              "a": "חניון באזור, לפי מה שיתמלא."
+            },
+            {
+              "q": "עד מתי?",
+              "a": "הבר נסגר לפי שעת המקום. לא קבענו שעה בדויה."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "brit-1": {
+    "template_id": "brit-1",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Frank Ruhl Libre",
+      "scale": "M",
+      "cover": {
+        "stock": "brit-1/hero"
+      },
+      "colors": {
+        "primary": "#6B7F5A",
+        "secondary": "#C4A882",
+        "accent": "#C4A882",
+        "background": "#F3F0E8",
+        "text": "#2C3828"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "הברית של ארי",
+          "event_date": "2027-02-11T10:00:00+02:00",
+          "kicker": "מזל טוב",
+          "venue": "אולם הדוגמה",
+          "city": "גבעתיים",
+          "welcome_heading": "ברוכים הבאים",
+          "welcome": "שמחים לארח אתכם ביום השמחה של ארי ושל המשפחה. אתם מוזמנים לצלם רגעים קטנים ולהעלות לאלבום המשותף.",
+          "date_he": "יום חמישי, 11 בפברואר 2027",
+          "time_he": "10:00",
+          "cover": {
+            "stock": "brit-1/hero"
+          }
+        }
+      },
+      {
+        "id": "name",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "השם",
+          "heading": "ארי",
+          "body": "משמעות השם, אם המשפחה רוצה לשתף, תופיע כאן. «ארי» קשור לאריה — משפט שהמארח יכול להשאיר, להרחיב או להחליף. במוק זה טקסט לדוגמה, לא סיפור משפחתי בדוי.",
+          "image": {
+            "stock": "art/ol-leaf"
+          },
+          "layout": "split"
+        }
+      },
+      {
+        "id": "family",
+        "type": "PEOPLE",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "המשפחה",
+          "heading": "מי מחכה לכם",
+          "note": "תפקידים לדוגמה, בלי שמות מלאים ובלי תמונות.",
+          "items": [
+            {
+              "initials": "א",
+              "name": "אמא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "א",
+              "name": "אבא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "ס",
+              "name": "סבים",
+              "role": "אם ירצו"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ceremony",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "הברית",
+          "heading": "פרטי הטקס",
+          "items": [
+            {
+              "title": "מתי",
+              "body": "בבוקר, לפי הלו״ז למטה."
+            },
+            {
+              "title": "איפה",
+              "body": "באולם, אחרי קבלת הפנים."
+            },
+            {
+              "title": "מה להביא",
+              "body": "את עצמכם. בקשות מיוחדות המארח יוסיף."
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "רך",
+          "heading": "גלריה עדינה",
+          "style": "masonry",
+          "note": "איורי תינוקות מספרית ה־QR: עלים, עננים, סוס נדנדה. בלי תמונות של תינוקות.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/ol-rich"
+              },
+              "caption": "זית · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/hs-rich"
+              },
+              "caption": "סוס נדנדה · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/hs-c"
+              },
+              "caption": "סוס · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/sk-rich"
+              },
+              "caption": "שמים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bb-rattle"
+              },
+              "caption": "רעשן · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ol-leaf"
+              },
+              "caption": "עלה · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "heading": "סדר הבוקר",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "10:00",
+              "label": "קבלת פנים"
+            },
+            {
+              "time": "10:30",
+              "label": "הברית"
+            },
+            {
+              "time": "11:00",
+              "label": "סעודה וברכות"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "רגעים קטנים, באלבום אחד",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "צפו באלבום"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "אולם הדוגמה",
+          "location_name": "אולם הדוגמה",
+          "city": "גבעתיים",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "wishes",
+        "type": "WISHING_WELL",
+        "enabled": false,
+        "order": 9,
+        "data": {
+          "title": "ברכות למשפחה",
+          "message": "מילה לארי ולהורים."
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 10,
+        "data": {
+          "kicker": "אישור",
+          "heading": "מגיעים בבוקר?",
+          "body": "אישור לדוגמה."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "כדאי לדעת",
+          "items": [
+            {
+              "q": "יש חניה?",
+              "a": "ליד האולם, לפי השילוט."
+            },
+            {
+              "q": "האם מתאים לילדים?",
+              "a": "כן, זו שמחה משפחתית. המארח יכול לפרט."
+            },
+            {
+              "q": "מה לובשים?",
+              "a": "חגיגי ונוח לבוקר."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "brit-2": {
+    "template_id": "brit-2",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Frank Ruhl Libre",
+      "scale": "M",
+      "cover": {
+        "stock": "brit-2/hero"
+      },
+      "colors": {
+        "primary": "#C4896A",
+        "secondary": "#E8B8A0",
+        "accent": "#E8B8A0",
+        "background": "#F8EFE6",
+        "text": "#5A3228"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "הבריתה של נועה",
+          "event_date": "2027-07-08T11:00:00+03:00",
+          "kicker": "מזל טוב",
+          "venue": "גן הדוגמה",
+          "city": "נס ציונה",
+          "welcome_heading": "שלום לנועה",
+          "welcome": "יום רך ושמח. צלמו מה שתרצו, והעלו לכאן — המשפחה כולה תראה את הרגעים באלבום אחד.",
+          "date_he": "יום חמישי, 8 ביולי 2027",
+          "time_he": "11:00",
+          "cover": {
+            "stock": "brit-2/hero"
+          }
+        }
+      },
+      {
+        "id": "name",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "השם",
+          "heading": "נועה",
+          "body": "אם המשפחה רוצה, כאן נכתבת משמעות השם. «נועה» קשורה לתנועה ולנעימות — משפט שאפשר להשאיר או להחליף. לא כתבנו סיפור משפחתי בדוי.",
+          "image": {
+            "stock": "art/pc-flower"
+          },
+          "layout": "split"
+        }
+      },
+      {
+        "id": "family",
+        "type": "PEOPLE",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "המשפחה",
+          "heading": "מחכים לכם",
+          "note": "תפקידים לדוגמה, בלי תמונות.",
+          "items": [
+            {
+              "initials": "א",
+              "name": "אמא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "א",
+              "name": "אבא",
+              "role": "שם לדוגמה"
+            },
+            {
+              "initials": "ס",
+              "name": "סבתות",
+              "role": "אם ירצו"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ceremony",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "הבריתה",
+          "heading": "פרטי היום",
+          "items": [
+            {
+              "title": "הטקס",
+              "body": "בגן, אחרי קבלת הפנים. המארח מפרט."
+            },
+            {
+              "title": "כיבוד",
+              "body": "יופיע כאן, בלי תפריט בדוי."
+            },
+            {
+              "title": "צילום",
+              "body": "מוזמנים לצלם ולהעלות לאלבום המשותף."
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "חמים",
+          "heading": "חדר מלא אור",
+          "style": "grid",
+          "note": "חבל כביסה, דובי, מתנות וסוס נדנדה — איורים בלבד, בלי תמונות תינוקות.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/cl-rich"
+              },
+              "caption": "חבל כביסה · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/td-gifts"
+              },
+              "caption": "מתנות · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/td-rich"
+              },
+              "caption": "דובי · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/pc-rich1"
+              },
+              "caption": "אפרסק · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/pc-rich2"
+              },
+              "caption": "פרח · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bb-rich"
+              },
+              "caption": "קוביות · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "heading": "סדר היום",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "11:00",
+              "label": "קבלת פנים"
+            },
+            {
+              "time": "11:30",
+              "label": "הבריתה"
+            },
+            {
+              "time": "12:00",
+              "label": "כיבוד וברכות"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "שלושה צעדים",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "האלבום"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "גן הדוגמה",
+          "location_name": "גן הדוגמה",
+          "city": "נס ציונה",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "wishes",
+        "type": "WISHING_WELL",
+        "enabled": false,
+        "order": 9,
+        "data": {
+          "title": "ברכות לנועה",
+          "message": "מילה למשפחה."
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 10,
+        "data": {
+          "kicker": "אישור",
+          "heading": "מגיעים?",
+          "body": "אישור לדוגמה."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לפני שיוצאים",
+          "items": [
+            {
+              "q": "יש חניה?",
+              "a": "ליד הגן, לפי ההוראות שיתמלאו."
+            },
+            {
+              "q": "מה לובשים?",
+              "a": "חגיגי ונוח, מתאים לגן בקיץ."
+            },
+            {
+              "q": "האם יש צל?",
+              "a": "המארח מציין. במוק לא תיארנו מתחם בדוי."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "corporate-1": {
+    "template_id": "corporate-1",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Heebo",
+      "scale": "M",
+      "cover": {
+        "stock": "corporate-1/hero"
+      },
+      "colors": {
+        "primary": "#3D6A80",
+        "secondary": "#8AA0AC",
+        "accent": "#8AA0AC",
+        "background": "#EEF1F3",
+        "text": "#1A2830"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "כנס החברה 2027",
+          "event_date": "2027-11-03T09:00:00+02:00",
+          "kicker": "כנס שנתי",
+          "venue": "מרכז הכנסים הדוגמה",
+          "city": "רמת גן",
+          "welcome_heading": "ברוכים הבאים לכנס",
+          "welcome": "לוח הזמנים, הדוברים והאלבום החי — באותו עמוד. העלו תמונות מהיום, בלי אפליקציה.",
+          "date_he": "יום רביעי, 3 בנובמבר 2027",
+          "time_he": "09:00",
+          "cover": {
+            "stock": "corporate-1/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "הכנס",
+          "heading": "יום אחד, תכנית אחת",
+          "body": "כאן החברה כותבת מה מצפים מהיום. במוק אין יעדי הכנס בדויים ואין מספרי משתתפים.",
+          "layout": "wide"
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "heading": "לוח הזמנים",
+          "kicker": "סדר היום",
+          "items": [
+            {
+              "time": "09:00",
+              "label": "התכנסות וקפה"
+            },
+            {
+              "time": "09:45",
+              "label": "פתיחה",
+              "description": "דברי ברכה"
+            },
+            {
+              "time": "10:15",
+              "label": "מושב ראשון"
+            },
+            {
+              "time": "12:30",
+              "label": "הפסקת צהריים"
+            },
+            {
+              "time": "13:30",
+              "label": "מושב אחר הצהריים"
+            },
+            {
+              "time": "16:00",
+              "label": "סיכום וקבלת פנים"
+            }
+          ]
+        }
+      },
+      {
+        "id": "speakers",
+        "type": "SPEAKERS",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "heading": "דוברים",
+          "note": "שמות לדוגמה בלבד, בלי תמונות.",
+          "items": [
+            {
+              "initials": "דכ",
+              "name": "דנה כהן",
+              "role": "מנכ״לית"
+            },
+            {
+              "initials": "עמ",
+              "name": "עמית מזרחי",
+              "role": "סמנכ״ל מוצר"
+            },
+            {
+              "initials": "יל",
+              "name": "יונתן לוי",
+              "role": "אורח"
+            }
+          ]
+        }
+      },
+      {
+        "id": "sponsors",
+        "type": "SPONSORS",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "תודה",
+          "heading": "שותפים לדוגמה",
+          "note": "סימנים כלליים בלבד, לא לוגו של חברות אמיתיות.",
+          "items": [
+            {
+              "initials": "א",
+              "name": "שותף א׳"
+            },
+            {
+              "initials": "ב",
+              "name": "שותף ב׳"
+            },
+            {
+              "initials": "ג",
+              "name": "שותף ג׳"
+            },
+            {
+              "initials": "ד",
+              "name": "שותף ד׳"
+            }
+          ]
+        }
+      },
+      {
+        "id": "venue",
+        "type": "MAP",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "המקום",
+          "heading": "מרכז הכנסים הדוגמה",
+          "location_name": "מרכז הכנסים הדוגמה",
+          "city": "רמת גן",
+          "note": "סקיצת מפה לדוגמה. הוראות כניסה והתמצאות המארח ממלא."
+        }
+      },
+      {
+        "id": "network",
+        "type": "NETWORKING",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "חיבור",
+          "heading": "להכיר, לא רק לשמוע",
+          "body": "אם החברה מפעילה פינת היכרות או «הייתי שם» — זה המקום להסביר, באופט־אין. במוק אין רשת בדויה ואין שמות משתתפים."
+        }
+      },
+      {
+        "id": "tag",
+        "type": "HASHTAG",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "tag": "#כנסהחברה2027",
+          "body": "האשטאג לדוגמה. התמונות עצמן עולות לאלבום החי, לא חייבות לעבור ברשתות."
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "המקום",
+          "heading": "תמונות לדוגמה",
+          "style": "grid",
+          "note": "זכוכית, אבן וצבע — בלי תמונות של קהל.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/cb-rich1"
+              },
+              "caption": "צבע · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/cb-rich2"
+              },
+              "caption": "גיאומטריה · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ar-rich"
+              },
+              "caption": "מבנה · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ye-rich"
+              },
+              "caption": "זהב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ga-corner"
+              },
+              "caption": "ארט־דקו · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/tx-crumple"
+              },
+              "caption": "מתכת · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "העלו מהכנס",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות מהכנס",
+          "album_text": "האלבום החי"
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "למשתתפים",
+          "items": [
+            {
+              "q": "יש חניה?",
+              "a": "בחניון המרכז, לפי השילוט שיתמלא."
+            },
+            {
+              "q": "מה קוד הלבוש?",
+              "a": "עסקי-נוח, אלא אם המארח יבקש אחרת."
+            },
+            {
+              "q": "יש וויי־פיי?",
+              "a": "פרטי הרשת יופיעו כאן, בלי סיסמה בדויה במוק."
+            },
+            {
+              "q": "איך מקבלים מצגות?",
+              "a": "קישור אחרי היום, אם החברה בוחרת לשתף."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "corporate-2": {
+    "template_id": "corporate-2",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "DARK",
+      "font_family": "Frank Ruhl Libre",
+      "scale": "M",
+      "cover": {
+        "stock": "corporate-2/hero"
+      },
+      "colors": {
+        "primary": "#D4AF37",
+        "secondary": "#B8A88A",
+        "accent": "#D4AF37",
+        "background": "#0C0C0C",
+        "text": "#F3EEE6"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "ערב הגאלה",
+          "event_date": "2027-12-16T19:30:00+02:00",
+          "kicker": "מזמינים אתכם ל",
+          "venue": "אולם הדוגמה",
+          "city": "תל אביב",
+          "welcome_heading": "ערב של החברה",
+          "welcome": "לבוש ערב. האלבום החי ירוץ על המסכים לאורך הלילה — פשוט מעלים מהטלפון.",
+          "date_he": "יום חמישי, 16 בדצמבר 2027",
+          "time_he": "19:30",
+          "cover": {
+            "stock": "corporate-2/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "הגאלה",
+          "heading": "ערב של החברה",
+          "body": "כאן נכתב למה מתכנסים. במוק אין הישגים שנתיים בדויים ואין רשימת מצטיינים.",
+          "layout": "wide"
+        }
+      },
+      {
+        "id": "schedule",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "heading": "סדר הערב",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "19:30",
+              "label": "קבלת פנים"
+            },
+            {
+              "time": "20:15",
+              "label": "דברי ברכה"
+            },
+            {
+              "time": "20:45",
+              "label": "ארוחה"
+            },
+            {
+              "time": "22:00",
+              "label": "מופע וריקודים"
+            }
+          ]
+        }
+      },
+      {
+        "id": "speakers",
+        "type": "SPEAKERS",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "heading": "על הבמה",
+          "note": "שמות לדוגמה בלבד.",
+          "items": [
+            {
+              "initials": "דכ",
+              "name": "דנה כהן",
+              "role": "מנכ״לית"
+            },
+            {
+              "initials": "אע",
+              "name": "אורח הערב",
+              "role": "דובר אורח"
+            }
+          ]
+        }
+      },
+      {
+        "id": "dress",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "לפני שמגיעים",
+          "heading": "קוד לבוש",
+          "items": [
+            {
+              "title": "ערב",
+              "body": "לבוש ערב. המארח יכול לדייק צבע או עניבה."
+            },
+            {
+              "title": "צילום",
+              "body": "יהיו מסכים ואלבום חי — מוזמנים להעלות מהטלפון."
+            }
+          ]
+        }
+      },
+      {
+        "id": "sponsors",
+        "type": "SPONSORS",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "תודה",
+          "heading": "שותפים לדוגמה",
+          "note": "סימנים כלליים, לא מותגים אמיתיים.",
+          "items": [
+            {
+              "initials": "א",
+              "name": "שותף א׳"
+            },
+            {
+              "initials": "ב",
+              "name": "שותף ב׳"
+            },
+            {
+              "initials": "ג",
+              "name": "שותף ג׳"
+            }
+          ]
+        }
+      },
+      {
+        "id": "tag",
+        "type": "HASHTAG",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "tag": "#ערבגאלה2027",
+          "body": "אשטאג לדוגמה, למי שרוצה לשתף גם בחוץ."
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "אווירה",
+          "heading": "שחור וזהב",
+          "style": "masonry",
+          "note": "ארט־דקו וחיל־הים, בלי קהל.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/ga-corner"
+              },
+              "caption": "ארט־דקו · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ga-rich"
+              },
+              "caption": "זהב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/nv-corner"
+              },
+              "caption": "חיל־הים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/tx-crumple"
+              },
+              "caption": "רדיד · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ye-rich"
+              },
+              "caption": "ערב · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/cb-rich2"
+              },
+              "caption": "צורה · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "העלו מהערב",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "האלבום החי"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "אולם הדוגמה",
+          "location_name": "אולם הדוגמה",
+          "city": "תל אביב",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 11,
+        "data": {
+          "kicker": "אישור",
+          "heading": "שומרים מקום",
+          "body": "אישור הגעה לערב, בלי שמירה בשרת במוק."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לקראת הערב",
+          "items": [
+            {
+              "q": "מה לובשים?",
+              "a": "לבוש ערב, לפי הסעיף למעלה."
+            },
+            {
+              "q": "יש חניה?",
+              "a": "חניון האולם, לפי ההוראות שיתמלאו."
+            },
+            {
+              "q": "יש מלתחה?",
+              "a": "אם המקום מציע — המארח יציין."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 14,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "party-1": {
+    "template_id": "party-1",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "DARK",
+      "font_family": "Rubik",
+      "scale": "M",
+      "cover": {
+        "stock": "party-1/hero"
+      },
+      "colors": {
+        "primary": "#FF2E9A",
+        "secondary": "#41F3FF",
+        "accent": "#41F3FF",
+        "background": "#070614",
+        "text": "#F4EEFF"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "אדם",
+          "event_date": "2027-06-03T21:00:00+03:00",
+          "kicker": "הרווקים של",
+          "venue": "מועדון הדוגמה",
+          "city": "תל אביב",
+          "welcome_heading": "הלילה הזה",
+          "welcome": "בלי אפליקציה ובלי קבוצת וואטסאפ מתה. מעלים לכאן, רואים על המסך, וממשיכים לרקוד.",
+          "date_he": "יום חמישי, 3 ביוני 2027",
+          "time_he": "21:00",
+          "cover": {
+            "stock": "party-1/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "הלילה",
+          "heading": "הרווקים של אדם",
+          "body": "מסיבה, לא כנס. כאן כותבים מה צפוי ומה מבקשים מהאורחים. במוק אין סיפור בדוי על החברותא.",
+          "layout": "wide"
+        }
+      },
+      {
+        "id": "lineup",
+        "type": "LINEUP",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "על הבמה",
+          "heading": "ליינאפ לדוגמה",
+          "note": "שמות כלליים בלבד, לא אמנים אמיתיים.",
+          "items": [
+            {
+              "time": "21:00",
+              "title": "פתיחת דלתות",
+              "body": "כניסה והאלבום נפתח."
+            },
+            {
+              "time": "22:00",
+              "title": "די־ג׳יי א׳ (דוגמה)",
+              "body": "הרחבה מתחילה."
+            },
+            {
+              "time": "00:00",
+              "title": "די־ג׳יי ב׳ (דוגמה)",
+              "body": "המשך הלילה."
+            }
+          ]
+        }
+      },
+      {
+        "id": "dress",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "מה לובשים",
+          "heading": "ניאון, שחור, נוח לרחבה",
+          "items": [
+            {
+              "title": "הנושא",
+              "body": "לילה. המארח יכול לבקש צבע או נעל מסוימת."
+            },
+            {
+              "title": "נוחות",
+              "body": "רחבה ארוכה — נעליים שאפשר לרקוד בהן."
+            }
+          ]
+        }
+      },
+      {
+        "id": "playlist",
+        "type": "PLAYLIST",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "heading": "הפלייליסט",
+          "note": "רשימה לדוגמה, לא פלייליסט אמיתי.",
+          "tracks": [
+            {
+              "song": "פתיחה",
+              "art": "די־ג׳יי הערב",
+              "dur": "3:12"
+            },
+            {
+              "song": "רחבה",
+              "art": "די־ג׳יי הערב",
+              "dur": "4:01"
+            },
+            {
+              "song": "בלדה קצרה",
+              "art": "די־ג׳יי הערב",
+              "dur": "3:40"
+            },
+            {
+              "song": "סיום",
+              "art": "די־ג׳יי הערב",
+              "dur": "3:28"
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "אור",
+          "heading": "ניאון לדוגמה",
+          "style": "carousel",
+          "note": "הילה וניאון, בלי תמונות קהל.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/cf-rich"
+              },
+              "caption": "קונפטי · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/nn-edge"
+              },
+              "caption": "ניאון · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/nn-rich"
+              },
+              "caption": "הילה · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/cf-rich2"
+              },
+              "caption": "צבע · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bl-rich1"
+              },
+              "caption": "בלון · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "been",
+        "type": "BEEN_THERE",
+        "enabled": false,
+        "order": 7,
+        "data": {
+          "heading": "הייתי שם",
+          "body": "ראיתם מישהו בתמונה ורוצים לומר שלום? לוחצים על הרגע באלבום. פרטי קשר רק אם שני הצדדים מסכימים. הפיצ׳ר כבוי בברירת המחדל אצל המארח — כאן הוא מוצג כדוגמה."
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "מעלים מהרחבה",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו עכשיו",
+          "album_text": "האלבום החי"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "מועדון הדוגמה",
+          "location_name": "מועדון הדוגמה",
+          "city": "תל אביב",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לפני הלילה",
+          "items": [
+            {
+              "q": "יש רשימה בכניסה?",
+              "a": "אם כן, המארח מציין. במוק אין רשימה בדויה."
+            },
+            {
+              "q": "מה לובשים?",
+              "a": "לפי סעיף הלבוש למעלה."
+            },
+            {
+              "q": "יש מלתחה?",
+              "a": "לפי המועדון. יצוין כאן."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "party-2": {
+    "template_id": "party-2",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Secular One",
+      "scale": "M",
+      "cover": {
+        "stock": "party-2/hero"
+      },
+      "colors": {
+        "primary": "#D06018",
+        "secondary": "#E8A030",
+        "accent": "#E8A030",
+        "background": "#F8EED8",
+        "text": "#4A2818"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "מסיבת קיץ",
+          "event_date": "2027-08-12T19:00:00+03:00",
+          "kicker": "מוזמנים ל",
+          "venue": "גינת הדוגמה",
+          "city": "חולון",
+          "welcome_heading": "אור, מוזיקה וחברים",
+          "welcome": "מסיבה פתוחה בגינה. העלו תמונות בלי אפליקציה, והן יצטרפו לאלבום המשותף.",
+          "date_he": "יום חמישי, 12 באוגוסט 2027",
+          "time_he": "19:00",
+          "cover": {
+            "stock": "party-2/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "קיץ",
+          "heading": "אור, מוזיקה וחברים",
+          "body": "מסיבה בגינה, באוויר הפתוח. כאן המארחים כותבים מה להביא ומה מחכה. בלי סיפור בדוי.",
+          "image": {
+            "stock": "art/rt-sun"
+          },
+          "layout": "split"
+        }
+      },
+      {
+        "id": "lineup",
+        "type": "LINEUP",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "הבמה",
+          "heading": "מי מנגן, לדוגמה",
+          "note": "שמות כלליים, לא אמנים אמיתיים.",
+          "items": [
+            {
+              "time": "19:00",
+              "title": "פתיחת השער",
+              "body": "כניסה חופשית לפי הזמנת המארח."
+            },
+            {
+              "time": "20:00",
+              "title": "הרכב א׳ (דוגמה)",
+              "body": "במה בגינה."
+            },
+            {
+              "time": "21:30",
+              "title": "די־ג׳יי (דוגמה)",
+              "body": "רחבה עד סגירה."
+            }
+          ]
+        }
+      },
+      {
+        "id": "playlist",
+        "type": "PLAYLIST",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "heading": "מה שומעים",
+          "note": "רשימה לדוגמה.",
+          "tracks": [
+            {
+              "song": "פתיחת שער",
+              "art": "רשימת הבית",
+              "dur": "3:20"
+            },
+            {
+              "song": "ריקוד ראשון",
+              "art": "רשימת הבית",
+              "dur": "3:55"
+            },
+            {
+              "song": "שקט באמצע",
+              "art": "רשימת הבית",
+              "dur": "4:10"
+            },
+            {
+              "song": "סיום חם",
+              "art": "רשימת הבית",
+              "dur": "3:44"
+            }
+          ]
+        }
+      },
+      {
+        "id": "dress",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "לבוש",
+          "heading": "קיץ, צבע, יחפים אם בא לכם",
+          "items": [
+            {
+              "title": "הנושא",
+              "body": "רטרו-קיץ. המארח יכול לבקש הדפס או צבע."
+            },
+            {
+              "title": "הגינה",
+              "body": "דשא. נעליים שמתאימות לחצר, או בלי."
+            }
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "צבע",
+          "heading": "שמשות לדוגמה",
+          "style": "masonry",
+          "note": "רטרו, שמש וגלים — בלי קהל.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/rt-rich"
+              },
+              "caption": "שמש · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/rt-rich2"
+              },
+              "caption": "גל · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/rt-sun"
+              },
+              "caption": "רטרו · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/cf-rich"
+              },
+              "caption": "קונפטי · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ds-rich"
+              },
+              "caption": "אופק · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ad-ribbon"
+              },
+              "caption": "סרט · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "שלושה צעדים",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "האלבום"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "גינת הדוגמה",
+          "location_name": "גינת הדוגמה",
+          "city": "חולון",
+          "note": "סקיצת מפה לדוגמה."
+        }
+      },
+      {
+        "id": "rsvp",
+        "type": "RSVP",
+        "enabled": false,
+        "order": 9,
+        "data": {
+          "kicker": "אישור",
+          "heading": "מגיעים לגינה?",
+          "body": "אישור לדוגמה."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לפני הקיץ",
+          "items": [
+            {
+              "q": "מה אם יורד גשם?",
+              "a": "תוכנית הגיבוי של המארח תופיע כאן."
+            },
+            {
+              "q": "אפשר להביא משהו?",
+              "a": "אם מבקשים תרומה לכיבוד — זה המקום, בלי רשימת קניות בדויה."
+            },
+            {
+              "q": "יש חניה?",
+              "a": "ליד הגינה, לפי ההוראות."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "festival-1": {
+    "template_id": "festival-1",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "DARK",
+      "font_family": "Rubik",
+      "scale": "M",
+      "cover": {
+        "stock": "festival-1/hero"
+      },
+      "colors": {
+        "primary": "#FF8A3A",
+        "secondary": "#FFD080",
+        "accent": "#FFD080",
+        "background": "#1A0E0A",
+        "text": "#F8EDE0"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "פסטיבל השקיעה",
+          "event_date": "2027-07-15T16:00:00+03:00",
+          "kicker": "סוף שבוע ב",
+          "venue": "מתחם הדוגמה",
+          "city": "הערבה",
+          "welcome_heading": "ברוכים הבאים לשטח",
+          "welcome": "במות, שקיעה, ואלבום חי אחד לכולם. מעלים מהטלפון — בלי אפליקציה — והתמונות עולות למסכים.",
+          "date_he": "יום חמישי, 15 ביולי 2027",
+          "time_he": "16:00",
+          "cover": {
+            "stock": "festival-1/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "השטח",
+          "heading": "שקיעה, במות, אלבום אחד",
+          "body": "כאן ההפקה כותבת מהו הסוף-שבוע. במוק אין מספרי קהל, אין מותרות בדויות, ואין שמות אמנים אמיתיים.",
+          "layout": "wide"
+        }
+      },
+      {
+        "id": "stages",
+        "type": "LINEUP",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "kicker": "לו״ז הבמות",
+          "heading": "מי עולה, לדוגמה",
+          "note": "הרכבים כלליים בלבד, מסומנים כדוגמה.",
+          "items": [
+            {
+              "time": "16:00",
+              "title": "פתיחת השערים",
+              "body": "כניסה למתחם."
+            },
+            {
+              "time": "17:30",
+              "title": "במה קטנה · הרכב פתיחה (דוגמה)",
+              "body": "שמות ההרכבים יופיעו כשיתמלאו."
+            },
+            {
+              "time": "19:15",
+              "title": "שקיעה על הבמה הראשית",
+              "body": "הרכב לדוגמה."
+            },
+            {
+              "time": "21:00",
+              "title": "הרכב ראשי (דוגמה)",
+              "body": "הבמה הראשית."
+            },
+            {
+              "time": "23:30",
+              "title": "סשן לילה (דוגמה)",
+              "body": "המשך בשטח."
+            }
+          ]
+        }
+      },
+      {
+        "id": "grounds",
+        "type": "GROUNDS",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "התמצאות",
+          "heading": "מפת השטח",
+          "note": "תרשים לדוגמה, לא מפת מדידה.",
+          "zones": [
+            {
+              "id": "gate",
+              "label": "כניסה"
+            },
+            {
+              "id": "main",
+              "label": "במה ראשית"
+            },
+            {
+              "id": "small",
+              "label": "במה קטנה"
+            },
+            {
+              "id": "food",
+              "label": "אוכל"
+            },
+            {
+              "id": "camp",
+              "label": "לינה"
+            },
+            {
+              "id": "park",
+              "label": "חניה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "tickets",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "מידע",
+          "heading": "כרטיסים וכניסה",
+          "items": [
+            {
+              "title": "כרטיס",
+              "body": "פרטי הכרטיס והשער יופיעו כאן. במוק אין מחיר בדוי."
+            },
+            {
+              "title": "שעות",
+              "body": "פתיחת שערים לפי הלו״ז. סגירה לפי ההפקה."
+            },
+            {
+              "title": "נגישות",
+              "body": "המארח מציין דרכי הגעה נגישות, אם יש."
+            }
+          ]
+        }
+      },
+      {
+        "id": "food",
+        "type": "ZONES",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "לשבת לאכול",
+          "heading": "פינות אוכל",
+          "note": "שמות כלליים, לא דוכנים אמיתיים.",
+          "items": [
+            {
+              "title": "רחבת האוכל",
+              "body": "דוכנים שיתמלאו בשמות אמיתיים."
+            },
+            {
+              "title": "שתייה",
+              "body": "עמדות מים ושתיה, לפי ההפקה."
+            },
+            {
+              "title": "צל",
+              "body": "אם יש רשת צל — היא תצוין כאן."
+            }
+          ]
+        }
+      },
+      {
+        "id": "rules",
+        "type": "RULES",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "בשטח",
+          "heading": "כללים ואחריות",
+          "items": [
+            "לא משאירים זבל בשטח — פחים לפי המפה.",
+            "אש רק במקומות שסומנו, אם סומנו.",
+            "כבוד לקהילה ולשקט בשעות שיוגדרו.",
+            "ההפקה ממלאת כאן כללי בטיחות, בלי תקנון בדוי ארוך."
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "אור",
+          "heading": "שקיעה לדוגמה",
+          "style": "masonry",
+          "note": "שמים, מדבר והילה — בלי קהל.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/ss-rich"
+              },
+              "caption": "שקיעה · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ss-rich2"
+              },
+              "caption": "אור · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ss-sky"
+              },
+              "caption": "שמים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ds-rich"
+              },
+              "caption": "מדבר · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ds-horizon"
+              },
+              "caption": "אופק · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bh-lights"
+              },
+              "caption": "אורות · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "העלו מהשטח",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו מהשטח",
+          "album_text": "האלבום החי"
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "מתחם הדוגמה",
+          "location_name": "מתחם הדוגמה",
+          "city": "הערבה",
+          "note": "סקיצת הגעה לדוגמה, בנוסף למפת השטח."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לפני שיוצאים",
+          "items": [
+            {
+              "q": "יש לינה?",
+              "a": "אם כן, המארח מפרט. במוק אין מחירי קמפינג בדויים."
+            },
+            {
+              "q": "מה מביאים?",
+              "a": "רשימת ציוד, אם יש, תופיע כאן."
+            },
+            {
+              "q": "מה עם רכב?",
+              "a": "חניה לפי המפה, לפי הוראות ההפקה."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  },
+  "festival-2": {
+    "template_id": "festival-2",
+    "theme": {
+      "palette_id": "default",
+      "background_type": "LIGHT",
+      "font_family": "Frank Ruhl Libre",
+      "scale": "M",
+      "cover": {
+        "stock": "festival-2/hero"
+      },
+      "colors": {
+        "primary": "#8A5A32",
+        "secondary": "#C4894A",
+        "accent": "#C4894A",
+        "background": "#EDE4D4",
+        "text": "#2A1C14"
+      }
+    },
+    "blocks": [
+      {
+        "id": "hero",
+        "type": "HERO_COUNTDOWN",
+        "enabled": true,
+        "order": 1,
+        "data": {
+          "title": "פסטיבל בוהו",
+          "event_date": "2027-10-07T15:00:00+03:00",
+          "kicker": "שלושה ימים ב",
+          "venue": "חוות הדוגמה",
+          "city": "הנגב",
+          "welcome_heading": "קחו אוויר, קחו תמונה",
+          "welcome": "יצירה, מוזיקה ואוכל בשטח. האלבום המשותף נבנה מכל הטלפונים — פשוט מעלים לכאן.",
+          "date_he": "יום חמישי, 7 באוקטובר 2027",
+          "time_he": "15:00",
+          "cover": {
+            "stock": "festival-2/hero"
+          }
+        }
+      },
+      {
+        "id": "about",
+        "type": "ABOUT",
+        "enabled": true,
+        "order": 2,
+        "data": {
+          "kicker": "בוהו",
+          "heading": "קחו אוויר, קחו תמונה",
+          "body": "שלושה ימים בחווה: יצירה, מוזיקה ואוכל. ההפקה כותבת כאן את הרוח. במוק אין מספרי קהל.",
+          "image": {
+            "stock": "art/bh-frame"
+          },
+          "layout": "split"
+        }
+      },
+      {
+        "id": "stages",
+        "type": "EVENT_TIMELINE",
+        "enabled": true,
+        "order": 3,
+        "data": {
+          "heading": "מה קורה בשטח",
+          "kicker": "לו״ז",
+          "items": [
+            {
+              "time": "15:00",
+              "label": "פתיחה ושוק יוצרים"
+            },
+            {
+              "time": "17:00",
+              "label": "סדנאות"
+            },
+            {
+              "time": "19:00",
+              "label": "במה מרכזית",
+              "description": "הרכב לדוגמה, כשיתמלא שם"
+            },
+            {
+              "time": "21:30",
+              "label": "מעגל אש"
+            }
+          ]
+        }
+      },
+      {
+        "id": "grounds",
+        "type": "GROUNDS",
+        "enabled": true,
+        "order": 4,
+        "data": {
+          "kicker": "התמצאות",
+          "heading": "מפת החווה",
+          "note": "תרשים לדוגמה.",
+          "zones": [
+            {
+              "id": "gate",
+              "label": "שער"
+            },
+            {
+              "id": "main",
+              "label": "במה"
+            },
+            {
+              "id": "small",
+              "label": "סדנאות"
+            },
+            {
+              "id": "food",
+              "label": "מטבח"
+            },
+            {
+              "id": "camp",
+              "label": "לינה"
+            },
+            {
+              "id": "park",
+              "label": "חניה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "food",
+        "type": "ZONES",
+        "enabled": true,
+        "order": 5,
+        "data": {
+          "kicker": "שולחן משותף",
+          "heading": "אוכל בשטח",
+          "note": "תיאורים כלליים, לא שמות שפים.",
+          "items": [
+            {
+              "title": "המטבח",
+              "body": "שעות הגשה יופיעו כאן."
+            },
+            {
+              "title": "שוק",
+              "body": "דוכנים של יוצרים, כשיתמלאו."
+            },
+            {
+              "title": "קפה",
+              "body": "אם יש פינה — היא תצוין."
+            }
+          ]
+        }
+      },
+      {
+        "id": "rules",
+        "type": "RULES",
+        "enabled": true,
+        "order": 6,
+        "data": {
+          "kicker": "ביחד",
+          "heading": "כללים עדינים",
+          "items": [
+            "משאירים את השטח כמו שמצאנו, או יותר יפה.",
+            "רעש אחרי השעה שתיקבע — בשקט.",
+            "צילום מכבד: לא מעלים מישהו שביקש שלא.",
+            "ההפקה תוסיף כאן כללי בטיחות אמיתיים."
+          ]
+        }
+      },
+      {
+        "id": "gallery",
+        "type": "GALLERY",
+        "enabled": true,
+        "order": 7,
+        "data": {
+          "kicker": "עץ ואור",
+          "heading": "בוהו לדוגמה",
+          "style": "masonry",
+          "note": "מקרמה, אורות ומרקם — בלי קהל.",
+          "images": [
+            {
+              "image": {
+                "stock": "art/bh-rich"
+              },
+              "caption": "מקרמה · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bh-rich2"
+              },
+              "caption": "אורות · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bh-frame"
+              },
+              "caption": "מסגרת · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/bh-lights"
+              },
+              "caption": "חמים · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ds-horizon"
+              },
+              "caption": "שטח · דוגמה"
+            },
+            {
+              "image": {
+                "stock": "art/ol-rich"
+              },
+              "caption": "עלה · דוגמה"
+            }
+          ]
+        }
+      },
+      {
+        "id": "join",
+        "type": "STEPS",
+        "enabled": true,
+        "order": 8,
+        "data": {
+          "kicker": "האלבום",
+          "heading": "העלו מהחווה",
+          "steps": [
+            {
+              "n": "01",
+              "title": "סורקים",
+              "body": "סריקת ה־QR על השולחן, או כניסה מהקישור. בלי הורדת אפליקציה."
+            },
+            {
+              "n": "02",
+              "title": "מעלים",
+              "body": "תמונה או סרטון ישר מהטלפון, מהמצלמה או מהגלריה."
+            },
+            {
+              "n": "03",
+              "title": "רואים חי",
+              "body": "הקובץ מופיע באלבום המשותף, ועל המסך באולם אם המארח הפעיל."
+            }
+          ],
+          "button_text": "העלו תמונות",
+          "album_text": "האלבום החי"
+        }
+      },
+      {
+        "id": "tickets",
+        "type": "CARDS",
+        "enabled": true,
+        "order": 9,
+        "data": {
+          "kicker": "מידע",
+          "heading": "כניסה ושהות",
+          "items": [
+            {
+              "title": "כרטיס",
+              "body": "פרטים יופיעו כאן, בלי מחיר בדוי."
+            },
+            {
+              "title": "לינה",
+              "body": "אם יש קמפינג — ההפקה מפרטת."
+            },
+            {
+              "title": "מה מביאים",
+              "body": "רשימה קצרה, כשיתמלא."
+            }
+          ]
+        }
+      },
+      {
+        "id": "arrive",
+        "type": "MAP",
+        "enabled": true,
+        "order": 10,
+        "data": {
+          "kicker": "הגעה",
+          "heading": "חוות הדוגמה",
+          "location_name": "חוות הדוגמה",
+          "city": "הנגב",
+          "note": "סקיצת הגעה לדוגמה."
+        }
+      },
+      {
+        "id": "faq",
+        "type": "FAQ",
+        "enabled": true,
+        "order": 11,
+        "data": {
+          "kicker": "שאלות",
+          "heading": "לפני הירידה דרומה",
+          "items": [
+            {
+              "q": "יש מקלחות?",
+              "a": "ההפקה מציינת. במוק אין תיאור מתקן בדוי."
+            },
+            {
+              "q": "אפשר להגיע עם כלב?",
+              "a": "המדיניות תופיע כאן."
+            },
+            {
+              "q": "מה עם רכב?",
+              "a": "חניה לפי המפה."
+            }
+          ]
+        }
+      },
+      {
+        "id": "snapshare_cta",
+        "type": "SNAPSHARE_CTA",
+        "enabled": true,
+        "order": 12,
+        "data": {
+          "button_text": "העלו תמונות",
+          "subtitle": "בלי אפליקציה"
+        }
+      },
+      {
+        "id": "footer",
+        "type": "FOOTER",
+        "enabled": true,
+        "order": 13,
+        "data": {
+          "note": "העמוד הזה נוצר ב־SnapShare. האורחים מעלים בלי אפליקציה, והתמונות מופיעות באלבום החי."
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+/* 2. Wedding modern — espresso / gold, cinematic large type */
+.t-wedding-2 {
+  --bg: #14110F; --stage: #14110F; --ink: #F3EEE6; --muted: #B4A89A;
+  --accent: #C9A36A; --hero-ink: #F7F1E8;
+  --hero-muted: rgba(247,241,232,.7);
+  --cta-bg: #C9A36A; --cta-ink: #14110F; --cta-shadow: rgba(201,163,106,.35);
+  --nav-bg: rgba(18,15,13,.82); --nav-on-bg: #C9A36A; --nav-on-ink: #14110F;
+  --font-display: "Heebo", sans-serif; --font-body: "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/espresso.webp");
+  --hero-scrim: linear-gradient(180deg, rgba(16,13,11,.15) 0%, rgba(16,13,11,.2) 40%, rgba(16,13,11,.88) 100%);
+  --line: rgba(243,238,230,.12); --line-strong: rgba(243,238,230,.35);
+  --btn-r: 0px; --hero-pos: center;
+  --hero-line: rgba(243,238,230,.4);
+}
+.t-wedding-2 .enames { letter-spacing: -.05em; font-weight: 800; }
+.t-wedding-2 .block { background: #14110F; }
+.t-wedding-2 .block.alt { background: #1B1714; }
+.t-wedding-2 .welcome .body { font-size: 1.2rem; font-weight: 400; color: #C8BDB0; }
+.t-wedding-2 .btn-primary { letter-spacing: .04em; text-transform: uppercase; font-size: .92rem; }
+.t-wedding-2.page { color: #F3EEE6; }
+.t-wedding-2.page.dark { }
+

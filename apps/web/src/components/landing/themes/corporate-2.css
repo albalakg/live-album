@@ -1,0 +1,18 @@
+/* 10. Corporate gala — navy gold art deco */
+.t-corporate-2 {
+  --bg: #0C0C0C; --stage: #0C0C0C; --ink: #F3EEE6; --muted: #B8A88A;
+  --accent: #D4AF37; --hero-ink: #F7F1E8;
+  --hero-muted: rgba(247,241,232,.72);
+  --cta-bg: #D4AF37; --cta-ink: #0C0C0C; --cta-shadow: rgba(212,175,55,.3);
+  --nav-bg: rgba(10,10,10,.88); --nav-on-bg: #D4AF37; --nav-on-ink: #0C0C0C;
+  --font-display: "Frank Ruhl Libre", serif; --font-body: "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/gala.webp");
+  --hero-scrim: linear-gradient(180deg, rgba(8,8,8,.15) 0%, rgba(8,8,8,.35) 45%, rgba(8,8,8,.88) 100%);
+  --line: rgba(212,175,55,.18); --line-strong: rgba(212,175,55,.45);
+  --btn-r: 0px;
+}
+.t-corporate-2 .block { background: #0C0C0C; }
+.t-corporate-2 .block.alt { background: #141414; }
+.t-corporate-2 .enames { font-weight: 700; }
+.t-corporate-2 .btn-primary { letter-spacing: .08em; text-transform: uppercase; font-size: .88rem; }
+

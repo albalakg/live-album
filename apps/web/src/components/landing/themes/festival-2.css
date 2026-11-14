@@ -1,0 +1,14 @@
+/* 14. Festival boho */
+.t-festival-2 {
+  --bg: #EDE4D4; --stage: #E6D8C4; --ink: #2A1C14; --muted: #6A5040;
+  --accent: #8A5A32; --accent-2: #C4894A; --hero-ink: #2A1C14;
+  --cta-bg: #2A1C14; --cta-ink: #F3E8D6;
+  --nav-bg: rgba(237,228,212,.9); --nav-on-bg: #2A1C14; --nav-on-ink: #F3E8D6;
+  --font-display: "Frank Ruhl Libre", serif; --font-body: "Assistant", "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/boho.webp");
+  --line: rgba(42,28,20,.12); --line-strong: rgba(42,28,20,.28);
+  --btn-r: 999px; --card-r: 40% 40% 12px 12px / 18% 18% 12px 12px;
+}
+.t-festival-2 .block.alt { background: #E4D6C0; }
+.t-festival-2 .welcome .body { font-family: "Frank Ruhl Libre", serif; font-size: 1.28rem; }
+.t-festival-2 .hero-card { box-shadow: 0 24px 60px rgba(42,28,20,.22); }

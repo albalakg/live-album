@@ -1,0 +1,17 @@
+/* 4. Barmitzvah ceremonial — midnight navy + gold */
+.t-barmitzvah-2 {
+  --bg: #0E1730; --stage: #0E1730; --ink: #F3EEE6; --muted: #B8B0A0;
+  --accent: #D4AF37; --hero-ink: #F7F1E8;
+  --hero-muted: rgba(247,241,232,.7);
+  --cta-bg: #D4AF37; --cta-ink: #0E1730; --cta-shadow: rgba(212,175,55,.35);
+  --nav-bg: rgba(10,16,36,.86); --nav-on-bg: #D4AF37; --nav-on-ink: #0E1730;
+  --font-display: "Frank Ruhl Libre", serif; --font-body: "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/navy.webp");
+  --hero-scrim: linear-gradient(180deg, rgba(8,12,28,.2) 0%, rgba(8,12,28,.55) 55%, rgba(8,12,28,.92) 100%);
+  --line: rgba(243,238,230,.12); --line-strong: rgba(212,175,55,.45);
+  --btn-r: 2px; --hero-pos: center top;
+}
+.t-barmitzvah-2 .block { background: #0E1730; }
+.t-barmitzvah-2 .block.alt { background: #121C3A; }
+.t-barmitzvah-2 .enames { font-weight: 700; }
+

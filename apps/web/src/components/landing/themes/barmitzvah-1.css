@@ -1,0 +1,15 @@
+/* 3. Barmitzvah joyful — turquoise / gold papercut */
+.t-barmitzvah-1 {
+  --bg: #F3F6F0; --stage: #E7EFE6; --ink: #1A3A36; --muted: #4A6A64;
+  --accent: #1F7A72; --accent-2: #C9A36A; --hero-ink: #1A3A36;
+  --cta-bg: #1F7A72; --cta-ink: #F7FFFC; --cta-shadow: rgba(31,122,114,.3);
+  --nav-bg: rgba(243,246,240,.9); --nav-on-bg: #1F7A72; --nav-on-ink: #fff;
+  --font-display: "Varela Round", "Rubik", sans-serif; --font-body: "Rubik", "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/teal.webp");
+  --stage-img: none;
+  --line: rgba(26,58,54,.1); --line-strong: rgba(26,58,54,.28);
+  --btn-r: 22px; --card-r: 28px;
+}
+.t-barmitzvah-1 .block.alt { background: #E4EEE8; }
+.t-barmitzvah-1 .enames { font-weight: 400; }
+

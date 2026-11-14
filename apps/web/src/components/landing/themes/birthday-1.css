@@ -1,0 +1,14 @@
+/* 5. Birthday playful — coral / violet balloons */
+.t-birthday-1 {
+  --bg: #FFF6F3; --stage: #FFEDE8; --ink: #4A2040; --muted: #7A4E6E;
+  --accent: #E15A6A; --accent-2: #7B4BAA; --hero-ink: #4A2040;
+  --cta-bg: #E15A6A; --cta-ink: #FFF8F6; --cta-shadow: rgba(225,90,106,.32);
+  --nav-bg: rgba(255,246,243,.9); --nav-on-bg: #E15A6A; --nav-on-ink: #fff;
+  --font-display: "Varela Round", "Rubik", sans-serif; --font-body: "Rubik", "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/balloons.webp");
+  --line: rgba(74,32,64,.1); --line-strong: rgba(74,32,64,.25);
+  --btn-r: 999px; --card-r: 36px;
+}
+.t-birthday-1 .block.alt { background: #FFE8E4; }
+.t-birthday-1 .enames { font-weight: 400; }
+

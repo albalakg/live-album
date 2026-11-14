@@ -1,0 +1,23 @@
+/* 9. Corporate clean — steel / glass */
+.t-corporate-1 {
+  --bg: #EEF1F3; --stage: #E4EAEF; --ink: #1A2830; --muted: #536068;
+  --accent: #3D6A80; --accent-2: #8AA0AC; --hero-ink: #1A2830;
+  --cta-bg: #1A2830; --cta-ink: #EEF1F3;
+  --nav-bg: rgba(238,241,243,.92); --nav-on-bg: #1A2830; --nav-on-ink: #EEF1F3;
+  --font-display: "Heebo", sans-serif; --font-body: "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/glass.webp");
+  --hero-scrim: linear-gradient(180deg, rgba(228,234,239,.25) 0%, rgba(228,234,239,.15) 40%, rgba(228,234,239,.82) 100%);
+  --line: rgba(26,40,48,.1); --line-strong: rgba(26,40,48,.28);
+  --btn-r: 8px;
+}
+.t-corporate-1 .block.alt { background: #E4EAEE; }
+.t-corporate-1 .enames { font-weight: 800; letter-spacing: -.045em; font-size: clamp(2.4rem, 6vw, 5.2rem); }
+.t-corporate-1 .kicker { letter-spacing: .22em; }
+.t-corporate-1 {
+  --hero-muted: #536068;
+  --hero-line: rgba(26,40,48,.35);
+  --count-ink: #1A2830;
+}
+.t-corporate-1 .hero-cinema .count .n { color: #1A2830; }
+.t-corporate-1 .hero-cinema .btn-primary { box-shadow: 0 10px 28px rgba(26,40,48,.2); }
+

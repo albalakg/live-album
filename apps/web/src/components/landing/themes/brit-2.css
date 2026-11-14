@@ -1,0 +1,28 @@
+/* 8. Brit warm nursery — peach, baby elements */
+.t-brit-2 {
+  --bg: #F8EFE6; --stage: #F3E6DA; --ink: #5A3228; --muted: #8A6458;
+  --accent: #C4896A; --accent-2: #E8B8A0; --hero-ink: #5A3228;
+  --cta-bg: #5A3228; --cta-ink: #F8EFE6;
+  --nav-bg: rgba(248,239,230,.9); --nav-on-bg: #5A3228; --nav-on-ink: #F8EFE6;
+  --font-display: "Frank Ruhl Libre", serif; --font-body: "Assistant", "Heebo", sans-serif;
+  --hero-art: url("../../../../public/landing/art/clothes.webp");
+  --stage-img: url("../../../../public/landing/art/peach.webp");
+  --line: rgba(90,50,40,.1); --line-strong: rgba(90,50,40,.25);
+  --btn-r: 999px; --card-r: 24px;
+}
+.t-brit-2 .block.alt { background: #F3E4D4; }
+.t-brit-2 .welcome .body { font-family: "Frank Ruhl Libre", serif; font-size: 1.28rem; }
+.baby-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px;
+}
+.baby-row figure {
+  border-radius: 20px; overflow: hidden; aspect-ratio: 3/4;
+  background-size: cover; background-position: center;
+  box-shadow: 0 12px 32px rgba(90,50,40,.12);
+}
+.baby-row figcaption {
+  text-align: center; font-size: .85rem; font-weight: 600; color: var(--muted);
+  margin-top: 8px; padding: 0 4px;
+}
+.baby-item { display: flex; flex-direction: column; }
+
