@@ -74,12 +74,37 @@
     animation: pulse 1.6s ease infinite;
   }
 
-  .stage-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+  .stage-mid {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    min-height: 0; padding-top: 16px; overflow: hidden;
+  }
   .stage-q {
     font-size: 58px; font-weight: 900; line-height: 1.2; letter-spacing: -.03em;
-    text-wrap: balance; margin: 10px auto 32px; max-width: 1180px;
+    text-wrap: balance; margin: 24px auto 32px; max-width: 1180px;
     text-align: center;
   }
+  .stage[data-phase="question"] .stage-top { margin-bottom: 8px; }
+  .stage[data-phase="question"] .stage-mid { padding-top: 8px; }
+  .stage[data-phase="reveal"] .stage-ui { padding-top: 28px; padding-bottom: 24px; }
+  .stage[data-phase="reveal"] .stage-top {
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 2;
+  }
+  .stage[data-phase="reveal"] .stage-mid {
+    padding-top: 0;
+    justify-content: center;
+    min-height: 0;
+  }
+  .stage[data-phase="reveal"] .stage-q {
+    margin-top: 0;
+    margin-bottom: 22px;
+    font-size: 52px;
+  }
+  .stage[data-theme="elegant"][data-phase="reveal"] .stage-q { font-size: 54px; }
+  .stage[data-phase="reveal"] .s-opt { padding: 16px 20px; font-size: 26px; }
+  .stage[data-phase="reveal"] .fun { margin-top: 14px; padding: 12px 18px; font-size: 20px; }
+  .stage[data-phase="reveal"] .stage-foot { margin-top: 14px; padding: 10px 14px; }
   .stage-sub { font-size: 24px; opacity: .8; margin-top: -18px; margin-bottom: 28px; font-weight: 500; }
 
   .timer-ring {
@@ -164,8 +189,11 @@
     flex: none;
     display: flex; align-items: center; gap: 18px;
     margin-top: 22px;
+    padding: 14px 18px;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.28);
   }
-  .players-live { display: flex; align-items: center; gap: 10px; font-weight: 750; font-size: 18px; }
+  .players-live { display: flex; align-items: center; gap: 10px; font-weight: 750; font-size: 18px; color: #fff; }
   .av-stack { display: flex; }
   .av-stack i, .av-stack img {
     width: 36px; height: 36px; border-radius: 50%;
@@ -173,7 +201,7 @@
     border: 2px solid currentColor;
     display: grid; place-items: center;
     font-weight: 800; font-size: 13px;
-    background: #fff; color: var(--ink);
+    background: #fff; color: #fff;
   }
   .av-stack i:first-child, .av-stack img:first-child { margin-right: 0; }
   .team-pill {
@@ -185,6 +213,7 @@
     padding: 8px 16px; border-radius: 999px;
     background: rgba(255,255,255,.12);
     font-size: 16px;
+    color: #fff;
   }
   .mini-qr {
     width: 86px; height: 86px; border-radius: 12px; background: #fff; padding: 6px;
@@ -375,8 +404,26 @@
   }
   .stage[data-theme="elegant"] .stage-q { font-family: var(--serif); font-weight: 700; font-size: 62px; letter-spacing: 0; color: #161310; }
   .stage[data-theme="elegant"] .stage-event,
-  .stage[data-theme="elegant"] .stage-brand,
+  .stage[data-theme="elegant"] .stage-brand { color: var(--ink); }
+  .stage[data-theme="elegant"] .stage-foot {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
   .stage[data-theme="elegant"] .players-live { color: var(--ink); }
+  .stage[data-theme="elegant"] .team-pill span {
+    background: rgba(22, 19, 16, 0.07);
+    color: var(--ink);
+  }
+  .stage[data-theme="elegant"] .av-stack i,
+  .stage[data-theme="elegant"] .av-stack img,
+  .stage[data-theme="elegant"] .av-stack .av {
+    border-color: #F3EEE6 !important;
+    color: #fff !important;
+  }
   .stage[data-theme="elegant"] .stage-progress { background: rgba(22,19,16,.06); color: var(--muted); }
   .stage[data-theme="elegant"] .live-dot { background: rgba(220,91,102,.12); color: #9a3036; }
   .stage[data-theme="elegant"] .s-opt {
@@ -412,7 +459,6 @@
   .stage[data-theme="elegant"] .correct-mark .needle { background: var(--rose); }
   .stage[data-theme="elegant"] .closest-card, .stage[data-theme="elegant"] .order-item { background: #FFFCFA; color: var(--ink); }
   .stage[data-theme="elegant"] .mini-qr { box-shadow: 0 4px 16px rgba(18,16,14,.08); }
-  .stage[data-theme="elegant"] .av-stack i { border-color: #F3EEE6; }
 
   /* NEON */
   .stage[data-theme="neon"] { color: #fff; }

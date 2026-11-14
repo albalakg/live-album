@@ -216,7 +216,7 @@ interface PlayQuestion extends TriviaQuestionDto {
   id: number;
 }
 
-const POLL_MS = 2000;
+const POLL_MS = 1000;
 const FEEDBACK_MS = 1300;
 
 export default defineComponent({
@@ -408,6 +408,22 @@ export default defineComponent({
           this.view === "join"
         ) {
           await this.resume();
+          return;
+        }
+
+        // Host-paced: react as soon as screen reports a shared phase change.
+        const phase = screen.current_phase || "";
+        if (
+          this.isSharedPace &&
+          (phase === "question" || phase === "reveal" || phase === "leaderboard")
+        ) {
+          if (
+            this.view === "waiting-for-host" ||
+            this.view === "looking" ||
+            (this.view === "question" && phase !== "question")
+          ) {
+            await this.loadQuestion({ silent: !initial });
+          }
         }
       } catch (error) {
         if (initial) {
@@ -675,8 +691,14 @@ export default defineComponent({
         this.scheduleAfterFeedback(data);
       } catch (error) {
         this.fail(error, "לא הצלחנו לשמור את התשובה");
-        this.view = "question";
-        if (this.secondsLeft > 0) this.startClock();
+        if (this.question && this.isSharedPace) {
+          await this.loadQuestion({ silent: true });
+        } else if (this.question) {
+          this.view = "question";
+          if (this.secondsLeft > 0) this.startClock();
+        } else {
+          this.view = "waiting-for-host";
+        }
       } finally {
         this.submitting = false;
       }

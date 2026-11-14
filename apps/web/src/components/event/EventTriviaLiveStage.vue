@@ -695,8 +695,8 @@ export default defineComponent({
         height: `${size}px`,
         fontSize: `${Math.round(size * 0.4)}px`,
         background: bg,
-        color: "#fff",
-        borderColor: "transparent",
+        color: "#ffffff",
+        border: "2px solid transparent",
       };
     },
 
