@@ -41,16 +41,18 @@
           v-if="!selectMode"
           type="button"
           class="tile-download"
-          aria-label="הורדה"
+          aria-label="הורדת תמונה"
           :disabled="busy"
           @click.stop="downloadOne(index)"
+          @keydown.enter.stop.prevent="downloadOne(index)"
+          @keydown.space.stop.prevent="downloadOne(index)"
         >
           <span class="material-symbols-outlined" aria-hidden="true">download</span>
         </button>
       </div>
     </div>
     <p v-if="!loading && assets.length === 0" class="empty">עוד אין תמונות באלבום.</p>
-    <GuestAlbumCta />
+      <GuestAlbumCta />
 
     <div
       v-if="selectMode"
@@ -198,6 +200,7 @@
             :disabled="busy"
             @click="downloadOne(currentAssetIndex)"
           >
+            <span class="material-symbols-outlined" aria-hidden="true">download</span>
             הורדה
           </button>
         </div>
@@ -787,7 +790,7 @@ export default defineComponent({
   box-shadow: 0 4px 14px rgba(18, 16, 14, 0.18);
   /* Always visible on narrow / touch viewports */
   opacity: 1;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .tile-download .material-symbols-outlined {
   font-size: 1.25rem;
@@ -797,13 +800,25 @@ export default defineComponent({
   opacity: 0.5;
   cursor: progress;
 }
-/* Desktop: show on hover (viewport-based so it matches mobile screenshots) */
+.tile-download:focus {
+  outline: none;
+  opacity: 1 !important;
+}
+.tile-download:focus-visible {
+  outline: 2px solid #161310;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 4px 14px rgba(18, 16, 14, 0.18);
+  opacity: 1 !important;
+}
+.tile-wrap:focus-within .tile-download {
+  opacity: 1 !important;
+}
+/* Desktop: hide until hover/focus so the grid stays clean */
 @media (min-width: 800px) {
   .tile-download {
     opacity: 0;
   }
-  .tile-wrap:hover .tile-download,
-  .tile-download:focus-visible {
+  .tile-wrap:hover .tile-download {
     opacity: 1;
   }
 }
@@ -927,6 +942,7 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 40px;
   padding: 0 18px;
   border: 1px solid transparent;
@@ -937,6 +953,10 @@ export default defineComponent({
   line-height: 1;
   cursor: pointer;
 }
+.lightbox .lb-btn .material-symbols-outlined {
+  font-size: 1.15rem;
+  line-height: 1;
+}
 .lightbox .lb-btn--download {
   background: #1f7a45;
   color: #fff;
@@ -945,5 +965,14 @@ export default defineComponent({
 .lightbox .lb-btn--download:disabled {
   opacity: 0.65;
   cursor: progress;
+}
+</style>
+
+<style lang="scss">
+/* Unscoped: pierce GuestAlbumCta sticky bar while select mode is on (desktop) */
+@media (min-width: 800px) {
+  .guest-gallery.has-select-bar .guest-cta {
+    display: none !important;
+  }
 }
 </style>

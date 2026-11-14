@@ -95,9 +95,12 @@ export default defineComponent({
 
   &.is-rail {
     min-height: 0;
+    width: 100%;
+    height: 100%;
     padding: 0;
     gap: 0;
     border-radius: 0;
+    justify-content: center;
     background: transparent !important;
     color: inherit;
 
@@ -118,20 +121,24 @@ export default defineComponent({
 
   &.is-expanded.is-active {
     background: var(--deep, #12100e);
-    color: #fff;
+    color: #fff !important;
+
+    .item-label {
+      color: #fff !important;
+    }
 
     .rail-ico,
     .rail-ico :deep(svg),
     .rail-ico :deep(svg *) {
-      color: #fff;
+      color: #fff !important;
     }
 
     .rail-ico :deep(svg) {
-      stroke: #fff;
+      stroke: #fff !important;
     }
 
     .rail-ico :deep(svg [fill="currentColor"]) {
-      fill: #fff;
+      fill: #fff !important;
       stroke: none;
     }
   }
@@ -170,8 +177,8 @@ export default defineComponent({
 
 .rail-badge {
   position: absolute;
-  top: -2px;
-  inset-inline-end: -2px;
+  z-index: 2;
+  pointer-events: none;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
@@ -182,10 +189,23 @@ export default defineComponent({
   font-weight: 800;
   display: grid;
   place-items: center;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+/* Collapsed rail: park on the physical top-left of the 46×46 hit area, outside the glyph */
+.is-rail .rail-badge {
+  top: 0;
+  left: 0;
+  right: auto;
+  transform: translate(-35%, -35%);
 }
 
 .is-expanded .rail-badge {
   top: 6px;
+  left: auto;
+  right: auto;
   inset-inline-end: 8px;
+  transform: none;
 }
 </style>

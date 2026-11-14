@@ -43,6 +43,7 @@ export default defineComponent({
   box-shadow: 0 8px 24px rgba(18, 16, 14, 0.12);
   font-family: var(--font, Heebo, sans-serif);
 }
+/* Hidden by EventGuestGalleryView while select mode is on (desktop) — see unscoped rule there */
 .guest-cta p {
   margin: 0;
   flex: 1 1 auto;

@@ -291,6 +291,16 @@ export default defineComponent({
   display: block;
   width: 100%;
   border-radius: 14px;
+  color: inherit;
+}
+
+.expanded-link.on {
+  color: #fff;
+}
+
+.expanded-link.on :deep(.item-label),
+.expanded-link.on :deep(.rail-ico) {
+  color: #fff;
 }
 
 .expanded-link:focus-visible {
@@ -308,6 +318,7 @@ export default defineComponent({
   color: var(--muted, #5e564e);
   transition: background 0.15s, color 0.15s;
   flex: none;
+  overflow: visible;
 }
 
 .rail-link:hover {
