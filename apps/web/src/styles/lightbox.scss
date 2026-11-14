@@ -7,7 +7,7 @@
     max(12px, env(safe-area-inset-right, 0px))
     max(12px, env(safe-area-inset-bottom, 0px))
     max(12px, env(safe-area-inset-left, 0px));
-  background-color: rgba(8, 7, 6, 0.94);
+  background-color: rgba(0, 0, 0, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,6 +58,10 @@
     border-radius: 8px;
     user-select: none;
     -webkit-user-drag: none;
+  }
+
+  video.lightbox-asset {
+    background: #000;
   }
 
   .lightbox-asset.is-loading {
@@ -151,9 +155,10 @@
     transform: translateX(-50%);
     z-index: 30;
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
     width: auto;
     max-width: calc(100% - 24px);
@@ -174,10 +179,19 @@
   }
 }
 
+/* Hide floating contact / WhatsApp while lightbox is open */
+body.lightbox-open .assist,
+body.lightbox-open .assist-fab {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 @media only screen and (max-width: 600px) {
   .lightbox {
+    padding-bottom: 0;
+
     .lightbox-content--with-actions {
-      padding-bottom: 80px;
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
     }
 
     .lightbox-icon {
@@ -198,12 +212,26 @@
       font-size: 1.45rem;
     }
 
+    /* Horizontal action bar — no boxed panel */
     .lightbox-actions {
-      bottom: max(14px, env(safe-area-inset-bottom, 0px));
-      gap: 6px;
-      padding: 7px;
-      max-width: calc(100% - 16px);
-      border-radius: 18px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transform: none;
+      width: 100%;
+      max-width: none;
+      box-sizing: border-box;
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 8px;
+      margin: 0;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: none;
     }
   }
 }

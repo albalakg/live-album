@@ -137,6 +137,9 @@ export default defineComponent({
   },
   watch: {
     isModalOpened(open: boolean) {
+      if (typeof document !== "undefined") {
+        document.body.classList.toggle("lightbox-open", open);
+      }
       if (open) {
         this.$nextTick(() => this.activateLightboxFocus());
       } else {
@@ -159,6 +162,9 @@ export default defineComponent({
     window.addEventListener("keydown", this.onKey);
   },
   beforeUnmount() {
+    if (typeof document !== "undefined") {
+      document.body.classList.remove("lightbox-open");
+    }
     window.removeEventListener("keydown", this.onKey);
     if (this.pollId) clearInterval(this.pollId);
   },

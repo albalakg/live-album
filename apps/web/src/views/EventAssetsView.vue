@@ -462,6 +462,9 @@ export default defineComponent({
     },
 
     isModalOpened(open: boolean) {
+      if (typeof document !== "undefined") {
+        document.body.classList.toggle("lightbox-open", open);
+      }
       if (open) {
         this.$nextTick(() => this.activateLightboxFocus());
       } else {
@@ -1050,6 +1053,9 @@ export default defineComponent({
   },
 
   beforeUnmount() {
+    if (typeof document !== "undefined") {
+      document.body.classList.remove("lightbox-open");
+    }
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
@@ -1678,6 +1684,13 @@ export default defineComponent({
 }
 
 @media (max-width: 600px) {
+  .lb-btn {
+    min-height: 36px;
+    min-width: 0;
+    padding: 0 14px;
+    font-size: 0.82rem;
+  }
+
   .event-assets {
     gap: 14px;
   }
