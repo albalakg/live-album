@@ -1,14 +1,48 @@
 <template>
-  <div class="sidebar" :class="{ 'sidebar--rail': rail }">
-    <div v-if="!rail" class="sidebar-title">
-      <p class="sidebar-kicker">האירוע של</p>
-      <h2>{{ eventName || "—" }}</h2>
-    </div>
+  <div
+    class="sidebar"
+    :class="{
+      'sidebar--collapsed': collapsed,
+      'sidebar--expanded': !collapsed,
+    }"
+  >
+    <button
+      type="button"
+      class="sidebar-toggle"
+      :aria-label="collapsed ? 'פתיחת תפריט' : 'סגירת תפריט'"
+      :aria-expanded="!collapsed"
+      aria-controls="event-sidebar-nav"
+      @click="$emit('toggle')"
+    >
+      <svg
+        class="sidebar-toggle-ico"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <!-- panel + chevron: collapsed → points left (open); expanded → points right (close) -->
+        <rect fill="none" x="3.5" y="4" width="17" height="16" rx="2.2" />
+        <path fill="none" d="M9.5 4v16" />
+        <path
+          v-if="collapsed"
+          fill="none"
+          d="M15.2 9.2 12.5 12l2.7 2.8"
+        />
+        <path
+          v-else
+          fill="none"
+          d="M14.8 9.2 17.5 12l-2.7 2.8"
+        />
+      </svg>
+    </button>
 
     <div
-      v-else
       class="rail-cover"
-      :class="{ 'is-empty': !hasCoverImage }"
+      :class="{ 'is-empty': !hasCoverImage, 'rail-cover--sm': collapsed }"
       :style="coverStyle"
       :title="eventName || ''"
       aria-hidden="true"
@@ -28,18 +62,28 @@
       </svg>
     </div>
 
-    <nav class="sidebar-nav" :aria-label="rail ? 'תפריט האירוע' : 'תפריט האירוע'">
+    <p v-if="!collapsed && eventName" class="sidebar-event-name">{{ eventName }}</p>
+
+    <nav
+      id="event-sidebar-nav"
+      class="sidebar-nav"
+      aria-label="תפריט האירוע"
+    >
       <router-link
         v-for="(item, index) in items"
         :key="index"
         :to="item.path"
         class="side-bar-link"
-        :class="{ 'rail-link': rail, on: item.isActive }"
+        :class="{
+          'rail-link': collapsed,
+          'expanded-link': !collapsed,
+          on: item.isActive,
+        }"
         :aria-current="item.isActive ? 'page' : undefined"
-        :aria-label="rail ? item.text : undefined"
+        :aria-label="collapsed ? item.text : undefined"
       >
-        <SideBarItem :item="item" :rail="rail" />
-        <span v-if="rail" class="rail-tip">{{ item.text }}</span>
+        <SideBarItem :item="item" :collapsed="collapsed" />
+        <span v-if="collapsed" class="rail-tip">{{ item.text }}</span>
       </router-link>
     </nav>
   </div>
@@ -61,11 +105,13 @@ export default defineComponent({
       type: Array,
       required: true,
     },
-    rail: {
+    collapsed: {
       type: Boolean,
       default: false,
     },
   },
+
+  emits: ["toggle"],
 
   computed: {
     eventName(): string {
@@ -93,6 +139,7 @@ export default defineComponent({
 .sidebar {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -101,18 +148,54 @@ export default defineComponent({
   border: 0;
   border-inline-end: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 0;
-  padding: 20px 16px;
+  padding: 12px 10px 18px;
   box-shadow: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
-.sidebar--rail {
+.sidebar--collapsed {
   align-items: center;
-  padding: 16px 0 18px;
+  padding: 12px 0 18px;
   gap: 6px;
   background: transparent;
-  border-inline-end: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-  overflow: visible;
+}
+
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted, #5e564e);
+  cursor: pointer;
+  flex: none;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(22, 19, 16, 0.06);
+    color: var(--ink, #161310);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ink, #161310);
+    outline-offset: 2px;
+  }
+}
+
+.sidebar--expanded .sidebar-toggle {
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+}
+
+.sidebar-toggle-ico {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .rail-cover {
@@ -120,12 +203,17 @@ export default defineComponent({
   height: 48px;
   border-radius: 14px;
   background: var(--deep, #12100e) center / cover no-repeat;
-  margin-bottom: 10px;
+  margin: 0 auto 8px;
   box-shadow: var(--shadow-sm, 0 8px 24px rgba(18, 16, 14, 0.08));
   flex: none;
   display: grid;
   place-items: center;
   overflow: hidden;
+}
+
+.sidebar--expanded .rail-cover {
+  width: 56px;
+  height: 56px;
 }
 
 .rail-cover.is-empty {
@@ -141,51 +229,51 @@ export default defineComponent({
   display: block;
 }
 
-.sidebar-title {
-  flex: none;
-  text-align: center;
-  margin: 0 0 14px;
-  padding-bottom: 12px;
+.sidebar-event-name {
+  margin: 0 4px 10px;
+  padding: 0 4px 10px;
   border-bottom: 1px solid var(--line, rgba(22, 19, 16, 0.11));
-}
-
-.sidebar-kicker {
-  color: var(--muted, #5e564e);
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.sidebar-title h2 {
-  margin: 4px 0 0;
   font-family: var(--brand, Outfit, Heebo, sans-serif);
   font-weight: 800;
-  font-size: 1.2rem;
-  letter-spacing: -0.03em;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
   color: var(--ink, #161310);
-  line-height: 1.25;
+  line-height: 1.3;
+  text-align: center;
   word-break: break-word;
 }
 
 .sidebar-nav {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: visible;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
 }
 
-.sidebar--rail .sidebar-nav {
+.sidebar--collapsed .sidebar-nav {
   overflow: visible;
   align-items: center;
   gap: 6px;
-  width: 100%;
 }
 
 .side-bar-link {
   text-decoration: none;
   color: inherit;
+}
+
+.expanded-link {
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+}
+
+.expanded-link:focus-visible {
+  outline: 2px solid var(--ink, #161310);
+  outline-offset: 2px;
 }
 
 .rail-link {
@@ -203,6 +291,11 @@ export default defineComponent({
 .rail-link:hover {
   background: rgba(22, 19, 16, 0.06);
   color: var(--ink, #161310);
+}
+
+.rail-link:focus-visible {
+  outline: 2px solid var(--ink, #161310);
+  outline-offset: 2px;
 }
 
 .rail-link.on {
@@ -227,6 +320,7 @@ export default defineComponent({
 
 .rail-tip {
   position: absolute;
+  /* In RTL, inline-start is the right edge; 100%+ places tip to the left of the rail */
   inset-inline-start: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
@@ -240,11 +334,19 @@ export default defineComponent({
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s;
-  z-index: 30;
+  z-index: 80;
+  box-shadow: 0 8px 20px rgba(18, 16, 14, 0.18);
 }
 
 .rail-link:hover .rail-tip,
-.rail-link:focus-visible .rail-tip {
+.rail-link:focus-visible .rail-tip,
+.rail-link:focus .rail-tip {
   opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-tip {
+    transition: none;
+  }
 }
 </style>

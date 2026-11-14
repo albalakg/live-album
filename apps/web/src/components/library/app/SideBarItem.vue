@@ -1,11 +1,15 @@
 <template>
   <div
     class="side-bar-item"
-    :class="{ 'is-active': item.isActive, 'is-rail': rail }"
+    :class="{
+      'is-active': item.isActive,
+      'is-rail': collapsed,
+      'is-expanded': !collapsed,
+    }"
   >
-    <span v-if="rail" class="rail-ico" aria-hidden="true" v-html="iconSvg"></span>
-    <span v-else>{{ item.text }}</span>
-    <span v-if="rail && item.badge" class="rail-badge">{{ item.badge }}</span>
+    <span class="rail-ico" aria-hidden="true" v-html="iconSvg"></span>
+    <span v-if="!collapsed" class="item-label">{{ item.text }}</span>
+    <span v-if="item.badge" class="rail-badge">{{ item.badge }}</span>
   </div>
 </template>
 
@@ -23,7 +27,8 @@ const ICONS: Record<string, string> = {
   "/event/album": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect fill="none" x="3.5" y="3.5" width="7" height="7" rx="1.4"/><rect fill="none" x="13.5" y="3.5" width="7" height="7" rx="1.4"/><rect fill="none" x="3.5" y="13.5" width="7" height="7" rx="1.4"/><rect fill="none" x="13.5" y="13.5" width="7" height="7" rx="1.4"/></svg>`,
   "/event/assets": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect fill="none" x="3.5" y="3.5" width="7" height="7" rx="1.4"/><rect fill="none" x="13.5" y="3.5" width="7" height="7" rx="1.4"/><rect fill="none" x="3.5" y="13.5" width="7" height="7" rx="1.4"/><rect fill="none" x="13.5" y="13.5" width="7" height="7" rx="1.4"/></svg>`,
   "/event/plan": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M4 9.5h16v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5z"/><path fill="none" d="M8 9.5V6.8A4 4 0 0 1 12 3a4 4 0 0 1 4 3.8v2.7"/></svg>`,
-  "/event/trivia": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle fill="none" cx="12" cy="12" r="8.5"/><path fill="none" d="M9.2 9.4c.5-1.4 4.2-1.8 4.2.5 0 1.7-1.8 1.9-2.4 3"/><circle cx="12" cy="16.4" r=".8" fill="currentColor" stroke="none"/></svg>`,
+  /* Lucide message-circle-question style */
+  "/event/trivia": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/><path fill="none" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path fill="none" d="M12 17h.01"/></svg>`,
   "/event/whatsapp": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M5 19l1.5-4A7.5 7.5 0 1 1 12 19.5H7z"/><path fill="none" d="M9 11c.5 2 2 3.5 4 4"/></svg>`,
 };
 
@@ -35,7 +40,7 @@ export default defineComponent({
       type: Object,
       required: true,
     },
-    rail: {
+    collapsed: {
       type: Boolean,
       default: false,
     },
@@ -57,6 +62,7 @@ export default defineComponent({
 .side-bar-item {
   display: flex;
   align-items: center;
+  gap: 10px;
   min-height: 42px;
   padding: 10px 14px;
   border-radius: 999px;
@@ -64,10 +70,12 @@ export default defineComponent({
   transition: background 0.15s ease, color 0.15s ease;
   position: relative;
 
-  span {
+  .item-label {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &:hover {
@@ -80,7 +88,7 @@ export default defineComponent({
     background: rgba(220, 91, 102, 0.14);
     font-weight: 800;
 
-    span {
+    .item-label {
       font-weight: 800;
     }
   }
@@ -88,6 +96,7 @@ export default defineComponent({
   &.is-rail {
     min-height: 0;
     padding: 0;
+    gap: 0;
     border-radius: 0;
     background: transparent !important;
     color: inherit;
@@ -98,6 +107,34 @@ export default defineComponent({
       color: inherit;
     }
   }
+
+  &.is-expanded {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 14px;
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+
+  &.is-expanded.is-active {
+    background: var(--deep, #12100e);
+    color: #fff;
+
+    .rail-ico,
+    .rail-ico :deep(svg),
+    .rail-ico :deep(svg *) {
+      color: #fff;
+    }
+
+    .rail-ico :deep(svg) {
+      stroke: #fff;
+    }
+
+    .rail-ico :deep(svg [fill="currentColor"]) {
+      fill: #fff;
+      stroke: none;
+    }
+  }
 }
 
 .rail-ico {
@@ -105,6 +142,7 @@ export default defineComponent({
   place-items: center;
   width: 22px;
   height: 22px;
+  flex: none;
   color: inherit;
 
   :deep(svg) {
@@ -144,5 +182,10 @@ export default defineComponent({
   font-weight: 800;
   display: grid;
   place-items: center;
+}
+
+.is-expanded .rail-badge {
+  top: 6px;
+  inset-inline-end: 8px;
 }
 </style>

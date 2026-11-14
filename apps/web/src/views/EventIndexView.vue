@@ -11,9 +11,18 @@
         <router-view></router-view>
       </transition>
     </template>
-    <div class="event-main" v-else>
-      <aside class="event-sidebar is-rail">
-        <Sidebar :items="items" :rail="true" />
+    <div
+      class="event-main"
+      v-else
+      :class="{ 'is-sidebar-collapsed': sidebarCollapsed }"
+      :style="mainStyle"
+    >
+      <aside class="event-sidebar">
+        <Sidebar
+          :items="items"
+          :collapsed="sidebarCollapsed"
+          @toggle="toggleSidebar"
+        />
       </aside>
       <nav class="event-mobile-nav" aria-label="ניווט האירוע">
         <MobileScrollBar :items="items" />
@@ -34,12 +43,46 @@ import { defineComponent } from "vue";
 import { isWhatsAppEnabled } from "@/helpers/features";
 import { IMobileScrollBarItem } from "@/helpers/interfaces";
 
+const SIDEBAR_STORAGE_KEY = "snapshare.sidebarCollapsed";
+const SIDEBAR_EXPANDED_PX = 236;
+const SIDEBAR_COLLAPSED_PX = 72;
+
+function readSidebarCollapsed(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.localStorage?.getItem(SIDEBAR_STORAGE_KEY);
+    if (raw === null || raw === undefined) return false;
+    return raw === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeSidebarCollapsed(value: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage?.setItem(SIDEBAR_STORAGE_KEY, value ? "true" : "false");
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
 export default defineComponent({
   name: "EventIndexView",
 
   components: {
     Sidebar,
     MobileScrollBar,
+  },
+
+  data() {
+    return {
+      sidebarCollapsed: false as boolean,
+    };
+  },
+
+  created() {
+    this.sidebarCollapsed = readSidebarCollapsed();
   },
 
   computed: {
@@ -54,6 +97,14 @@ export default defineComponent({
     },
     pendingCount(): number {
       return (this.$store.getters["event/getPendingAssets"] || []).length;
+    },
+    sidebarWidthPx(): number {
+      return this.sidebarCollapsed ? SIDEBAR_COLLAPSED_PX : SIDEBAR_EXPANDED_PX;
+    },
+    mainStyle(): Record<string, string> {
+      return {
+        "--host-sidebar": `${this.sidebarWidthPx}px`,
+      };
     },
 
     items(): IMobileScrollBarItem[] {
@@ -90,12 +141,19 @@ export default defineComponent({
       });
     },
   },
+
+  methods: {
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+      writeSidebarCollapsed(this.sidebarCollapsed);
+    },
+  },
 });
 </script>
 
 <style lang="scss" scoped>
 .event-main {
-  --host-sidebar: 72px;
+  --host-sidebar: 236px;
   --host-nav: 72px;
   min-height: calc(100vh - 72px);
   width: 100%;
@@ -109,6 +167,7 @@ export default defineComponent({
   padding-inline-end: 24px;
   box-sizing: border-box;
   background: #f3eee6;
+  transition: padding-inline-start 0.2s ease;
 }
 
 .event-sidebar {
@@ -119,6 +178,7 @@ export default defineComponent({
   height: calc(100vh - var(--host-nav));
   z-index: 20;
   overflow: visible;
+  transition: width 0.2s ease;
 }
 
 .event-mobile-nav {
@@ -134,12 +194,22 @@ export default defineComponent({
   padding: 8px 16px 32px;
   box-shadow: none;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .event-main,
+  .event-sidebar {
+    transition: none;
+  }
+}
+
+/* Mobile: keep current bottom nav; hide desktop sidebar + collapse toggle */
 @media (max-width: 900px) {
   .event-main {
     width: 100%;
     padding: 8px 12px 88px;
+    transition: none;
   }
 
   .event-sidebar {
