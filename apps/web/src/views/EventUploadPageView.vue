@@ -41,17 +41,9 @@
         <section class="links-card">
           <h2>קישור לעמוד העלאות</h2>
           <div class="link-row">
-            <button
-              type="button"
-              class="icon-btn"
-              aria-label="העתקת קישור עמוד העלאות"
-              @click="copyUrl(`/event/uploads/${eventPath}`)"
-            >
-              <MainIcon icon="content_copy" />
-            </button>
+            <CopyLinkButton :text="uploadPageUrl" />
             <div>
               <strong>עמוד העלאות</strong>
-              <small>{{ copyUploadText }}</small>
             </div>
           </div>
         </section>
@@ -86,7 +78,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import MainButton from "@/components/library/buttons/MainButton.vue";
-import MainIcon from "@/components/library/general/MainIcon.vue";
+import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 import EventSwitchPanel, {
   SwitchItem,
 } from "@/components/event/EventSwitchPanel.vue";
@@ -103,12 +95,11 @@ type ConfigKey =
 export default defineComponent({
   name: "EventUploadPageView",
 
-  components: { MainButton, MainIcon, EventSwitchPanel },
+  components: { MainButton, CopyLinkButton, EventSwitchPanel },
 
   data() {
     return {
       loading: false,
-      textCopied: false,
       welcomeText: "",
       config: {
         preview_site_display_image: false,
@@ -175,8 +166,8 @@ export default defineComponent({
       }
       return { background: "#12100e" };
     },
-    copyUploadText(): string {
-      return this.textCopied ? "הקישור הועתק" : "לחצו להעתקת הקישור";
+    uploadPageUrl(): string {
+      return `${window.location.origin}/event/uploads/${this.eventPath}`;
     },
   },
 
@@ -219,19 +210,6 @@ export default defineComponent({
       await this.$store.dispatch("event/update", { config: configPayload });
       this.loading = false;
       notify({ text: "ההגדרות נשמרו", type: "success" });
-    },
-
-    async copyUrl(url: string) {
-      try {
-        await navigator.clipboard.writeText(window.location.origin + url);
-        this.textCopied = true;
-        notify({ text: "הקישור הועתק", type: "success" });
-        setTimeout(() => {
-          this.textCopied = false;
-        }, 2000);
-      } catch (e) {
-        console.error(e);
-      }
     },
   },
 });
@@ -316,14 +294,6 @@ textarea {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-.icon-btn {
-  border: 0;
-  background: #f3eee6;
-  border-radius: 12px;
-  width: 42px;
-  height: 42px;
-  cursor: pointer;
 }
 .phone-wrap {
   position: sticky;

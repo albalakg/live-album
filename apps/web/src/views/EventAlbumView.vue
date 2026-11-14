@@ -13,17 +13,9 @@
       <h2>אלבום האורחים</h2>
       <div class="link-row">
         <div class="link-meta">
-          <button
-            type="button"
-            class="icon-btn"
-            aria-label="העתקת קישור אלבום האורחים"
-            @click="copyUrl(`/event/open-gallery/${eventPath}`)"
-          >
-            <MainIcon icon="content_copy" />
-          </button>
+          <CopyLinkButton :text="guestAlbumUrl" />
           <div>
             <strong>עמוד האלבום לאורחים</strong>
-            <small>{{ copyText }}</small>
           </div>
         </div>
         <router-link
@@ -51,16 +43,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import MainIcon from "@/components/library/general/MainIcon.vue";
+import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 
 export default defineComponent({
   name: "EventAlbumView",
 
-  components: { MainIcon },
-
-  data() {
-    return { textCopied: false };
-  },
+  components: { CopyLinkButton },
 
   computed: {
     eventPath(): string {
@@ -69,37 +57,8 @@ export default defineComponent({
     isEventAvailable(): boolean {
       return this.$store.getters["event/isEventAvailable"];
     },
-    copyText(): string {
-      return this.textCopied ? "הקישור הועתק" : "לחצו להעתקת הקישור";
-    },
-  },
-
-  methods: {
-    copyUrl(url: string) {
-      const full = window.location.origin + url;
-      const done = () => {
-        this.textCopied = true;
-        setTimeout(() => {
-          this.textCopied = false;
-        }, 2000);
-      };
-      if (!navigator.clipboard) {
-        const area = document.createElement("textarea");
-        area.value = full;
-        area.style.position = "fixed";
-        document.body.appendChild(area);
-        area.focus();
-        area.select();
-        try {
-          if (document.execCommand("copy")) done();
-        } finally {
-          document.body.removeChild(area);
-        }
-        return;
-      }
-      navigator.clipboard.writeText(full).then(done).catch(() => {
-        /* ignore */
-      });
+    guestAlbumUrl(): string {
+      return `${window.location.origin}/event/open-gallery/${this.eventPath}`;
     },
   },
 });
@@ -179,22 +138,6 @@ export default defineComponent({
 .link-meta strong {
   display: block;
   font-size: 0.95rem;
-}
-
-.link-meta small {
-  color: var(--muted, #5e564e);
-}
-
-.icon-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.16));
-  border-radius: 12px;
-  background: #fffcfa;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  flex: none;
 }
 
 .ghost-btn,

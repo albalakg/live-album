@@ -135,11 +135,9 @@
         </label>
         <div class="tb-field" style="margin-top: 8px">
           <span>קישור לאורחים</span>
-          <div style="display: flex; gap: 8px; margin-top: 6px">
+          <div style="display: flex; gap: 8px; margin-top: 6px; align-items: center">
             <input type="text" readonly :value="guestUrl" style="flex: 1" @focus="($event.target as HTMLInputElement).select()" />
-            <button type="button" class="tb-btn tb-btn-ghost" @click="$emit('copy-link')">
-              {{ copied ? "הועתק" : "העתקה" }}
-            </button>
+            <CopyLinkButton :text="guestUrl" />
           </div>
         </div>
       </div>
@@ -149,10 +147,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 import { TriviaBuilderGame } from "@/helpers/triviaBuilder";
 
 export default defineComponent({
   name: "TriviaSettingsPanel",
+
+  components: { CopyLinkButton },
 
   props: {
     game: {
@@ -160,10 +161,9 @@ export default defineComponent({
       required: true,
     },
     guestUrl: { type: String, default: "" },
-    copied: { type: Boolean, default: false },
   },
 
-  emits: ["patch", "copy-link"],
+  emits: ["patch"],
 
   methods: {
     set(key: string, value: unknown) {
@@ -178,20 +178,3 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-.tb-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: 800;
-  font-size: 0.92rem;
-  white-space: nowrap;
-  cursor: pointer;
-  border: 0;
-  font-family: inherit;
-  background: #fff;
-  border: 1.5px solid rgba(22, 19, 16, 0.11);
-}
-</style>

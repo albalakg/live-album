@@ -12,17 +12,9 @@
       <h2>תצוגת המסך החי</h2>
       <div class="link-row">
         <div class="link-meta">
-          <button
-            type="button"
-            class="icon-btn"
-            aria-label="העתקת קישור האלבום החי"
-            @click="copyUrl()"
-          >
-            <MainIcon icon="content_copy" />
-          </button>
+          <CopyLinkButton :text="liveAlbumUrl" />
           <div>
             <strong>קישור לאלבום החי</strong>
-            <small>{{ copyText }}</small>
           </div>
         </div>
         <div class="link-actions">
@@ -104,7 +96,7 @@ import MainButton from "@/components/library/buttons/MainButton.vue";
 import EventSwitchPanel, {
   SwitchItem,
 } from "@/components/event/EventSwitchPanel.vue";
-import MainIcon from "@/components/library/general/MainIcon.vue";
+import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 import { defineComponent } from "vue";
 import { IEvent } from "@/helpers/interfaces";
 
@@ -126,13 +118,12 @@ export default defineComponent({
 
   components: {
     MainButton,
-    MainIcon,
+    CopyLinkButton,
     EventSwitchPanel,
   },
 
   data() {
     return {
-      textCopied: false as boolean,
       albumsSelectOptions: [
         {
           value: "EventGallerySingle",
@@ -204,12 +195,12 @@ export default defineComponent({
       return this.$store.getters["event/getTotalAssets"];
     },
 
-    copyText(): string {
-      return this.textCopied ? "הקישור הועתק" : "לחצו להעתקת הקישור לאלבום החי";
-    },
-
     eventPath(): string {
       return this.$store.getters["event/getEventPath"];
+    },
+
+    liveAlbumUrl(): string {
+      return `${window.location.origin}/event/open-album/${this.eventPath}`;
     },
 
     event(): IEvent {
@@ -270,62 +261,11 @@ export default defineComponent({
       this.loading = false;
     },
 
-    copyUrl() {
-      this.copyTextToClipboard(
-        window.location.origin + `/event/open-album/${this.eventPath}`
-      );
-    },
-
     toggleBlockedGalleryAssets(event: Event) {
       const target = event.target as HTMLInputElement;
       this.$store.dispatch(
         "event/setShowBlockedGalleryAssets",
         target.checked
-      );
-    },
-
-    fallbackCopyTextToClipboard(text: string) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.top = "0";
-      textArea.style.left = "0";
-      textArea.style.position = "fixed";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        const successful = document.execCommand("copy");
-        if (successful) {
-          this.textCopied = true;
-          setTimeout(() => {
-            this.textCopied = false;
-          }, 2000);
-        }
-      } catch (err) {
-        console.error("Fallback: Oops, unable to copy", err);
-      }
-
-      document.body.removeChild(textArea);
-    },
-
-    copyTextToClipboard(text: string) {
-      if (!navigator.clipboard) {
-        this.fallbackCopyTextToClipboard(text);
-        return;
-      }
-
-      navigator.clipboard.writeText(text).then(
-        () => {
-          this.textCopied = true;
-          setTimeout(() => {
-            this.textCopied = false;
-          }, 2000);
-        },
-        (err) => {
-          console.error("Async: Could not copy text: ", err);
-          this.fallbackCopyTextToClipboard(text);
-        }
       );
     },
   },
@@ -419,32 +359,11 @@ export default defineComponent({
   font-size: 0.95rem;
 }
 
-.link-meta small {
-  color: var(--muted, #5e564e);
-}
-
 .file-count {
   color: var(--muted, #5e564e);
   font-size: 0.88rem;
   font-weight: 700;
   white-space: nowrap;
-}
-
-.icon-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--line, rgba(22, 19, 16, 0.16));
-  border-radius: 12px;
-  background: #fffcfa;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  flex: none;
-  transition: border-color 0.2s ease;
-}
-
-.icon-btn:hover {
-  border-color: var(--ink, #161310);
 }
 
 .ghost-btn {

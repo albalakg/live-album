@@ -134,9 +134,7 @@
         v-show="tab === 'settings'"
         :game="game"
         :guest-url="guestUrl"
-        :copied="copied"
         @patch="onSettingsPatch"
-        @copy-link="copyLink"
       />
 
       <TriviaReportPanel
@@ -312,8 +310,6 @@ export default defineComponent({
       questionSaveTimer: null as ReturnType<typeof setTimeout> | null,
       settingsSaveTimer: null as ReturnType<typeof setTimeout> | null,
       savedClearTimer: null as ReturnType<typeof setTimeout> | null,
-      copied: false,
-      copyTimer: null as ReturnType<typeof setTimeout> | null,
       suppressAutosave: false,
       dryPhases: [
         { id: "lobby", label: "הצטרפות" },
@@ -538,7 +534,6 @@ export default defineComponent({
     if (this.questionSaveTimer) clearTimeout(this.questionSaveTimer);
     if (this.settingsSaveTimer) clearTimeout(this.settingsSaveTimer);
     if (this.savedClearTimer) clearTimeout(this.savedClearTimer);
-    if (this.copyTimer) clearTimeout(this.copyTimer);
   },
 
   methods: {
@@ -1050,23 +1045,6 @@ export default defineComponent({
         this.fail(error, "לא הצלחנו לחזור לתמונות");
       } finally {
         this.acting = false;
-      }
-    },
-
-    async copyLink() {
-      try {
-        await navigator.clipboard.writeText(this.guestUrl);
-        this.copied = true;
-        if (this.copyTimer) clearTimeout(this.copyTimer);
-        this.copyTimer = setTimeout(() => {
-          this.copied = false;
-        }, 2000);
-      } catch {
-        notify({
-          text: "לא הצלחנו להעתיק. סמנו את הקישור ידנית.",
-          type: "error",
-          duration: 4000,
-        });
       }
     },
   },

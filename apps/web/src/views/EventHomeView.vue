@@ -83,7 +83,9 @@
       <section class="card links">
         <h2>קישורי שיתוף</h2>
         <div class="link-row" v-for="link in shareLinks" :key="link.path">
-          <button type="button" class="copy" @click="copy(link.path)">העתק</button>
+          <div class="copy-slot">
+            <CopyLinkButton :text="`${origin}${link.path}`" />
+          </div>
           <div>
             <strong>{{ link.label }}</strong>
             <small dir="ltr">{{ origin }}{{ link.path }}</small>
@@ -96,8 +98,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 import { StatusEnum } from "@/helpers/enums";
-import { notify } from "@/helpers/notify";
 import Time from "@/helpers/time";
 
 const ACTION_ICONS = {
@@ -109,6 +111,8 @@ const ACTION_ICONS = {
 
 export default defineComponent({
   name: "EventHomeView",
+
+  components: { CopyLinkButton },
 
   data() {
     return {
@@ -198,18 +202,6 @@ export default defineComponent({
         { label: "האלבום החי למסך", path: `/event/open-album/${p}` },
         { label: "הגלריה לאורחים", path: `/event/open-gallery/${p}` },
       ];
-    },
-  },
-
-  methods: {
-    async copy(path: string) {
-      try {
-        await navigator.clipboard.writeText(`${this.origin}${path}`);
-        notify({ text: "הקישור הועתק", type: "success" });
-      } catch (e) {
-        console.error(e);
-        notify({ text: "ההעתקה נכשלה", type: "error" });
-      }
     },
   },
 });
@@ -372,16 +364,10 @@ export default defineComponent({
   color: #8a8278;
   word-break: break-all;
 }
-.copy {
+.copy-slot {
   margin-inline-start: auto;
-  border: 0;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 800;
-  cursor: pointer;
   order: -1;
+  flex: none;
 }
 .banner.error {
   background: #fff4f4;
