@@ -1,14 +1,15 @@
 <template>
-  <teleport to="body">
+  <Teleport to="body">
     <div
       v-if="open"
       class="tb-preview-backdrop"
-      @click="$emit('close')"
+      @click="close"
     ></div>
     <div
       v-if="open"
       class="tb-preview-drawer"
       role="dialog"
+      aria-modal="true"
       aria-label="תצוגה חיה"
     >
       <div class="tb-drawer-handle"></div>
@@ -35,7 +36,7 @@
             @click="$emit('theme', t.id)"
           ></button>
         </div>
-        <button type="button" class="tb-btn tb-btn-ghost" @click="$emit('close')">סגירה</button>
+        <button type="button" class="tb-btn tb-btn-ghost" @click="close">סגירה</button>
       </div>
       <div class="tb-preview-body">
         <div class="tb-tv-wrap">
@@ -64,7 +65,7 @@
         </div>
       </div>
     </div>
-  </teleport>
+  </Teleport>
 </template>
 
 <script lang="ts">
@@ -90,6 +91,13 @@ export default defineComponent({
   },
 
   emits: ["close", "phase", "theme"],
+
+  data() {
+    return {
+      scrollLocked: false,
+      prevBodyOverflow: "",
+    };
+  },
 
   computed: {
     phases() {
@@ -121,6 +129,42 @@ export default defineComponent({
         .slice(0, 4)
         .map((o) => o.label)
         .filter(Boolean);
+    },
+  },
+
+  watch: {
+    open: {
+      immediate: true,
+      handler(isOpen: boolean) {
+        if (isOpen) this.lockBody();
+        else this.unlockBody();
+      },
+    },
+  },
+
+  beforeUnmount() {
+    this.unlockBody();
+  },
+
+  methods: {
+    close() {
+      this.$emit("close");
+    },
+    onKeydown(e: KeyboardEvent) {
+      if (e.key === "Escape") this.close();
+    },
+    lockBody() {
+      if (this.scrollLocked || typeof document === "undefined") return;
+      this.prevBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      this.scrollLocked = true;
+      window.addEventListener("keydown", this.onKeydown);
+    },
+    unlockBody() {
+      if (!this.scrollLocked || typeof document === "undefined") return;
+      document.body.style.overflow = this.prevBodyOverflow;
+      this.scrollLocked = false;
+      window.removeEventListener("keydown", this.onKeydown);
     },
   },
 });
