@@ -42,20 +42,44 @@
     <p v-if="arrival" class="stage-new">תמונה חדשה</p>
 
     <aside v-if="triviaPhase === 'photos'" class="stage-card" aria-label="כרטיס QR">
-      <EventQR background="#ffffff" />
+      <div class="stage-card-qr">
+        <EventQR
+          background="#ffffff"
+          :size="128"
+          :margin="4"
+          keep-quiet-zone
+        />
+      </div>
       <p>סרקו והעלו</p>
     </aside>
 
     <aside v-if="settingsOpen && !showGuestCta" class="stage-panel">
       <p>תצוגה</p>
-      <button type="button" :class="{ on: stageMode === 'slideshow' }" @click="stageMode = 'slideshow'">מצגת</button>
-      <button type="button" :class="{ on: stageMode === 'mosaic' }" @click="stageMode = 'mosaic'">פסיפס</button>
+      <button
+        type="button"
+        class="stage-panel-btn"
+        :class="{ on: stageMode === 'slideshow' }"
+        @click="stageMode = 'slideshow'"
+      >
+        מצגת
+      </button>
+      <button
+        type="button"
+        class="stage-panel-btn"
+        :class="{ on: stageMode === 'mosaic' }"
+        @click="stageMode = 'mosaic'"
+      >
+        פסיפס
+      </button>
       <label v-if="hasBlockedAssets">
         <input type="checkbox" :checked="showBlockedGalleryAssets" @change="toggleBlockedGalleryAssets" />
         הצג חסומות
       </label>
-      <button type="button" @click="toggleFullScreen">{{ isFullScreen ? "יציאה ממסך מלא" : "מסך מלא" }}</button>
-      <router-link to="/event/gallery">חזרה לניהול</router-link>
+      <button type="button" class="stage-panel-btn" @click="toggleFullScreen">
+        {{ isFullScreen ? "יציאה ממסך מלא" : "מסך מלא" }}
+      </button>
+      <div class="stage-panel-sep" aria-hidden="true"></div>
+      <router-link class="stage-panel-btn" to="/event/gallery">חזרה לניהול</router-link>
     </aside>
 
     <GuestAlbumCta v-if="showGuestCta" />
@@ -407,19 +431,38 @@ export default defineComponent({
 }
 .stage-card {
   position: absolute;
-  left: 22px;
-  bottom: 22px;
-  z-index: 5;
-  width: 148px;
-  padding: 12px 12px 10px;
+  left: max(24px, env(safe-area-inset-left, 0px));
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  z-index: 8;
+  width: 168px;
+  padding: 16px 16px 12px;
   border-radius: 18px;
-  background: rgba(255,252,250,.94);
+  background: #fff;
   color: #161310;
   text-align: center;
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  overflow: visible;
+  box-sizing: border-box;
 }
-.stage-card p { margin: 8px 0 0; font-weight: 900; }
-.stage.has-guest-cta .stage-card { bottom: 108px; }
+.stage-card-qr {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  background: #fff;
+  border-radius: 8px;
+}
+.stage-card-qr :deep(.qr-code),
+.stage-card-qr :deep(svg) {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.stage-card p { margin: 10px 0 0; font-weight: 900; font-size: 0.95rem; }
+.stage.has-guest-cta .stage-card {
+  bottom: max(108px, calc(84px + env(safe-area-inset-bottom, 0px)));
+}
 .stage-gear {
   position: static;
   border: 1px solid rgba(255,255,255,.2);
@@ -445,19 +488,34 @@ export default defineComponent({
   background: rgba(18,16,14,.88);
   color: #fff;
 }
-.stage-panel button, .stage-panel a {
+.stage-panel-btn {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  margin: 0;
   border: 1px solid rgba(255,255,255,.16);
   background: transparent;
   color: #fff;
   border-radius: 999px;
-  padding: 8px 12px;
+  padding: 0 12px;
+  font-size: 0.875rem;
   font-weight: 700;
+  line-height: 1;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   font-family: inherit;
 }
-.stage-panel button.on { background: #fff; color: #12100e; }
+.stage-panel-btn.on { background: #fff; color: #12100e; }
+.stage-panel-sep {
+  height: 1px;
+  margin: 2px 0;
+  background: rgba(255,255,255,.14);
+}
 .stage-panel label { display: flex; gap: 8px; align-items: center; font-weight: 700; }
 </style>
 

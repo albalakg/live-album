@@ -1,12 +1,15 @@
 <template>
-  <div class="qr-code" :class="{ 'qr-code--inverted': inverted }">
+  <div
+    class="qr-code"
+    :class="{ 'qr-code--inverted': inverted, 'qr-code--quiet': keepQuietZone }"
+  >
     <div class="qr-export" aria-hidden="true">
       <qrcode-svg
         :value="QRLink"
         level="H"
         :foreground="foreground"
         :background="resolvedBackground"
-        :margin="1"
+        :margin="moduleMargin"
         ref="qrSvg"
       />
     </div>
@@ -15,7 +18,7 @@
       :value="QRLink"
       :background="resolvedBackground"
       :foreground="foreground"
-      :margin="1"
+      :margin="moduleMargin"
       :size="renderedSize"
       level="H"
       render-as="svg"
@@ -50,6 +53,16 @@ export default defineComponent({
       type: Number,
       default: 0,
     },
+    /** Quiet-zone modules around the QR (qrcode.vue margin). */
+    margin: {
+      type: Number,
+      default: 1,
+    },
+    /** Keep the white quiet-zone plate (do not strip / force transparent). */
+    keepQuietZone: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   components: {
@@ -66,8 +79,16 @@ export default defineComponent({
       return window.location.origin + `/event/uploads/${this.event.path}`;
     },
 
+    moduleMargin(): number {
+      return this.margin > 0 ? this.margin : 1;
+    },
+
     resolvedBackground(): string {
       const bg = this.background || "transparent";
+      if (this.keepQuietZone) {
+        if (bg === "transparent") return "#ffffff";
+        return bg;
+      }
       if (bg === "#fff" || bg === "#ffffff" || bg === "#FFFFFF" || bg === "white") {
         return "transparent";
       }
@@ -87,6 +108,9 @@ export default defineComponent({
     resolvedBackground() {
       this.$nextTick(() => this.stripWhitePlate());
     },
+    keepQuietZone() {
+      this.$nextTick(() => this.stripWhitePlate());
+    },
   },
 
   mounted() {
@@ -99,6 +123,7 @@ export default defineComponent({
 
   methods: {
     stripWhitePlate() {
+      if (this.keepQuietZone) return;
       const root = this.$el as HTMLElement | undefined;
       if (!root) return;
       root.querySelectorAll("svg rect").forEach((rect) => {
@@ -136,14 +161,25 @@ export default defineComponent({
 }
 .qr-code :deep(svg) {
   display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.qr-code:not(.qr-code--quiet) :deep(svg) {
   background: transparent !important;
 }
-/* Kill any white quiet-zone plate from the QR renderer */
-.qr-code :deep(svg > rect:first-child),
-.qr-code :deep(svg rect[fill="#ffffff"]),
-.qr-code :deep(svg rect[fill="#fff"]),
-.qr-code :deep(svg rect[fill="white"]),
-.qr-code :deep(svg rect[fill="#FFFFFF"]) {
+/* Kill any white quiet-zone plate from the QR renderer (print/card cutouts) */
+.qr-code:not(.qr-code--quiet) :deep(svg > rect:first-child),
+.qr-code:not(.qr-code--quiet) :deep(svg rect[fill="#ffffff"]),
+.qr-code:not(.qr-code--quiet) :deep(svg rect[fill="#fff"]),
+.qr-code:not(.qr-code--quiet) :deep(svg rect[fill="white"]),
+.qr-code:not(.qr-code--quiet) :deep(svg rect[fill="#FFFFFF"]) {
   fill: transparent !important;
+}
+.qr-code--quiet {
+  background: #fff !important;
+}
+.qr-code--quiet :deep(svg) {
+  background: #fff !important;
 }
 </style>
