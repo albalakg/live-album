@@ -160,6 +160,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/EventUploadPageView.vue"),
       },
       {
+        path: "page",
+        name: "eventLandingPage",
+        component: () => import("../views/EventPageBuilderView.vue"),
+      },
+      {
         path: "album",
         name: "eventAlbum",
         component: () => import("../views/EventAlbumView.vue"),

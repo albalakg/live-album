@@ -126,6 +126,7 @@ export default defineComponent({
         { text: "פרטי האירוע", path: "/event/details", isActive: false },
         { text: "אלבום חי", path: "/event/gallery", isActive: false },
         { text: "עמוד העלאה", path: "/event/upload", isActive: false },
+        { text: "דף אירוע", path: "/event/page", isActive: false },
         { text: "כרטיס QR", path: "/event/qr", isActive: false },
         {
           text: "כל הקבצים",
