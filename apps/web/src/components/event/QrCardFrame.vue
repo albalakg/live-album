@@ -129,7 +129,7 @@ export default defineComponent({
   min-width: 0;
   flex: 0 0 auto;
   line-height: 0;
-  background: #fff;
+  background: transparent;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -142,7 +142,7 @@ export default defineComponent({
   min-width: 0 !important;
   height: auto !important;
   margin: 0 !important;
-  background: #fff !important;
+  background: transparent !important;
 }
 
 .qr-card-frame__qr :deep(svg) {
@@ -151,7 +151,7 @@ export default defineComponent({
   max-width: 100% !important;
   height: auto !important;
   aspect-ratio: 1 / 1;
-  background: #fff !important;
+  background: transparent !important;
 }
 
 .qr-card-frame__plate {

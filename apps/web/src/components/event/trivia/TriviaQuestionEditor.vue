@@ -423,29 +423,32 @@ export default defineComponent({
     },
     patch(partial: Partial<TriviaBuilderQuestion>) {
       if (!this.question) return;
-      this.$emit("update", { ...this.question, ...partial });
+      // Mutate in place and emit the same object so list/editor identity stays
+      // stable — replacing the question on every keystroke remounted inputs and
+      // cleared visible values on blur.
+      Object.assign(this.question, partial);
+      this.$emit("update", this.question);
     },
     updateOption(index: number, partial: { label?: string; is_correct?: boolean }) {
       if (!this.question) return;
-      const options = this.question.options.map((o, i) =>
-        i === index ? { ...o, ...partial } : o
-      );
-      this.patch({ options });
+      const opt = this.question.options[index];
+      if (!opt) return;
+      Object.assign(opt, partial);
+      this.$emit("update", this.question);
     },
     markCorrect(index: number) {
       if (!this.question) return;
-      const options = this.question.options.map((o, i) => ({
-        ...o,
-        is_correct: i === index,
-      }));
-      this.patch({ options });
+      this.question.options.forEach((o, i) => {
+        o.is_correct = i === index;
+      });
+      this.$emit("update", this.question);
     },
     toggleCorrect(index: number) {
       if (!this.question) return;
-      const options = this.question.options.map((o, i) =>
-        i === index ? { ...o, is_correct: !o.is_correct } : o
-      );
-      this.patch({ options });
+      const opt = this.question.options[index];
+      if (!opt) return;
+      opt.is_correct = !opt.is_correct;
+      this.$emit("update", this.question);
     },
     markLie(index: number) {
       this.markCorrect(index);
@@ -455,20 +458,24 @@ export default defineComponent({
       this.patch({
         options: [
           ...this.question.options,
-          { key: nextBuilderKey("o"), label: "", is_correct: false },
+          {
+            key: nextBuilderKey("o"),
+            label: "",
+            is_correct: false,
+          },
         ],
       });
     },
     removeOption(index: number) {
       if (!this.question || this.question.options.length <= 2) return;
-      const options = this.question.options.filter((_, i) => i !== index);
-      this.patch({ options });
+      this.patch({
+        options: this.question.options.filter((_, i) => i !== index),
+      });
     },
     updateSideLabel(index: number, label: string) {
       if (!this.question) return;
-      const options = this.question.options.map((o, i) =>
-        i === index ? { ...o, label } : o
-      );
+      const opt = this.question.options[index];
+      if (opt) Object.assign(opt, { label });
       const sides = [...(this.sideCards as any[])];
       sides[index] = {
         ...sides[index],
@@ -476,14 +483,17 @@ export default defineComponent({
         initial: label.slice(0, 1) || sides[index].initial,
       };
       this.patch({
-        options,
         config: { ...(this.question.config || {}), sides },
       });
     },
     patchNum(key: string, value: number | string) {
       if (!this.question) return;
       this.patch({
-        config: { ...this.numConfig, ...(this.question.config || {}), [key]: value },
+        config: {
+          ...this.numConfig,
+          ...(this.question.config || {}),
+          [key]: value,
+        },
       });
     },
     pickPhoto(photo: { id: number; url: string }) {

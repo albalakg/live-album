@@ -42,7 +42,6 @@
                   :inverted="Boolean(selectedCard?.inverted)"
                   :size="280"
                   :margin="4"
-                  keep-quiet-zone
                 />
               </template>
             </QrCardFrame>
@@ -130,7 +129,6 @@
             :inverted="Boolean(selectedCard?.inverted)"
             :size="280"
             :margin="4"
-            keep-quiet-zone
           />
         </template>
       </QrCardFrame>

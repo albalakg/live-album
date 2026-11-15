@@ -219,6 +219,7 @@ import {
   zipAndDownloadAssets,
   type DownloadProgress,
 } from "@/helpers/guestGalleryDownload";
+import { trackEvent } from "@/helpers/deviceAnalytics";
 
 type PendingJob =
   | { kind: "single"; index: number }
@@ -289,7 +290,11 @@ export default defineComponent({
   },
   async created() {
     await this.getEventDetails();
-    if (this.$route.params.event_path === "preview") return;
+    const eventPath = String(this.$route.params.event_path || "");
+    if (eventPath === "preview") return;
+    if (eventPath) {
+      trackEvent(eventPath, "gallery_view");
+    }
     this.pollId = setInterval(() => this.getEventDetails(), 10000);
   },
   mounted() {
@@ -563,6 +568,10 @@ export default defineComponent({
           signal: this.progressAbort?.signal,
         });
         this.progressPercent = 100;
+        const eventPath = String(this.$route.params.event_path || "");
+        if (eventPath && eventPath !== "preview") {
+          trackEvent(eventPath, "gallery_download", { count: 1 });
+        }
         this.closeProgress();
       } catch (err) {
         if ((err as Error)?.name === "AbortError") {
@@ -594,6 +603,7 @@ export default defineComponent({
         pairs.length === 1 ? "מוריד…" : "מוריד קבצים…",
         pairs.length
       );
+      const eventPath = String(this.$route.params.event_path || "");
       try {
         if (pairs.length === 1) {
           await downloadSingleAsset({
@@ -602,6 +612,9 @@ export default defineComponent({
             index1Based: pairs[0].index1Based,
             signal: this.progressAbort?.signal,
           });
+          if (eventPath && eventPath !== "preview") {
+            trackEvent(eventPath, "gallery_download", { count: 1 });
+          }
           this.closeProgress();
           return;
         }
@@ -613,6 +626,9 @@ export default defineComponent({
           signal: this.progressAbort?.signal,
           onProgress: this.onZipProgress,
         });
+        if (eventPath && eventPath !== "preview") {
+          trackEvent(eventPath, "gallery_download", { count: pairs.length });
+        }
         this.closeProgress();
       } catch (err) {
         if ((err as Error)?.name === "AbortError") {

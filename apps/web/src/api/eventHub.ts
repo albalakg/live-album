@@ -11,6 +11,7 @@ export interface PublicHubIntegrations {
 export interface PublicHubPayload {
   event_id: number;
   event_name: string;
+  event_path?: string | null;
   template_id?: string | null;
   theme: HubTheme;
   blocks: Array<Omit<HubBlock, "enabled"> & { enabled?: boolean }>;

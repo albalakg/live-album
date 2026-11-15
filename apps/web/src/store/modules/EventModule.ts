@@ -77,6 +77,7 @@ function filterAssetsByModeration(
 interface IUploadFilePayload {
   file: File;
   isAuth: boolean;
+  device_id?: string;
   onUploadProgress?: (event: AxiosProgressEvent) => void;
   signal?: AbortSignal;
 }
@@ -1056,6 +1057,9 @@ const EventModule = {
         const fileName = file.name || `upload_${Date.now()}.png`;
         // Many backends expect "file"; some expect "image". Try "file" first.
         formData.append("file", file, fileName);
+        if (data.device_id) {
+          formData.append("device_id", data.device_id);
+        }
         const url = `events/${context.state.event.id}/${
           data.isAuth ? "auth/" : ""
         }upload`;

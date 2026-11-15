@@ -58,6 +58,7 @@ export interface EventMeta {
   album_url?: string;
   trivia_url?: string;
   event_name?: string;
+  event_path?: string;
   slug?: string;
 }
 

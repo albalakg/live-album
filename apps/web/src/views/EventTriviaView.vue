@@ -310,6 +310,7 @@ export default defineComponent({
       questionSaveTimer: null as ReturnType<typeof setTimeout> | null,
       settingsSaveTimer: null as ReturnType<typeof setTimeout> | null,
       savedClearTimer: null as ReturnType<typeof setTimeout> | null,
+      questionSaveGen: 0,
       suppressAutosave: false,
       dryPhases: [
         { id: "lobby", label: "הצטרפות" },
@@ -575,9 +576,14 @@ export default defineComponent({
       this.suppressAutosave = true;
       const prevId = keepSelection ? this.selectedQuestion?.id : null;
       const prevKey = keepSelection ? this.selectedQuestion?.key : null;
+      const prevById = new Map(
+        this.questions.filter((q) => q.id != null).map((q) => [q.id as number, q])
+      );
       this.game = gameFromApi(data);
       this.previewTheme = this.game.theme;
-      this.questions = (data.questions || []).map(questionFromApi);
+      this.questions = (data.questions || []).map((raw: any) =>
+        questionFromApi(raw, raw?.id != null ? prevById.get(raw.id) : null)
+      );
       if (!this.questions.length) {
         this.selectedIndex = 0;
       } else if (prevId != null) {
@@ -591,6 +597,23 @@ export default defineComponent({
       }
       this.$nextTick(() => {
         this.suppressAutosave = false;
+      });
+    },
+
+    /** After a single-question PATCH, sync option ids without remounting editor inputs. */
+    syncQuestionIdsFromAdmin(data: any, questionId: number) {
+      this.game = {
+        ...this.game,
+        ...gameFromApi(data),
+        // keep local join_path / cap if missing
+      };
+      this.previewTheme = this.game.theme;
+      const remote = (data.questions || []).find((q: any) => q.id === questionId);
+      const local = this.questions.find((q) => q.id === questionId);
+      if (!remote || !local) return;
+      const remoteOpts = remote.options || [];
+      local.options.forEach((opt, i) => {
+        if (remoteOpts[i]?.id != null) opt.id = remoteOpts[i].id;
       });
     },
 
@@ -637,24 +660,33 @@ export default defineComponent({
       if (this.suppressAutosave || this.questionsLocked) return;
       const q = this.selectedQuestion;
       if (!q?.id) return;
+      const questionId = q.id;
+      const gen = ++this.questionSaveGen;
       this.saveState = "pending";
       if (this.questionSaveTimer) clearTimeout(this.questionSaveTimer);
       this.questionSaveTimer = setTimeout(() => {
-        this.patchQuestion(q);
+        // Always read the latest question by id — never a stale closure snapshot.
+        const latest = this.questions.find((item) => item.id === questionId);
+        if (latest) this.patchQuestion(latest, gen);
       }, AUTOSAVE_MS);
     },
 
-    async patchQuestion(q: TriviaBuilderQuestion) {
+    async patchQuestion(q: TriviaBuilderQuestion, gen?: number) {
       if (!q.id || this.questionsLocked) return;
+      const questionId = q.id;
+      const saveGen = gen ?? ++this.questionSaveGen;
       this.saveState = "saving";
       try {
         const res = await axios.patch(
-          `events/${this.eventId}/trivia/admin/questions/${q.id}`,
+          `events/${this.eventId}/trivia/admin/questions/${questionId}`,
           questionPayload(q)
         );
-        this.applyAdminPayload(res.data.data);
+        // Ignore outdated responses so an older PATCH cannot wipe newer typing.
+        if (saveGen !== this.questionSaveGen) return;
+        this.syncQuestionIdsFromAdmin(res.data.data, questionId);
         this.markSaved();
       } catch (error) {
+        if (saveGen !== this.questionSaveGen) return;
         this.saveState = "error";
         this.fail(error, "לא הצלחנו לשמור את השאלה");
       }
@@ -663,7 +695,13 @@ export default defineComponent({
     onQuestionUpdate(next: TriviaBuilderQuestion) {
       const idx = this.questions.findIndex((q) => q.key === next.key);
       if (idx < 0) return;
-      this.questions.splice(idx, 1, next);
+      // Keep array slot identity when the editor mutates the same object.
+      if (this.questions[idx] !== next) {
+        this.questions.splice(idx, 1, next);
+      } else {
+        // Trigger dependents that watch the questions array shallowly.
+        this.questions = [...this.questions];
+      }
       this.scheduleQuestionSave();
     },
 

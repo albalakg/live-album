@@ -43,18 +43,99 @@
           <small>מתוך {{ filesCap }}</small>
         </article>
         <article class="stat">
-          <strong>{{ guestCount }}</strong>
+          <strong>{{ uploadersCount }}</strong>
           <span>אורחים שהעלו</span>
         </article>
         <article class="stat">
-          <strong>{{ pendingCount }}</strong>
+          <strong>{{ pendingDisplay }}</strong>
           <span>ממתינים לבדיקה</span>
-          <small v-if="pendingCount">יש תמונות בתור</small>
+          <small v-if="pendingDisplay">יש תמונות בתור</small>
         </article>
         <article class="stat">
           <strong>{{ daysLeft }}</strong>
           <span>ימים לאחסון</span>
         </article>
+      </section>
+
+      <section class="stats-block">
+        <div class="stats-block__head">
+          <h2>משפך אורחים</h2>
+          <span v-if="analyticsLoading" class="muted">טוען…</span>
+          <span v-else-if="analyticsError" class="muted error-text">לא נטען</span>
+          <span v-else class="live-mini">
+            {{ activeVisitors }} פעילים ב־15 דק׳
+          </span>
+        </div>
+        <div class="stats">
+          <article class="stat">
+            <strong>{{ landingVisitors }}</strong>
+            <span>נכנסו לדף האירוע</span>
+          </article>
+          <article class="stat">
+            <strong>{{ uploadPageVisitors }}</strong>
+            <span>נכנסו לעמוד העלאה</span>
+            <small>{{ formatRate(rates.landing_to_upload_page) }} מדף האירוע</small>
+          </article>
+          <article class="stat">
+            <strong>{{ uploadersCount }}</strong>
+            <span>העלו קבצים</span>
+            <small>{{ formatRate(rates.upload_page_to_upload) }} מעמוד העלאה</small>
+          </article>
+          <article class="stat">
+            <strong>{{ galleryVisitors }}</strong>
+            <span>נכנסו לגלריה</span>
+            <small>{{ formatRate(rates.upload_to_gallery) }} ממעלים</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="stats-block">
+        <div class="stats-block__head">
+          <h2>העלאות ומדיה</h2>
+        </div>
+        <div class="stats">
+          <article class="stat">
+            <strong>{{ totalGuestUploads }}</strong>
+            <span>העלאות אורחים</span>
+          </article>
+          <article class="stat">
+            <strong>{{ avgUploads }}</strong>
+            <span>ממוצע העלאות לאורח</span>
+          </article>
+          <article class="stat">
+            <strong>{{ photosCount }}</strong>
+            <span>תמונות</span>
+          </article>
+          <article class="stat">
+            <strong>{{ videosCount }}</strong>
+            <span>סרטונים</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="stats-block">
+        <div class="stats-block__head">
+          <h2>בדיקה ומעורבות</h2>
+        </div>
+        <div class="stats">
+          <article class="stat">
+            <strong>{{ approvedCount }}</strong>
+            <span>מאושרים</span>
+          </article>
+          <article class="stat">
+            <strong>{{ blockedCount }}</strong>
+            <span>חסומים</span>
+          </article>
+          <article class="stat">
+            <strong>{{ peakHourLabel }}</strong>
+            <span>שעת שיא להעלאות</span>
+          </article>
+          <article class="stat">
+            <strong>{{ galleryDownloadItems }}</strong>
+            <span>הורדות מהגלריה</span>
+            <small>{{ galleryDownloadEvents }} פעולות הורדה</small>
+          </article>
+        </div>
       </section>
 
       <section class="quick">
@@ -76,7 +157,7 @@
         <router-link class="qcard" to="/event/assets?filter=pending">
           <span class="ico" aria-hidden="true" v-html="actionIcons.mod"></span>
           <strong>ממתינים לבדיקה</strong>
-          <small>{{ pendingCount }} ממתינים</small>
+          <small>{{ pendingDisplay }} ממתינים</small>
         </router-link>
       </section>
 
@@ -99,6 +180,10 @@ import { defineComponent } from "vue";
 import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
 import { StatusEnum } from "@/helpers/enums";
 import Time from "@/helpers/time";
+import {
+  fetchEventAnalyticsOverview,
+  type EventAnalyticsOverview,
+} from "@/api/eventAnalytics";
 
 const ACTION_ICONS = {
   live: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect fill="none" x="3" y="5" width="18" height="12" rx="2"/><path fill="none" d="M8 21h8M12 17v4"/></svg>`,
@@ -107,14 +192,28 @@ const ACTION_ICONS = {
   mod: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M12 3 5 6v5c0 5 3.2 8.6 7 10 3.8-1.4 7-5 7-10V6z"/><path fill="none" d="M9.5 12.2 11.2 14l3.5-4"/></svg>`,
 };
 
+const EMPTY_RATES = {
+  landing_to_upload_page: 0,
+  upload_page_to_upload: 0,
+  upload_to_gallery: 0,
+};
+
 export default defineComponent({
   name: "EventHomeView",
 
   components: { CopyLinkButton },
 
-  data() {
+  data(): {
+    actionIcons: typeof ACTION_ICONS;
+    analytics: EventAnalyticsOverview | null;
+    analyticsLoading: boolean;
+    analyticsError: boolean;
+  } {
     return {
       actionIcons: ACTION_ICONS,
+      analytics: null,
+      analyticsLoading: false,
+      analyticsError: false,
     };
   },
 
@@ -131,6 +230,9 @@ export default defineComponent({
     event(): any {
       return this.$store.getters["event/getEvent"];
     },
+    eventId(): number {
+      return Number(this.event?.id || 0);
+    },
     eventName(): string {
       return this.$store.getters["event/getEventName"] || "";
     },
@@ -138,7 +240,6 @@ export default defineComponent({
       return this.$store.getters["event/getEventPath"] || "";
     },
     isSetupEmpty(): boolean {
-      // Empty only when the event has no name yet (cover alone does not hide overview).
       return !String(this.eventName || "").trim();
     },
     isLive(): boolean {
@@ -173,13 +274,60 @@ export default defineComponent({
       const allowed = this.$store.getters["user/getSubscriptionFilesAllowed"];
       return allowed == null ? "—" : String(allowed);
     },
-    guestCount(): number {
-      const guests = this.event?.guests;
-      if (Array.isArray(guests)) return guests.length;
-      return Number(this.event?.guests_count || 0);
-    },
-    pendingCount(): number {
+    pendingFallback(): number {
       return (this.$store.getters["event/getPendingAssets"] || []).length;
+    },
+    pendingDisplay(): number {
+      return this.analytics ? this.analytics.pending : this.pendingFallback;
+    },
+    uploadersCount(): number {
+      return this.analytics?.uploaders ?? 0;
+    },
+    landingVisitors(): number {
+      return this.analytics?.landing_visitors ?? 0;
+    },
+    uploadPageVisitors(): number {
+      return this.analytics?.upload_page_visitors ?? 0;
+    },
+    galleryVisitors(): number {
+      return this.analytics?.gallery_visitors ?? 0;
+    },
+    rates(): EventAnalyticsOverview["rates"] {
+      return this.analytics?.rates ?? EMPTY_RATES;
+    },
+    totalGuestUploads(): number {
+      return this.analytics?.total_guest_uploads ?? 0;
+    },
+    avgUploads(): string {
+      const v = this.analytics?.avg_uploads_per_uploader;
+      if (v == null) return "0";
+      return Number.isInteger(v) ? String(v) : v.toFixed(1);
+    },
+    photosCount(): number {
+      return this.analytics?.photos ?? 0;
+    },
+    videosCount(): number {
+      return this.analytics?.videos ?? 0;
+    },
+    approvedCount(): number {
+      return this.analytics?.approved ?? 0;
+    },
+    blockedCount(): number {
+      return this.analytics?.blocked ?? 0;
+    },
+    peakHourLabel(): string {
+      const hour = this.analytics?.peak_upload_hour;
+      if (hour == null) return "—";
+      return `${String(hour).padStart(2, "0")}:00`;
+    },
+    galleryDownloadItems(): number {
+      return this.analytics?.gallery_download_items ?? 0;
+    },
+    galleryDownloadEvents(): number {
+      return this.analytics?.gallery_download_events ?? 0;
+    },
+    activeVisitors(): number {
+      return this.analytics?.active_visitors_15m ?? 0;
     },
     daysLeft(): number {
       const finish = this.$store.getters["event/getEventFinishTime"];
@@ -200,6 +348,36 @@ export default defineComponent({
         { label: "האלבום החי למסך", path: `/event/open-album/${p}` },
         { label: "הגלריה לאורחים", path: `/event/open-gallery/${p}` },
       ];
+    },
+  },
+
+  watch: {
+    eventId: {
+      immediate: true,
+      handler(id: number) {
+        if (id && !this.isSetupEmpty) {
+          this.loadAnalytics(id);
+        }
+      },
+    },
+  },
+
+  methods: {
+    formatRate(value: number): string {
+      if (!value) return "0% המרה";
+      return `${value}% המרה`;
+    },
+    async loadAnalytics(eventId: number) {
+      this.analyticsLoading = true;
+      this.analyticsError = false;
+      try {
+        this.analytics = await fetchEventAnalyticsOverview(eventId);
+      } catch {
+        this.analyticsError = true;
+        this.analytics = null;
+      } finally {
+        this.analyticsLoading = false;
+      }
     },
   },
 });
@@ -255,6 +433,9 @@ export default defineComponent({
 .muted {
   color: #5e564e;
 }
+.error-text {
+  color: #9a3036;
+}
 .live-pill {
   display: inline-flex;
   align-items: center;
@@ -272,11 +453,34 @@ export default defineComponent({
   border-radius: 50%;
   background: #dc5b66;
 }
+.live-mini {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #5e564e;
+}
+.stats-block {
+  margin: 8px 0 18px;
+}
+.stats-block__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.stats-block__head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
 .stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin: 18px 0;
+}
+.stats-block .stats {
+  margin: 0;
 }
 .stat {
   background: #fff;

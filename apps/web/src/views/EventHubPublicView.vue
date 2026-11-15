@@ -26,6 +26,7 @@ import {
   normalizePublicHub,
   type NormalizedPublicHub,
 } from "@/components/landing/publicHubNormalize";
+import { trackEvent } from "@/helpers/deviceAnalytics";
 
 export default defineComponent({
   name: "EventHubPublicView",
@@ -124,6 +125,14 @@ export default defineComponent({
         normalized.value = n;
         status.value = "ready";
         applyMeta(n);
+        const eventPath =
+          result.data.event_path ||
+          result.data.integrations?.gallery_path ||
+          n.eventMeta.event_path ||
+          "";
+        if (eventPath) {
+          trackEvent(String(eventPath), "landing_view");
+        }
       } catch (err) {
         console.error("[EventHubPublicView] normalize failed", err);
         status.value = "error";

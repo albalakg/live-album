@@ -140,14 +140,18 @@ function fillNullSlots(
 export function integrationsToEventMeta(
   integrations: PublicHubIntegrations | undefined,
   eventName?: string,
-  slug?: string
+  slug?: string,
+  eventPath?: string | null
 ): EventMeta {
-  const path = integrations?.gallery_path ? String(integrations.gallery_path) : "";
+  const path =
+    (eventPath && String(eventPath).trim()) ||
+    (integrations?.gallery_path ? String(integrations.gallery_path) : "");
   const meta: EventMeta = {
     event_name: eventName,
     slug,
   };
   if (path) {
+    meta.event_path = path;
     meta.upload_url = `/event/uploads/${path}`;
     meta.album_url = `/event/open-gallery/${path}`;
     if (integrations?.icebreaker_enabled) {
@@ -207,7 +211,12 @@ export function normalizePublicHub(payload: PublicHubPayload, slug: string): Nor
     templateId: templateId || "legacy",
     isLegacy,
     hubConfig,
-    eventMeta: integrationsToEventMeta(payload.integrations, payload.event_name, slug),
+    eventMeta: integrationsToEventMeta(
+      payload.integrations,
+      payload.event_name,
+      slug,
+      payload.event_path
+    ),
     coverResolved,
   };
 }

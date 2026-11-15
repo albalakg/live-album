@@ -476,9 +476,11 @@ export default defineComponent({
   list-style: none;
   margin: 0 0 16px;
   padding: 0;
+  padding-left: 10px;
   max-height: 220px;
   overflow-y: auto;
   border-top: 1px solid var(--line, rgba(22, 19, 16, 0.11));
+  scrollbar-gutter: stable;
 }
 
 .upload-list li {

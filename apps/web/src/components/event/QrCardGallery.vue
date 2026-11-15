@@ -108,7 +108,6 @@
             <template #qr>
               <div class="mini-qr" :class="{ inv: card.inverted }">
                 <svg viewBox="0 0 64 64" aria-hidden="true">
-                  <rect width="64" height="64" fill="#fff" />
                   <path
                     :fill="card.qrColor || '#000000'"
                     d="M6 6h20v20H6zm6 6v8h8v-8zM38 6h20v20H38zm6 6v8h8v-8zM6 38h20v20H6zm6 6v8h8v-8zM38 38h6v6h-6zm10 0h10v6H48zm-10 10h6v10h-6zm10 4h10v6H48z"
@@ -430,7 +429,7 @@ export default defineComponent({
 
 .mini-qr {
   width: 100%;
-  background: #fff !important;
+  background: transparent !important;
   line-height: 0;
 }
 
@@ -438,7 +437,7 @@ export default defineComponent({
   width: 100%;
   height: auto;
   display: block;
-  background: #fff !important;
+  background: transparent !important;
 }
 
 .qr-card h4 {

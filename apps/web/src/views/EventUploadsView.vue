@@ -184,6 +184,7 @@ import Auth from "@/helpers/Auth";
 import MediaEditorModal from "@/components/event/MediaEditorModal.vue";
 import { notify } from "@/helpers/notify";
 import { validateUploadFile } from "@/helpers/uploadValidation";
+import { getOrCreateDeviceId, trackEvent } from "@/helpers/deviceAnalytics";
 
 export default defineComponent({
   name: "EventUploadsView",
@@ -349,6 +350,7 @@ export default defineComponent({
         await store.dispatch("event/uploadFile", {
           file,
           isAuth: Auth.isLogged(),
+          device_id: getOrCreateDeviceId(),
           onUploadProgress: updateUploadProgress,
         });
 
@@ -468,11 +470,12 @@ export default defineComponent({
 
   methods: {
     async getEventDetails() {
-      await this.$store.dispatch(
-        "event/getEventBaseInfo",
-        this.$route.params.event_path,
-      );
+      const eventPath = String(this.$route.params.event_path || "");
+      await this.$store.dispatch("event/getEventBaseInfo", eventPath);
       this.loading = false;
+      if (eventPath && this.canShow) {
+        trackEvent(eventPath, "upload_page_view");
+      }
     },
   },
 });

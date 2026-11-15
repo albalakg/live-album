@@ -89,7 +89,10 @@ export function blankBuilderQuestion(
   };
 }
 
-export function questionFromApi(raw: any): TriviaBuilderQuestion {
+export function questionFromApi(
+  raw: any,
+  previous?: TriviaBuilderQuestion | null
+): TriviaBuilderQuestion {
   const type = raw.type || "choice";
   const config = raw.config
     ? { ...raw.config }
@@ -99,8 +102,12 @@ export function questionFromApi(raw: any): TriviaBuilderQuestion {
   }
   const hostHint =
     typeof raw.config?.host_hint === "string" ? raw.config.host_hint : "";
+  const prev =
+    previous && previous.id != null && previous.id === raw.id ? previous : null;
   return {
-    key: nextBuilderKey("q"),
+    // Keep a stable key when the same question is refreshed from the API so
+    // inputs are patched in place instead of remounted (avoids blur flicker).
+    key: prev?.key || nextBuilderKey("q"),
     id: raw.id,
     type,
     prompt: raw.prompt || "",
@@ -111,12 +118,18 @@ export function questionFromApi(raw: any): TriviaBuilderQuestion {
     config,
     time_limit_seconds: raw.time_limit_seconds ?? 20,
     max_points: raw.max_points ?? (isUnscoredType(type) ? 0 : 1000),
-    options: (raw.options || []).map((o: any) => ({
-      key: nextBuilderKey("o"),
-      id: o.id,
-      label: o.label || "",
-      is_correct: !!o.is_correct,
-    })),
+    options: (raw.options || []).map((o: any, i: number) => {
+      const prevOpt = prev?.options?.[i];
+      const byId = o.id
+        ? prev?.options?.find((p) => p.id === o.id)
+        : undefined;
+      return {
+        key: byId?.key || prevOpt?.key || nextBuilderKey("o"),
+        id: o.id,
+        label: o.label || "",
+        is_correct: !!o.is_correct,
+      };
+    }),
   };
 }
 

@@ -92,14 +92,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-/* Sit on the inline-start side (RTL: physical right) so it does not cover
-   share-link copy icons, which sit on the inline-end / physical-left edge. */
+/* Physical bottom-left so it stays clear of the RTL host sidebar on the right. */
 .assist {
   position: fixed;
   z-index: 80;
   bottom: calc(22px + env(safe-area-inset-bottom, 0px));
-  inset-inline-start: calc(var(--host-sidebar, 0px) + 22px);
-  inset-inline-end: auto;
+  left: 22px;
+  right: auto;
 }
 .assist-fab {
   display: inline-flex;
@@ -129,9 +128,7 @@ export default defineComponent({
   position: fixed;
   z-index: 80;
   bottom: calc(22px + env(safe-area-inset-bottom, 0px));
-  inset-inline-start: calc(var(--host-sidebar, 0px) + 22px);
-  inset-inline-end: auto;
-  left: auto;
+  left: 22px;
   right: auto;
   background: #1fad4f;
   color: #fff;
@@ -140,7 +137,8 @@ export default defineComponent({
 .assist-panel {
   position: absolute;
   bottom: 58px;
-  inset-inline-start: 0;
+  left: 0;
+  right: auto;
   width: min(320px, calc(100vw - 32px));
   background: var(--paper, #fff);
   color: var(--ink, #161310);
@@ -184,9 +182,9 @@ export default defineComponent({
 @media (max-width: 900px) {
   .assist,
   .assist-fab--wa {
-    /* Above mobile event nav; keep clear of share-link copy icons on the left */
+    /* Above mobile event nav */
     bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-    inset-inline-start: 16px;
+    left: 16px;
   }
 }
 </style>
