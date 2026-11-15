@@ -1,30 +1,30 @@
 import type { Component } from "vue";
 import HeroCountdown from "./HeroCountdown.vue";
-import Story from "./Story.vue";
-import About from "./About.vue";
-import People from "./People.vue";
+import SectionStory from "./SectionStory.vue";
+import SectionAbout from "./SectionAbout.vue";
+import SectionPeople from "./SectionPeople.vue";
 import EventTimeline from "./EventTimeline.vue";
-import Cards from "./Cards.vue";
-import Gallery from "./Gallery.vue";
-import Steps from "./Steps.vue";
+import SectionCards from "./SectionCards.vue";
+import SectionGallery from "./SectionGallery.vue";
+import SectionSteps from "./SectionSteps.vue";
 import MapSection from "./MapSection.vue";
 import WishingWell from "./WishingWell.vue";
-import Rsvp from "./Rsvp.vue";
-import Faq from "./Faq.vue";
-import Quote from "./Quote.vue";
+import SectionRsvp from "./SectionRsvp.vue";
+import SectionFaq from "./SectionFaq.vue";
+import SectionQuote from "./SectionQuote.vue";
 import TriviaCta from "./TriviaCta.vue";
-import Gift from "./Gift.vue";
-import Milestones from "./Milestones.vue";
-import Playlist from "./Playlist.vue";
-import Speakers from "./Speakers.vue";
-import Sponsors from "./Sponsors.vue";
-import Networking from "./Networking.vue";
-import Hashtag from "./Hashtag.vue";
-import Lineup from "./Lineup.vue";
+import SectionGift from "./SectionGift.vue";
+import SectionMilestones from "./SectionMilestones.vue";
+import SectionPlaylist from "./SectionPlaylist.vue";
+import SectionSpeakers from "./SectionSpeakers.vue";
+import SectionSponsors from "./SectionSponsors.vue";
+import SectionNetworking from "./SectionNetworking.vue";
+import SectionHashtag from "./SectionHashtag.vue";
+import SectionLineup from "./SectionLineup.vue";
 import BeenThere from "./BeenThere.vue";
-import Grounds from "./Grounds.vue";
-import Zones from "./Zones.vue";
-import Rules from "./Rules.vue";
+import SectionGrounds from "./SectionGrounds.vue";
+import SectionZones from "./SectionZones.vue";
+import SectionRules from "./SectionRules.vue";
 import FooterSection from "./FooterSection.vue";
 import SnapshareCta from "./SnapshareCta.vue";
 import RichText from "./RichText.vue";
@@ -34,31 +34,31 @@ import MediaStrip from "./MediaStrip.vue";
 
 export const sectionComponents: Record<string, Component> = {
   HERO_COUNTDOWN: HeroCountdown,
-  STORY: Story,
-  ABOUT: About,
-  PEOPLE: People,
+  STORY: SectionStory,
+  ABOUT: SectionAbout,
+  PEOPLE: SectionPeople,
   EVENT_TIMELINE: EventTimeline,
-  CARDS: Cards,
-  GALLERY: Gallery,
-  STEPS: Steps,
+  CARDS: SectionCards,
+  GALLERY: SectionGallery,
+  STEPS: SectionSteps,
   MAP: MapSection,
   WISHING_WELL: WishingWell,
-  RSVP: Rsvp,
-  FAQ: Faq,
-  QUOTE: Quote,
+  RSVP: SectionRsvp,
+  FAQ: SectionFaq,
+  QUOTE: SectionQuote,
   TRIVIA_CTA: TriviaCta,
-  GIFT: Gift,
-  MILESTONES: Milestones,
-  PLAYLIST: Playlist,
-  SPEAKERS: Speakers,
-  SPONSORS: Sponsors,
-  NETWORKING: Networking,
-  HASHTAG: Hashtag,
-  LINEUP: Lineup,
+  GIFT: SectionGift,
+  MILESTONES: SectionMilestones,
+  PLAYLIST: SectionPlaylist,
+  SPEAKERS: SectionSpeakers,
+  SPONSORS: SectionSponsors,
+  NETWORKING: SectionNetworking,
+  HASHTAG: SectionHashtag,
+  LINEUP: SectionLineup,
   BEEN_THERE: BeenThere,
-  GROUNDS: Grounds,
-  ZONES: Zones,
-  RULES: Rules,
+  GROUNDS: SectionGrounds,
+  ZONES: SectionZones,
+  RULES: SectionRules,
   FOOTER: FooterSection,
   SNAPSHARE_CTA: SnapshareCta,
   RICH_TEXT: RichText,
