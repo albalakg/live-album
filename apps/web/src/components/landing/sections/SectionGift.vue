@@ -4,7 +4,7 @@
       <p v-if="data.kicker" class="sec-kicker">{{ data.kicker }}</p>
       <h2 v-if="data.heading" class="sec-title">{{ data.heading }}</h2>
       <p class="body" style="margin-bottom:22px">{{ data.body }}</p>
-      <button type="button" class="btn btn-ghost" @click="onGift">{{ data.button || 'לקישור' }}</button>
+      <button v-if="showGift" type="button" class="btn btn-ghost" @click="onGift">{{ data.button || 'לקישור' }}</button>
       <span v-if="preview" class="preview-note">בתצוגה מקדימה</span>
     </div>
   </section>
@@ -22,6 +22,7 @@ export default defineComponent({
   setup(props) {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const showGift = computed(() => preview.value || Boolean(props.data.url));
     function onGift() {
       if (preview.value || !props.data.url) {
         ctx?.toast("קישור לדוגמה בלבד.");
@@ -29,7 +30,7 @@ export default defineComponent({
       }
       window.open(String(props.data.url), "_blank", "noopener");
     }
-    return { preview, onGift };
+    return { preview, showGift, onGift };
   },
 });
 </script>

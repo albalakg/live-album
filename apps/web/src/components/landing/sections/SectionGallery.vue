@@ -15,7 +15,7 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.url" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
@@ -29,7 +29,7 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.url" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
@@ -43,7 +43,7 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.url" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
@@ -57,7 +57,7 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.url" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
@@ -102,11 +102,16 @@ export default defineComponent({
     const images = computed(() =>
       (props.data.images || [])
         .map((im: { image?: unknown; caption?: string }) => {
-          const img = resolve(im.image as never, im.caption || "");
+          const img = resolve(im.image as never, im.caption || "תמונה מהאירוע");
           if (!img) return null;
-          return { url: img.url, alt: im.caption || img.alt || "תמונה לדוגמה" };
+          const alt = im.caption || img.alt || "תמונה מהאירוע";
+          return {
+            url: img.url,
+            thumb: img.thumb_url || img.url,
+            alt,
+          };
         })
-        .filter(Boolean) as Array<{ url: string; alt: string }>
+        .filter(Boolean) as Array<{ url: string; thumb: string; alt: string }>
     );
 
     function open(i: number) {

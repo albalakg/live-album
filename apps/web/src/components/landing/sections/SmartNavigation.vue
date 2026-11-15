@@ -6,8 +6,8 @@
       <p class="venue-name">{{ data.location_name }}</p>
       <p class="venue-city">{{ data.city }}</p>
       <div class="nav-actions">
-        <button type="button" @click="openWaze"><span>פתחו ב־Waze</span><span class="ic">◁</span></button>
-        <button type="button" @click="openMaps"><span>פתחו בגוגל מפות</span><span class="ic">◁</span></button>
+        <button v-if="showWaze" type="button" @click="openWaze"><span>פתחו ב־Waze</span><span class="ic">◁</span></button>
+        <button v-if="showMaps" type="button" @click="openMaps"><span>פתחו בגוגל מפות</span><span class="ic">◁</span></button>
       </div>
       <p v-if="preview" class="preview-note">בתצוגה מקדימה</p>
     </div>
@@ -26,6 +26,8 @@ export default defineComponent({
   setup(props) {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const showWaze = computed(() => preview.value || Boolean(props.data.waze_url));
+    const showMaps = computed(() => preview.value || Boolean(props.data.google_maps_url));
     function openWaze() {
       if (preview.value || !props.data.waze_url) return ctx?.toast("קישור ווייז לדוגמה.");
       window.open(String(props.data.waze_url), "_blank", "noopener");
@@ -34,7 +36,7 @@ export default defineComponent({
       if (preview.value || !props.data.google_maps_url) return ctx?.toast("קישור מפות לדוגמה.");
       window.open(String(props.data.google_maps_url), "_blank", "noopener");
     }
-    return { preview, openWaze, openMaps };
+    return { preview, showWaze, showMaps, openWaze, openMaps };
   },
 });
 </script>

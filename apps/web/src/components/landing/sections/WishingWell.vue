@@ -22,7 +22,7 @@
         </li>
       </ul>
       <button
-        v-if="data.gift_label"
+        v-if="showGift"
         type="button"
         class="gift-link"
         @click="onGift"
@@ -48,6 +48,9 @@ export default defineComponent({
   setup(props) {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const showGift = computed(
+      () => Boolean(props.data.gift_label) && (preview.value || Boolean(props.data.payment_link))
+    );
     const from = ref("");
     const text = ref("");
     const wishes = ref([
@@ -55,6 +58,7 @@ export default defineComponent({
     ]);
 
     function onSubmit() {
+      // Display-only: no network / no durable storage (ephemeral local list for UX).
       if (preview.value) {
         ctx?.toast("בתצוגה מקדימה");
         return;
@@ -73,7 +77,7 @@ export default defineComponent({
       window.open(String(props.data.payment_link), "_blank", "noopener");
     }
 
-    return { preview, from, text, wishes, onSubmit, onGift };
+    return { preview, showGift, from, text, wishes, onSubmit, onGift };
   },
 });
 </script>

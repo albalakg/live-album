@@ -15,7 +15,7 @@
       </ul>
       <div v-if="photos.length" class="people-photos">
         <figure v-for="(ph, i) in photos" :key="i" class="g-item">
-          <img :src="ph.url" :alt="ph.alt || ph.caption" loading="lazy" />
+          <img :src="ph.thumb || ph.url" :alt="ph.alt || ph.caption" loading="lazy" />
           <figcaption>{{ ph.caption || ph.alt }}</figcaption>
         </figure>
       </div>
@@ -39,8 +39,14 @@ export default defineComponent({
     const photos = computed(() =>
       (props.data.photos || [])
         .map((ph: { image?: unknown; caption?: string }) => {
-          const img = resolve(ph.image as never, ph.caption || "");
-          return img ? { ...img, caption: ph.caption || img.alt } : null;
+          const img = resolve(ph.image as never, ph.caption || "תמונה מהאירוע");
+          if (!img) return null;
+          return {
+            url: img.url,
+            thumb: img.thumb_url || img.url,
+            alt: img.alt || "תמונה מהאירוע",
+            caption: ph.caption || img.alt,
+          };
         })
         .filter(Boolean)
     );

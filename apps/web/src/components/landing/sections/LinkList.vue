@@ -4,7 +4,7 @@
       <p class="sec-kicker">קישורים</p>
       <h2 v-if="data.heading" class="sec-title">{{ data.heading }}</h2>
       <ul class="links">
-        <li v-for="(l, i) in (data.links || [])" :key="i">
+        <li v-for="(l, i) in visibleLinks" :key="i">
           <a href="#" @click.prevent="onLink(l)">{{ l.label }}<span class="ic">←</span></a>
         </li>
       </ul>
@@ -22,14 +22,19 @@ export default defineComponent({
     sectionId: { type: String, required: true },
     alt: { type: Boolean, default: false },
   },
-  setup() {
+  setup(props) {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const visibleLinks = computed(() => {
+      const links = (props.data.links || []) as Array<{ label?: string; url?: string; demo?: boolean }>;
+      if (preview.value) return links;
+      return links.filter((l) => Boolean(l.url) && !l.demo);
+    });
     function onLink(l: { url?: string; demo?: boolean }) {
       if (preview.value || l.demo || !l.url) return ctx?.toast("קישור לדוגמה בלבד.");
       window.open(String(l.url), "_blank", "noopener");
     }
-    return { preview, onLink };
+    return { preview, visibleLinks, onLink };
   },
 });
 </script>

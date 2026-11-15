@@ -41,6 +41,7 @@ export interface HubBlock {
 }
 
 export interface HubConfig {
+  /** Template id, or "legacy" for hubs without template_id. */
   template_id: string;
   theme: HubTheme;
   blocks: HubBlock[];

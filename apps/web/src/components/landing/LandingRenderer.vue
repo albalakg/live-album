@@ -21,7 +21,12 @@
         >{{ n.label }}</a>
       </nav>
       <div class="nav-end">
-        <button type="button" class="btn btn-primary nav-cta" @click="onUpload">העלו תמונות</button>
+        <button
+          v-if="canUpload"
+          type="button"
+          class="btn btn-primary nav-cta"
+          @click="onUpload"
+        >העלו תמונות</button>
         <button
           type="button"
           class="nav-burger"
@@ -85,7 +90,12 @@
           @click.prevent="scrollTo(n.id); drawerOpen = false"
         >{{ n.label }}</a>
       </nav>
-      <button type="button" class="btn btn-primary" @click="onUpload(); drawerOpen = false">העלו תמונות</button>
+      <button
+        v-if="canUpload"
+        type="button"
+        class="btn btn-primary"
+        @click="onUpload(); drawerOpen = false"
+      >העלו תמונות</button>
     </aside>
 
     <div class="toast" :class="{ on: !!toastMsg }" role="status" aria-live="polite">{{ toastMsg }}</div>
@@ -124,6 +134,7 @@ export default defineComponent({
     mode: { type: String as PropType<LandingMode>, default: "preview" },
     resolvedImages: { type: Object as PropType<Record<string, ResolvedImage>>, default: undefined },
     eventMeta: { type: Object as PropType<EventMeta>, default: undefined },
+    coverImage: { type: Object as PropType<ResolvedImage | null>, default: null },
   },
   setup(props) {
     const route = useRoute();
@@ -150,10 +161,14 @@ export default defineComponent({
     });
     const scale = computed(() => props.hubConfig.theme?.scale || "M");
 
+    // Public payload already filters disabled blocks and omits `enabled`.
     const enabledBlocks = computed(() =>
       [...(props.hubConfig.blocks || [])]
-        .filter((b) => b.enabled)
+        .filter((b) => b.enabled !== false)
         .sort((a, b) => a.order - b.order)
+    );
+    const canUpload = computed(
+      () => preview.value || Boolean(props.eventMeta?.upload_url)
     );
     const heroBlock = computed(
       () => enabledBlocks.value.find((b) => b.type === "HERO_COUNTDOWN") || null
@@ -252,8 +267,7 @@ export default defineComponent({
         return;
       }
       const url = props.eventMeta?.upload_url;
-      if (url) window.location.href = url;
-      else toast("קישור העלאה אינו זמין");
+      if (url) window.location.assign(url);
     }
 
     function openAlbum() {
@@ -262,8 +276,7 @@ export default defineComponent({
         return;
       }
       const url = props.eventMeta?.album_url;
-      if (url) window.location.href = url;
-      else toast("קישור אלבום אינו זמין");
+      if (url) window.location.assign(url);
     }
 
     function openTrivia(title?: string) {
@@ -272,8 +285,8 @@ export default defineComponent({
         return;
       }
       const url = props.eventMeta?.trivia_url;
-      if (url) window.location.href = url;
-      else toast(title ? `טריוויה: ${title}` : "טריוויה אינה זמינה");
+      if (url) window.location.assign(url);
+      else if (title) toast(`טריוויה: ${title}`);
     }
 
     const ctx: LandingContext = {
@@ -356,17 +369,32 @@ export default defineComponent({
       if (!root) return;
       const vars = themeStyleVars.value;
       Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+      const coverUrl = props.coverImage?.url;
+      if (coverUrl) {
+        root.style.setProperty("--hero-art", `url("${coverUrl}")`);
+      }
+    }
+
+    function scrollToHash() {
+      const hash = String(route.hash || window.location.hash || "").replace(/^#/, "");
+      if (!hash) return;
+      const id = hash.startsWith("sec-") ? hash.slice(4) : hash;
+      scrollTo(id);
     }
 
     onMounted(async () => {
       ensureFonts();
-      await loadTemplateTheme(props.templateId);
+      if (props.templateId && props.templateId !== "legacy") {
+        await loadTemplateTheme(props.templateId);
+      }
       document.body.classList.add("landing-active");
       if (isDark.value) document.body.classList.add("dark");
       await nextTick();
       applyThemeVars();
       observeNav();
       if (drawerOpen.value) document.body.classList.add("drawer-open");
+      // Deep link #<section-id> after sections paint
+      requestAnimationFrame(() => scrollToHash());
     });
 
     watch(drawerOpen, (v) => {
@@ -394,6 +422,11 @@ export default defineComponent({
       { deep: true }
     );
 
+    watch(
+      () => props.coverImage?.url,
+      () => applyThemeVars()
+    );
+
     onBeforeUnmount(() => {
       observer?.disconnect();
       document.body.classList.remove("landing-active", "dark", "drawer-open");
@@ -418,6 +451,7 @@ export default defineComponent({
       bodyBlocks,
       eventTitle,
       navItems,
+      canUpload,
       onUpload,
       scrollTo,
       blockBinds,
@@ -441,5 +475,14 @@ body.landing-active.drawer-open {
 .landing-root .about.right .wrap {
   display: flex;
   justify-content: flex-end;
+}
+/* Neutral theme for legacy hubs (no template_id) */
+.landing-root .t-legacy {
+  --accent: #3d6a80;
+  --accent-2: #8aa0ac;
+  --bg: #f4f1ec;
+  --ink: #1a2830;
+  --font-display: "Heebo", sans-serif;
+  --font-body: "Heebo", sans-serif;
 }
 </style>

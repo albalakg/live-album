@@ -16,10 +16,10 @@
           <p class="venue-city">{{ data.city }}</p>
           <p v-if="data.note" class="body" style="margin-bottom:22px">{{ data.note }}</p>
           <div class="nav-actions">
-            <button type="button" @click="openWaze">
+            <button v-if="showWaze" type="button" @click="openWaze">
               <span>פתחו ב־Waze</span><span class="ic">◁</span>
             </button>
-            <button type="button" @click="openMaps">
+            <button v-if="showMaps" type="button" @click="openMaps">
               <span>פתחו בגוגל מפות</span><span class="ic">◁</span>
             </button>
           </div>
@@ -44,6 +44,8 @@ export default defineComponent({
   setup(props) {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const showWaze = computed(() => preview.value || Boolean(props.data.waze_url));
+    const showMaps = computed(() => preview.value || Boolean(props.data.google_maps_url));
 
     function openWaze() {
       if (preview.value || !props.data.waze_url) {
@@ -59,7 +61,7 @@ export default defineComponent({
       }
       window.open(String(props.data.google_maps_url), "_blank", "noopener");
     }
-    return { preview, openWaze, openMaps };
+    return { preview, showWaze, showMaps, openWaze, openMaps };
   },
 });
 </script>

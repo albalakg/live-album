@@ -159,6 +159,19 @@ export function resolveImageRef(
     return resolveImageRef({ stock: ref.key }, resolvedImages);
   }
 
+  if ("type" in ref && ref.type === "asset") {
+    if (ref.url) {
+      return {
+        url: String(ref.url),
+        alt: ref.alt || "תמונה מהאירוע",
+        thumb_url: ref.thumb_url ? String(ref.thumb_url) : String(ref.url),
+      };
+    }
+    if (ref.asset_id != null) {
+      return resolveImageRef({ asset_id: ref.asset_id }, resolvedImages);
+    }
+  }
+
   return null;
 }
 

@@ -14,7 +14,11 @@
         <p class="venue">{{ venueLine }}</p>
       </div>
       <div class="hero-aside">
-        <div class="count" aria-label="ספירה לאחור">
+        <div v-if="ended" class="count count-ended" aria-label="האירוע התחיל">
+          <p class="ended-title">האירוע התחיל</p>
+          <p class="ended-sub">תודה שהייתם איתנו</p>
+        </div>
+        <div v-else class="count" aria-label="ספירה לאחור">
           <div class="cell"><span class="n">{{ pad(parts.days) }}</span><span class="l">ימים</span></div>
           <div class="count-sep" aria-hidden="true" />
           <div class="cell"><span class="n">{{ pad(parts.hours) }}</span><span class="l">שעות</span></div>
@@ -24,7 +28,7 @@
           <div class="cell"><span class="n">{{ pad(parts.secs) }}</span><span class="l">שניות</span></div>
         </div>
         <div class="cta-row">
-          <button type="button" class="btn btn-primary" @click="onUpload">העלו תמונות</button>
+          <button v-if="canUpload" type="button" class="btn btn-primary" @click="onUpload">העלו תמונות</button>
           <a class="btn btn-ghost" href="#sec-join" @click.prevent="scrollJoin">איך זה עובד</a>
         </div>
         <p v-if="preview" class="preview-note">בתצוגה מקדימה</p>
@@ -42,7 +46,11 @@
       <p class="date">{{ dateLine }}</p>
       <p class="venue">{{ venueLine }}</p>
       <div class="hero-aside">
-        <div class="count" aria-label="ספירה לאחור">
+        <div v-if="ended" class="count count-ended" aria-label="האירוע התחיל">
+          <p class="ended-title">האירוע התחיל</p>
+          <p class="ended-sub">תודה שהייתם איתנו</p>
+        </div>
+        <div v-else class="count" aria-label="ספירה לאחור">
           <div class="cell"><span class="n">{{ pad(parts.days) }}</span><span class="l">ימים</span></div>
           <div class="count-sep" aria-hidden="true" />
           <div class="cell"><span class="n">{{ pad(parts.hours) }}</span><span class="l">שעות</span></div>
@@ -52,7 +60,7 @@
           <div class="cell"><span class="n">{{ pad(parts.secs) }}</span><span class="l">שניות</span></div>
         </div>
         <div class="cta-row">
-          <button type="button" class="btn btn-primary" @click="onUpload">העלו תמונות</button>
+          <button v-if="canUpload" type="button" class="btn btn-primary" @click="onUpload">העלו תמונות</button>
           <a class="btn btn-ghost" href="#sec-join" @click.prevent="scrollJoin">איך זה עובד</a>
         </div>
         <p v-if="preview" class="preview-note">בתצוגה מקדימה</p>
@@ -62,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, reactive } from "vue";
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { LANDING_CTX } from "../landingContext";
 
 const FROZEN = { days: 14, hours: 6, mins: 22, secs: 8 };
@@ -78,7 +86,9 @@ export default defineComponent({
   setup(props) {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const canUpload = computed(() => preview.value || Boolean(ctx?.eventMeta?.upload_url));
     const parts = reactive({ days: 0, hours: 0, mins: 0, secs: 0 });
+    const ended = ref(false);
     let timer: ReturnType<typeof setInterval> | null = null;
 
     const isShort = computed(
@@ -102,12 +112,25 @@ export default defineComponent({
 
     function tick() {
       if (ctx?.shot) {
+        ended.value = false;
         Object.assign(parts, FROZEN);
         return;
       }
-      const target = new Date(String(props.data.event_date || "")).getTime();
-      const diff = Math.max(0, target - Date.now());
-      const secs = Math.floor(diff / 1000);
+      const raw = String(props.data.event_date || "");
+      const target = new Date(raw).getTime();
+      if (!raw || Number.isNaN(target)) {
+        ended.value = false;
+        Object.assign(parts, { days: 0, hours: 0, mins: 0, secs: 0 });
+        return;
+      }
+      const diffMs = target - Date.now();
+      if (diffMs <= 0) {
+        ended.value = true;
+        Object.assign(parts, { days: 0, hours: 0, mins: 0, secs: 0 });
+        return;
+      }
+      ended.value = false;
+      const secs = Math.floor(diffMs / 1000);
       parts.days = Math.floor(secs / 86400);
       parts.hours = Math.floor((secs % 86400) / 3600);
       parts.mins = Math.floor((secs % 3600) / 60);
@@ -134,7 +157,39 @@ export default defineComponent({
       if (timer) clearInterval(timer);
     });
 
-    return { parts, pad, isShort, dateLine, venueLine, heroClass, preview, onUpload, scrollJoin };
+    return {
+      parts,
+      pad,
+      isShort,
+      dateLine,
+      venueLine,
+      heroClass,
+      preview,
+      canUpload,
+      ended,
+      onUpload,
+      scrollJoin,
+    };
   },
 });
 </script>
+
+<style scoped>
+.count-ended {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 4px;
+}
+.ended-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+.ended-sub {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 0.95rem;
+}
+</style>

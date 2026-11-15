@@ -4,7 +4,7 @@
       <p class="sec-kicker">חיבור</p>
       <h2 class="sec-title">{{ data.heading }}</h2>
       <p class="body">{{ data.body }}</p>
-      <button type="button" class="btn btn-ghost" @click="onAlbum">לאלבום החי</button>
+      <button v-if="canAlbum" type="button" class="btn btn-ghost" @click="onAlbum">לאלבום החי</button>
       <span v-if="preview" class="preview-note">בתצוגה מקדימה</span>
     </div>
   </section>
@@ -22,11 +22,12 @@ export default defineComponent({
   setup() {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const canAlbum = computed(() => preview.value || Boolean(ctx?.eventMeta?.album_url));
     function onAlbum() {
       if (preview.value) return ctx?.toast("בתצוגה מקדימה");
       ctx?.openAlbum();
     }
-    return { preview, onAlbum };
+    return { preview, canAlbum, onAlbum };
   },
 });
 </script>

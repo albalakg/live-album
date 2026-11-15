@@ -4,7 +4,7 @@
       <p class="sec-kicker">טריוויה</p>
       <h2 class="sec-title">{{ data.title }}</h2>
       <p class="body">{{ data.body }}</p>
-      <button type="button" class="btn btn-primary" @click="onTrivia">הצטרפו למשחק</button>
+      <button v-if="canTrivia" type="button" class="btn btn-primary" @click="onTrivia">הצטרפו למשחק</button>
       <span v-if="preview" class="preview-note">בתצוגה מקדימה</span>
     </div>
   </section>
@@ -22,11 +22,12 @@ export default defineComponent({
   setup(props) {
     const ctx = inject(LANDING_CTX, null);
     const preview = computed(() => ctx?.preview === true);
+    const canTrivia = computed(() => preview.value || Boolean(ctx?.eventMeta?.trivia_url));
     function onTrivia() {
       if (preview.value) return ctx?.toast("בתצוגה מקדימה");
       ctx?.openTrivia(String(props.data.title || "טריוויה"));
     }
-    return { preview, onTrivia };
+    return { preview, canTrivia, onTrivia };
   },
 });
 </script>
