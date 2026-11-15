@@ -75,6 +75,8 @@ export default defineComponent({
   computed: {
     isFullScreen(): boolean {
       const path = this.$route.path;
+      // Public event landing — no marketing/app chrome (landing footer only)
+      if (path === "/h" || path.startsWith("/h/")) return true;
       if (path.includes("/event/trivia/")) return true;
       if (path.includes("open-album") || path.includes("open-gallery")) return true;
       if (path.startsWith("/preview/")) return true;

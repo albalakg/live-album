@@ -99,6 +99,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/TermsAndConditionsView.vue"),
   },
   {
+    path: "/h/:slug",
+    name: "eventHubPublic",
+    // Public for logged-out AND logged-in visitors (no Guard.guest)
+    component: () => import("@/views/EventHubPublicView.vue"),
+  },
+  {
     path: "/event/trivia/:event_path",
     name: "eventTriviaPlay",
     component: () => import("@/views/EventTriviaPlayView.vue"),
