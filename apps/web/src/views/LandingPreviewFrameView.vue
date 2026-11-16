@@ -21,6 +21,8 @@ const PING_TYPE = "snapshare:landing-preview-ping";
 /** { type, sectionId, instant? } — scroll the preview to a section (`sec-{block id}`). */
 const SCROLL_TYPE = "snapshare:landing-preview-scroll";
 const FLASH_CLASS = "lpf-flash";
+/** { type, key } — keys the builder handles even while focus is inside the preview (Esc closes). */
+const KEY_TYPE = "snapshare:landing-preview-key";
 
 export default defineComponent({
   name: "LandingPreviewFrameView",
@@ -83,9 +85,15 @@ export default defineComponent({
       ready.value = true;
     }
 
+    function onKeydown(ev: KeyboardEvent) {
+      if (ev.key !== "Escape" || !window.parent || window.parent === window) return;
+      window.parent.postMessage({ type: KEY_TYPE, key: "Escape" }, window.location.origin);
+    }
+
     // Listen immediately so early parent pings are not lost
     if (typeof window !== "undefined") {
       window.addEventListener("message", onMessage);
+      window.addEventListener("keydown", onKeydown);
     }
 
     onMounted(() => {
@@ -105,6 +113,7 @@ export default defineComponent({
     onBeforeUnmount(() => {
       if (scrollRaf) cancelAnimationFrame(scrollRaf);
       window.removeEventListener("message", onMessage);
+      window.removeEventListener("keydown", onKeydown);
       document.documentElement.removeAttribute("data-landing-preview-frame");
     });
 

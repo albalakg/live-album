@@ -40,6 +40,7 @@ const MSG_TYPE = "snapshare:landing-preview";
 const READY_TYPE = "snapshare:landing-preview-ready";
 const PING_TYPE = "snapshare:landing-preview-ping";
 const SCROLL_TYPE = "snapshare:landing-preview-scroll";
+const KEY_TYPE = "snapshare:landing-preview-key";
 const PHONE_W = 390;
 const PHONE_H = 844;
 const DESKTOP_W = 1440;
@@ -243,7 +244,13 @@ export default defineComponent({
       if (ev.origin !== window.location.origin) return;
       if (ev.source !== iframeEl.value?.contentWindow) return;
       const data = ev.data;
-      if (!data || typeof data !== "object" || data.type !== READY_TYPE) return;
+      if (!data || typeof data !== "object") return;
+      if (data.type === KEY_TYPE && data.key === "Escape") {
+        // Focus is inside the frame: replay Esc on this document so open dialogs close.
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+        return;
+      }
+      if (data.type !== READY_TYPE) return;
       onFrameReady();
     }
 
