@@ -86,9 +86,17 @@ export default defineComponent({
       return false;
     },
 
-    /** Hide floating «צור קשר» on the event-page builder so it never overlaps the action bar. */
+    /**
+     * Hide floating «צור קשר» on the logged-in host dashboard (every child of the "event"
+     * route: overview, builder, assets, QR, trivia…) so it never covers cards, the builder
+     * action bar or the mobile tab bar. Public pages (/order, /login, /contact-us, and the guest
+     * /event/* routes, which are not children of event) are unaffected.
+     */
     hideHostAssist(): boolean {
       const path = this.$route.path;
+      // $route is shimmed without `matched`; the router's currentRoute carries it.
+      const matched = this.$router.currentRoute.value.matched;
+      if (matched.some((r) => r.name === "event")) return true;
       return path === "/event/page" || path.startsWith("/event/page/");
     },
 
