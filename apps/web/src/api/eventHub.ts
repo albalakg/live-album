@@ -152,4 +152,125 @@ export async function getHubAssets(
   return unwrapData<HubAssetsPage>(res.data);
 }
 
+export type HubErrorKind =
+  | "network"
+  | "unauthorized"
+  | "forbidden"
+  | "backend_outdated"
+  | "payload_too_large"
+  | "server"
+  | "validation"
+  | "unknown";
+
+export interface ClassifiedHubError {
+  kind: HubErrorKind;
+  message: string;
+}
+
+const BACKEND_OUTDATED_HE =
+  "השרת שמחובר לאפליקציה הזו לא מכיר עדיין את דף האירוע החדש, ולכן השמירה נכשלה.";
+const BACKEND_OUTDATED_LOCAL_HINT =
+  "בפיתוח מקומי: פתחו את הבונה ב-http://localhost:8081/event/page (מחובר לשרת 8001).";
+
+function axiosStatus(err: unknown): number | undefined {
+  return (err as AxiosError)?.response?.status;
+}
+
+function axiosMessage(err: unknown): string {
+  const ax = err as AxiosError<{ message?: string }>;
+  return String(ax?.response?.data?.message || (err as Error)?.message || "");
+}
+
+function axiosErrors(err: unknown): Record<string, string[]> | undefined {
+  const ax = err as AxiosError<{ errors?: Record<string, string[]> }>;
+  return ax?.response?.data?.errors;
+}
+
+function isBackendOutdatedPayload(err: unknown): boolean {
+  const status = axiosStatus(err);
+  if (status === 404) return true;
+  if (status !== 422) return false;
+  const msg = axiosMessage(err);
+  if (/Invalid event hub block configuration/i.test(msg)) return true;
+  const errors = axiosErrors(err);
+  if (!errors) return false;
+  return Object.keys(errors).some((path) =>
+    /hub_config\.blocks\.\d+\.type$/.test(path)
+  );
+}
+
+/**
+ * Map hub API failures to a stable kind + Hebrew message.
+ * Never returns raw English server text.
+ */
+export function classifyHubError(
+  err: unknown,
+  opts: { usesTemplate?: boolean } = {}
+): ClassifiedHubError {
+  console.error(err);
+  const ax = err as AxiosError;
+  const status = axiosStatus(err);
+
+  if (!ax?.response) {
+    return {
+      kind: "network",
+      message: "אין חיבור לשרת. בדקו שהשרת המקומי רץ ונסו שוב.",
+    };
+  }
+
+  if (status === 401) {
+    return {
+      kind: "unauthorized",
+      message: "החיבור פג. התחברו מחדש ונסו שוב.",
+    };
+  }
+  if (status === 403) {
+    return {
+      kind: "forbidden",
+      message: "אין לכם הרשאה לערוך את האירוע הזה.",
+    };
+  }
+  if (status === 413) {
+    return {
+      kind: "payload_too_large",
+      message: "התוכן גדול מדי לשמירה. קצרו טקסטים ארוכים ונסו שוב.",
+    };
+  }
+  if (status && status >= 500) {
+    return {
+      kind: "server",
+      message: "תקלה בשרת. השינויים לא נשמרו, נסו שוב בעוד רגע.",
+    };
+  }
+
+  // Legacy backends: missing hub routes (404) or old block-type whitelist (422)
+  if (status === 404 || (opts.usesTemplate && isBackendOutdatedPayload(err))) {
+    let message = BACKEND_OUTDATED_HE;
+    if (process.env.VUE_APP_ENV === "local") {
+      message = `${message}\n${BACKEND_OUTDATED_LOCAL_HINT}`;
+    }
+    return { kind: "backend_outdated", message };
+  }
+
+  if (status === 422) {
+    return {
+      kind: "validation",
+      message: "לא הצלחנו לשמור. בדקו את השדות ונסו שוב.",
+    };
+  }
+
+  return {
+    kind: "unknown",
+    message: "לא הצלחנו לשמור. בדקו את השדות ונסו שוב.",
+  };
+}
+
+export function backendOutdatedMessage(): string {
+  let message = BACKEND_OUTDATED_HE;
+  if (process.env.VUE_APP_ENV === "local") {
+    message = `${message}\n${BACKEND_OUTDATED_LOCAL_HINT}`;
+  }
+  return message;
+}
+
 export type { ImageRef, HubBlock, HubTheme, HubConfig };

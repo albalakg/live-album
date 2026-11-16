@@ -20,11 +20,21 @@
           </p>
         </div>
         <div class="epb-head-actions">
-          <span class="dirty" :class="{ on: dirty }">{{ dirty ? "יש שינויים שלא נשמרו" : "הכל שמור" }}</span>
+          <div class="epb-save-meta">
+            <span class="save-status" :class="saveStatusClass">{{ saveStatusLabel }}</span>
+            <button
+              v-if="saveUi === 'failed'"
+              type="button"
+              class="btn retry"
+              :disabled="saving || backendOutdated"
+              @click="save"
+            >נסו שוב</button>
+          </div>
           <button
             type="button"
             class="btn primary"
-            :disabled="saving || !hasTemplate"
+            :disabled="saving || !hasTemplate || backendOutdated"
+            :title="backendOutdated ? backendOutdatedTooltip : undefined"
             @click="save"
           >{{ saving ? "שומר…" : "שמירה" }}</button>
           <button
@@ -35,6 +45,20 @@
           >החלפת עיצוב</button>
         </div>
       </header>
+
+      <div
+        v-if="backendOutdated"
+        class="epb-banner"
+        role="alert"
+      >
+        <p v-for="(line, i) in backendOutdatedLines" :key="i">{{ line }}</p>
+      </div>
+
+      <p
+        v-else-if="saveUi === 'failed' && saveErrorMessage"
+        class="epb-inline-err"
+        role="alert"
+      >{{ saveErrorMessage }}</p>
 
       <LandingTemplatePicker
         v-if="!hasTemplate || showPicker"
@@ -50,7 +74,7 @@
         <LandingPublishBar
           :is-published="isPublished"
           :public-url="publicUrl"
-          :can-publish="canPublish"
+          :can-publish="canPublish && !backendOutdated"
           :busy="acting"
           @publish="onPublish"
           @unpublish="onUnpublish"
@@ -119,7 +143,12 @@
         <button type="button" class="btn" @click="mobilePreview = false">סגירה</button>
       </header>
       <div class="epb-sheet-body">
-        <LandingRenderer :template-id="templateId" :hub-config="hubConfig" mode="preview" />
+        <LandingPreviewIframe
+          :template-id="templateId"
+          :hub-config="hubConfig"
+          mode="phone"
+          title="תצוגה מקדימה בטלפון"
+        />
       </div>
     </div>
   </div>
@@ -136,6 +165,9 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import {
+  backendOutdatedMessage,
+  checkHubSlug,
+  classifyHubError,
   getAdminHub,
   publishHub,
   updateHub,
@@ -143,7 +175,6 @@ import {
 } from "@/api/eventHub";
 import { notify } from "@/helpers/notify";
 import type { HubBlock, HubConfig, HubTheme } from "../types";
-import LandingRenderer from "../LandingRenderer.vue";
 import LandingTemplatePicker from "./LandingTemplatePicker.vue";
 import LandingBlockList from "./LandingBlockList.vue";
 import LandingBlockEditor from "./LandingBlockEditor.vue";
@@ -151,6 +182,7 @@ import LandingThemePanel from "./LandingThemePanel.vue";
 import LandingSlugField from "./LandingSlugField.vue";
 import LandingPublishBar from "./LandingPublishBar.vue";
 import LandingBuilderPreview from "./LandingBuilderPreview.vue";
+import LandingPreviewIframe from "./LandingPreviewIframe.vue";
 import {
   applyTemplateConfig,
   friendlyHubError,
@@ -164,10 +196,11 @@ import {
   type FieldError,
 } from "./hubBuilderUtils";
 
+type SaveUi = "clean" | "dirty" | "saving" | "saved" | "failed";
+
 export default defineComponent({
   name: "EventPageBuilderTab",
   components: {
-    LandingRenderer,
     LandingTemplatePicker,
     LandingBlockList,
     LandingBlockEditor,
@@ -175,6 +208,7 @@ export default defineComponent({
     LandingSlugField,
     LandingPublishBar,
     LandingBuilderPreview,
+    LandingPreviewIframe,
   },
   setup() {
     const store = useStore();
@@ -193,6 +227,10 @@ export default defineComponent({
     const fieldErrors = ref<FieldError[]>([]);
     const slugAvailable = ref(false);
     const slugReason = ref<SlugCheckReason>(null);
+    const backendOutdated = ref(false);
+    const saveUi = ref<SaveUi>("clean");
+    const savedAtLabel = ref("");
+    const saveErrorMessage = ref("");
 
     const event = computed(() => store.getters["event/getEvent"]);
     const eventId = computed(() => Number(event.value?.id || 0));
@@ -216,9 +254,44 @@ export default defineComponent({
       () => hasTemplate.value && Boolean(slug.value) && slugAvailable.value
     );
 
-    function markSaved() {
+    const backendOutdatedLines = computed(() =>
+      backendOutdatedMessage().split("\n").filter(Boolean)
+    );
+    const backendOutdatedTooltip =
+      "השרת המחובר לא מכיר עדיין את דף האירוע החדש — לא ניתן לשמור או לפרסם.";
+
+    const saveStatusLabel = computed(() => {
+      if (saveUi.value === "saving" || saving.value) return "שומר…";
+      if (saveUi.value === "failed") return "השמירה נכשלה";
+      if (dirty.value || saveUi.value === "dirty") return "לא נשמר";
+      if (savedAtLabel.value) return `נשמר ✓ ${savedAtLabel.value}`;
+      return "";
+    });
+
+    const saveStatusClass = computed(() => {
+      if (saveUi.value === "saving" || saving.value) return "busy";
+      if (saveUi.value === "failed") return "bad";
+      if (dirty.value || saveUi.value === "dirty") return "dirty";
+      if (savedAtLabel.value) return "ok";
+      return "";
+    });
+
+    function formatClock(d = new Date()): string {
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    function markSaved(fromSave = false) {
       if (!hubConfig.value) return;
       savedSnap.value = snapshotHub(hubConfig.value, slug.value, isPublished.value);
+      if (fromSave) {
+        savedAtLabel.value = formatClock();
+        saveUi.value = "saved";
+      } else {
+        saveUi.value = "clean";
+      }
+      saveErrorMessage.value = "";
     }
 
     function eventPrefill() {
@@ -230,6 +303,20 @@ export default defineComponent({
       };
     }
 
+    async function probeBackendCapabilities() {
+      if (!eventId.value) return;
+      try {
+        await checkHubSlug(eventId.value, slug.value || "x-probe");
+        backendOutdated.value = false;
+      } catch (err) {
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404) {
+          backendOutdated.value = true;
+        }
+        // Other errors (422 invalid slug, network) — do not treat as outdated
+      }
+    }
+
     async function load() {
       if (!eventId.value) {
         loadState.value = "error";
@@ -238,6 +325,7 @@ export default defineComponent({
       }
       loadState.value = "loading";
       loadError.value = "";
+      backendOutdated.value = false;
       try {
         const hub = await getAdminHub(eventId.value);
         const cfg = (hub.hub_config || { theme: {}, blocks: [] }) as HubConfig;
@@ -253,12 +341,13 @@ export default defineComponent({
           hubConfig.value.blocks[0]?.id ||
           "";
         showPicker.value = !hasTemplateId(hubConfig.value);
-        markSaved();
+        markSaved(false);
         loadState.value = "ready";
+        await probeBackendCapabilities();
       } catch (err) {
         console.error(err);
         loadState.value = "error";
-        loadError.value = friendlyHubError(err);
+        loadError.value = friendlyHubError(err, false);
       }
     }
 
@@ -283,6 +372,7 @@ export default defineComponent({
       showPicker.value = false;
       pane.value = "blocks";
       fieldErrors.value = [];
+      saveUi.value = "dirty";
     }
 
     function onToggle(blockId: string, enabled: boolean) {
@@ -346,29 +436,45 @@ export default defineComponent({
 
     async function save(): Promise<boolean> {
       if (!hubConfig.value || !eventId.value) return false;
+      if (backendOutdated.value) {
+        saveUi.value = "failed";
+        saveErrorMessage.value = backendOutdatedMessage();
+        notify({ text: saveErrorMessage.value.split("\n")[0], type: "error", duration: 5000 });
+        return false;
+      }
       const clientErrors = validateHubConfigClient(hubConfig.value);
       if (clientErrors.length) {
         fieldErrors.value = clientErrors;
         scrollToFieldError(clientErrors[0]);
+        saveUi.value = "failed";
+        saveErrorMessage.value = clientErrors[0].message;
         notify({ text: clientErrors[0].message, type: "error", duration: 4000 });
         return false;
       }
       saving.value = true;
+      saveUi.value = "saving";
       fieldErrors.value = [];
+      saveErrorMessage.value = "";
       try {
         await updateHub(eventId.value, {
           slug: slug.value || null,
           is_published: isPublished.value,
           hub_config: hubConfig.value,
         });
-        markSaved();
+        markSaved(true);
         notify({ text: "העמוד נשמר", type: "success", duration: 3000 });
         return true;
       } catch (err) {
-        console.error(err);
-        const mapped = mapAxiosValidationErrors(err);
+        const classified = classifyHubError(err, { usesTemplate: hasTemplate.value });
+        if (classified.kind === "backend_outdated") {
+          backendOutdated.value = true;
+          saveUi.value = "failed";
+          saveErrorMessage.value = classified.message;
+          notify({ text: classified.message.split("\n")[0], type: "error", duration: 5500 });
+          return false;
+        }
+        const mapped = mapAxiosValidationErrors(err, hubConfig.value?.blocks);
         if (mapped.length) {
-          // Resolve __index_N to real block ids when possible
           fieldErrors.value = mapped.map((e) => {
             if (e.blockId.startsWith("__index_") && hubConfig.value) {
               const idx = Number(e.blockId.replace("__index_", ""));
@@ -378,9 +484,13 @@ export default defineComponent({
             return e;
           });
           scrollToFieldError(fieldErrors.value[0]);
+          saveUi.value = "failed";
+          saveErrorMessage.value = fieldErrors.value[0].message;
           notify({ text: fieldErrors.value[0].message, type: "error", duration: 4500 });
         } else {
-          notify({ text: friendlyHubError(err), type: "error", duration: 4500 });
+          saveUi.value = "failed";
+          saveErrorMessage.value = classified.message;
+          notify({ text: classified.message.split("\n")[0], type: "error", duration: 4500 });
         }
         return false;
       } finally {
@@ -389,7 +499,7 @@ export default defineComponent({
     }
 
     async function onPublish() {
-      if (!eventId.value) return;
+      if (!eventId.value || backendOutdated.value) return;
       if (dirty.value) {
         const ok = window.confirm("יש שינויים שלא נשמרו. לשמור ואז לפרסם?");
         if (!ok) return;
@@ -408,27 +518,37 @@ export default defineComponent({
         });
         isPublished.value = Boolean(res.is_published);
         slug.value = res.slug || slug.value;
-        markSaved();
+        markSaved(true);
         notify({ text: "העמוד פורסם", type: "success", duration: 3000 });
       } catch (err) {
-        console.error(err);
-        notify({ text: friendlyHubError(err), type: "error", duration: 4500 });
+        const classified = classifyHubError(err, { usesTemplate: hasTemplate.value });
+        if (classified.kind === "backend_outdated") backendOutdated.value = true;
+        notify({
+          text: classified.message.split("\n")[0],
+          type: "error",
+          duration: 4500,
+        });
       } finally {
         acting.value = false;
       }
     }
 
     async function onUnpublish() {
-      if (!eventId.value) return;
+      if (!eventId.value || backendOutdated.value) return;
       acting.value = true;
       try {
         const res = await publishHub(eventId.value, { is_published: false });
         isPublished.value = Boolean(res.is_published);
-        markSaved();
+        markSaved(true);
         notify({ text: "הפרסום הוסר", type: "success", duration: 3000 });
       } catch (err) {
-        console.error(err);
-        notify({ text: friendlyHubError(err), type: "error", duration: 4500 });
+        const classified = classifyHubError(err, { usesTemplate: hasTemplate.value });
+        if (classified.kind === "backend_outdated") backendOutdated.value = true;
+        notify({
+          text: classified.message.split("\n")[0],
+          type: "error",
+          duration: 4500,
+        });
       } finally {
         acting.value = false;
       }
@@ -440,17 +560,33 @@ export default defineComponent({
       e.returnValue = "";
     }
 
+    function onKeydown(e: KeyboardEvent) {
+      const key = e.key?.toLowerCase?.() || "";
+      if (!(e.ctrlKey || e.metaKey) || key !== "s") return;
+      if (loadState.value !== "ready" || !hasTemplate.value) return;
+      e.preventDefault();
+      if (!saving.value && !backendOutdated.value) save();
+    }
+
     onMounted(() => {
       load();
       window.addEventListener("beforeunload", onBeforeUnload);
+      window.addEventListener("keydown", onKeydown);
     });
 
     onBeforeUnmount(() => {
       window.removeEventListener("beforeunload", onBeforeUnload);
+      window.removeEventListener("keydown", onKeydown);
     });
 
     watch(eventId, (id, prev) => {
       if (id && id !== prev) load();
+    });
+
+    watch(dirty, (isDirty) => {
+      if (isDirty && saveUi.value !== "saving" && saveUi.value !== "failed") {
+        saveUi.value = "dirty";
+      }
     });
 
     return {
@@ -475,6 +611,13 @@ export default defineComponent({
       fieldErrors,
       publicUrl,
       canPublish,
+      backendOutdated,
+      backendOutdatedLines,
+      backendOutdatedTooltip,
+      saveUi,
+      saveErrorMessage,
+      saveStatusLabel,
+      saveStatusClass,
       onPickTemplate,
       onToggle,
       onMove,
@@ -535,13 +678,56 @@ export default defineComponent({
   gap: 8px;
   align-items: center;
 }
-.dirty {
+.epb-save-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.save-status {
   font-size: 0.85rem;
   font-weight: 700;
   color: #8a8278;
+  white-space: nowrap;
 }
-.dirty.on {
+.save-status.dirty {
   color: #a66a12;
+}
+.save-status.ok {
+  color: #2f7a45;
+}
+.save-status.bad {
+  color: #b42318;
+}
+.save-status.busy {
+  color: #5e564e;
+}
+.btn.retry {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+.epb-banner {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff4f0;
+  border: 1px solid rgba(180, 35, 24, 0.22);
+  color: #7a1f16;
+  line-height: 1.45;
+}
+.epb-banner p {
+  margin: 0;
+}
+.epb-banner p + p {
+  margin-top: 6px;
+  font-size: 0.92rem;
+}
+.epb-inline-err {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff4f0;
+  border: 1px solid rgba(180, 35, 24, 0.18);
+  color: #7a1f16;
+  white-space: pre-line;
 }
 .btn {
   border: 0;
@@ -565,9 +751,15 @@ export default defineComponent({
 }
 .epb-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 46%);
   gap: 18px;
   align-items: start;
+  max-width: 100%;
+  width: 100%;
+}
+.epb-layout > :last-child {
+  min-width: 0;
+  width: 100%;
 }
 .epb-editor {
   min-width: 0;
@@ -603,7 +795,7 @@ export default defineComponent({
 .epb-sheet {
   position: fixed;
   inset: 0;
-  z-index: 70;
+  z-index: 200;
   background: #0e0c0a;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -617,8 +809,13 @@ export default defineComponent({
   color: #f3eee6;
 }
 .epb-sheet-body {
-  overflow: auto;
-  background: #fff;
+  overflow: hidden;
+  background: #1c1814;
+  padding: 12px;
+  min-height: 0;
+}
+.epb-sheet-body :deep(.lpi) {
+  height: 100%;
 }
 :deep(.epb-flash) {
   animation: epbFlash 1.4s ease;

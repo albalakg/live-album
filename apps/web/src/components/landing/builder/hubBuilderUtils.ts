@@ -2,7 +2,8 @@ import type { AxiosError } from "axios";
 import type { HubBlock, HubConfig, ImageRef } from "../types";
 import { getDefaultHubConfig, isKnownTemplateId } from "../templates/registry";
 import { fieldsForBlockType, isHttpsUrl, type BuilderField } from "./builderFields";
-import { LOCKED_BLOCK_TYPES } from "./blockLabels";
+import { blockTypeLabel, LOCKED_BLOCK_TYPES } from "./blockLabels";
+import { classifyHubError } from "@/api/eventHub";
 
 export interface EventPrefill {
   name?: string | null;
@@ -243,7 +244,10 @@ export function validateHubConfigClient(config: HubConfig): FieldError[] {
   return errors;
 }
 
-export function mapAxiosValidationErrors(err: unknown): FieldError[] {
+export function mapAxiosValidationErrors(
+  err: unknown,
+  blocks?: HubBlock[] | null
+): FieldError[] {
   const ax = err as AxiosError<{ errors?: Record<string, string[]>; message?: string }>;
   const status = ax?.response?.status;
   const body = ax?.response?.data;
@@ -251,20 +255,38 @@ export function mapAxiosValidationErrors(err: unknown): FieldError[] {
 
   if (status === 422 && body?.errors) {
     for (const [path, msgs] of Object.entries(body.errors)) {
+      // Legacy whitelist rejects type — not a field error (handled by classifyHubError)
+      if (/hub_config\.blocks\.\d+\.type$/.test(path)) continue;
+
       const msg = Array.isArray(msgs) ? msgs[0] : String(msgs);
       const m = path.match(/hub_config\.blocks\.(\d+)\.data\.([^.]+)/);
       if (m) {
+        const idx = Number(m[1]);
+        const fieldKey = m[2];
+        const block = blocks?.[idx];
+        const section = block ? blockTypeLabel(block.type) : "";
+        const fieldLabel = fieldLabelFor(block?.type, fieldKey) || fieldKey;
+        const base = hebrewizeServerMessage(msg);
+        const withSection = section
+          ? `בסעיף «${section}» · ${fieldLabel}: ${base}`
+          : base;
         out.push({
-          blockId: `__index_${m[1]}`,
-          fieldKey: m[2],
-          message: hebrewizeServerMessage(msg),
+          blockId: block?.id || `__index_${m[1]}`,
+          fieldKey,
+          message: withSection,
         });
-      } else {
+      } else if (!/hub_config\.blocks\.\d+\.type/.test(path)) {
         out.push({ blockId: "", fieldKey: path, message: hebrewizeServerMessage(msg) });
       }
     }
   }
   return out;
+}
+
+function fieldLabelFor(blockType: string | undefined, fieldKey: string): string {
+  if (!blockType) return "";
+  const fields = fieldsForBlockType(blockType);
+  return fields.find((f) => f.key === fieldKey)?.label || "";
 }
 
 export function hebrewizeServerMessage(msg: string): string {
@@ -282,7 +304,11 @@ export function hebrewizeServerMessage(msg: string): string {
   return "לא הצלחנו לשמור. בדקו את השדות ונסו שוב.";
 }
 
-export function friendlyHubError(err: unknown): string {
+export function friendlyHubError(err: unknown, usesTemplate = true): string {
+  const classified = classifyHubError(err, { usesTemplate });
+  if (classified.kind !== "validation" && classified.kind !== "unknown") {
+    return classified.message;
+  }
   const ax = err as AxiosError<{ message?: string }>;
   const msg = ax?.response?.data?.message || (err as Error)?.message || "";
   return hebrewizeServerMessage(String(msg));
