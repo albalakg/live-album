@@ -870,9 +870,15 @@ function themeFor(state: WizardState, templateTheme?: HubTheme | null): ThemeOut
   const pal = PALETTES.find((p) => p.id === state.theme.palette_id) || PALETTES[0];
   const font = FONTS.find((f) => f.id === state.theme.font_id);
   const base: Partial<HubTheme> = templateTheme ? cloneJson(templateTheme) : {};
+  // The wizard palettes (original/rose/olive/…) are client-side colour presets. The server only
+  // accepts the template's own palette ids (config event_landing.templates.*.palettes), so send the
+  // template palette and carry the preset in primary/secondary colours. fromHubConfig() maps the
+  // colours back to the wizard preset.
+  const basePalette = typeof base.palette_id === "string" ? base.palette_id : "";
+  const serverPaletteId = basePalette && !PALETTES.some((p) => p.id === basePalette) ? basePalette : "default";
   const theme = {
     ...base,
-    palette_id: pal.id,
+    palette_id: serverPaletteId,
     primary_color: pal.a,
     secondary_color: pal.b,
     font_family: font ? font.family : null,
