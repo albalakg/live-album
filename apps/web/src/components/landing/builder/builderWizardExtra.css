@@ -25,10 +25,11 @@
 .epb-wizard .pstep { min-width: 0; }
 .epb-wizard .pcol .pv { min-height: 0; }
 .epb-wizard .pv-screen .lpi { width: 100%; height: 100%; }
-.epb-wizard .pv-screen iframe { transform-origin: 0 0; }
 /* Scoped preview iframe styles use plain left-to-right boxes; keep the wizard's RTL out of them. */
 .epb-wizard .pv-stage { direction: ltr; }
 .epb-wizard .pv-url { direction: ltr; }
-.epb-portal { position: relative; z-index: 1000; }
+/* Above the app's fixed mobile header (.mobile-bar, z-index 10000) so the preview sheet's own
+   header, device toggle and pick button are never covered on phones. */
+.epb-portal { position: relative; z-index: 10050; }
 .epb-wizard .btn:focus-visible,
 .epb-wizard .link:focus-visible { border-radius: var(--pill); }

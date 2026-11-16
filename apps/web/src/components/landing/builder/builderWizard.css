@@ -270,19 +270,21 @@
 .epb-wizard .seg button { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: var(--pill); font-weight: 700; font-size: .92rem; color: var(--ink-2); }
 .epb-wizard .seg button svg { width: 18px; height: 18px; }
 .epb-wizard .seg button[aria-pressed="true"] { background: var(--primary); color: #fff; }
-.epb-wizard .pv-stage { flex: 1; min-height: 0; display: grid; place-items: center; padding: 0 16px 16px; position: relative; }
-.epb-wizard .pv-dev { position: relative; }
-.epb-wizard .pv-screen { position: relative; overflow: hidden; background: #fff; }
-.epb-wizard .pv-screen iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: 0 0; background: #fff; }
-.epb-wizard .pv-dev.desk { border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-2); background: #fff; }
+/* Stage = the box the device must fit in. LivePreviewPane sizes .pv-dev / .pv-screen exactly from it.
+   Device classes are pv-phone / pv-desk, never bare .phone: @snapshare/design/mock.css (global) has a
+   .phone rule (210px wide, 3px border) that used to squeeze the bezel and shift the screen. */
+.epb-wizard .pv-stage { flex: 1; min-height: 0; min-width: 0; display: flex; align-items: center; justify-content: center; padding: 0 16px 16px; position: relative; overflow: hidden; }
+.epb-wizard .pv-dev { position: relative; flex: none; box-sizing: border-box; max-width: none; }
+.epb-wizard .pv-screen { position: relative; overflow: hidden; background: #fff; box-sizing: content-box; }
+.epb-wizard .pv-dev.pv-desk { border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-2); background: #fff; }
 .epb-wizard .pv-chrome { height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #F6F1EA; border-bottom: 1px solid var(--line); direction: ltr; }
 .epb-wizard .pv-chrome i { width: 10px; height: 10px; border-radius: 50%; background: #D9CFC2; flex: none; }
 .epb-wizard .pv-url { flex: 1; height: 22px; border-radius: 6px; background: #fff; border: 1px solid var(--line); font-size: 12px; color: var(--muted); display: flex; align-items: center; padding: 0 10px; overflow: hidden; white-space: nowrap; max-width: 420px; margin: 0 auto; }
-.epb-wizard .pv-dev.phone { padding: 24px 9px 14px; border-radius: 44px; background: #15110E; box-shadow: var(--shadow-2), inset 0 0 0 2px #3A322C; }
-.epb-wizard .pv-dev.phone .pv-screen { border-radius: 26px; }
-.epb-wizard .pv-dev.phone .pv-notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 64px; height: 7px; border-radius: 4px; background: #3A322C; z-index: 2; }
-.epb-wizard .pv-dev.phone .pv-chrome { display: none; }
-.epb-wizard .pv-dev.desk .pv-notch { display: none; }
+.epb-wizard .pv-dev.pv-phone { padding: 24px 9px 14px; border-radius: 44px; background: #15110E; box-shadow: var(--shadow-2), inset 0 0 0 2px #3A322C; }
+.epb-wizard .pv-dev.pv-phone .pv-screen { border-radius: 26px; }
+.epb-wizard .pv-dev.pv-phone .pv-notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 64px; height: 7px; border-radius: 4px; background: #3A322C; z-index: 2; }
+.epb-wizard .pv-dev.pv-phone .pv-chrome { display: none; }
+.epb-wizard .pv-dev.pv-desk .pv-notch { display: none; }
 .epb-wizard .pv-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-weight: 600; background: #fff; transition: opacity .3s; z-index: 1; pointer-events: none; }
 .epb-wizard .pv-loading.gone { opacity: 0; }
 /* ---------- Step 3 ---------- */
@@ -443,7 +445,9 @@
   .epb-wizard .succ-actions { grid-template-columns: 1fr; }
   .epb-wizard .modal-back { padding: 12px; align-items: end; }
   .epb-wizard .modal { border-radius: 24px; }
-  .epb-wizard .tpm { inset: 0; border-radius: 0; }
+  /* Template preview = bottom sheet on small screens; the device inside always fits it. */
+  .epb-wizard .tpm { inset: auto 0 0 0; height: calc(100vh - 16px); height: calc(100dvh - 16px); border-radius: 22px 22px 0 0; }
+  .epb-wizard .tpm-body .pv-stage { padding: 12px; }
   .epb-wizard .tpm-h { flex-wrap: wrap; padding: 10px 12px; gap: 8px; }
   .epb-wizard .tpm-h .ttl { order: 1; flex: 1; }
   .epb-wizard .tpm-h .mclose { order: 2; }
