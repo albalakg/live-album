@@ -114,6 +114,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+/* Scrolling to the end of the preview must not chain into (and jump) the builder page behind it. */
+html[data-landing-preview-frame],
+html[data-landing-preview-frame] body {
+  overscroll-behavior: contain;
+}
 /* Brief highlight on the section the host is editing (preview frame only). */
 html[data-landing-preview-frame] .lpf-flash {
   animation: lpf-flash 1.2s ease-out;

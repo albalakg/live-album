@@ -1,5 +1,9 @@
 <template>
-  <div ref="hostEl" class="lpi" :class="{ phone: mode === 'phone', desktop: mode === 'desktop' }">
+  <div
+    ref="hostEl"
+    class="lpi"
+    :class="{ 'lpi-phone': mode === 'phone', 'lpi-desktop': mode === 'desktop', 'lpi-fit': fitScale > 0 }"
+  >
     <div class="lpi-align">
       <div class="lpi-clip" :style="clipStyle">
         <div class="lpi-scale" :style="scaleWrapStyle">
@@ -50,6 +54,13 @@ export default defineComponent({
     /** Block id to scroll to inside the preview. Bump `scrollTick` to scroll to the same id again. */
     scrollSection: { type: String, default: "" },
     scrollTick: { type: Number, default: 0 },
+    /**
+     * Exact layout from the parent pane: CSS scale plus the iframe's own viewport size.
+     * When set, the iframe fills its host box exactly (no self-measuring, no letterboxing).
+     */
+    fitScale: { type: Number, default: 0 },
+    viewWidth: { type: Number, default: 0 },
+    viewHeight: { type: Number, default: 0 },
   },
   emits: ["ready"],
   setup(props, { emit, expose }) {
@@ -64,9 +75,20 @@ export default defineComponent({
     let measureRaf = 0;
     let pingTimer: ReturnType<typeof setInterval> | null = null;
 
-    const designW = computed(() => (props.mode === "phone" ? PHONE_W : DESKTOP_W));
+    const designW = computed(() =>
+      props.viewWidth > 0 && props.fitScale > 0
+        ? props.viewWidth
+        : props.mode === "phone"
+          ? PHONE_W
+          : DESKTOP_W
+    );
+
+    const external = computed(
+      () => props.fitScale > 0 && props.viewWidth > 0 && props.viewHeight > 0
+    );
 
     const scale = computed(() => {
+      if (external.value) return props.fitScale;
       if (!stageW.value && !stageH.value) return 1;
       if (props.mode === "phone") {
         const byH = stageH.value > 0 ? stageH.value / PHONE_H : 1;
@@ -77,6 +99,7 @@ export default defineComponent({
     });
 
     const designH = computed(() => {
+      if (external.value) return props.viewHeight;
       if (props.mode === "phone") return PHONE_H;
       const s = scale.value || 0.42;
       const h = stageH.value > 0 ? stageH.value / s : 900;
@@ -84,6 +107,12 @@ export default defineComponent({
     });
 
     const clipStyle = computed(() => {
+      if (external.value) {
+        return {
+          width: `${designW.value * scale.value}px`,
+          height: `${designH.value * scale.value}px`,
+        };
+      }
       if (props.mode === "phone") {
         const s = scale.value;
         return {
@@ -100,6 +129,14 @@ export default defineComponent({
 
     const scaleWrapStyle = computed(() => {
       const s = scale.value;
+      if (external.value) {
+        return {
+          width: `${designW.value}px`,
+          height: `${designH.value}px`,
+          transform: `scale(${s})`,
+          transformOrigin: "0 0",
+        };
+      }
       if (props.mode === "phone") {
         return {
           width: `${PHONE_W}px`,
@@ -249,7 +286,7 @@ export default defineComponent({
     });
 
     watch(
-      () => [props.templateId, props.hubConfig, props.mode] as const,
+      () => [props.templateId, props.hubConfig, props.mode, props.fitScale] as const,
       () => {
         scheduleMeasure();
         schedulePost();
@@ -304,8 +341,8 @@ export default defineComponent({
   background: #fff;
   direction: ltr;
 }
+/* The guest page must stay scrollable (wheel + touch) inside the frame: no pointer-events lock. */
 .lpi-scale {
-  pointer-events: none;
   position: absolute;
   top: 0;
   left: 0;
@@ -314,13 +351,21 @@ export default defineComponent({
   border: 0;
   display: block;
   background: #fff;
-  pointer-events: none;
+  position: static;
+  transform: none;
 }
-.lpi.phone .lpi-clip {
+.lpi.lpi-phone .lpi-clip {
   border-radius: 20px;
   box-shadow: 0 12px 28px rgba(22, 19, 16, 0.16);
 }
-.lpi.desktop .lpi-clip {
+.lpi.lpi-desktop .lpi-clip {
   border-radius: 8px;
+}
+/* Class names avoid bare .phone: the global design mock.css styles .phone as a 210px device. */
+/* Inside the device chrome the screen box already clips and rounds. */
+.lpi.lpi-fit .lpi-clip {
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 </style>
