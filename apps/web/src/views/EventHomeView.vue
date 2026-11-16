@@ -1,195 +1,112 @@
 <template>
-  <div class="home-page">
-    <div v-if="shotError" class="banner error">לא הצלחנו לטעון את הנתונים</div>
-    <div v-else-if="shotLoading" class="skeleton-grid" aria-busy="true">
-      <div class="skel" v-for="n in 4" :key="n"></div>
+  <div class="ov-page" dir="rtl">
+    <div v-if="shotError" class="ov-banner ov-banner--error">
+      לא הצלחנו לטעון את הנתונים
     </div>
-    <template v-else-if="shotEmpty || isSetupEmpty">
-      <header class="page-head">
-        <h1>סקירה</h1>
-      </header>
-      <div class="card empty">
-        <h2>האירוע עדיין בהקמה</h2>
-        <p>הוסיפו שם ותמונת כיסוי כדי להתחיל.</p>
-        <router-link class="btn btn-dark" to="/event/details">פרטי האירוע</router-link>
+
+    <div v-else-if="shotLoading" class="ov-loading" aria-busy="true">
+      <div class="ov-loading__hero" />
+      <div class="ov-loading__keys">
+        <div v-for="n in 4" :key="n" class="ov-loading__key" />
       </div>
-    </template>
-    <template v-else>
-      <header class="page-head">
-        <div>
-          <h1>סקירה</h1>
-        </div>
-        <router-link class="btn btn-dark" to="/event/gallery/full-screen">
-          פתיחת המסך החי
+      <div class="ov-loading__block" />
+    </div>
+
+    <template v-else-if="shotEmpty || isSetupEmpty">
+      <header class="ov-setup">
+        <p class="ov-setup__eyebrow">סקירה</p>
+        <h1>האירוע עדיין בהקמה</h1>
+        <p>הוסיפו שם ותמונת כיסוי כדי להתחיל.</p>
+        <router-link class="ov-setup__cta" to="/event/details">
+          פרטי האירוע
         </router-link>
       </header>
+    </template>
 
-      <section class="card status-card">
-        <div class="status-main">
-          <div>
-            <h2>{{ eventName }}</h2>
-            <p>{{ dateLabel }}</p>
-            <p class="muted">{{ planLabel }} · אחסון עד {{ storageLabel }}</p>
-          </div>
-          <span class="live-pill" v-if="isLive"><i></i> חי</span>
-          <span class="status-pill" v-else>{{ statusLabel }}</span>
-        </div>
-      </section>
+    <template v-else>
+      <OverviewStatusHeader
+        :name="displayName"
+        :status-label="statusLabel"
+        :date-label="dateLabel"
+        :venue="venueLabel"
+        :timing-label="timing.timingLabel"
+        :phase="timing.phase"
+      />
 
-      <section class="stats">
-        <article class="stat">
-          <strong>{{ totalAssets }}</strong>
-          <span>קבצים באלבום</span>
-          <small>מתוך {{ filesCap }}</small>
-        </article>
-        <article class="stat">
-          <strong>{{ uploadersCount }}</strong>
-          <span>אורחים שהעלו</span>
-        </article>
-        <article class="stat">
-          <strong>{{ pendingDisplay }}</strong>
-          <span>ממתינים לבדיקה</span>
-          <small v-if="pendingDisplay">יש תמונות בתור</small>
-        </article>
-        <article class="stat">
-          <strong>{{ daysLeft }}</strong>
-          <span>ימים לאחסון</span>
-        </article>
-      </section>
+      <OverviewKeyNumbers :items="keyNumberItems" />
 
-      <section class="stats-block">
-        <div class="stats-block__head">
-          <h2>משפך אורחים</h2>
-          <span v-if="analyticsLoading" class="muted">טוען…</span>
-          <span v-else-if="analyticsError" class="muted error-text">לא נטען</span>
-          <span v-else class="live-mini">
-            {{ activeVisitors }} פעילים ב־15 דק׳
-          </span>
-        </div>
-        <div class="stats">
-          <article class="stat">
-            <strong>{{ landingVisitors }}</strong>
-            <span>נכנסו לדף האירוע</span>
-          </article>
-          <article class="stat">
-            <strong>{{ uploadPageVisitors }}</strong>
-            <span>נכנסו לעמוד העלאה</span>
-            <small>{{ formatRate(rates.landing_to_upload_page) }} מדף האירוע</small>
-          </article>
-          <article class="stat">
-            <strong>{{ uploadersCount }}</strong>
-            <span>העלו קבצים</span>
-            <small>{{ formatRate(rates.upload_page_to_upload) }} מעמוד העלאה</small>
-          </article>
-          <article class="stat">
-            <strong>{{ galleryVisitors }}</strong>
-            <span>נכנסו לגלריה</span>
-            <small>{{ formatRate(rates.upload_to_gallery) }} ממעלים</small>
-          </article>
-        </div>
-      </section>
+      <OverviewNextStepCard :step="nextStep" />
 
-      <section class="stats-block">
-        <div class="stats-block__head">
-          <h2>העלאות ומדיה</h2>
-        </div>
-        <div class="stats">
-          <article class="stat">
-            <strong>{{ totalGuestUploads }}</strong>
-            <span>העלאות אורחים</span>
-          </article>
-          <article class="stat">
-            <strong>{{ avgUploads }}</strong>
-            <span>ממוצע העלאות לאורח</span>
-          </article>
-          <article class="stat">
-            <strong>{{ photosCount }}</strong>
-            <span>תמונות</span>
-          </article>
-          <article class="stat">
-            <strong>{{ videosCount }}</strong>
-            <span>סרטונים</span>
-          </article>
-        </div>
-      </section>
+      <OverviewQuickActions :items="quickActionItems" />
 
-      <section class="stats-block">
-        <div class="stats-block__head">
-          <h2>בדיקה ומעורבות</h2>
-        </div>
-        <div class="stats">
-          <article class="stat">
-            <strong>{{ approvedCount }}</strong>
-            <span>מאושרים</span>
-          </article>
-          <article class="stat">
-            <strong>{{ blockedCount }}</strong>
-            <span>חסומים</span>
-          </article>
-          <article class="stat">
-            <strong>{{ peakHourLabel }}</strong>
-            <span>שעת שיא להעלאות</span>
-          </article>
-          <article class="stat">
-            <strong>{{ galleryDownloadItems }}</strong>
-            <span>הורדות מהגלריה</span>
-            <small>{{ galleryDownloadEvents }} פעולות הורדה</small>
-          </article>
-        </div>
-      </section>
+      <OverviewAnalyticsBlock
+        :loading="analyticsLoading"
+        :available="analyticsAvailable"
+        :landing-visitors="landingVisitors"
+        :upload-page-visitors="uploadPageVisitors"
+        :uploaders="uploadersCount"
+        :gallery-visitors="galleryVisitors"
+        :active-visitors="activeVisitors"
+        :rate-landing="formatRate(rates.landing_to_upload_page)"
+        :rate-upload="formatRate(rates.upload_page_to_upload)"
+        :rate-gallery="formatRate(rates.upload_to_gallery)"
+        :photos="analyticsPhotos"
+        :videos="analyticsVideos"
+        :downloads="analyticsDownloads"
+        :peak-hour="peakHourLabel"
+      />
 
-      <section class="quick">
-        <router-link class="qcard" to="/event/gallery/full-screen">
-          <span class="ico" aria-hidden="true" v-html="actionIcons.live"></span>
-          <strong>פתיחת המסך החי</strong>
-          <small>על מסך האולם או המחשב</small>
-        </router-link>
-        <router-link class="qcard" to="/event/upload">
-          <span class="ico" aria-hidden="true" v-html="actionIcons.upload"></span>
-          <strong>עמוד העלאה</strong>
-          <small>איך האורחים רואים את העמוד</small>
-        </router-link>
-        <router-link class="qcard" to="/event/qr">
-          <span class="ico" aria-hidden="true" v-html="actionIcons.qr"></span>
-          <strong>כרטיס QR</strong>
-          <small>הורדה והדפסה לשולחנות</small>
-        </router-link>
-        <router-link class="qcard" to="/event/assets?filter=pending">
-          <span class="ico" aria-hidden="true" v-html="actionIcons.mod"></span>
-          <strong>ממתינים לבדיקה</strong>
-          <small>{{ pendingDisplay }} ממתינים</small>
-        </router-link>
-      </section>
+      <OverviewRecentUploads :items="recentUploads" />
 
-      <section class="card links">
-        <h2>קישורי שיתוף</h2>
-        <div class="link-row" v-for="link in shareLinks" :key="link.path">
-          <div class="link-meta">
-            <strong>{{ link.label }}</strong>
-            <small dir="ltr">{{ origin }}{{ link.path }}</small>
-          </div>
-          <CopyLinkButton :text="`${origin}${link.path}`" />
-        </div>
-      </section>
+      <OverviewShareLinks :origin="origin" :links="shareLinks" />
     </template>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
+import OverviewStatusHeader from "@/components/event/overview/OverviewStatusHeader.vue";
+import OverviewKeyNumbers from "@/components/event/overview/OverviewKeyNumbers.vue";
+import OverviewNextStepCard from "@/components/event/overview/OverviewNextStepCard.vue";
+import OverviewQuickActions from "@/components/event/overview/OverviewQuickActions.vue";
+import type {
+  OverviewKeyNumberItem,
+  OverviewQuickActionItem,
+} from "@/helpers/overviewUiTypes";
+import OverviewAnalyticsBlock from "@/components/event/overview/OverviewAnalyticsBlock.vue";
+import OverviewRecentUploads from "@/components/event/overview/OverviewRecentUploads.vue";
+import OverviewShareLinks from "@/components/event/overview/OverviewShareLinks.vue";
 import { StatusEnum } from "@/helpers/enums";
 import Time from "@/helpers/time";
+import { isWhatsAppEnabled } from "@/helpers/features";
 import {
   fetchEventAnalyticsOverview,
   type EventAnalyticsOverview,
 } from "@/api/eventAnalytics";
+import { getAdminHub } from "@/api/eventHub";
+import {
+  resolveOverviewTiming,
+  type OverviewTimingResult,
+} from "@/helpers/overviewTiming";
+import {
+  resolveOverviewNextStep,
+  type OverviewNextStep,
+} from "@/helpers/overviewNextStep";
+import {
+  pickOverviewRecentUploads,
+  type OverviewUploadThumb,
+} from "@/helpers/overviewRecentUploads";
+import { resolveOverviewVenue } from "@/helpers/overviewVenue";
 
 const ACTION_ICONS = {
   live: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect fill="none" x="3" y="5" width="18" height="12" rx="2"/><path fill="none" d="M8 21h8M12 17v4"/></svg>`,
   upload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect fill="none" x="7" y="2.5" width="10" height="19" rx="2.5"/><path fill="none" d="M11 18.5h2"/></svg>`,
   qr: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect fill="none" x="4" y="4" width="7" height="7" rx="1.2"/><rect fill="none" x="13" y="4" width="7" height="7" rx="1.2"/><rect fill="none" x="4" y="13" width="7" height="7" rx="1.2"/><path d="M14 14h2v2h-2zm3 0h3v3h-2v2h-3v-3h2z" fill="currentColor" stroke="none"/></svg>`,
+  page: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect fill="none" x="4" y="3" width="16" height="18" rx="2"/><path fill="none" d="M8 8h8M8 12h8M8 16h5"/></svg>`,
+  gallery: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect fill="none" x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="1.6" fill="currentColor" stroke="none"/><path fill="none" d="m7 17 3.5-4 2.5 3 2-2.5L17 17"/></svg>`,
+  trivia: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8" fill="none"/><path fill="none" d="M9.5 10a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8M12 17h.01"/></svg>`,
   mod: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M12 3 5 6v5c0 5 3.2 8.6 7 10 3.8-1.4 7-5 7-10V6z"/><path fill="none" d="M9.5 12.2 11.2 14l3.5-4"/></svg>`,
+  whatsapp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M12 4a8 8 0 0 0-6.9 12l-1 3.5 3.6-.9A8 8 0 1 0 12 4z"/><path fill="none" d="M9.5 10.2c.3-.4.7-.4 1 0l.7.9c.2.3.2.6 0 .8l-.4.4c.5 1 1.4 1.8 2.4 2.3l.5-.5c.2-.2.5-.2.8 0l.9.7c.4.3.4.7 0 1-.6.5-1.5.8-2.4.5-2.3-.8-4.2-2.7-5-5-.3-.9 0-1.8.5-2.4z"/></svg>`,
 };
 
 const EMPTY_RATES = {
@@ -198,22 +115,51 @@ const EMPTY_RATES = {
   upload_to_gallery: 0,
 };
 
+/** Neutral SVG placeholders for shot modes — no people. */
+const SHOT_PLACEHOLDER =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop stop-color="#efe8de"/><stop offset="1" stop-color="#d9d0c3"/>
+      </linearGradient></defs>
+      <rect width="320" height="320" fill="url(#g)"/>
+      <rect x="36" y="36" width="248" height="248" rx="22" fill="#f7f2ea" stroke="#cfc5b6"/>
+      <circle cx="118" cy="128" r="26" fill="#d9d0c3"/>
+      <path d="M56 236l62-70 38 42 30-26 78 54H56z" fill="#d9d0c3"/>
+    </svg>`
+  );
+
+type ShotMode =
+  | ""
+  | "no-uploads"
+  | "with-uploads"
+  | "past"
+  | "live"
+  | "analytics-empty";
+
 export default defineComponent({
   name: "EventHomeView",
 
-  components: { CopyLinkButton },
+  components: {
+    OverviewStatusHeader,
+    OverviewKeyNumbers,
+    OverviewNextStepCard,
+    OverviewQuickActions,
+    OverviewAnalyticsBlock,
+    OverviewRecentUploads,
+    OverviewShareLinks,
+  },
 
-  data(): {
-    actionIcons: typeof ACTION_ICONS;
-    analytics: EventAnalyticsOverview | null;
-    analyticsLoading: boolean;
-    analyticsError: boolean;
-  } {
+  data() {
     return {
-      actionIcons: ACTION_ICONS,
-      analytics: null,
+      analytics: null as EventAnalyticsOverview | null,
       analyticsLoading: false,
-      analyticsError: false,
+      analyticsUnavailable: false,
+      hubPublished: null as boolean | null,
+      hubConfig: null as Record<string, unknown> | null,
+      timingTick: 0,
+      timingTimer: null as ReturnType<typeof setInterval> | null,
     };
   },
 
@@ -227,8 +173,27 @@ export default defineComponent({
     shotError(): boolean {
       return this.$route.query.error === "1";
     },
-    event(): any {
-      return this.$store.getters["event/getEvent"];
+    shotMode(): ShotMode {
+      const raw = String(this.$route.query.shot || "");
+      if (
+        raw === "no-uploads" ||
+        raw === "with-uploads" ||
+        raw === "past" ||
+        raw === "live" ||
+        raw === "analytics-empty"
+      ) {
+        return raw;
+      }
+      return "";
+    },
+    forceAnalyticsEmpty(): boolean {
+      return (
+        this.shotMode === "analytics-empty" ||
+        this.$route.query.analytics === "0"
+      );
+    },
+    event(): Record<string, unknown> | null {
+      return this.$store.getters["event/getEvent"] || null;
     },
     eventId(): number {
       return Number(this.event?.id || 0);
@@ -236,38 +201,96 @@ export default defineComponent({
     eventName(): string {
       return this.$store.getters["event/getEventName"] || "";
     },
+    displayName(): string {
+      if (this.shotMode === "live") return this.eventName || "אירוע לדוגמה";
+      if (this.shotMode === "past") return this.eventName || "אירוע לדוגמה";
+      if (this.shotMode === "no-uploads") return this.eventName || "אירוע חדש";
+      return this.eventName;
+    },
     eventPath(): string {
       return this.$store.getters["event/getEventPath"] || "";
     },
     isSetupEmpty(): boolean {
+      if (this.shotMode) return false;
       return !String(this.eventName || "").trim();
     },
-    isLive(): boolean {
-      return this.$store.getters["event/isEventInProgress"];
+    storeStatus(): number | null {
+      return this.$store.getters["event/getEventStatus"];
+    },
+    effectiveStatus(): number | null {
+      if (this.shotMode === "live") return StatusEnum.IN_PROGRESS;
+      if (this.shotMode === "past") return StatusEnum.ACTIVE;
+      if (this.shotMode === "no-uploads") return StatusEnum.READY;
+      if (this.shotMode === "with-uploads") return StatusEnum.READY;
+      // Keep analytics-empty focused on quiet analytics, not past-event chrome.
+      if (this.shotMode === "analytics-empty") return StatusEnum.READY;
+      return this.storeStatus;
     },
     statusLabel(): string {
-      const s = this.$store.getters["event/getEventStatus"];
+      if (this.timing.phase === "live") return "חי";
+      const s = this.effectiveStatus;
       if (s === StatusEnum.PENDING) return "ממתין";
       if (s === StatusEnum.READY) return "מוכן";
-      if (s === StatusEnum.ACTIVE) return "פעיל";
+      if (s === StatusEnum.ACTIVE) return "הסתיים";
       if (s === StatusEnum.INACTIVE) return "לא פעיל";
+      if (s === StatusEnum.IN_PROGRESS) return "חי";
       return "סטטוס";
     },
+    startsAt(): string {
+      if (this.shotMode === "live") {
+        return new Date(Date.now() - 3600000).toISOString();
+      }
+      if (this.shotMode === "past") {
+        return new Date(Date.now() - 7 * 86400000).toISOString();
+      }
+      if (
+        this.shotMode === "no-uploads" ||
+        this.shotMode === "with-uploads" ||
+        this.shotMode === "analytics-empty"
+      ) {
+        return new Date(Date.now() + 5 * 86400000).toISOString();
+      }
+      return this.$store.getters["event/getEventStartTime"] || "";
+    },
+    finishedAt(): string {
+      if (this.shotMode === "live") {
+        return new Date(Date.now() + 3600000).toISOString();
+      }
+      if (this.shotMode === "past") {
+        return new Date(Date.now() - 6 * 86400000).toISOString();
+      }
+      return this.$store.getters["event/getEventFinishTime"] || "";
+    },
     dateLabel(): string {
+      if (this.startsAt) {
+        return Time.extractDate(this.startsAt) || this.$store.getters["event/getEventDate"] || "";
+      }
       return this.$store.getters["event/getEventDate"] || "";
     },
-    planLabel(): string {
-      const name = this.$store.getters["user/getSubscriptionName"] || "";
-      return name || "נסיון";
+    venueLabel(): string {
+      return resolveOverviewVenue({
+        event: this.event,
+        hubConfig: this.hubConfig,
+      });
     },
-    storageLabel(): string {
-      const finish = this.$store.getters["event/getEventFinishTime"];
-      const hours =
-        Number(this.$store.getters["user/getSubscriptionFilesStorageTime"]) || 0;
-      if (!finish || !hours) return "—";
-      return Time.addHours(finish, hours) || "—";
+    timing(): OverviewTimingResult {
+      // Depend on timingTick so countdown refreshes.
+      void this.timingTick;
+      return resolveOverviewTiming({
+        hasName: Boolean(this.displayName),
+        status: this.effectiveStatus,
+        startsAt: this.startsAt,
+        finishedAt: this.finishedAt,
+      });
     },
     totalAssets(): number {
+      if (this.shotMode === "no-uploads") return 0;
+      if (this.shotMode === "with-uploads" || this.shotMode === "live") {
+        return Math.max(Number(this.$store.getters["event/getTotalAssets"] || 0), 6);
+      }
+      if (this.shotMode === "past") {
+        return Math.max(Number(this.$store.getters["event/getTotalAssets"] || 0), 4);
+      }
       return Number(this.$store.getters["event/getTotalAssets"] || 0);
     },
     filesCap(): string {
@@ -278,10 +301,19 @@ export default defineComponent({
       return (this.$store.getters["event/getPendingAssets"] || []).length;
     },
     pendingDisplay(): number {
+      if (this.shotMode === "no-uploads") return 0;
       return this.analytics ? this.analytics.pending : this.pendingFallback;
     },
+    guestCountFallback(): number {
+      const guests = this.event?.guests;
+      if (Array.isArray(guests)) return guests.length;
+      return Number(this.event?.guests_count || 0);
+    },
     uploadersCount(): number {
-      return this.analytics?.uploaders ?? 0;
+      if (this.analyticsUnavailable || !this.analytics) {
+        return this.guestCountFallback;
+      }
+      return this.analytics.uploaders ?? 0;
     },
     landingVisitors(): number {
       return this.analytics?.landing_visitors ?? 0;
@@ -295,39 +327,34 @@ export default defineComponent({
     rates(): EventAnalyticsOverview["rates"] {
       return this.analytics?.rates ?? EMPTY_RATES;
     },
-    totalGuestUploads(): number {
-      return this.analytics?.total_guest_uploads ?? 0;
-    },
-    avgUploads(): string {
-      const v = this.analytics?.avg_uploads_per_uploader;
-      if (v == null) return "0";
-      return Number.isInteger(v) ? String(v) : v.toFixed(1);
-    },
-    photosCount(): number {
-      return this.analytics?.photos ?? 0;
-    },
-    videosCount(): number {
-      return this.analytics?.videos ?? 0;
-    },
-    approvedCount(): number {
-      return this.analytics?.approved ?? 0;
-    },
-    blockedCount(): number {
-      return this.analytics?.blocked ?? 0;
-    },
-    peakHourLabel(): string {
-      const hour = this.analytics?.peak_upload_hour;
-      if (hour == null) return "—";
-      return `${String(hour).padStart(2, "0")}:00`;
-    },
-    galleryDownloadItems(): number {
-      return this.analytics?.gallery_download_items ?? 0;
-    },
-    galleryDownloadEvents(): number {
-      return this.analytics?.gallery_download_events ?? 0;
-    },
     activeVisitors(): number {
       return this.analytics?.active_visitors_15m ?? 0;
+    },
+    analyticsAvailable(): boolean {
+      if (this.forceAnalyticsEmpty) return false;
+      return Boolean(this.analytics) && !this.analyticsUnavailable;
+    },
+    analyticsPhotos(): number | null {
+      if (!this.analyticsAvailable) return null;
+      return this.analytics?.photos ?? 0;
+    },
+    analyticsVideos(): number | null {
+      if (!this.analyticsAvailable) return null;
+      return this.analytics?.videos ?? 0;
+    },
+    analyticsDownloads(): number | null {
+      if (!this.analyticsAvailable) return null;
+      return this.analytics?.gallery_download_items ?? 0;
+    },
+    peakHourLabel(): string {
+      if (!this.analyticsAvailable) return "";
+      const hour = this.analytics?.peak_upload_hour;
+      if (hour == null) return "";
+      return `${String(hour).padStart(2, "0")}:00`;
+    },
+    viewsDisplay(): number | string {
+      if (!this.analyticsAvailable) return "—";
+      return this.landingVisitors;
     },
     daysLeft(): number {
       const finish = this.$store.getters["event/getEventFinishTime"];
@@ -335,14 +362,159 @@ export default defineComponent({
         Number(this.$store.getters["user/getSubscriptionFilesStorageTime"]) || 0;
       if (!finish || !hours) return 0;
       const end = new Date(Time.addHours(finish, hours) || finish).getTime();
+      if (Number.isNaN(end)) return 0;
       const diff = Math.ceil((end - Date.now()) / 86400000);
       return Math.max(0, diff);
+    },
+    daysUntilStart(): number | null {
+      const start = this.startsAt;
+      if (!start) return null;
+      const ms = Date.parse(start.includes("T") ? start : start.replace(" ", "T"));
+      if (Number.isNaN(ms)) return null;
+      const diff = Math.ceil((ms - Date.now()) / 86400000);
+      return diff > 0 ? diff : null;
+    },
+    keyNumberItems(): OverviewKeyNumberItem[] {
+      const items: OverviewKeyNumberItem[] = [
+        {
+          label: "קבצים באלבום",
+          value: this.totalAssets,
+          hint: this.filesCap !== "—" ? `מתוך ${this.filesCap}` : undefined,
+        },
+        {
+          label: this.analyticsAvailable ? "אורחים שהעלו" : "אורחים",
+          value: this.uploadersCount,
+        },
+        {
+          label: "ממתינים לבדיקה",
+          value: this.pendingDisplay,
+          hint: this.pendingDisplay ? "יש קבצים בתור" : undefined,
+        },
+      ];
+      if (this.analyticsAvailable) {
+        items.push({
+          label: "כניסות לדף",
+          value: this.viewsDisplay,
+        });
+      } else if (this.timing.phase === "upcoming" && this.daysUntilStart != null) {
+        items.push({
+          label: "ימים לאירוע",
+          value: this.daysUntilStart,
+        });
+      } else {
+        items.push({
+          label: "ימים לאחסון",
+          value: this.daysLeft > 0 ? this.daysLeft : "—",
+        });
+      }
+      return items;
+    },
+    effectiveHubPublished(): boolean | null {
+      if (
+        this.shotMode === "no-uploads" ||
+        this.shotMode === "with-uploads" ||
+        this.shotMode === "live" ||
+        this.shotMode === "past" ||
+        this.shotMode === "analytics-empty"
+      ) {
+        return true;
+      }
+      return this.hubPublished;
+    },
+    storeAssets(): unknown[] {
+      const owned = this.$store.getters["event/getOwnerVisibleAssets"];
+      if (Array.isArray(owned) && owned.length) return owned;
+      const all = this.$store.getters["event/getAssets"];
+      return Array.isArray(all) ? all : [];
+    },
+    nextStep(): OverviewNextStep {
+      return resolveOverviewNextStep({
+        hasName: Boolean(this.displayName),
+        hasDate: Boolean(this.dateLabel || this.startsAt),
+        statusPending: this.effectiveStatus === StatusEnum.PENDING,
+        phase: this.timing.phase,
+        totalAssets: this.totalAssets,
+        pendingCount: this.pendingDisplay,
+        hubPublished: this.effectiveHubPublished,
+      });
+    },
+    recentUploads(): OverviewUploadThumb[] {
+      if (this.shotMode === "no-uploads") return [];
+      // Shot modes: neutral placeholders only (never real people photos).
+      if (
+        this.shotMode === "with-uploads" ||
+        this.shotMode === "live" ||
+        this.shotMode === "past" ||
+        this.shotMode === "analytics-empty"
+      ) {
+        return Array.from({ length: 8 }, (_, i) => ({
+          id: `shot-${i}`,
+          src: SHOT_PLACEHOLDER,
+          alt: "תמונה לדוגמה",
+          isVideo: i === 3,
+        }));
+      }
+      return pickOverviewRecentUploads(this.storeAssets, 8);
+    },
+    quickActionItems(): OverviewQuickActionItem[] {
+      return [
+        {
+          title: "המסך החי",
+          hint: "הצגה באולם או במחשב",
+          to: "/event/gallery/full-screen",
+          icon: ACTION_ICONS.live,
+        },
+        {
+          title: "דף האירוע",
+          hint: "העמוד שתשלחו לאורחים",
+          to: "/event/page",
+          icon: ACTION_ICONS.page,
+        },
+        {
+          title: "כרטיס QR",
+          hint: "הורדה והדפסה לשולחנות",
+          to: "/event/qr",
+          icon: ACTION_ICONS.qr,
+        },
+        {
+          title: "עמוד העלאה",
+          hint: "איך האורחים מעלים",
+          to: "/event/upload",
+          icon: ACTION_ICONS.upload,
+        },
+        {
+          title: "אלבום חי",
+          hint: "גלריה והגדרות תצוגה",
+          to: "/event/gallery",
+          icon: ACTION_ICONS.gallery,
+        },
+        {
+          title: "טריוויה",
+          hint: "משחק אינטראקטיבי לאורחים",
+          to: "/event/trivia",
+          icon: ACTION_ICONS.trivia,
+        },
+        {
+          title: "ממתינים לבדיקה",
+          hint: `${this.pendingDisplay} ממתינים`,
+          to: "/event/assets?filter=pending",
+          icon: ACTION_ICONS.mod,
+          hidden: this.pendingDisplay <= 0,
+        },
+        {
+          title: "WhatsApp",
+          hint: "הזמנות וקמפיינים",
+          to: "/event/whatsapp",
+          icon: ACTION_ICONS.whatsapp,
+          hidden: !isWhatsAppEnabled(),
+        },
+      ];
     },
     origin(): string {
       return typeof window !== "undefined" ? window.location.origin : "";
     },
     shareLinks(): Array<{ label: string; path: string }> {
-      const p = String(this.$store.getters["event/getEventPath"] || "");
+      const p = String(this.eventPath || "");
       return [
         { label: "עמוד העלאה לאורחים", path: `/event/uploads/${p}` },
         { label: "האלבום החי למסך", path: `/event/open-album/${p}` },
@@ -357,26 +529,78 @@ export default defineComponent({
       handler(id: number) {
         if (id && !this.isSetupEmpty) {
           this.loadAnalytics(id);
+          this.loadHubMeta(id);
         }
+      },
+    },
+    "timing.phase": {
+      immediate: true,
+      handler() {
+        this.syncTimingTimer();
       },
     },
   },
 
+  mounted() {
+    this.syncTimingTimer();
+  },
+
+  beforeUnmount() {
+    this.clearTimingTimer();
+  },
+
   methods: {
     formatRate(value: number): string {
-      if (!value) return "0% המרה";
-      return `${value}% המרה`;
+      if (!this.analyticsAvailable || !value) return "";
+      return `${value}% מהשלב הקודם`;
+    },
+    syncTimingTimer() {
+      this.clearTimingTimer();
+      if (this.timing.phase !== "upcoming") return;
+      this.timingTimer = setInterval(() => {
+        this.timingTick += 1;
+      }, 30000);
+    },
+    clearTimingTimer() {
+      if (this.timingTimer) {
+        clearInterval(this.timingTimer);
+        this.timingTimer = null;
+      }
     },
     async loadAnalytics(eventId: number) {
+      if (this.forceAnalyticsEmpty) {
+        this.analytics = null;
+        this.analyticsUnavailable = true;
+        this.analyticsLoading = false;
+        return;
+      }
       this.analyticsLoading = true;
-      this.analyticsError = false;
+      this.analyticsUnavailable = false;
       try {
+        // Keep calling Gal's endpoint; 404 → quiet empty, no toast.
         this.analytics = await fetchEventAnalyticsOverview(eventId);
+        if (!this.analytics) {
+          this.analyticsUnavailable = true;
+        }
       } catch {
-        this.analyticsError = true;
+        this.analyticsUnavailable = true;
         this.analytics = null;
       } finally {
         this.analyticsLoading = false;
+      }
+    },
+    async loadHubMeta(eventId: number) {
+      try {
+        const hub = await getAdminHub(eventId);
+        this.hubPublished = Boolean(hub?.is_published);
+        this.hubConfig =
+          hub?.hub_config && typeof hub.hub_config === "object"
+            ? (hub.hub_config as Record<string, unknown>)
+            : null;
+      } catch {
+        // Hub optional for overview; venue/next-step degrade gracefully.
+        this.hubPublished = null;
+        this.hubConfig = null;
       }
     },
   },
@@ -384,221 +608,102 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.page-head {
+.ov-page {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 16px;
-  margin-bottom: 12px;
-}
-.page-head h1 {
-  margin: 0;
-  font-size: clamp(1.9rem, 3vw, 2.55rem);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 12px 22px;
-  font-weight: 800;
-  text-decoration: none;
-  border: 0;
-  cursor: pointer;
-  font-family: inherit;
-}
-.btn-dark {
-  background: #12100e;
-  color: #fff;
-}
-.card {
-  background: #fff;
-  border-radius: 26px;
-  padding: 28px 32px;
-  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
-}
-.status-main {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-}
-.status-main h2 {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 900;
-}
-.muted {
-  color: #5e564e;
-}
-.error-text {
-  color: #9a3036;
-}
-.live-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #fff4f4;
-  color: #9a3036;
-  font-weight: 800;
-  font-size: 0.78rem;
-  padding: 4px 10px;
-  border-radius: 999px;
-}
-.live-pill i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #dc5b66;
-}
-.live-mini {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #5e564e;
-}
-.stats-block {
-  margin: 8px 0 18px;
-}
-.stats-block__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.stats-block__head h2 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 800;
-}
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin: 18px 0;
-}
-.stats-block .stats {
-  margin: 0;
-}
-.stat {
-  background: #fff;
-  border-radius: 22px;
-  padding: 22px;
-  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
-}
-.stat strong {
-  display: block;
-  font-size: 2rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-.stat span {
-  display: block;
-  font-weight: 700;
-}
-.stat small {
-  color: #8a8278;
-}
-.quick {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin-bottom: 18px;
-}
-.qcard {
-  background: #fff;
-  border-radius: 22px;
-  padding: 22px;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
-}
-.qcard .ico {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  background: rgba(201, 163, 106, 0.16);
-  color: #161310;
-  margin-bottom: 4px;
-}
-.qcard .ico :deep(svg) {
-  width: 22px;
-  height: 22px;
-  display: block;
-  fill: none;
-  stroke: currentColor;
-}
-.qcard .ico :deep(svg [fill="currentColor"]) {
-  fill: currentColor;
-  stroke: none;
-}
-.qcard strong {
-  display: block;
-  margin-top: 10px;
-  font-weight: 800;
-}
-.qcard small {
-  color: #5e564e;
-}
-.links h2 {
-  margin: 0 0 14px;
-  font-size: 1.22rem;
-  font-weight: 800;
-}
-.link-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 0;
-  border-top: 1px solid rgba(22, 19, 16, 0.08);
-}
-.link-row:first-of-type {
-  border-top: 0;
-}
-.link-meta {
-  flex: 1;
+  max-width: 1100px;
   min-width: 0;
-  text-align: start;
+  width: 100%;
+  padding-bottom: 28px;
+  overflow-x: hidden;
 }
-.link-row strong {
-  display: block;
-}
-.link-row small {
-  display: block;
-  color: #8a8278;
-  direction: ltr;
-  unicode-bidi: isolate;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.banner.error {
-  background: #fff4f4;
-  color: #9a3036;
+
+.ov-banner {
   border-radius: 16px;
   padding: 14px 18px;
   font-weight: 800;
-  margin-bottom: 16px;
 }
-.skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+
+.ov-banner--error {
+  background: #fff4f4;
+  color: #9a3036;
 }
-.skel {
-  height: 110px;
+
+.ov-loading__hero,
+.ov-loading__block,
+.ov-loading__key {
   border-radius: 22px;
   background: linear-gradient(90deg, #ebe4da, #f7f2ea, #ebe4da);
   background-size: 200% 100%;
-  animation: shimmer 1.2s infinite;
 }
-@keyframes shimmer {
+
+.ov-loading__hero {
+  height: 140px;
+}
+
+.ov-loading__keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ov-loading__key {
+  height: 96px;
+}
+
+.ov-loading__block {
+  height: 120px;
+}
+
+.ov-setup {
+  background: #fff;
+  border-radius: 22px;
+  padding: 36px 24px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(18, 16, 14, 0.06);
+  border: 1px solid rgba(22, 19, 16, 0.05);
+}
+
+.ov-setup__eyebrow {
+  margin: 0 0 6px;
+  color: #8a8278;
+  font-weight: 700;
+}
+
+.ov-setup h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  font-weight: 900;
+}
+
+.ov-setup p {
+  margin: 0 0 18px;
+  color: #5e564e;
+}
+
+.ov-setup__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: #12100e;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ov-loading__hero,
+  .ov-loading__block,
+  .ov-loading__key {
+    animation: ov-page-shimmer 1.2s infinite;
+  }
+}
+
+@keyframes ov-page-shimmer {
   0% {
     background-position: 100% 0;
   }
@@ -606,31 +711,19 @@ export default defineComponent({
     background-position: -100% 0;
   }
 }
-.empty {
-  text-align: center;
-}
-.empty h2 {
-  margin: 0 0 8px;
-}
-.empty p {
-  color: #5e564e;
-  margin-bottom: 18px;
-}
+
 @media (max-width: 1024px) {
-  .stats,
-  .quick {
-    grid-template-columns: 1fr 1fr;
+  .ov-loading__keys {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
 @media (max-width: 600px) {
-  .stats,
-  .quick,
-  .skeleton-grid {
-    grid-template-columns: 1fr;
+  .ov-page {
+    gap: 14px;
   }
-  .page-head {
-    flex-direction: column;
-    align-items: stretch;
+  .ov-loading__keys {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>
