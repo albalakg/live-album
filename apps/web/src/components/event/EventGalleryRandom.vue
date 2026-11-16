@@ -14,13 +14,19 @@
             class="collage-asset"
           />
           <video
-            v-else-if="item.asset?.type === 'video'"
+            v-else-if="item.asset?.type === 'video' && playingItemId === item.id"
             :src="item.asset.fullPath"
             autoplay
             muted
             loop
             class="collage-asset"
           ></video>
+          <img
+            v-else-if="item.asset?.type === 'video'"
+            :src="item.asset.fullPath"
+            class="collage-asset"
+            alt=""
+          />
         </EventGalleryMediaFrame>
       </div>
     </transition-group>
@@ -48,7 +54,7 @@ export default defineComponent({
 
   props: {
     interval: { type: Number, default: 2000 }, // ms between new spawns
-    maxItems: { type: Number, default: 36 }, // how many on screen
+    maxItems: { type: Number, default: 12 }, // soft cap for TV browsers
     lifespan: { type: Number, default: 8000 }, // ms each asset lives
   },
 
@@ -57,6 +63,7 @@ export default defineComponent({
       items: [] as CollageItem[],
       timerId: null as ReturnType<typeof setInterval> | null,
       counter: 0,
+      playingItemId: -1,
     };
   },
 
@@ -165,9 +172,13 @@ export default defineComponent({
       };
 
       this.items.push(newItem);
+      const video = this.items.find((i) => i.asset?.type === "video");
+      this.playingItemId = video ? video.id : -1;
 
       setTimeout(() => {
         this.items = this.items.filter((i) => i.id !== newItem.id);
+        const still = this.items.find((i) => i.asset?.type === "video");
+        this.playingItemId = still ? still.id : -1;
       }, this.lifespan);
     },
   },
@@ -232,6 +243,16 @@ export default defineComponent({
   100% {
     transform: scale(1.2) translate(-20px, -20px);
     opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collage-item {
+    animation: none !important;
+  }
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
   }
 }
 </style>

@@ -60,7 +60,23 @@ export default defineComponent({
         this.updateSessionAsset();
     },
 
+    beforeUnmount() {
+        if (this.timeoutId) clearTimeout(this.timeoutId);
+        if (this.intervalId) clearInterval(this.intervalId);
+        this.timeoutId = null;
+        this.intervalId = null;
+    },
+
     watch: {
+        assets: {
+            immediate: true,
+            handler(list: IEventAsset[]) {
+                if (!list.length) return;
+                if (!this.sessionAsset.length) {
+                    this.updateSessionAsset();
+                }
+            },
+        },
         sessionAsset: {
             handler(newSessionAsset) {
                 if (newSessionAsset.length && newSessionAsset[0].type === 'video') {
@@ -68,7 +84,7 @@ export default defineComponent({
                         clearInterval(this.intervalId);
                         this.intervalId = null;
                     }
-                } else {
+                } else if (newSessionAsset.length) {
                     this.resetInterval();
                 }
             },

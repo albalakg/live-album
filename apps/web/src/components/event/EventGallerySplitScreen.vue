@@ -64,6 +64,17 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    assets: {
+      immediate: true,
+      handler(list: IEventAsset[]) {
+        if (!list.length) return;
+        const empty = !this.cells.length || this.cells.every((c) => !c.asset);
+        if (empty) this.initCells();
+      },
+    },
+  },
+
   methods: {
     getRandomAsset(): IEventAsset | null {
       if (!this.assets.length) return null;

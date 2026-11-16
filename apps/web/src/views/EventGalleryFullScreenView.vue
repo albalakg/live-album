@@ -1,13 +1,26 @@
 <template>
   <div
     class="stage"
-    :class="{ 'has-guest-cta': showGuestCta }"
+    :class="{
+      'has-guest-cta': showGuestCta,
+      'stage--header-hidden': !showHeader,
+    }"
     v-if="event"
+    @mousemove="onMouseMove"
   >
-    <header class="stage-bar">
+    <header
+      class="stage-bar"
+      @mouseenter="onHeaderMouseEnter"
+      @mouseleave="onHeaderMouseLeave"
+    >
       <p class="stage-live"><i></i> LIVE</p>
       <h1>{{ event.name }}</h1>
-      <router-link v-if="showGuestCta" class="stage-link" :to="`/event/open-gallery/${event.path}`">גלריה</router-link>
+      <router-link
+        v-if="showGuestCta"
+        class="stage-link"
+        :to="`/event/open-gallery/${event.path}`"
+        >גלריה</router-link
+      >
       <button
         v-else
         class="stage-gear"
@@ -19,7 +32,7 @@
         הגדרות
       </button>
     </header>
-    <div class="stage-screen">
+    <div class="stage-screen" :class="`fit-${fitMode}`">
       <EventTriviaPodium
         v-if="showTriviaPodium && triviaScreen"
         :screen="triviaScreen"
@@ -30,18 +43,17 @@
         :screen="triviaScreen"
         :event-name="event?.name || ''"
       />
-      <div v-else-if="stageMode === 'mosaic'" class="mosaic">
-        <figure v-for="asset in mosaicAssets" :key="asset.id">
-          <img v-if="asset.type !== 'video'" :src="asset.fullPath" alt="" />
-          <video v-else :src="asset.fullPath" autoplay muted loop></video>
-        </figure>
-      </div>
       <component v-else class="slideshow" :is="selectedAlbum"></component>
     </div>
 
     <p v-if="arrival" class="stage-new">תמונה חדשה</p>
 
-    <aside v-if="triviaPhase === 'photos'" class="stage-card" aria-label="כרטיס QR">
+    <aside
+      v-if="showQrCard"
+      class="stage-card"
+      :class="`corner-${qrCorner}`"
+      aria-label="כרטיס QR"
+    >
       <div class="stage-card-qr">
         <EventQR
           background="#ffffff"
@@ -54,32 +66,32 @@
     </aside>
 
     <aside v-if="settingsOpen && !showGuestCta" class="stage-panel">
-      <p>תצוגה</p>
+      <p>מצב תצוגה</p>
       <button
+        v-for="mode in modeChoices"
+        :key="mode.id"
         type="button"
         class="stage-panel-btn"
-        :class="{ on: stageMode === 'slideshow' }"
-        @click="stageMode = 'slideshow'"
+        :class="{ on: selectedAlbum === mode.id }"
+        @click="setDisplayedGallery(mode.id)"
       >
-        מצגת
-      </button>
-      <button
-        type="button"
-        class="stage-panel-btn"
-        :class="{ on: stageMode === 'mosaic' }"
-        @click="stageMode = 'mosaic'"
-      >
-        פסיפס
+        {{ mode.label }}
       </button>
       <label v-if="hasBlockedAssets">
-        <input type="checkbox" :checked="showBlockedGalleryAssets" @change="toggleBlockedGalleryAssets" />
+        <input
+          type="checkbox"
+          :checked="showBlockedGalleryAssets"
+          @change="toggleBlockedGalleryAssets"
+        />
         הצג חסומות
       </label>
       <button type="button" class="stage-panel-btn" @click="toggleFullScreen">
         {{ isFullScreen ? "יציאה ממסך מלא" : "מסך מלא" }}
       </button>
       <div class="stage-panel-sep" aria-hidden="true"></div>
-      <router-link class="stage-panel-btn" to="/event/gallery">חזרה לניהול</router-link>
+      <router-link class="stage-panel-btn" to="/event/gallery"
+        >חזרה לניהול</router-link
+      >
     </aside>
 
     <GuestAlbumCta v-if="showGuestCta" />
@@ -91,14 +103,29 @@ import { IEvent } from "@/helpers/interfaces";
 import { defineComponent } from "vue";
 import axios from "axios";
 import EventGallerySingle from "@/components/event/EventGallerySingle.vue";
-import MainIcon from "@/components/library/general/MainIcon.vue";
 import EventQR from "@/components/event/EventQR.vue";
 import EventGallerySplitScreen from "@/components/event/EventGallerySplitScreen.vue";
 import EventGalleryRandom from "@/components/event/EventGalleryRandom.vue";
 import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
+import EventGalleryKenBurns from "@/components/event/EventGalleryKenBurns.vue";
+import EventGallerySpotlight from "@/components/event/EventGallerySpotlight.vue";
+import EventGalleryMosaic from "@/components/event/EventGalleryMosaic.vue";
+import EventGalleryMasonry from "@/components/event/EventGalleryMasonry.vue";
+import EventGalleryPolaroid from "@/components/event/EventGalleryPolaroid.vue";
+import EventGalleryFilmstrip from "@/components/event/EventGalleryFilmstrip.vue";
+import EventGalleryFadeShow from "@/components/event/EventGalleryFadeShow.vue";
+import EventGallerySplitPair from "@/components/event/EventGallerySplitPair.vue";
+import EventGalleryHeroGrid from "@/components/event/EventGalleryHeroGrid.vue";
 import EventTriviaLiveStage from "@/components/event/EventTriviaLiveStage.vue";
 import EventTriviaPodium from "@/components/event/EventTriviaPodium.vue";
 import GuestAlbumCta from "@/components/event/GuestAlbumCta.vue";
+import {
+  LIVE_SCREEN_MODES,
+  resolveLiveGalleryMode,
+  type LiveQrCorner,
+} from "@/helpers/liveScreenModes";
+import { readLiveScreenOptions } from "@/helpers/liveScreenRuntime";
+import type { EventGalleryType } from "@/helpers/types";
 
 const HEADER_HIDE_DELAY_MS = 3000;
 
@@ -107,11 +134,19 @@ export default defineComponent({
 
   components: {
     EventGallerySingle,
-    MainIcon,
     EventQR,
     EventGalleryRandom,
     EventGalleryGrid3X3,
     EventGallerySplitScreen,
+    EventGalleryKenBurns,
+    EventGallerySpotlight,
+    EventGalleryMosaic,
+    EventGalleryMasonry,
+    EventGalleryPolaroid,
+    EventGalleryFilmstrip,
+    EventGalleryFadeShow,
+    EventGallerySplitPair,
+    EventGalleryHeroGrid,
     EventTriviaLiveStage,
     EventTriviaPodium,
     GuestAlbumCta,
@@ -120,7 +155,6 @@ export default defineComponent({
   data() {
     return {
       isFullScreen: false as boolean,
-      background: "#fff" as string,
       galleryPollIntervalId: null as ReturnType<typeof setInterval> | null,
       showHeader: true as boolean,
       isHoveringHeader: false as boolean,
@@ -131,8 +165,9 @@ export default defineComponent({
       seenIds: new Set<number>(),
       seenReady: false,
       arrivalTimer: null as ReturnType<typeof setTimeout> | null,
-      stageMode: "slideshow" as "slideshow" | "mosaic",
       settingsOpen: false,
+      modeChoices: LIVE_SCREEN_MODES.slice(0, 6),
+      savingMode: false,
     };
   },
 
@@ -146,11 +181,8 @@ export default defineComponent({
       this.scheduleHideHeader();
       return;
     }
-    this.$store.dispatch("event/getEventGalleryAssets");
+    this.startGalleryPolling();
     this.$store.dispatch("event/getEventAssets");
-    this.galleryPollIntervalId = setInterval(() => {
-      this.$store.dispatch("event/getEventGalleryAssets");
-    }, 10000);
     this.refreshTriviaScreen();
     this.triviaPollIntervalId = setInterval(() => {
       this.refreshTriviaScreen();
@@ -163,15 +195,17 @@ export default defineComponent({
       return this.$store.getters["event/getEvent"];
     },
 
-    screenIcon(): string {
-      return this.isFullScreen ? "fullscreen_exit" : "fullscreen";
+    selectedAlbum(): EventGalleryType {
+      return resolveLiveGalleryMode(this.event?.config?.displayed_gallery);
     },
 
-    selectedAlbum(): string {
-      return (
-        this.$store.getters["event/getEvent"].config.displayed_gallery ||
-        "EventGallerySingle"
-      );
+    pollMs(): number {
+      return this.selectedAlbum === "EventGallerySpotlight" ? 5000 : 10000;
+    },
+
+    guestToken(): string | null {
+      if (!this.showGuestCta) return null;
+      return this.event?.path || null;
     },
 
     hasBlockedAssets(): boolean {
@@ -215,9 +249,30 @@ export default defineComponent({
       return this.$route.name === "guestAlbum";
     },
 
-    mosaicAssets(): { id: number; fullPath: string; type?: string }[] {
-      const assets = this.$store.getters["event/getDisplayGalleryAssets"] || [];
-      return assets.slice(0, 9);
+    previewQrEnabled(): boolean {
+      const value = this.event?.config?.preview_qr_in_gallery;
+      return value !== false && value !== "false" && value !== 0;
+    },
+
+    showQrCard(): boolean {
+      if (this.triviaPhase !== "photos") return false;
+      return this.previewQrEnabled;
+    },
+
+    qrCorner(): LiveQrCorner {
+      return readLiveScreenOptions(this.event).qr_corner || "bottom-start";
+    },
+
+    fitMode(): "contain" | "cover" {
+      const containModes = new Set([
+        "EventGalleryKenBurns",
+        "EventGalleryFadeShow",
+        "EventGallerySpotlight",
+        "EventGalleryFilmstrip",
+        "EventGallerySingle",
+        "EventGalleryHeroGrid",
+      ]);
+      return containModes.has(this.selectedAlbum) ? "contain" : "cover";
     },
 
     liveAssetIds(): number[] {
@@ -245,9 +300,40 @@ export default defineComponent({
         }, 2400);
       },
     },
+    pollMs() {
+      this.startGalleryPolling();
+    },
+    selectedAlbum() {
+      this.startGalleryPolling();
+    },
   },
 
   methods: {
+    startGalleryPolling() {
+      if (this.galleryPollIntervalId) {
+        clearInterval(this.galleryPollIntervalId);
+        this.galleryPollIntervalId = null;
+      }
+      if (this.$route.name === "previewHost" || this.$store.getters["event/isPreview"]) {
+        return;
+      }
+      const token = this.guestToken;
+      this.$store.dispatch("event/getEventGalleryAssets", token);
+      this.galleryPollIntervalId = setInterval(() => {
+        this.$store.dispatch("event/getEventGalleryAssets", token);
+      }, this.pollMs);
+    },
+
+    async setDisplayedGallery(modeId: EventGalleryType) {
+      if (this.savingMode || modeId === this.selectedAlbum) return;
+      this.savingMode = true;
+      await this.$store.dispatch("event/updateGallerySettings", {
+        selectedAlbum: modeId,
+        live_screen_options: this.event?.config?.live_screen_options || null,
+      });
+      this.savingMode = false;
+    },
+
     onMouseMove() {
       this.showHeader = true;
       if (!this.isHoveringHeader) {
@@ -269,7 +355,7 @@ export default defineComponent({
     scheduleHideHeader() {
       this.clearHideHeaderTimeout();
       this.hideHeaderTimeoutId = setTimeout(() => {
-        if (!this.isHoveringHeader) {
+        if (!this.isHoveringHeader && !this.settingsOpen) {
           this.showHeader = false;
         }
       }, HEADER_HIDE_DELAY_MS);
@@ -351,6 +437,10 @@ export default defineComponent({
   flex-direction: column;
 }
 .stage-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   flex: none;
   height: 72px;
   display: flex;
@@ -360,6 +450,12 @@ export default defineComponent({
   padding: 0 22px;
   background: #12100e;
   z-index: 6;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+.stage--header-hidden .stage-bar {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 .stage-bar h1 {
   margin: 0;
@@ -372,35 +468,37 @@ export default defineComponent({
   text-overflow: ellipsis;
   color: #f7f2eb;
 }
-.stage-brand { color: #c9a36a; font-family: Outfit, Heebo, sans-serif; font-weight: 800; }
-.stage-screen { position: relative; flex: 1; min-height: 0; }
-.slideshow, .mosaic { position: absolute; inset: 0; }
-.slideshow, .stage-screen :deep(.gallery), .stage-screen :deep(.album-wrapper), .stage-screen :deep(.album) {
+.stage-screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.slideshow {
+  position: absolute;
+  inset: 0;
+}
+.slideshow,
+.stage-screen :deep(.gallery),
+.stage-screen :deep(.album-wrapper),
+.stage-screen :deep(.album) {
   width: 100%;
   height: 100%;
 }
-.stage-screen :deep(.album-asset) {
+.stage-screen.fit-cover :deep(.album-asset) {
   width: 100%;
   height: 100%;
   max-width: none;
   max-height: none;
   object-fit: cover;
-  animation: stage-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-@keyframes stage-in { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) {
-  .stage-screen :deep(.album-asset) { animation: none; }
+.stage-screen.fit-contain :deep(.album-asset),
+.stage-screen.fit-contain :deep(.kb-contain),
+.stage-screen.fit-contain :deep(.spot-contain),
+.stage-screen.fit-contain :deep(.fade-contain),
+.stage-screen.fit-contain :deep(.film-contain),
+.stage-screen.fit-contain :deep(.hero-contain) {
+  object-fit: contain !important;
 }
-.mosaic {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 1fr;
-  gap: 6px;
-  padding: 6px;
-}
-.mosaic figure { margin: 0; overflow: hidden; border-radius: 10px; }
-.mosaic img, .mosaic video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.stage-title { display: none; }
 .stage-live {
   display: inline-flex;
   align-items: center;
@@ -412,9 +510,16 @@ export default defineComponent({
   font-weight: 800;
   letter-spacing: 0.08em;
 }
-.stage-live i { width: 7px; height: 7px; border-radius: 50%; background: #2fbe6a; }
-.stage-title h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); font-weight: 900; color: #f7f2eb; text-shadow: 0 8px 24px rgba(0,0,0,.45); }
-.stage-link { color: var(--gold, #c9a36a); font-weight: 800; }
+.stage-live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2fbe6a;
+}
+.stage-link {
+  color: var(--gold, #c9a36a);
+  font-weight: 800;
+}
 .stage-new {
   position: absolute;
   top: 22px;
@@ -422,17 +527,15 @@ export default defineComponent({
   transform: translateX(-50%);
   z-index: 5;
   margin: 0;
-  background: rgba(18,16,14,.72);
+  background: rgba(18, 16, 14, 0.72);
   color: #fff;
-  border: 1px solid rgba(255,255,255,.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   padding: 6px 12px;
   font-weight: 800;
 }
 .stage-card {
   position: absolute;
-  left: max(24px, env(safe-area-inset-left, 0px));
-  bottom: max(24px, env(safe-area-inset-bottom, 0px));
   z-index: 8;
   width: 168px;
   padding: 16px 16px 12px;
@@ -440,9 +543,25 @@ export default defineComponent({
   background: #fff;
   color: #161310;
   text-align: center;
-  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
   overflow: visible;
   box-sizing: border-box;
+}
+.stage-card.corner-bottom-start {
+  inset-inline-start: max(24px, env(safe-area-inset-left, 0px));
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+}
+.stage-card.corner-bottom-end {
+  inset-inline-end: max(24px, env(safe-area-inset-right, 0px));
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+}
+.stage-card.corner-top-start {
+  inset-inline-start: max(24px, env(safe-area-inset-left, 0px));
+  top: max(88px, env(safe-area-inset-top, 0px));
+}
+.stage-card.corner-top-end {
+  inset-inline-end: max(24px, env(safe-area-inset-right, 0px));
+  top: max(88px, env(safe-area-inset-top, 0px));
 }
 .stage-card-qr {
   width: 100%;
@@ -459,14 +578,19 @@ export default defineComponent({
   height: auto;
   display: block;
 }
-.stage-card p { margin: 10px 0 0; font-weight: 900; font-size: 0.95rem; }
-.stage.has-guest-cta .stage-card {
+.stage-card p {
+  margin: 10px 0 0;
+  font-weight: 900;
+  font-size: 0.95rem;
+}
+.stage.has-guest-cta .stage-card.corner-bottom-start,
+.stage.has-guest-cta .stage-card.corner-bottom-end {
   bottom: max(108px, calc(84px + env(safe-area-inset-bottom, 0px)));
 }
 .stage-gear {
   position: static;
-  border: 1px solid rgba(255,255,255,.2);
-  background: rgba(18,16,14,.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(18, 16, 14, 0.55);
   color: #fff;
   border-radius: 999px;
   padding: 8px 14px;
@@ -480,12 +604,14 @@ export default defineComponent({
   left: 22px;
   z-index: 6;
   width: 220px;
+  max-height: calc(100% - 110px);
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 14px;
   border-radius: 16px;
-  background: rgba(18,16,14,.88);
+  background: rgba(18, 16, 14, 0.88);
   color: #fff;
 }
 .stage-panel-btn {
@@ -493,29 +619,39 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 40px;
   min-height: 40px;
-  max-height: 40px;
   margin: 0;
-  border: 1px solid rgba(255,255,255,.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   background: transparent;
   color: #fff;
   border-radius: 999px;
-  padding: 0 12px;
+  padding: 8px 12px;
   font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.2;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   font-family: inherit;
 }
-.stage-panel-btn.on { background: #fff; color: #12100e; }
+.stage-panel-btn.on {
+  background: #fff;
+  color: #12100e;
+}
 .stage-panel-sep {
   height: 1px;
   margin: 2px 0;
-  background: rgba(255,255,255,.14);
+  background: rgba(255, 255, 255, 0.14);
 }
-.stage-panel label { display: flex; gap: 8px; align-items: center; font-weight: 700; }
+.stage-panel label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage-bar {
+    transition: none;
+  }
+}
 </style>
-

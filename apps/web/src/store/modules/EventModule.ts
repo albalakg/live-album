@@ -357,9 +357,15 @@ const EventModule = {
 
     UPDATE_GALLERY_SETTINGS(
       state: IEventModuleState,
-      settings: { selectedAlbum: EventGalleryType }
+      settings: {
+        selectedAlbum: EventGalleryType;
+        live_screen_options?: Record<string, unknown> | null;
+      }
     ) {
       state.event.config.displayed_gallery = settings.selectedAlbum;
+      if (Object.prototype.hasOwnProperty.call(settings, "live_screen_options")) {
+        state.event.config.live_screen_options = settings.live_screen_options;
+      }
     },
 
     UPDATE_QR_CARD_SETTINGS(
@@ -576,9 +582,12 @@ const EventModule = {
         axios
           .get(`events/${path}/base-assets`)
           .then((res) => {
-            res.data.data.assets = asAssetArray(res.data.data.displayed_assets);
+            const displayed = asAssetArray(res.data.data.displayed_assets);
+            res.data.data.assets = displayed;
             context.commit("SET_GALLERY_AUDIENCE", "guest");
             context.commit("SET_EVENT", res.data.data);
+            // Public live screen reads gallery.assets, not event.assets.
+            context.commit("SET_GALLERY_FILES", displayed);
             resolve(res.data);
           })
           .catch((err) => {
@@ -663,7 +672,6 @@ const EventModule = {
         const url = queryString
           ? `events/${context.state.event.id}/gallery-guests-assets${queryString}`
           : `events/${context.state.event.id}/gallery-assets`;
-        console.log("URL:", url);
         axios
           .get(url)
           .then((res) => {
@@ -961,7 +969,10 @@ const EventModule = {
         state: IEventModuleState;
         commit: (arg0: string, arg1: any) => void;
       },
-      data: { selectedAlbum: EventGalleryType }
+      data: {
+        selectedAlbum: EventGalleryType;
+        live_screen_options?: Record<string, unknown> | null;
+      }
     ) {
       return new Promise((resolve) => {
         axios

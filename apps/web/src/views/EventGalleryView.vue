@@ -4,7 +4,8 @@
       <p class="kicker">מסך חי</p>
       <h1>אלבום חי</h1>
       <p class="lede">
-        בחירת פריסה למסך באולם, מה מוצג עליו, וקישור לתצוגה המלאה.
+        בחירת מצב תצוגה למסך באולם, אפשרויות משותפות, ותצוגה מקדימה לפני המסך
+        המלא.
       </p>
     </header>
 
@@ -29,34 +30,103 @@
       </div>
     </section>
 
-    <form class="settings-form" @submit.prevent="submit">
+    <form class="settings-form" @submit.prevent="saveAll">
       <section class="layout-card">
-        <h2>פריסת האלבום</h2>
+        <h2>מצב תצוגה</h2>
         <p class="section-lede">איך התמונות יופיעו על המסך באולם.</p>
-        <div class="layout-options" role="radiogroup" aria-label="פריסת האלבום">
+        <div class="layout-options" role="radiogroup" aria-label="מצב תצוגה">
           <button
             v-for="option in albumsSelectOptions"
-            :key="option.value"
+            :key="option.id"
             type="button"
             class="layout-option"
-            :class="{ 'layout-option--active': form.selectedAlbum === option.value }"
+            :class="{
+              'layout-option--active': form.selectedAlbum === option.id,
+            }"
             role="radio"
-            :aria-checked="form.selectedAlbum === option.value"
-            @click="form.selectedAlbum = option.value"
+            :aria-checked="form.selectedAlbum === option.id"
+            @click="form.selectedAlbum = option.id"
           >
-            <span class="layout-preview" :data-layout="option.preview" aria-hidden="true">
-              <span v-for="n in option.slots" :key="n" class="layout-slot" />
-            </span>
+            <LiveScreenModeThumb
+              :preview="option.preview"
+              :slots="option.slots"
+            />
             <span class="layout-copy">
               <strong>{{ option.label }}</strong>
               <small>{{ option.hint }}</small>
             </span>
           </button>
         </div>
-        <div
-          v-if="hasBlockedAssets"
-          class="blocked-gallery-toggle"
-        >
+
+        <div class="mode-options" v-if="activeMode">
+          <h3>אפשרויות למצב</h3>
+          <div class="timing-grid">
+            <label
+              v-if="activeMode.optionKeys.includes('ken_burns_intensity')"
+              class="field"
+            >
+              <span>עוצמת קן ברנס</span>
+              <select v-model="liveOptions.ken_burns_intensity" class="txt">
+                <option value="subtle">עדין</option>
+                <option value="medium">בינוני</option>
+              </select>
+            </label>
+            <label
+              v-if="activeMode.optionKeys.includes('spotlight_hold_seconds')"
+              class="field"
+            >
+              <span>שניות בספוטלייט</span>
+              <input
+                class="txt"
+                type="number"
+                min="2"
+                max="30"
+                v-model.number="liveOptions.spotlight_hold_seconds"
+              />
+            </label>
+            <label
+              v-if="activeMode.optionKeys.includes('mosaic_size')"
+              class="field"
+            >
+              <span>גודל פסיפס</span>
+              <select v-model="liveOptions.mosaic_size" class="txt">
+                <option value="3x3">3×3</option>
+                <option value="4x4">4×4</option>
+              </select>
+            </label>
+            <label
+              v-if="activeMode.optionKeys.includes('masonry_density')"
+              class="field"
+            >
+              <span>צפיפות קיר</span>
+              <select v-model="liveOptions.masonry_density" class="txt">
+                <option value="cozy">נוח</option>
+                <option value="dense">צפוף</option>
+              </select>
+            </label>
+            <label
+              v-if="activeMode.optionKeys.includes('polaroid_count')"
+              class="field"
+            >
+              <span>מספר כרטיסים</span>
+              <input
+                class="txt"
+                type="number"
+                min="8"
+                max="12"
+                v-model.number="liveOptions.polaroid_count"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div class="preview-frame" aria-label="תצוגה מקדימה 16:9">
+          <div class="preview-stage">
+            <component :is="form.selectedAlbum" />
+          </div>
+        </div>
+
+        <div v-if="hasBlockedAssets" class="blocked-gallery-toggle">
           <label class="blocked-toggle">
             <input
               type="checkbox"
@@ -69,13 +139,8 @@
             לצפייה בלבד — תמונות חסומות לא מוצגות לאורחים עד שתבטלו את החסימה.
           </small>
         </div>
-        <div class="form-actions">
-          <MainButton :loading="loading" text="שמור פריסה" />
-        </div>
       </section>
-    </form>
 
-    <form class="settings-form" @submit.prevent="saveLiveConfig">
       <EventSwitchPanel
         title="מה מוצג באלבום החי"
         lede="שליטה על תמונות אורחים, תמונות שלכם, וכרטיס QR על המסך."
@@ -83,11 +148,9 @@
         :values="liveConfig"
         @toggle="toggleLive"
       />
-      <details class="more">
-        <summary>הגדרות נוספות</summary>
-        <p class="section-lede timing-lede">
-          כמה זמן כל תמונה וסרטון נשארים על המסך באלבום החי.
-        </p>
+
+      <section class="shared-options">
+        <h2>הגדרות משותפות</h2>
         <div class="timing-grid">
           <label class="field">
             <span>שניות לתמונה</span>
@@ -109,10 +172,20 @@
               v-model.number="timing.video_display_time"
             />
           </label>
+          <label class="field">
+            <span>פינת QR</span>
+            <select v-model="liveOptions.qr_corner" class="txt">
+              <option value="bottom-start">תחתית־התחלה (ברירת מחדל)</option>
+              <option value="bottom-end">תחתית־סוף</option>
+              <option value="top-start">ראש־התחלה</option>
+              <option value="top-end">ראש־סוף</option>
+            </select>
+          </label>
         </div>
-      </details>
+      </section>
+
       <div class="form-actions">
-        <MainButton :loading="configLoading" text="שמור הגדרות תצוגה" />
+        <MainButton :loading="loading" text="שמור הגדרות מסך חי" />
       </div>
     </form>
   </div>
@@ -124,25 +197,39 @@ import EventSwitchPanel, {
   SwitchItem,
 } from "@/components/event/EventSwitchPanel.vue";
 import CopyLinkButton from "@/components/ui/CopyLinkButton.vue";
+import LiveScreenModeThumb from "@/components/event/LiveScreenModeThumb.vue";
+import EventGallerySingle from "@/components/event/EventGallerySingle.vue";
+import EventGallerySplitScreen from "@/components/event/EventGallerySplitScreen.vue";
+import EventGalleryRandom from "@/components/event/EventGalleryRandom.vue";
+import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
+import EventGalleryKenBurns from "@/components/event/EventGalleryKenBurns.vue";
+import EventGallerySpotlight from "@/components/event/EventGallerySpotlight.vue";
+import EventGalleryMosaic from "@/components/event/EventGalleryMosaic.vue";
+import EventGalleryMasonry from "@/components/event/EventGalleryMasonry.vue";
+import EventGalleryPolaroid from "@/components/event/EventGalleryPolaroid.vue";
+import EventGalleryFilmstrip from "@/components/event/EventGalleryFilmstrip.vue";
+import EventGalleryFadeShow from "@/components/event/EventGalleryFadeShow.vue";
+import EventGallerySplitPair from "@/components/event/EventGallerySplitPair.vue";
+import EventGalleryHeroGrid from "@/components/event/EventGalleryHeroGrid.vue";
 import { defineComponent } from "vue";
 import type {
   NavigationGuardNext,
   RouteLocationNormalized,
 } from "vue-router";
 import { IEvent } from "@/helpers/interfaces";
+import {
+  DEFAULT_LIVE_GALLERY,
+  LIVE_SCREEN_MODES,
+  mergeLiveScreenOptions,
+  resolveLiveGalleryMode,
+  type LiveScreenOptions,
+} from "@/helpers/liveScreenModes";
+import type { EventGalleryType } from "@/helpers/types";
 
 type LiveConfigKey =
   | "preview_guests_assets_in_gallery"
   | "preview_owners_assets_in_gallery"
   | "preview_qr_in_gallery";
-
-type AlbumOption = {
-  value: string;
-  label: string;
-  hint: string;
-  preview: "single" | "random" | "split";
-  slots: number;
-};
 
 export default defineComponent({
   name: "EventGalleryView",
@@ -151,51 +238,36 @@ export default defineComponent({
     MainButton,
     CopyLinkButton,
     EventSwitchPanel,
+    LiveScreenModeThumb,
+    EventGallerySingle,
+    EventGallerySplitScreen,
+    EventGalleryRandom,
+    EventGalleryGrid3X3,
+    EventGalleryKenBurns,
+    EventGallerySpotlight,
+    EventGalleryMosaic,
+    EventGalleryMasonry,
+    EventGalleryPolaroid,
+    EventGalleryFilmstrip,
+    EventGalleryFadeShow,
+    EventGallerySplitPair,
+    EventGalleryHeroGrid,
   },
 
   data() {
     return {
-      albumsSelectOptions: [
-        {
-          value: "EventGallerySingle",
-          label: "אלבום רגיל",
-          hint: "תמונה אחת גדולה שמתחלפת",
-          preview: "single",
-          slots: 1,
-        },
-        {
-          value: "EventGalleryRandom",
-          label: "אלבום קופץ",
-          hint: "כמה תמונות מופיעות יחד בתנועה",
-          preview: "random",
-          slots: 4,
-        },
-        {
-          value: "EventGallerySplitScreen",
-          label: "חלוקת מסך",
-          hint: "שתי תמונות זו לצד זו",
-          preview: "split",
-          slots: 2,
-        },
-        {
-          value: "EventGalleryGrid3X3",
-          label: "רשת 3×3",
-          hint: "הצעה חדשה · תשע תמונות יחד",
-          preview: "split",
-          slots: 9,
-        },
-      ] as AlbumOption[],
+      albumsSelectOptions: LIVE_SCREEN_MODES,
       loading: false as boolean,
-      configLoading: false as boolean,
       liveConfig: {
         preview_guests_assets_in_gallery: false,
         preview_owners_assets_in_gallery: false,
-        preview_qr_in_gallery: false,
+        preview_qr_in_gallery: true,
       } as Record<LiveConfigKey, boolean>,
       timing: {
         image_display_time: 3 as number,
         video_display_time: 8 as number,
       },
+      liveOptions: mergeLiveScreenOptions(null),
       liveSwitches: [
         {
           key: "preview_guests_assets_in_gallery",
@@ -214,17 +286,16 @@ export default defineComponent({
         },
       ] as SwitchItem[],
       form: {
-        selectedAlbum: "EventGallerySingle" as string,
+        selectedAlbum: DEFAULT_LIVE_GALLERY as EventGalleryType,
       },
-      savedLayout: "EventGallerySingle" as string,
-      savedLiveSnapshot: "" as string,
+      savedSnapshot: "" as string,
     };
   },
 
   created() {
     this.$store.dispatch("event/getEventGalleryAssets");
     this.$store.dispatch("event/getEventAssets");
-    this.setForm();
+    this.syncFromEvent();
   },
 
   beforeRouteLeave(
@@ -232,7 +303,10 @@ export default defineComponent({
     _from: RouteLocationNormalized,
     next: NavigationGuardNext
   ) {
-    if (this.isDirty && !window.confirm("יש שינויים שלא נשמרו. לעזוב בלי לשמור?")) {
+    if (
+      this.isDirty &&
+      !window.confirm("יש שינויים שלא נשמרו. לעזוב בלי לשמור?")
+    ) {
       next(false);
       return;
     }
@@ -264,19 +338,24 @@ export default defineComponent({
       return this.$store.getters["event/showBlockedGalleryAssets"];
     },
 
-    liveSnapshot(): string {
+    activeMode(): (typeof LIVE_SCREEN_MODES)[number] | null {
+      return (
+        LIVE_SCREEN_MODES.find((mode) => mode.id === this.form.selectedAlbum) ||
+        null
+      );
+    },
+
+    currentSnapshot(): string {
       return JSON.stringify({
-        ...this.liveConfig,
-        image_display_time: this.timing.image_display_time,
-        video_display_time: this.timing.video_display_time,
+        selectedAlbum: this.form.selectedAlbum,
+        liveConfig: this.liveConfig,
+        timing: this.timing,
+        liveOptions: this.liveOptions,
       });
     },
 
     isDirty(): boolean {
-      return (
-        this.form.selectedAlbum !== this.savedLayout ||
-        this.liveSnapshot !== this.savedLiveSnapshot
-      );
+      return this.currentSnapshot !== this.savedSnapshot;
     },
   },
 
@@ -284,31 +363,28 @@ export default defineComponent({
     event: {
       immediate: true,
       handler() {
-        this.syncLiveConfig();
-        this.setForm();
+        this.syncFromEvent();
       },
     },
   },
 
   methods: {
-    setForm() {
-      this.form.selectedAlbum =
-        this.event?.config?.displayed_gallery || "EventGallerySingle";
-      this.savedLayout = this.form.selectedAlbum;
-    },
-
-    syncLiveConfig() {
+    syncFromEvent() {
       const cfg = this.event?.config;
+      this.form.selectedAlbum = resolveLiveGalleryMode(cfg?.displayed_gallery);
       this.liveConfig.preview_guests_assets_in_gallery =
         cfg?.preview_guests_assets_in_gallery ?? false;
       this.liveConfig.preview_owners_assets_in_gallery =
         cfg?.preview_owners_assets_in_gallery ?? false;
       this.liveConfig.preview_qr_in_gallery =
-        cfg?.preview_qr_in_gallery ?? false;
+        cfg?.preview_qr_in_gallery ?? true;
       this.timing.image_display_time = Number(cfg?.image_display_time) || 3;
       this.timing.video_display_time = Number(cfg?.video_display_time) || 8;
+      this.liveOptions = mergeLiveScreenOptions(
+        (cfg?.live_screen_options || null) as LiveScreenOptions | null
+      );
       this.$nextTick(() => {
-        this.savedLiveSnapshot = this.liveSnapshot;
+        this.savedSnapshot = this.currentSnapshot;
       });
     },
 
@@ -317,30 +393,27 @@ export default defineComponent({
       this.liveConfig[k] = !this.liveConfig[k];
     },
 
-    async saveLiveConfig() {
-      this.configLoading = true;
-      const config: Record<string, string | number> = {};
+    async saveAll() {
+      this.loading = true;
+      const config: Record<string, string | number | object> = {};
       (Object.keys(this.liveConfig) as LiveConfigKey[]).forEach((key) => {
         config[key] = this.liveConfig[key] ? "true" : "false";
       });
       config.image_display_time = this.timing.image_display_time;
       config.video_display_time = this.timing.video_display_time;
-      const result = await this.$store.dispatch("event/update", { config });
-      this.configLoading = false;
-      if (result) {
-        this.savedLiveSnapshot = this.liveSnapshot;
-      }
-    },
+      config.displayed_gallery = this.form.selectedAlbum;
+      config.live_screen_options = { ...this.liveOptions };
 
-    async submit() {
-      this.loading = true;
-      const result = await this.$store.dispatch(
-        "event/updateGallerySettings",
-        this.form
-      );
+      const [layoutResult, configResult] = await Promise.all([
+        this.$store.dispatch("event/updateGallerySettings", {
+          selectedAlbum: this.form.selectedAlbum,
+          live_screen_options: { ...this.liveOptions },
+        }),
+        this.$store.dispatch("event/update", { config }),
+      ]);
       this.loading = false;
-      if (result) {
-        this.savedLayout = this.form.selectedAlbum;
+      if (layoutResult || configResult) {
+        this.savedSnapshot = this.currentSnapshot;
       }
     },
 
@@ -389,14 +462,16 @@ export default defineComponent({
 
 .links-card,
 .layout-card,
-.settings-form {
+.settings-form,
+.shared-options {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
 .links-card,
-.layout-card {
+.layout-card,
+.shared-options {
   background: rgba(22, 19, 16, 0.02);
   border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 18px;
@@ -404,7 +479,9 @@ export default defineComponent({
 }
 
 .links-card h2,
-.layout-card h2 {
+.layout-card h2,
+.shared-options h2,
+.mode-options h3 {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 800;
@@ -479,11 +556,6 @@ export default defineComponent({
   font-size: 1.05rem;
   letter-spacing: -0.01em;
   white-space: nowrap;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-}
-
-.ghost-btn:hover {
-  border-color: var(--ink, #161310);
 }
 
 .layout-options {
@@ -491,7 +563,11 @@ export default defineComponent({
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 
-  @media only screen and (max-width: 900px) {
+  @media only screen and (max-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media only screen and (max-width: 700px) {
     grid-template-columns: 1fr;
   }
 }
@@ -508,9 +584,7 @@ export default defineComponent({
   cursor: pointer;
   color: inherit;
   font: inherit;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
+  transition: border-color 0.2s ease, background-color 0.2s ease,
     transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -524,40 +598,6 @@ export default defineComponent({
   transform: translateY(-1px);
 }
 
-.layout-preview {
-  display: grid;
-  gap: 6px;
-  height: 88px;
-  padding: 10px;
-  border-radius: 12px;
-  background: #1c1814;
-}
-
-.layout-preview[data-layout="single"] {
-  grid-template-columns: 1fr;
-}
-
-.layout-preview[data-layout="split"] {
-  grid-template-columns: 1fr 1fr;
-}
-
-.layout-preview[data-layout="random"] {
-  grid-template-columns: 1.2fr 0.8fr;
-  grid-template-rows: 1fr 1fr;
-}
-
-.layout-preview[data-layout="random"] .layout-slot:nth-child(1) {
-  grid-row: 1 / 3;
-}
-
-.layout-slot {
-  display: block;
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(220, 91, 102, 0.55), rgba(201, 163, 106, 0.45));
-  opacity: 0.9;
-}
-
 .layout-copy strong {
   display: block;
   font-size: 0.95rem;
@@ -569,6 +609,42 @@ export default defineComponent({
   margin-top: 4px;
   color: var(--muted, #5e564e);
   line-height: 1.35;
+}
+
+.preview-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(22, 19, 16, 0.12);
+  background: #070605;
+}
+
+.preview-stage {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-stage :deep(.stage),
+.preview-stage :deep(.kb),
+.preview-stage :deep(.spot),
+.preview-stage :deep(.mosaic-wall),
+.preview-stage :deep(.masonry),
+.preview-stage :deep(.polaroid),
+.preview-stage :deep(.film),
+.preview-stage :deep(.fade-show),
+.preview-stage :deep(.pair),
+.preview-stage :deep(.hero-grid),
+.preview-stage :deep(.gallery),
+.preview-stage :deep(.gallery-grid),
+.preview-stage :deep(.split-gallery),
+.preview-stage :deep(.collage-container) {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .blocked-gallery-toggle {
@@ -598,27 +674,9 @@ export default defineComponent({
 }
 
 .form-actions {
-  max-width: 280px;
+  max-width: 320px;
   margin-inline-start: auto;
   width: 100%;
-}
-
-.more {
-  background: #fff;
-  border-radius: 22px;
-  padding: 14px 18px 18px;
-  box-shadow: 0 8px 24px rgba(18, 16, 14, 0.06);
-}
-
-.more summary {
-  cursor: pointer;
-  font-weight: 800;
-  color: #5e564e;
-  padding: 6px 0 10px;
-}
-
-.timing-lede {
-  margin-bottom: 12px;
 }
 
 .timing-grid {
@@ -652,6 +710,12 @@ export default defineComponent({
 @media (max-width: 700px) {
   .timing-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-option {
+    transition: none;
   }
 }
 </style>

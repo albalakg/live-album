@@ -1,6 +1,15 @@
 export type IEventFileType = 'image' | 'video';
 
 export type EventGalleryType =
+  | 'EventGalleryKenBurns'
+  | 'EventGallerySpotlight'
+  | 'EventGalleryMosaic'
+  | 'EventGalleryMasonry'
+  | 'EventGalleryPolaroid'
+  | 'EventGalleryFilmstrip'
+  | 'EventGalleryFadeShow'
+  | 'EventGallerySplitPair'
+  | 'EventGalleryHeroGrid'
   | 'EventGallerySingle'
   | 'EventGalleryRandom'
   | 'EventGallerySplitScreen'
