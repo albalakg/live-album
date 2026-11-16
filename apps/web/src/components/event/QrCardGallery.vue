@@ -1,90 +1,50 @@
 <template>
   <section class="qr-gallery">
-    <div class="qr-filters">
-      <div class="filter-row" data-filter="style">
-        <span class="filter-label" id="qr-filter-style-label">סגנון</span>
-        <div
-          class="chips-fade"
-          :class="{
-            'fade-start': styleFade.start,
-            'fade-end': styleFade.end,
-          }"
+    <div class="qr-filters" role="search">
+      <div class="qr-search">
+        <svg class="qr-search-ico" viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8" />
+          <path d="m13.5 13.5 3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <input
+          v-model="query"
+          type="search"
+          class="qr-search-input"
+          placeholder="חיפוש עיצוב…"
+          aria-label="חיפוש עיצוב"
+          enterkeyhint="search"
+          autocomplete="off"
+          @keydown.esc="query = ''"
+        />
+        <button
+          v-if="query"
+          type="button"
+          class="qr-search-clear"
+          aria-label="ניקוי חיפוש"
+          @click="query = ''"
         >
-          <div
-            ref="styleScroll"
-            class="chips-scroll"
-            role="radiogroup"
-            aria-labelledby="qr-filter-style-label"
-            @scroll="onStyleScroll"
-            @keydown="onChipKeydown($event, 'style')"
-          >
-            <button
-              type="button"
-              class="chip"
-              role="radio"
-              :aria-checked="style === 'all'"
-              :class="{ on: style === 'all' }"
-              @click="style = 'all'"
-            >
-              הכל
-            </button>
-            <button
-              v-for="item in styles"
-              :key="item.id"
-              type="button"
-              class="chip"
-              role="radio"
-              :aria-checked="style === item.id"
-              :class="{ on: style === item.id }"
-              @click="style = item.id"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-        </div>
+          ×
+        </button>
       </div>
-
-      <div class="filter-row" data-filter="event">
-        <span class="filter-label" id="qr-filter-event-label">סוג אירוע</span>
-        <div
-          class="chips-fade"
-          :class="{
-            'fade-start': eventFade.start,
-            'fade-end': eventFade.end,
-          }"
-        >
-          <div
-            ref="eventScroll"
-            class="chips-scroll"
-            role="radiogroup"
-            aria-labelledby="qr-filter-event-label"
-            @scroll="onEventScroll"
-            @keydown="onChipKeydown($event, 'event')"
-          >
-            <button
-              type="button"
-              class="chip"
-              role="radio"
-              :aria-checked="eventType === 'all'"
-              :class="{ on: eventType === 'all' }"
-              @click="eventType = 'all'"
-            >
-              הכל
-            </button>
-            <button
-              v-for="item in eventTypes"
-              :key="item.id"
-              type="button"
-              class="chip"
-              role="radio"
-              :aria-checked="eventType === item.id"
-              :class="{ on: eventType === item.id }"
-              @click="eventType = item.id"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-        </div>
+      <div class="qr-filter-menus">
+        <QrFilterMultiSelect
+          v-model="eventTypesSel"
+          label="סוג אירוע"
+          :options="eventTypes"
+          data-filter="event"
+        />
+        <QrFilterMultiSelect
+          v-model="stylesSel"
+          label="סגנון"
+          :options="styles"
+          data-filter="style"
+        />
+      </div>
+      <div class="qr-filter-meta">
+        <span class="qr-result-count" aria-live="polite">{{ resultLabel }}</span>
+        <button v-if="hasFilters" type="button" class="qr-clear-all" @click="clearFilters">
+          ניקוי סינון
+        </button>
       </div>
     </div>
 
@@ -134,9 +94,10 @@
         <p>{{ styleLabel(card) }}</p>
       </button>
     </div>
-    <div v-if="cards.length === 0" class="empty">
-      <h3>אין כרטיס בסנן הזה</h3>
-      <p>נסו סגנון אחר או «הכל».</p>
+    <div v-if="cards.length === 0" class="empty qr-empty">
+      <h3>לא נמצאו עיצובים</h3>
+      <p>נסו מילה אחרת או פחות מסננים.</p>
+      <button type="button" class="qr-empty-clear" @click="clearFilters">ניקוי סינון</button>
     </div>
   </section>
 </template>
@@ -145,37 +106,23 @@
 import { defineComponent } from "vue";
 import QrCardFrame from "@/components/event/QrCardFrame.vue";
 import QrCardBackdrop from "@/components/event/qrDesigns/QrCardBackdrop.vue";
+import QrFilterMultiSelect from "@/components/event/QrFilterMultiSelect.vue";
 import {
-  filterQrCards,
+  QR_CARD_CATALOG,
   QR_EVENT_TYPES,
   QR_STYLE_FILTERS,
   categoryLabel,
   type QrCardDesign,
 } from "@/helpers/qrCardCatalog";
+import { filterQrCardsBy } from "@/helpers/qrCardSearch";
 import {
   findV2DesignByFile,
   type QrV2Design,
 } from "@/helpers/qrCardDesignsV2";
 
-type FadeState = { start: boolean; end: boolean };
-
-function measureFade(el: HTMLElement | undefined | null): FadeState {
-  if (!el) return { start: false, end: false };
-  const max = el.scrollWidth - el.clientWidth;
-  if (max <= 2) return { start: false, end: false };
-  const sl = el.scrollLeft;
-  // Chromium RTL often uses negative scrollLeft; others keep 0…max.
-  const fromStart = sl < 0 ? -sl : sl;
-  const fromEnd = max - fromStart;
-  return {
-    start: fromStart > 2,
-    end: fromEnd > 2,
-  };
-}
-
 export default defineComponent({
   name: "QrCardGallery",
-  components: { QrCardFrame, QrCardBackdrop },
+  components: { QrCardFrame, QrCardBackdrop, QrFilterMultiSelect },
   props: {
     selectable: { type: Boolean, default: false },
     selected: { type: String, default: "" },
@@ -184,42 +131,30 @@ export default defineComponent({
   emits: ["select"],
   data() {
     return {
-      eventType: "all",
-      style: "all",
+      query: "",
+      eventTypesSel: [] as string[],
+      stylesSel: [] as string[],
       eventTypes: QR_EVENT_TYPES,
       styles: QR_STYLE_FILTERS,
-      styleFade: { start: false, end: false } as FadeState,
-      eventFade: { start: false, end: false } as FadeState,
-      resizeObserver: null as ResizeObserver | null,
     };
   },
   computed: {
     cards(): QrCardDesign[] {
-      return filterQrCards(this.style, this.eventType);
+      return filterQrCardsBy({
+        query: this.query,
+        styles: this.stylesSel,
+        eventTypes: this.eventTypesSel,
+      });
     },
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.refreshFades();
-      if (typeof ResizeObserver !== "undefined") {
-        this.resizeObserver = new ResizeObserver(() => this.refreshFades());
-        const styleEl = this.$refs.styleScroll as HTMLElement | undefined;
-        const eventEl = this.$refs.eventScroll as HTMLElement | undefined;
-        if (styleEl) {
-          this.resizeObserver.observe(styleEl);
-          if (styleEl.parentElement) this.resizeObserver.observe(styleEl.parentElement);
-        }
-        if (eventEl) {
-          this.resizeObserver.observe(eventEl);
-          if (eventEl.parentElement) this.resizeObserver.observe(eventEl.parentElement);
-        }
-      }
-    });
-    window.addEventListener("resize", this.refreshFades);
-  },
-  beforeUnmount() {
-    this.resizeObserver?.disconnect();
-    window.removeEventListener("resize", this.refreshFades);
+    hasFilters(): boolean {
+      return Boolean(this.query.trim() || this.stylesSel.length || this.eventTypesSel.length);
+    },
+    resultLabel(): string {
+      const n = this.cards.length;
+      if (!this.hasFilters) return `${n} עיצובים`;
+      if (n === 1) return `עיצוב אחד מתוך ${QR_CARD_CATALOG.length}`;
+      return `${n} מתוך ${QR_CARD_CATALOG.length} עיצובים`;
+    },
   },
   methods: {
     v2ByFile(file: string): QrV2Design | undefined {
@@ -232,39 +167,10 @@ export default defineComponent({
     choose(file: string) {
       if (this.selectable) this.$emit("select", file);
     },
-    onStyleScroll() {
-      this.styleFade = measureFade(this.$refs.styleScroll as HTMLElement);
-    },
-    onEventScroll() {
-      this.eventFade = measureFade(this.$refs.eventScroll as HTMLElement);
-    },
-    refreshFades() {
-      this.styleFade = measureFade(this.$refs.styleScroll as HTMLElement);
-      this.eventFade = measureFade(this.$refs.eventScroll as HTMLElement);
-    },
-    onChipKeydown(event: KeyboardEvent, row: "style" | "event") {
-      const key = event.key;
-      if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") {
-        return;
-      }
-      const root =
-        row === "style"
-          ? (this.$refs.styleScroll as HTMLElement)
-          : (this.$refs.eventScroll as HTMLElement);
-      if (!root) return;
-      const chips = Array.from(root.querySelectorAll<HTMLButtonElement>(".chip"));
-      if (!chips.length) return;
-      const current = chips.indexOf(document.activeElement as HTMLButtonElement);
-      let next = current;
-      const rtl = getComputedStyle(root).direction === "rtl";
-      if (key === "Home") next = 0;
-      else if (key === "End") next = chips.length - 1;
-      else if (key === "ArrowRight") next = current + (rtl ? -1 : 1);
-      else if (key === "ArrowLeft") next = current + (rtl ? 1 : -1);
-      next = Math.max(0, Math.min(chips.length - 1, next));
-      event.preventDefault();
-      chips[next].focus();
-      chips[next].click();
+    clearFilters() {
+      this.query = "";
+      this.stylesSel = [];
+      this.eventTypesSel = [];
     },
   },
 });
@@ -279,163 +185,107 @@ export default defineComponent({
 
 .qr-filters {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   margin-bottom: 14px;
   min-width: 0;
   max-width: 100%;
 }
 
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  max-width: 100%;
-  width: 100%;
-}
-
-.filter-label {
-  flex: 0 0 auto;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #8a8178;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-}
-
-.chips-fade {
+.qr-search {
   position: relative;
-  flex: 1 1 auto;
+  flex: 1 1 260px;
   min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
+  max-width: 420px;
 }
 
-.chips-fade::before,
-.chips-fade::after {
-  content: "";
+.qr-search-ico {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 48px;
+  inset-inline-start: 13px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  color: #8a8178;
   pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.15s ease;
 }
 
-/* Start edge (right in RTL): opaque at the edge, clear toward center */
-.chips-fade::before {
-  inset-inline-start: 0;
-  background: linear-gradient(
-    to left,
-    var(--qr-filter-fade, #f6f1ea) 55%,
-    transparent
-  );
-}
-
-/* End edge (left in RTL) */
-.chips-fade::after {
-  inset-inline-end: 0;
-  background: linear-gradient(
-    to right,
-    var(--qr-filter-fade, #f6f1ea) 55%,
-    transparent
-  );
-}
-
-:global(html:not([dir="rtl"])) .chips-fade::before {
-  background: linear-gradient(
-    to right,
-    var(--qr-filter-fade, #f6f1ea) 40%,
-    transparent
-  );
-}
-
-:global(html:not([dir="rtl"])) .chips-fade::after {
-  background: linear-gradient(
-    to left,
-    var(--qr-filter-fade, #f6f1ea) 40%,
-    transparent
-  );
-}
-
-.chips-fade.fade-start::before {
-  opacity: 1;
-}
-
-.chips-fade.fade-end::after {
-  opacity: 1;
-}
-
-.chips-scroll {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 6px;
+.qr-search-input {
   width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-block: 2px;
-}
-
-.chips-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.chip {
-  appearance: none;
-  flex: 0 0 auto;
-  min-height: 44px;
-  height: 44px;
+  height: 40px;
   box-sizing: border-box;
-  border: 1.5px solid rgba(22, 19, 16, 0.16);
-  background: rgba(255, 255, 255, 0.55);
-  color: #161310;
-  font-family: inherit;
+  padding: 0 38px 0 34px;
+  padding-inline-start: 38px;
+  padding-inline-end: 34px;
+  border: 1px solid #e4dbcf;
+  border-radius: 999px;
+  background: #fff;
+  color: #12100e;
+  font: inherit;
+  font-size: 0.92rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.qr-search-input::-webkit-search-cancel-button { display: none; }
+.qr-search-input::placeholder { color: #9a9187; }
+.qr-search-input:focus { outline: none; border-color: #c9a36a; box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.22); }
+
+.qr-search-clear {
+  position: absolute;
+  inset-inline-end: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1ebe3;
+  color: #5e564e;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.qr-filter-menus {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.qr-filter-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline-start: auto;
+  flex: none;
+}
+
+.qr-result-count {
   font-size: 0.82rem;
   font-weight: 700;
-  line-height: 1;
-  border-radius: 999px;
-  padding: 0 14px;
-  cursor: pointer;
+  color: #8a8178;
   white-space: nowrap;
 }
 
-/*
- * Wide desktop: wrap only the shorter event-type row.
- * Style/category chips stay a single scroll row (many categories in v2).
- */
-@media (min-width: 1200px) {
-  .qr-filters {
-    max-height: none;
-  }
-
-  .filter-row[data-filter="event"] .chips-scroll {
-    flex-wrap: wrap;
-    overflow-x: visible;
-    row-gap: 6px;
-  }
-
-  .filter-row[data-filter="event"] .chips-fade::before,
-  .filter-row[data-filter="event"] .chips-fade::after {
-    display: none;
-  }
+.qr-clear-all {
+  border: 0;
+  background: none;
+  color: #a06a2c;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 2px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.chip:focus-visible {
-  outline: 2px solid #c9a36a;
-  outline-offset: 2px;
-}
-
-.chip.on {
-  background: #12100e;
-  color: #fff;
-  border-color: #12100e;
+@media (max-width: 767.98px) {
+  .qr-search { flex: 1 1 100%; max-width: none; }
+  .qr-filter-menus { flex: 1 1 auto; }
+  .qr-filter-meta { margin-inline-start: auto; }
 }
 
 .qr-grid {
@@ -499,6 +349,19 @@ export default defineComponent({
   margin: 2px;
   color: #5e564e;
   font-size: 0.82rem;
+}
+
+.qr-empty-clear {
+  margin-top: 12px;
+  height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #12100e;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .empty {
