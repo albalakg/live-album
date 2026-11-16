@@ -87,6 +87,19 @@
             />
           </label>
 
+          <label v-if="needsTable" class="table-pick">
+            איזה שולחן?
+            <input
+              v-model.trim="table"
+              type="text"
+              maxlength="40"
+              required
+              placeholder="למשל: 7 או שולחן המשפחה"
+              autocomplete="off"
+            />
+            <span class="table-hint">כך נחבר את הניקוד שלך לשולחן שלך</span>
+          </label>
+
           <div v-if="needsTeam" class="team-pick">
             <p class="team-lab">בחרו צד</p>
             <div class="team-row">
@@ -112,7 +125,12 @@
           <button
             class="g-go"
             type="submit"
-            :disabled="submitting || nickname.trim().length < 2 || (needsTeam && !team)"
+            :disabled="
+              submitting ||
+              nickname.trim().length < 2 ||
+              (needsTeam && !team) ||
+              (needsTable && !table)
+            "
           >
             יאללה, מתחילים
           </button>
@@ -122,6 +140,7 @@
       <!-- question -->
       <TriviaGuestQuestion
         v-else-if="view === 'question' && question"
+        ref="guestQ"
         :question="question"
         :selected-ids="selectedIds"
         :number-value="numberValue"
@@ -132,6 +151,8 @@
         @update:number-value="numberValue = $event"
         @submit="submitOptions"
         @submit-number="submitNumber"
+        @submit-text="submitText"
+        @submit-json="submitJson"
       />
 
       <!-- feedback -->
@@ -150,6 +171,7 @@
           <template v-else-if="feedback.is_correct">+{{ feedback.points_awarded ?? 0 }}</template>
           <template v-else>0</template>
         </div>
+        <p v-if="feedbackCorrectText" class="correct-text">התשובה: {{ feedbackCorrectText }}</p>
         <p class="score">הניקוד שלך: {{ formatScore(feedback.score) }}</p>
       </section>
 
@@ -180,9 +202,12 @@ import { defineComponent } from "vue";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@/helpers/notify";
 import {
+  TriviaGuestDraft,
   TriviaPace,
   TriviaQuestionDto,
+  formatTriviaDate,
   isUnscoredType,
+  normalizeTriviaTheme,
 } from "@/helpers/triviaTypes";
 import TriviaGuestQuestion from "@/components/event/trivia/TriviaGuestQuestion.vue";
 
@@ -204,9 +229,20 @@ interface TriviaResult {
   total_questions: number;
 }
 
+interface TriviaAnswerBody {
+  question_id: number;
+  option_ids: number[];
+  value_number?: number;
+  value_text?: string;
+  value_json?: Record<string, unknown>;
+}
+
 interface TriviaFeedback extends Partial<TriviaResult> {
   is_correct: boolean | null;
   points_awarded: number | null;
+  correct_text?: string | null;
+  correct_date?: number | string | null;
+  correct_number?: number | null;
   finished?: boolean;
   waiting_for_reveal?: boolean;
   score: number;
@@ -215,6 +251,18 @@ interface TriviaFeedback extends Partial<TriviaResult> {
 interface PlayQuestion extends TriviaQuestionDto {
   id: number;
 }
+
+/** Types where an empty answer is rejected by the server. */
+const NEEDS_VALUE_TYPES = new Set([
+  "cloud",
+  "finish",
+  "fillblank",
+  "rate",
+  "date",
+  "map",
+  "match",
+  "order",
+]);
 
 const POLL_MS = 1000;
 const FEEDBACK_MS = 1300;
@@ -235,17 +283,14 @@ export default defineComponent({
       image: null as File | null,
       previewUrl: "" as string,
       team: "" as "" | "a" | "b",
+      table: "",
       teamsMode: "none" as string,
       teamLabels: { a: "צד עמית", b: "צד גל" },
       serverSkew: 0,
       question: null as PlayQuestion | null,
       selectedIds: [] as number[],
       numberValue: 0,
-      lastSubmit: null as {
-        question_id: number;
-        option_ids: number[];
-        value_number?: number;
-      } | null,
+      lastSubmit: null as TriviaAnswerBody | null,
       feedbackShownFor: null as number | null,
       feedback: null as TriviaFeedback | null,
       result: null as TriviaResult | null,
@@ -274,6 +319,19 @@ export default defineComponent({
 
     needsTeam(): boolean {
       return this.teamsMode === "sides";
+    },
+
+    needsTable(): boolean {
+      return this.teamsMode === "tables";
+    },
+
+    feedbackCorrectText(): string {
+      const f = this.feedback;
+      if (!f || f.is_correct !== false) return "";
+      if (f.correct_text) return String(f.correct_text);
+      if (f.correct_date != null) return formatTriviaDate(f.correct_date);
+      if (f.correct_number != null) return String(f.correct_number);
+      return "";
     },
 
     nicknameInitial(): string {
@@ -351,7 +409,7 @@ export default defineComponent({
         const res = await axios.get(`events/${this.eventPath}/trivia/screen`);
         const screen = res.data.data;
         this.title = screen.title || "טריוויה";
-        this.theme = screen.theme === "neon" ? "neon" : "elegant";
+        this.theme = normalizeTriviaTheme(screen.theme);
         if (screen.pace) this.pace = screen.pace;
 
         if (screen.teams?.mode === "sides") {
@@ -360,6 +418,8 @@ export default defineComponent({
             a: screen.teams.labels?.a || "צד עמית",
             b: screen.teams.labels?.b || "צד גל",
           };
+        } else if (screen.teams?.mode === "tables") {
+          this.teamsMode = "tables";
         } else if (initial) {
           this.teamsMode = "none";
         }
@@ -475,12 +535,16 @@ export default defineComponent({
     async join() {
       if (this.nickname.trim().length < 2) return;
       if (this.needsTeam && !this.team) return;
+      if (this.needsTable && !this.table.trim()) return;
       this.submitting = true;
       try {
         const form = new FormData();
         form.append("nickname", this.nickname.trim());
         if (this.image) form.append("image", this.image);
         if (this.needsTeam && this.team) form.append("team", this.team);
+        if (this.needsTable && this.table.trim()) {
+          form.append("team", this.table.trim().replace(/\s+/g, " ").slice(0, 40));
+        }
 
         const res = await axios.post(`events/${this.eventPath}/trivia/join`, form);
         const data = res.data.data;
@@ -636,6 +700,21 @@ export default defineComponent({
         this.submitNumber(this.numberValue);
         return;
       }
+      const draft = (
+        this.$refs.guestQ as { collectDraft?: () => TriviaGuestDraft | null } | undefined
+      )?.collectDraft?.();
+      if (draft) {
+        this.submitAnswer(draft);
+        return;
+      }
+      if (NEEDS_VALUE_TYPES.has(this.question.type)) {
+        // Nothing entered and the server rejects empty answers: just wait.
+        if (this.isSharedPace) {
+          this.view = "looking";
+          this.loadQuestion({ silent: true });
+        }
+        return;
+      }
       this.submitOptions([...this.selectedIds]);
     },
 
@@ -647,21 +726,36 @@ export default defineComponent({
       this.submitAnswer({ option_ids: [], value_number: value });
     },
 
-    async submitAnswer(payload: { option_ids: number[]; value_number?: number }) {
+    submitText(text: string) {
+      this.submitAnswer({ option_ids: [], value_text: text });
+    },
+
+    submitJson(value: Record<string, unknown>) {
+      this.submitAnswer({ option_ids: [], value_json: value });
+    },
+
+    async submitAnswer(payload: {
+      option_ids: number[];
+      value_number?: number;
+      value_text?: string;
+      value_json?: Record<string, unknown>;
+    }) {
       if (!this.question || this.submitting || this.view !== "question") return;
       this.submitting = true;
       this.stopClock();
       const questionId = this.question.id;
-      const body: {
-        question_id: number;
-        option_ids: number[];
-        value_number?: number;
-      } = {
+      const body: TriviaAnswerBody = {
         question_id: questionId,
         option_ids: payload.option_ids,
       };
       if (payload.value_number !== undefined) {
         body.value_number = payload.value_number;
+      }
+      if (payload.value_text !== undefined) {
+        body.value_text = payload.value_text;
+      }
+      if (payload.value_json !== undefined) {
+        body.value_json = payload.value_json;
       }
 
       try {
@@ -815,6 +909,103 @@ export default defineComponent({
     radial-gradient(circle at 20% 0%, rgba(255, 46, 139, 0.22), transparent 42%),
     radial-gradient(circle at 100% 20%, rgba(61, 240, 255, 0.14), transparent 40%),
     var(--g-bg);
+}
+
+/* Guest palettes for the other stage themes (kept readable on phones). */
+.trivia-play[data-theme="cinema"] {
+  --g-ink: #f6efe4;
+  --g-muted: #cbbfae;
+  --g-faint: #9a8d7a;
+  --g-rose: #c9a36a;
+  --g-gold: #e3c488;
+  --g-paper: #241c15;
+  --g-line: rgba(201, 163, 106, 0.4);
+  --g-ans-on: rgba(201, 163, 106, 0.18);
+  --g-timer-track: #2c231a;
+  --g-bg: #14100c;
+  background: radial-gradient(circle at 50% 0%, rgba(201, 163, 106, 0.18), transparent 50%), var(--g-bg);
+}
+
+.trivia-play[data-theme="arcade"] {
+  --g-ink: #e9fbf6;
+  --g-muted: #9fd0c6;
+  --g-faint: #6fa59a;
+  --g-rose: #2ec4b6;
+  --g-gold: #d4b15a;
+  --g-paper: #10302b;
+  --g-line: rgba(46, 196, 182, 0.45);
+  --g-ans-on: rgba(46, 196, 182, 0.2);
+  --g-timer-track: #123a34;
+  --g-bg: #0a1816;
+  background: radial-gradient(circle at 20% 0%, rgba(46, 196, 182, 0.2), transparent 45%), var(--g-bg);
+}
+
+.trivia-play[data-theme="playful"] {
+  --g-ink: #2b1a1d;
+  --g-muted: #6b4b50;
+  --g-faint: #9a7b80;
+  --g-rose: #e8566a;
+  --g-gold: #6fae5a;
+  --g-paper: #fffaf5;
+  --g-line: rgba(232, 86, 106, 0.3);
+  --g-ans-on: #ffe9ec;
+  --g-timer-track: #f9dfe2;
+  --g-bg: #ffeef0;
+}
+
+.trivia-play[data-theme="festival"] {
+  --g-ink: #fff4ea;
+  --g-muted: #f1cfae;
+  --g-faint: #c99d78;
+  --g-rose: #ff8a2b;
+  --g-gold: #a77bff;
+  --g-paper: #4a1f12;
+  --g-line: rgba(255, 138, 43, 0.45);
+  --g-ans-on: rgba(255, 138, 43, 0.22);
+  --g-timer-track: #5a2a1a;
+  --g-bg: #2c1020;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(138, 77, 255, 0.35), transparent 45%),
+    radial-gradient(circle at 10% 100%, rgba(255, 138, 43, 0.3), transparent 45%),
+    var(--g-bg);
+}
+
+.trivia-play[data-theme="corporate"] {
+  --g-ink: #eef2f7;
+  --g-muted: #aab6c6;
+  --g-faint: #7f8da1;
+  --g-rose: #6e8ba8;
+  --g-gold: #9db4cc;
+  --g-paper: #1b222c;
+  --g-line: rgba(110, 139, 168, 0.4);
+  --g-ans-on: rgba(110, 139, 168, 0.2);
+  --g-timer-track: #232c38;
+  --g-bg: #10141a;
+}
+
+.trivia-play[data-theme="cinema"] .selfie,
+.trivia-play[data-theme="arcade"] .selfie,
+.trivia-play[data-theme="festival"] .selfie,
+.trivia-play[data-theme="corporate"] .selfie {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.table-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.table-hint {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--g-muted);
+}
+
+.g-feed .correct-text {
+  margin-top: 10px;
+  font-weight: 800;
+  color: var(--g-ink);
 }
 
 .guest {

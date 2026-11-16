@@ -7,13 +7,30 @@
       </div>
     </div>
 
-    <h1>{{ question.prompt }}</h1>
+    <h1 :class="{ 'emoji-prompt': questionType === 'emoji' }">{{ question.prompt }}</h1>
 
     <p v-if="hintText" class="hint">{{ hintText }}</p>
 
-    <!-- photo thumbnail -->
-    <div v-if="questionType === 'photo' && photoUrl" class="g-photo-thumb">
-      <img :src="photoUrl" alt="" />
+    <!-- media: photo / blur / spotdiff / video / audio -->
+    <div v-if="showMedia" class="g-media" :class="`kind-${mediaKind}`">
+      <div v-if="mediaKind === 'image'" class="g-photo-thumb" :class="{ 'is-blur': isBlur }">
+        <img :src="mediaUrl" alt="" :style="blurStyle" />
+      </div>
+      <video
+        v-else-if="mediaKind === 'video'"
+        class="g-video"
+        :src="mediaUrl"
+        controls
+        playsinline
+        preload="metadata"
+      ></video>
+      <audio
+        v-else
+        class="g-audio"
+        :src="mediaUrl"
+        controls
+        preload="metadata"
+      ></audio>
     </div>
 
     <!-- who / whosaid -->
@@ -31,10 +48,10 @@
       </button>
     </div>
 
-    <!-- thisorthat -->
-    <div v-else-if="questionType === 'thisorthat'" class="g-tot">
+    <!-- thisorthat / tugofwar -->
+    <div v-else-if="isTwoCardVote" class="g-tot">
       <button
-        v-for="card in sideCards"
+        v-for="(card, i) in sideCards"
         :key="card.id"
         type="button"
         :class="{ on: selectedIds.includes(card.id) }"
@@ -83,9 +100,107 @@
       <button class="g-go" type="button" :disabled="disabled" @click="emitNumber">שליחה</button>
     </div>
 
-    <!-- choice / multi / truefalse / poll / photo -->
+    <!-- rate: 1..10 slider -->
+    <div v-else-if="questionType === 'rate'" class="g-slider g-rate">
+      <div class="val">{{ rateValue }}</div>
+      <input
+        type="range"
+        :min="rateMin"
+        :max="rateMax"
+        step="1"
+        :value="rateValue"
+        :disabled="disabled"
+        @input="onRateInput"
+      />
+      <div class="bounds">
+        <span>{{ rateMin }}</span>
+        <span>{{ rateMax }}</span>
+      </div>
+      <button class="g-go" type="button" :disabled="disabled" @click="emitRate">שליחה</button>
+    </div>
+
+    <!-- date -->
+    <form v-else-if="questionType === 'date'" class="g-date" @submit.prevent="emitDate">
+      <input
+        v-model="dateIso"
+        type="date"
+        class="g-input"
+        :min="dateMin"
+        :max="dateMax"
+        :disabled="disabled"
+        required
+      />
+      <button class="g-go" type="submit" :disabled="disabled || !dateNumber">שליחה</button>
+    </form>
+
+    <!-- cloud / finish -->
+    <form v-else-if="isTextType" class="g-text" @submit.prevent="emitText">
+      <p v-if="finishPrefix" class="finish-prefix">{{ finishPrefix }}</p>
+      <input
+        v-model.trim="textValue"
+        type="text"
+        class="g-input"
+        maxlength="80"
+        :placeholder="questionType === 'cloud' ? 'מילה או שתיים' : 'מה בא לכם להשלים?'"
+        :disabled="disabled"
+        autocomplete="off"
+        enterkeyhint="send"
+      />
+      <button class="g-go" type="submit" :disabled="disabled || !textValue">שליחה</button>
+    </form>
+
+    <!-- fillblank: letter tiles -->
+    <div v-else-if="questionType === 'fillblank'" class="g-fill">
+      <TriviaFillBlankTiles
+        v-model="fillValue"
+        :letters="fillLetters"
+        :disabled="disabled"
+      />
+      <button class="g-go" type="button" :disabled="disabled || !fillValue" @click="emitFill">שליחה</button>
+    </div>
+
+    <!-- map: tap to drop a pin -->
+    <div v-else-if="questionType === 'map'" class="g-map">
+      <TriviaMapPin v-model="mapPoint" :disabled="disabled" />
+      <button class="g-go" type="button" :disabled="disabled || !mapPoint" @click="emitMap">
+        שליחת הנעץ
+      </button>
+    </div>
+
+    <!-- order: tap to order -->
+    <div v-else-if="questionType === 'order'" class="g-order">
+      <TriviaOrderList v-model="orderIds" :items="options" :disabled="disabled" />
+      <button
+        class="g-go"
+        type="button"
+        :disabled="disabled || orderIds.length !== options.length"
+        @click="emitOrder"
+      >
+        שליחה
+      </button>
+    </div>
+
+    <!-- match: pair left to right -->
+    <div v-else-if="questionType === 'match'" class="g-match">
+      <TriviaMatchPairs
+        v-model="matchPairs"
+        :left="options"
+        :right="rightItems"
+        :disabled="disabled"
+      />
+      <button
+        class="g-go"
+        type="button"
+        :disabled="disabled || matchPairs.length !== options.length"
+        @click="emitMatch"
+      >
+        שליחה
+      </button>
+    </div>
+
+    <!-- choice / multi / truefalse / poll / photo / blur / spotdiff / video / audio / emoji / buzzer -->
     <template v-else>
-      <div class="g-answers" :class="{ tf: options.length <= 2 }">
+      <div class="g-answers" :class="{ tf: options.length <= 2, buzzer: questionType === 'buzzer' }">
         <button
           v-for="(opt, i) in options"
           :key="opt.id"
@@ -114,16 +229,32 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import TriviaFillBlankTiles from "@/components/event/trivia/TriviaFillBlankTiles.vue";
+import TriviaMapPin from "@/components/event/trivia/TriviaMapPin.vue";
+import TriviaMatchPairs from "@/components/event/trivia/TriviaMatchPairs.vue";
+import TriviaOrderList from "@/components/event/trivia/TriviaOrderList.vue";
 import {
   TRIVIA_LETTERS,
   TRIVIA_LETTER_COLORS,
+  TriviaGuestDraft,
   TriviaQuestionDto,
+  dateToIso,
+  isMediaType,
+  isoToDateNumber,
 } from "@/helpers/triviaTypes";
 
 const SIDE_COLORS = ["#1F6F6A", "#DC5B66", "#6E4A8A", "#C9A36A"];
+const MAX_BLUR_PX = 28;
 
 export default defineComponent({
   name: "TriviaGuestQuestion",
+
+  components: {
+    TriviaFillBlankTiles,
+    TriviaMapPin,
+    TriviaMatchPairs,
+    TriviaOrderList,
+  },
 
   props: {
     question: {
@@ -152,21 +283,59 @@ export default defineComponent({
     },
   },
 
-  emits: ["update:selectedIds", "update:numberValue", "submit", "submit-number"],
+  emits: [
+    "update:selectedIds",
+    "update:numberValue",
+    "submit",
+    "submit-number",
+    "submit-text",
+    "submit-json",
+  ],
+
+  data() {
+    return {
+      textValue: "",
+      fillValue: "",
+      dateIso: "",
+      rateValue: 5,
+      rateTouched: false,
+      orderIds: [] as number[],
+      mapPoint: null as { x: number; y: number } | null,
+      matchPairs: [] as { left_id: number; right_id: number }[],
+    };
+  },
 
   computed: {
     questionType(): string {
       return this.question.type || "choice";
     },
 
+    config(): Record<string, any> {
+      return (this.question.config || {}) as Record<string, any>;
+    },
+
     isWhoFamily(): boolean {
       return this.questionType === "who" || this.questionType === "whosaid";
     },
 
+    isTwoCardVote(): boolean {
+      return this.questionType === "thisorthat" || this.questionType === "tugofwar";
+    },
+
+    isTextType(): boolean {
+      return this.questionType === "cloud" || this.questionType === "finish";
+    },
+
     isMulti(): boolean {
       return (
-        this.questionType === "multi" || this.question.selection_mode === "multiple"
+        this.questionType === "multi" ||
+        this.questionType === "spotdiff" ||
+        this.question.selection_mode === "multiple"
       );
+    },
+
+    isBlur(): boolean {
+      return this.questionType === "blur";
     },
 
     options(): { id: number; label: string }[] {
@@ -176,44 +345,86 @@ export default defineComponent({
       );
     },
 
-    photoUrl(): string {
+    mediaUrl(): string {
       return this.question.media?.url || "";
     },
 
-    hintText(): string {
-      if (this.questionType === "multi" || this.question.selection_mode === "multiple") {
-        return "סמנו את כל התשובות הנכונות";
-      }
-      if (this.questionType === "twothruths") {
-        return "בחרו את המשפט שהוא השקר";
-      }
-      if (this.questionType === "poll" || this.questionType === "thisorthat") {
-        return "בלי תשובה נכונה — רק מה שהקהל בוחר";
-      }
-      if (this.questionType === "photo" && this.photoUrl) {
-        return "התמונה על המסך הגדול";
-      }
-      return "";
+    mediaKind(): "image" | "video" | "audio" {
+      const kind = String(this.question.media?.kind || "");
+      if (kind === "video" || kind === "audio" || kind === "image") return kind;
+      if (this.questionType === "video") return "video";
+      if (this.questionType === "audio") return "audio";
+      return "image";
     },
 
-    numberConfig(): { min?: number; max?: number; unit?: string } {
-      return (this.question.config || {}) as {
-        min?: number;
-        max?: number;
-        unit?: string;
-      };
+    showMedia(): boolean {
+      return isMediaType(this.questionType) && !!this.mediaUrl;
+    },
+
+    blurStyle(): Record<string, string> {
+      if (!this.isBlur) return {};
+      const p = Math.max(0, Math.min(1, this.timerProgress));
+      return { filter: `blur(${(p * MAX_BLUR_PX).toFixed(1)}px)` };
+    },
+
+    hintText(): string {
+      switch (this.questionType) {
+        case "multi":
+          return "סמנו את כל התשובות הנכונות";
+        case "spotdiff":
+          return "סמנו כמה הבדלים שמצאתם, ואז אישור";
+        case "twothruths":
+          return "בחרו את המשפט שהוא השקר";
+        case "poll":
+        case "thisorthat":
+          return "בלי תשובה נכונה — רק מה שהקהל בוחר";
+        case "tugofwar":
+          return "בלי תשובה נכונה — כל הקהל מושך בחבל";
+        case "photo":
+          return this.showMedia ? "התמונה על המסך הגדול" : "";
+        case "blur":
+          return "התמונה מתחדדת עם הזמן. ככל שעונים מוקדם יותר, מקבלים יותר נקודות";
+        case "video":
+          return "צפו בקטע ואז ענו";
+        case "audio":
+          return "האזינו לקטע ואז ענו";
+        case "buzzer":
+          return "הראשון שעונה נכון לוקח את כל הנקודות";
+        case "cloud":
+          return "בלי תשובה נכונה — המילים עולות למסך";
+        case "finish":
+          return "בלי תשובה נכונה — משלימים את המשפט";
+        case "rate":
+          return "בלי תשובה נכונה — מדרגים";
+        case "date":
+          return "בחרו תאריך. הקרוב ביותר מנצח";
+        case "map":
+          return "הניחו נעץ במקום שנראה לכם נכון. הקרוב ביותר מנצח";
+        case "order":
+          return "הקישו לפי הסדר, מהראשון ועד האחרון";
+        case "fillblank":
+          return "הרכיבו את המילה מהאותיות";
+        case "emoji":
+          return "מה מסתתר מאחורי האימוג׳י?";
+        default:
+          return this.isMulti ? "סמנו את כל התשובות הנכונות" : "";
+      }
+    },
+
+    finishPrefix(): string {
+      return this.questionType === "finish" ? String(this.config.prefix || "") : "";
     },
 
     numberMin(): number {
-      return Number(this.numberConfig.min ?? 0);
+      return Number(this.config.min ?? 0);
     },
 
     numberMax(): number {
-      return Number(this.numberConfig.max ?? 100);
+      return Number(this.config.max ?? 100);
     },
 
     numberUnit(): string {
-      return String(this.numberConfig.unit || "");
+      return String(this.config.unit || "");
     },
 
     numberStep(): number {
@@ -223,11 +434,42 @@ export default defineComponent({
       return 1;
     },
 
+    rateMin(): number {
+      return Number(this.config.min ?? 1);
+    },
+
+    rateMax(): number {
+      return Number(this.config.max ?? 10);
+    },
+
+    dateMin(): string | undefined {
+      return dateToIso(this.config.min) || undefined;
+    },
+
+    dateMax(): string | undefined {
+      return dateToIso(this.config.max) || undefined;
+    },
+
+    dateNumber(): number | null {
+      return isoToDateNumber(this.dateIso);
+    },
+
+    fillLetters(): string | string[] {
+      const letters = this.config.letters;
+      return Array.isArray(letters) ? (letters as string[]) : String(letters || "");
+    },
+
+    rightItems(): { id: number; label: string }[] {
+      const items = this.config.right_items;
+      if (!Array.isArray(items)) return [];
+      return items
+        .filter((r: any) => r && r.id != null)
+        .map((r: any) => ({ id: Number(r.id), label: String(r.label ?? "") }));
+    },
+
     sideCards() {
-      const config = (this.question.config || {}) as {
-        sides?: { name?: string; color?: string; initial?: string }[];
-      };
-      const sides = config.sides || [];
+      const sides =
+        (this.config.sides as { name?: string; color?: string; initial?: string }[]) || [];
       const options = this.options;
       const count = Math.min(2, Math.max(sides.length, options.length, 2));
       const cards: {
@@ -252,7 +494,27 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    "question.id": {
+      immediate: true,
+      handler() {
+        this.resetLocal();
+      },
+    },
+  },
+
   methods: {
+    resetLocal() {
+      this.textValue = "";
+      this.fillValue = "";
+      this.dateIso = "";
+      this.orderIds = [];
+      this.mapPoint = null;
+      this.matchPairs = [];
+      this.rateTouched = false;
+      this.rateValue = Math.round((this.rateMin + this.rateMax) / 2);
+    },
+
     letter(i: number): string {
       return TRIVIA_LETTERS[i] || String(i + 1);
     },
@@ -301,6 +563,87 @@ export default defineComponent({
     emitNumber() {
       if (this.disabled) return;
       this.$emit("submit-number", this.numberValue);
+    },
+
+    onRateInput(event: Event) {
+      this.rateTouched = true;
+      this.rateValue = Number((event.target as HTMLInputElement).value);
+    },
+
+    emitRate() {
+      if (this.disabled) return;
+      this.$emit("submit-number", this.rateValue);
+    },
+
+    emitDate() {
+      if (this.disabled || !this.dateNumber) return;
+      this.$emit("submit-number", this.dateNumber);
+    },
+
+    emitText() {
+      const text = this.textValue.trim();
+      if (this.disabled || !text) return;
+      this.$emit("submit-text", text);
+    },
+
+    emitFill() {
+      const text = this.fillValue.trim();
+      if (this.disabled || !text) return;
+      this.$emit("submit-text", text);
+    },
+
+    emitMap() {
+      if (this.disabled || !this.mapPoint) return;
+      this.$emit("submit-json", { x: this.mapPoint.x, y: this.mapPoint.y });
+    },
+
+    emitOrder() {
+      if (this.disabled || this.orderIds.length !== this.options.length) return;
+      this.$emit("submit", [...this.orderIds]);
+    },
+
+    emitMatch() {
+      if (this.disabled || this.matchPairs.length !== this.options.length) return;
+      this.$emit("submit-json", { matches: this.matchPairs.map((p) => ({ ...p })) });
+    },
+
+    /**
+     * What the player has entered so far, for auto-submit when time runs out.
+     * Returns null when there is nothing meaningful to send.
+     */
+    collectDraft(): TriviaGuestDraft | null {
+      switch (this.questionType) {
+        case "cloud":
+        case "finish": {
+          const text = this.textValue.trim();
+          return text ? { option_ids: [], value_text: text } : null;
+        }
+        case "fillblank": {
+          const text = this.fillValue.trim();
+          return text ? { option_ids: [], value_text: text } : null;
+        }
+        case "rate":
+          return this.rateTouched ? { option_ids: [], value_number: this.rateValue } : null;
+        case "date":
+          return this.dateNumber ? { option_ids: [], value_number: this.dateNumber } : null;
+        case "map":
+          return this.mapPoint
+            ? { option_ids: [], value_json: { x: this.mapPoint.x, y: this.mapPoint.y } }
+            : null;
+        case "order":
+          return this.orderIds.length === this.options.length
+            ? { option_ids: [...this.orderIds] }
+            : null;
+        case "match":
+          return this.matchPairs.length === this.options.length
+            ? {
+                option_ids: [],
+                value_json: { matches: this.matchPairs.map((p) => ({ ...p })) },
+              }
+            : null;
+        default:
+          return null;
+      }
     },
   },
 });
@@ -546,5 +889,109 @@ h1 {
 .g-go:disabled {
   opacity: 0.55;
   cursor: default;
+}
+
+/* ===== v4 types ===== */
+h1.emoji-prompt {
+  font-size: 2.6rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.g-media {
+  margin: 12px 0 4px;
+}
+
+.g-photo-thumb.is-blur {
+  position: relative;
+}
+
+.g-photo-thumb.is-blur img {
+  transform: scale(1.12);
+  transition: filter 0.25s linear;
+}
+
+.g-video {
+  width: 100%;
+  max-height: 320px;
+  border-radius: 18px;
+  background: #000;
+  display: block;
+}
+
+.g-audio {
+  width: 100%;
+  display: block;
+}
+
+.g-answers.buzzer .g-ans {
+  min-height: 72px;
+  font-size: 1.2rem;
+  border-width: 2.5px;
+  border-color: var(--g-rose, #dc5b66);
+  background: var(--g-paper, #fff);
+}
+
+.g-answers.buzzer .g-ans.on {
+  background: var(--g-rose, #dc5b66);
+  color: #fff;
+}
+
+.g-rate .val {
+  font-size: 4.4rem;
+}
+
+.g-date,
+.g-text,
+.g-fill,
+.g-map,
+.g-order,
+.g-match {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.g-date .g-go,
+.g-text .g-go,
+.g-fill .g-go,
+.g-map .g-go,
+.g-order .g-go,
+.g-match .g-go {
+  margin-top: 16px;
+}
+
+.g-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--g-line, rgba(22, 19, 16, 0.12));
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: var(--g-paper, #fff);
+  color: inherit;
+  font-family: inherit;
+}
+
+.g-input:focus {
+  outline: 3px solid rgba(201, 163, 106, 0.4);
+  border-color: var(--g-gold, #c9a36a);
+}
+
+.finish-prefix {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  color: var(--g-ink, #161310);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-photo-thumb.is-blur img {
+    transition: none;
+  }
 }
 </style>

@@ -5,8 +5,13 @@ import {
   TriviaQuestionDto,
   defaultConfigForType,
   defaultOptionsForType,
+  isClosestType,
+  isFreeTextType,
+  isMediaType,
+  isRateType,
   isTwoCardType,
   isUnscoredType,
+  TRIVIA_THEMES,
 } from "@/helpers/triviaTypes";
 
 export { TRIVIA_QUESTION_CAP };
@@ -29,7 +34,7 @@ export interface TriviaBuilderQuestion {
   fun_fact: string;
   host_hint: string;
   media_asset_id: number | null;
-  media: { id: number; url: string } | null;
+  media: { id: number; url: string | null; kind?: string } | null;
   config: Record<string, unknown> | null;
   time_limit_seconds: number;
   max_points: number;
@@ -140,9 +145,13 @@ export function gameFromApi(data: any): TriviaBuilderGame {
     phase: data.phase || "photos",
     current_phase: data.current_phase || "lobby",
     title: data.title || "טריוויה",
-    theme: data.theme === "neon" ? "neon" : "elegant",
+    theme: TRIVIA_THEMES.some((t) => t.id === data.theme)
+      ? String(data.theme)
+      : "elegant",
     pace: data.pace || "host",
-    teams_mode: data.teams_mode || "none",
+    teams_mode: ["sides", "tables"].includes(data.teams_mode)
+      ? data.teams_mode
+      : "none",
     team_labels: {
       a: data.team_labels?.a || "צד עמית",
       b: data.team_labels?.b || "צד גל",
@@ -175,10 +184,10 @@ export function questionPayload(q: TriviaBuilderQuestion) {
     time_limit_seconds: q.time_limit_seconds,
     max_points: unscored ? 0 : q.max_points,
     fun_fact: q.fun_fact.trim() || null,
-    media_asset_id: q.type === "photo" ? q.media_asset_id : null,
+    media_asset_id: isMediaType(q.type) ? q.media_asset_id : null,
     config: Object.keys(config).length ? config : null,
   };
-  if (q.type === "number") {
+  if (isClosestType(q.type) || isFreeTextType(q.type) || isRateType(q.type)) {
     payload.options = [];
   } else {
     payload.options = q.options.map((o) => ({
@@ -188,6 +197,19 @@ export function questionPayload(q: TriviaBuilderQuestion) {
   }
   return payload;
 }
+
+const CHOICE_LIKE_TYPES = new Set([
+  "choice",
+  "multi",
+  "poll",
+  "buzzer",
+  "emoji",
+  "photo",
+  "blur",
+  "spotdiff",
+  "video",
+  "audio",
+]);
 
 export function applyTypeChange(
   q: TriviaBuilderQuestion,
@@ -199,44 +221,39 @@ export function applyTypeChange(
   const keepTime = q.time_limit_seconds;
   const blank = blankBuilderQuestion(nextType, {
     time: keepTime,
-    points: q.max_points,
+    points: q.max_points > 0 ? q.max_points : undefined,
   });
   blank.key = q.key;
   blank.id = q.id;
   blank.prompt = keepPrompt;
   blank.fun_fact = keepFun;
   blank.host_hint = keepHint;
+  if (isUnscoredType(nextType)) blank.max_points = 0;
   if (isTwoCardType(nextType) && isTwoCardType(q.type) && q.options.length >= 2) {
-    blank.options = q.options.slice(0, 2).map((o, i) => ({
+    const unscoredNext = isUnscoredType(nextType);
+    blank.options = q.options.slice(0, 2).map((o) => ({
       ...o,
       key: o.key || nextBuilderKey("o"),
-      is_correct: nextType === "thisorthat" ? false : i === 0 ? o.is_correct : o.is_correct,
+      is_correct: unscoredNext ? false : o.is_correct,
     }));
     if (q.config?.sides) blank.config = { ...q.config };
   }
   if (
-    (nextType === "choice" ||
-      nextType === "multi" ||
-      nextType === "poll" ||
-      nextType === "photo") &&
-    (q.type === "choice" ||
-      q.type === "multi" ||
-      q.type === "poll" ||
-      q.type === "photo") &&
+    CHOICE_LIKE_TYPES.has(nextType) &&
+    CHOICE_LIKE_TYPES.has(q.type) &&
     q.options.length >= 2
   ) {
     blank.options = q.options.map((o) => ({
       ...o,
       is_correct: nextType === "poll" ? false : o.is_correct,
     }));
-    if (nextType === "photo") {
-      blank.media_asset_id = q.media_asset_id;
-      blank.media = q.media;
-    }
+  }
+  if (isMediaType(nextType) && isMediaType(q.type)) {
+    blank.media_asset_id = q.media_asset_id;
+    blank.media = q.media;
   }
   return blank;
 }
-
 export function toPublicQuestion(q: TriviaBuilderQuestion | null): TriviaQuestionDto | null {
   if (!q) return null;
   return {

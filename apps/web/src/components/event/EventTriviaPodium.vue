@@ -5,6 +5,7 @@
         class="stage"
         ref="stage"
         :data-theme="theme"
+        :data-skin="skin"
         data-phase="podium"
         data-type="choice"
       >
@@ -64,7 +65,8 @@
                 <em>{{ medal(slot.rank) }}</em>
               </article>
             </div>
-            <p v-else class="prize">אף אחד לא הספיק לשחק</p>
+            <p v-else class="prize">אף אחד לא הספיק לשחק. אפשר להתחיל משחק חדש בכל רגע</p>
+            <p v-if="ordered.length === 1" class="prize">שחקן אחד על הפודיום. כל הכבוד!</p>
           </div>
         </div>
       </section>
@@ -78,6 +80,7 @@ import {
   TRIVIA_LETTER_COLORS,
   TriviaPlayerCard,
   TriviaScreenPayload,
+  normalizeTriviaTheme,
 } from "@/helpers/triviaTypes";
 
 export default defineComponent({
@@ -102,8 +105,11 @@ export default defineComponent({
 
   computed: {
     theme(): string {
-      const t = this.screen.theme || "elegant";
-      return t === "neon" ? "neon" : "elegant";
+      return normalizeTriviaTheme(this.screen.theme);
+    },
+
+    skin(): string {
+      return this.theme === "elegant" || this.theme === "neon" ? "legacy" : "vars";
     },
 
     title(): string {

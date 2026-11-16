@@ -50,6 +50,7 @@
               v-else-if="screen"
               :screen="screen"
               :event-name="eventName"
+              preview
             />
           </div>
         </div>
@@ -57,11 +58,12 @@
           <div class="ph-meta">{{ phoneMeta }}</div>
           <div class="ph-title">{{ phoneTitle }}</div>
           <div
-            v-for="(opt, i) in phoneOptions"
+            v-for="(line, i) in phoneLines"
             :key="i"
             class="ph-opt"
-          >{{ opt }}</div>
-          <div v-if="!phoneOptions.length" class="ph-opt">מסתכלים על המסך</div>
+            :class="{ ctl: line.ctl }"
+          >{{ line.text }}</div>
+          <div v-if="!phoneLines.length" class="ph-opt">מסתכלים על המסך</div>
         </div>
       </div>
     </div>
@@ -123,12 +125,51 @@ export default defineComponent({
       if (this.phase === "reveal") return "מסתכלים על המסך";
       return this.screen?.question?.prompt || "שאלה";
     },
-    phoneOptions(): string[] {
+    /** Simplified phone view: the answer options, or the control the guest gets. */
+    phoneLines(): { text: string; ctl?: boolean }[] {
       if (this.phase !== "question") return [];
-      return (this.screen?.question?.options || [])
-        .slice(0, 4)
+      const q = this.screen?.question;
+      if (!q) return [];
+      const cfg = (q.config || {}) as Record<string, any>;
+      const labels = (q.options || [])
         .map((o) => o.label)
         .filter(Boolean);
+      switch (q.type) {
+        case "number":
+          return [{ text: `סליידר ${cfg.min ?? 0} עד ${cfg.max ?? 100}`, ctl: true }];
+        case "rate":
+          return [{ text: `סליידר דירוג ${cfg.min ?? 1} עד ${cfg.max ?? 10}`, ctl: true }];
+        case "date":
+          return [{ text: "בחירת תאריך", ctl: true }];
+        case "map":
+          return [{ text: "מפה: מניחים נעץ במקום", ctl: true }];
+        case "cloud":
+          return [{ text: "שדה כתיבה: מילה או שתיים", ctl: true }];
+        case "finish":
+          return [
+            ...(cfg.prefix ? [{ text: String(cfg.prefix) }] : []),
+            { text: "שדה כתיבה: משלימים את המשפט", ctl: true },
+          ];
+        case "fillblank":
+          return [
+            {
+              text: `אריחי אותיות: ${Array.from(String(cfg.letters || "")).join(" ")}`,
+              ctl: true,
+            },
+          ];
+        case "order":
+          return [
+            { text: "מסדרים בהקשה לפי הסדר", ctl: true },
+            ...labels.slice(0, 4).map((text, i) => ({ text: `${i + 1}. ${text}` })),
+          ];
+        case "match":
+          return [
+            { text: "מחברים כל פריט לזוג שלו", ctl: true },
+            ...labels.slice(0, 4).map((text) => ({ text })),
+          ];
+        default:
+          return labels.slice(0, 4).map((text) => ({ text }));
+      }
     },
   },
 

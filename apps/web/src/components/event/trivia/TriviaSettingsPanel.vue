@@ -18,12 +18,15 @@
 
       <div class="tb-set-card">
         <h3>קבוצות</h3>
-        <p class="hint">אפשר לשחק אישית, או לפתוח תחרות בין צדדים.</p>
+        <p class="hint">אפשר לשחק אישית, להתחרות בין שני צדדים, או לפי שולחנות באולם.</p>
         <div class="tb-seg">
           <button type="button" :class="{ on: game.teams_mode === 'none' }" @click="set('teams_mode', 'none')">בלי קבוצות</button>
           <button type="button" :class="{ on: game.teams_mode === 'sides' }" @click="set('teams_mode', 'sides')">צד עמית וצד גל</button>
-          <button type="button" disabled title="בשלב הבא">לפי שולחנות</button>
+          <button type="button" :class="{ on: game.teams_mode === 'tables' }" @click="set('teams_mode', 'tables')">לפי שולחנות</button>
         </div>
+        <p v-if="game.teams_mode === 'tables'" class="hint" style="margin-top: 8px">
+          בהצטרפות כל אורח מזין את מספר השולחן שלו (או שם השולחן). הניקוד של כל השולחן מסתכם על המסך, והשולחן המוביל מופיע בטבלה.
+        </p>
         <div v-if="game.teams_mode === 'sides'" class="tb-meta-row" style="margin-top: 8px">
           <label class="tb-field">
             <span>צד א</span>

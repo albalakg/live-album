@@ -224,6 +224,7 @@ import Time from "@/helpers/time";
 import { findTriviaTemplate } from "@/helpers/triviaTemplates";
 import {
   TriviaScreenPayload,
+  TriviaQuestionDto,
   TriviaCurrentPhase,
   TRIVIA_QUESTION_CAP,
   defaultConfigForType,
@@ -382,18 +383,23 @@ export default defineComponent({
         { id: "results", label: "תוצאות" },
       ];
     },
-    albumPhotos(): { id: number; url: string }[] {
+    albumPhotos(): { id: number; url: string; kind: string }[] {
       const assets =
         this.$store.getters["event/getActiveGuestAssets"] ||
         this.$store.getters["event/getEvent"]?.assets ||
         [];
-      return (assets as any[])
-        .filter((a) => a && (a.type === "image" || !a.type) && (a.fullPath || a.url || a.path))
-        .slice(0, 12)
-        .map((a) => ({
-          id: a.id,
-          url: a.fullPath || a.url || a.path,
-        }));
+      const usable = (assets as any[]).filter(
+        (a) => a && (a.fullPath || a.url || a.path)
+      );
+      const images = usable
+        .filter((a) => a.type === "image" || !a.type)
+        .slice(0, 12);
+      const videos = usable.filter((a) => a.type === "video").slice(0, 12);
+      return [...images, ...videos].map((a) => ({
+        id: a.id,
+        url: a.fullPath || a.url || a.path,
+        kind: a.type === "video" ? "video" : "image",
+      }));
     },
     previewScreen(): TriviaScreenPayload | null {
       const q = this.selectedQuestion;
@@ -423,14 +429,7 @@ export default defineComponent({
           join_path: this.game.join_path,
           top: sampleTop,
           prize_text: this.game.prize_text || "הפרס: בקבוק יין",
-          teams:
-            this.game.teams_mode === "sides"
-              ? {
-                  mode: "sides",
-                  labels: this.game.team_labels,
-                  scores: { a: 12000, b: 9800 },
-                }
-              : null,
+          teams: this.previewTeams(12000, 9800),
           server_now: new Date().toISOString(),
           event_name: this.eventName,
         };
@@ -457,18 +456,8 @@ export default defineComponent({
         };
       }
 
-      const tallies =
-        isReveal || q?.type === "poll" || q?.type === "thisorthat"
-          ? {
-              mode: "options" as const,
-              total_answers: 24,
-              options: (question?.options || []).map((o, i) => ({
-                option_id: o.id || i + 1,
-                count: [10, 8, 4, 2][i] || 1,
-                percent: [42, 33, 17, 8][i] || 5,
-              })),
-            }
-          : null;
+      const showTallies = isReveal || (!!q && isUnscoredType(q.type));
+      const tallies = showTallies ? this.previewTallies(question, q) : null;
 
       return {
         phase: "live",
@@ -480,29 +469,12 @@ export default defineComponent({
         join_path: this.game.join_path,
         top: sampleTop,
         joining: phase === "lobby" ? joining : undefined,
-        teams:
-          this.game.teams_mode === "sides"
-            ? {
-                mode: "sides",
-                labels: this.game.team_labels,
-                scores: { a: 4200, b: 3800 },
-              }
-            : null,
+        teams: this.previewTeams(4200, 3800),
         prize_text: this.game.prize_text,
         question: phase === "lobby" || phase === "leaderboard" ? null : question,
-        tallies: isReveal || q?.type === "poll" || q?.type === "thisorthat" ? tallies : null,
+        tallies,
         fun_fact: isReveal ? q?.fun_fact || null : null,
-        correct: isReveal
-          ? {
-              option_ids: (q?.options || [])
-                .map((o, i) => (o.is_correct ? o.id ?? i + 1 : null))
-                .filter((x): x is number => x != null),
-              number:
-                q?.type === "number"
-                  ? Number((q.config as any)?.correct ?? 0)
-                  : undefined,
-            }
-          : null,
+        correct: isReveal ? this.previewCorrect(q) : null,
         server_now: new Date().toISOString(),
         event_name: this.eventName,
       };
@@ -989,6 +961,146 @@ export default defineComponent({
         this.fail(error, "לא הצלחנו להחיל תבנית");
       } finally {
         this.templateBusy = false;
+      }
+    },
+
+    previewTeams(a: number, b: number): TriviaScreenPayload["teams"] {
+      if (this.game.teams_mode === "sides") {
+        return { mode: "sides", labels: this.game.team_labels, scores: { a, b } };
+      }
+      if (this.game.teams_mode === "tables") {
+        return {
+          mode: "tables",
+          labels: null,
+          tables: [
+            { team: "7", score: a, players: 4 },
+            { team: "3", score: b, players: 5 },
+            { team: "12", score: Math.round(b * 0.6), players: 3 },
+          ],
+        };
+      }
+      return null;
+    },
+
+    /** Sample tallies so every type looks alive in the builder preview. */
+    previewTallies(question: TriviaQuestionDto | null, q: TriviaBuilderQuestion | null) {
+      const type = q?.type || "choice";
+      const cfg = (q?.config || {}) as Record<string, any>;
+      if (type === "number") {
+        const min = Number(cfg.min ?? 0);
+        const max = Number(cfg.max ?? 100);
+        const span = max - min;
+        return {
+          mode: "number" as const,
+          guesses: [0.2, 0.45, 0.5, 0.7, 0.85].map((f, i) => ({
+            player_id: i + 1,
+            value: Math.round(min + span * f),
+          })),
+        };
+      }
+      if (type === "date") {
+        return {
+          mode: "date" as const,
+          guesses: [20120410, 20150801, 20190120, 20210615, 20230301].map((v, i) => ({
+            player_id: i + 1,
+            value: v,
+          })),
+        };
+      }
+      if (type === "map") {
+        return {
+          mode: "map" as const,
+          total_answers: 5,
+          guesses: [
+            { x: 22, y: 30 },
+            { x: 48, y: 52 },
+            { x: 61, y: 40 },
+            { x: 75, y: 70 },
+            { x: 35, y: 78 },
+          ].map((g, i) => ({ player_id: i + 1, ...g })),
+        };
+      }
+      if (type === "cloud" || type === "finish") {
+        return {
+          mode: "words" as const,
+          total_answers: 14,
+          words: [
+            { text: "אהבה", count: 5 },
+            { text: "שמחה", count: 3 },
+            { text: "יין", count: 3 },
+            { text: "ריקודים", count: 2 },
+            { text: "משפחה", count: 1 },
+            { text: "חברים", count: 1 },
+          ],
+        };
+      }
+      if (type === "rate") {
+        const min = Number(cfg.min ?? 1);
+        const max = Number(cfg.max ?? 10);
+        const counts = [0, 1, 0, 1, 2, 3, 5, 6, 4, 2];
+        const distribution = [];
+        for (let v = min; v <= max && v - min < 20; v++) {
+          distribution.push({ value: v, count: counts[(v - min) % counts.length] });
+        }
+        return {
+          mode: "rate" as const,
+          total_answers: distribution.reduce((a, d) => a + d.count, 0),
+          average: 7.4,
+          min,
+          max,
+          distribution,
+        };
+      }
+      return {
+        mode: "options" as const,
+        total_answers: 24,
+        options: (question?.options || []).map((o, i) => ({
+          option_id: o.id || i + 1,
+          count: [10, 8, 4, 2][i] || 1,
+          percent: [42, 33, 17, 8][i] || 5,
+        })),
+      };
+    },
+
+    previewCorrect(q: TriviaBuilderQuestion | null): TriviaScreenPayload["correct"] {
+      if (!q) return null;
+      const cfg = (q.config || {}) as Record<string, any>;
+      const ids = q.options.map((o, i) => ({ id: o.id ?? i + 1, correct: o.is_correct }));
+      const base: NonNullable<TriviaScreenPayload["correct"]> = {
+        option_ids: ids.filter((o) => o.correct).map((o) => o.id),
+      };
+      switch (q.type) {
+        case "number":
+          return { ...base, number: Number(cfg.correct ?? 0), closest: { nickname: "נועה", value: Number(cfg.correct ?? 0) } };
+        case "date":
+          return { ...base, date: cfg.correct ?? null, closest: { nickname: "נועה", value: Number(cfg.correct ?? 0) } };
+        case "map":
+          return {
+            ...base,
+            x: Number(cfg.correct_x ?? 50),
+            y: Number(cfg.correct_y ?? 50),
+            closest: { nickname: "נועה" },
+          };
+        case "fillblank":
+          return { ...base, answer: String(cfg.answer ?? "") };
+        case "order":
+          return { option_ids: ids.map((o) => o.id) };
+        case "match": {
+          const labels = (cfg.right_labels ?? cfg.rights ?? []) as string[];
+          const map = (cfg.correct_map ?? cfg.answer_map ?? []) as number[];
+          return {
+            option_ids: [],
+            right_labels: labels,
+            pairs: ids.map((o, i) => ({
+              left_id: Number(o.id),
+              right_id: Number(map[i] ?? i),
+            })),
+          };
+        }
+        case "buzzer":
+          return { ...base, winner: { nickname: "נועה", elapsed_ms: 1840 } };
+        default:
+          return base;
       }
     },
 

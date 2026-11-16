@@ -21,7 +21,7 @@
         <div class="tb-modal-head">
           <div>
             <h2>{{ mode === 'change' ? "שינוי סוג השאלה" : "הוספת שאלה" }}</h2>
-            <p class="lede">בחרו סוג — אפשר לשנות אחר כך. סוגים עם «בקרוב» ייפתחו בהמשך.</p>
+            <p class="lede">בחרו סוג — אפשר לשנות אחר כך. כל הסוגים זמינים למשחק.</p>
           </div>
           <button type="button" class="tb-modal-close" aria-label="סגירה" @click="close">×</button>
         </div>
