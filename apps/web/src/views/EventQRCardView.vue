@@ -25,8 +25,19 @@
             ref="eventCard"
             class="qr-live"
             :class="{ inv: selectedCard?.inverted }"
+            data-qr-card-live
           >
-            <img class="bg" :src="`/assets/${selectedQR}`" alt="" />
+            <QrCardBackdrop
+              v-if="selectedV2"
+              class="bg"
+              :design="selectedV2"
+            />
+            <img
+              v-else
+              class="bg"
+              :src="`/assets/${selectedQR}`"
+              alt=""
+            />
             <QrCardFrame
               :event-name="eventName"
               :text-color="textColor"
@@ -39,7 +50,7 @@
                   ref="qrComp"
                   :background="qrBackground"
                   :foreground="qrForeground"
-                  :inverted="Boolean(selectedCard?.inverted)"
+                  :inverted="false"
                   :size="280"
                   :margin="4"
                 />
@@ -112,9 +123,20 @@
       ref="exportCard"
       class="qr-export-card"
       aria-hidden="true"
+      data-qr-card-export
       :class="{ inv: selectedCard?.inverted }"
     >
-      <img class="bg" :src="`/assets/${selectedQR}`" alt="" />
+      <QrCardBackdrop
+        v-if="selectedV2"
+        class="bg"
+        :design="selectedV2"
+      />
+      <img
+        v-else
+        class="bg"
+        :src="`/assets/${selectedQR}`"
+        alt=""
+      />
       <QrCardFrame
         :event-name="eventName"
         :text-color="textColor"
@@ -126,7 +148,7 @@
           <EventQR
             :background="qrBackground"
             :foreground="qrForeground"
-            :inverted="Boolean(selectedCard?.inverted)"
+            :inverted="false"
             :size="280"
             :margin="4"
           />
@@ -143,6 +165,7 @@ import html2canvas from "html2canvas";
 import EventQR from "@/components/event/EventQR.vue";
 import QrCardFrame from "@/components/event/QrCardFrame.vue";
 import QrCardGallery from "@/components/event/QrCardGallery.vue";
+import QrCardBackdrop from "@/components/event/qrDesigns/QrCardBackdrop.vue";
 import {
   DEFAULT_QR_CARD_DESIGN,
   DEFAULT_QR_CARD_TEXT,
@@ -152,7 +175,29 @@ import {
   findQrCardByFile,
   type QrCardDesign,
 } from "@/helpers/qrCardCatalog";
+import {
+  findV2DesignByFile,
+  type QrV2Design,
+} from "@/helpers/qrCardDesignsV2";
 import { notify } from "@/helpers/notify";
+
+/** Relative luminance helper — light QR on white plate is unscannable. */
+function isLightHex(color: string): boolean {
+  const hex = color.replace("#", "").trim();
+  if (hex.length !== 3 && hex.length !== 6) return false;
+  const full =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : hex;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return lum > 0.45;
+}
 
 export default defineComponent({
   name: "EventQRCardView",
@@ -161,6 +206,7 @@ export default defineComponent({
     EventQR,
     QrCardFrame,
     QrCardGallery,
+    QrCardBackdrop,
   },
 
   data() {
@@ -200,12 +246,18 @@ export default defineComponent({
       return findQrCardByFile(this.selectedQR);
     },
 
+    selectedV2(): QrV2Design | undefined {
+      return findV2DesignByFile(this.selectedQR);
+    },
+
+    /** Always dark modules on the white quiet-zone plate. */
     qrForeground(): string {
-      return this.selectedCard?.qrColor || "#000000";
+      const c = this.selectedCard?.qrColor || "#12100e";
+      return isLightHex(c) ? "#12100e" : c;
     },
 
     qrBackground(): string {
-      return this.selectedCard?.qrBackground || "transparent";
+      return "transparent";
     },
 
     textColor(): string {
@@ -471,6 +523,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 .meta-card {
   margin-top: 18px;

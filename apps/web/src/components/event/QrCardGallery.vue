@@ -16,6 +16,7 @@
             role="radiogroup"
             aria-labelledby="qr-filter-style-label"
             @scroll="onStyleScroll"
+            @keydown="onChipKeydown($event, 'style')"
           >
             <button
               type="button"
@@ -25,7 +26,7 @@
               :class="{ on: style === 'all' }"
               @click="style = 'all'"
             >
-              כל הסגנונות
+              הכל
             </button>
             <button
               v-for="item in styles"
@@ -58,6 +59,7 @@
             role="radiogroup"
             aria-labelledby="qr-filter-event-label"
             @scroll="onEventScroll"
+            @keydown="onChipKeydown($event, 'event')"
           >
             <button
               type="button"
@@ -67,7 +69,7 @@
               :class="{ on: eventType === 'all' }"
               @click="eventType = 'all'"
             >
-              כל האירועים
+              הכל
             </button>
             <button
               v-for="item in eventTypes"
@@ -93,10 +95,21 @@
         type="button"
         class="qr-card"
         :class="{ on: selectable && selected === card.file }"
+        :aria-pressed="selectable ? selected === card.file : undefined"
         @click="choose(card.file)"
       >
         <div class="qr-thumb">
-          <img :src="`/assets/${card.file}`" :alt="card.label" />
+          <QrCardBackdrop
+            v-if="card.renderer === 'css' && v2ByFile(card.file)"
+            :design="v2ByFile(card.file)!"
+          />
+          <img
+            v-else
+            :src="`/assets/${card.file}`"
+            :alt="card.label"
+            loading="lazy"
+            decoding="async"
+          />
           <QrCardFrame
             mini
             :event-name="eventName"
@@ -106,10 +119,10 @@
             tagline="סרקו והעלו תמונות"
           >
             <template #qr>
-              <div class="mini-qr" :class="{ inv: card.inverted }">
+              <div class="mini-qr">
                 <svg viewBox="0 0 64 64" aria-hidden="true">
                   <path
-                    :fill="card.qrColor || '#000000'"
+                    fill="#12100e"
                     d="M6 6h20v20H6zm6 6v8h8v-8zM38 6h20v20H38zm6 6v8h8v-8zM6 38h20v20H6zm6 6v8h8v-8zM38 38h6v6h-6zm10 0h10v6H48zm-10 10h6v10h-6zm10 4h10v6H48z"
                   />
                 </svg>
@@ -118,12 +131,12 @@
           </QrCardFrame>
         </div>
         <h4>{{ card.label }}</h4>
-        <p>{{ styleLabel(card.style) }}</p>
+        <p>{{ styleLabel(card) }}</p>
       </button>
     </div>
     <div v-if="cards.length === 0" class="empty">
       <h3>אין כרטיס בסנן הזה</h3>
-      <p>נסו סגנון אחר או «כל האירועים».</p>
+      <p>נסו סגנון אחר או «הכל».</p>
     </div>
   </section>
 </template>
@@ -131,13 +144,18 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import QrCardFrame from "@/components/event/QrCardFrame.vue";
+import QrCardBackdrop from "@/components/event/qrDesigns/QrCardBackdrop.vue";
 import {
   filterQrCards,
   QR_EVENT_TYPES,
   QR_STYLE_FILTERS,
-  QR_STYLES,
+  categoryLabel,
   type QrCardDesign,
 } from "@/helpers/qrCardCatalog";
+import {
+  findV2DesignByFile,
+  type QrV2Design,
+} from "@/helpers/qrCardDesignsV2";
 
 type FadeState = { start: boolean; end: boolean };
 
@@ -157,7 +175,7 @@ function measureFade(el: HTMLElement | undefined | null): FadeState {
 
 export default defineComponent({
   name: "QrCardGallery",
-  components: { QrCardFrame },
+  components: { QrCardFrame, QrCardBackdrop },
   props: {
     selectable: { type: Boolean, default: false },
     selected: { type: String, default: "" },
@@ -204,8 +222,12 @@ export default defineComponent({
     window.removeEventListener("resize", this.refreshFades);
   },
   methods: {
-    styleLabel(id: string) {
-      return QR_STYLES.find((item) => item.id === id)?.label || id;
+    v2ByFile(file: string): QrV2Design | undefined {
+      return findV2DesignByFile(file);
+    },
+    styleLabel(card: QrCardDesign) {
+      const primary = card.categories[0] || card.style;
+      return categoryLabel(primary);
     },
     choose(file: string) {
       if (this.selectable) this.$emit("select", file);
@@ -219,6 +241,30 @@ export default defineComponent({
     refreshFades() {
       this.styleFade = measureFade(this.$refs.styleScroll as HTMLElement);
       this.eventFade = measureFade(this.$refs.eventScroll as HTMLElement);
+    },
+    onChipKeydown(event: KeyboardEvent, row: "style" | "event") {
+      const key = event.key;
+      if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") {
+        return;
+      }
+      const root =
+        row === "style"
+          ? (this.$refs.styleScroll as HTMLElement)
+          : (this.$refs.eventScroll as HTMLElement);
+      if (!root) return;
+      const chips = Array.from(root.querySelectorAll<HTMLButtonElement>(".chip"));
+      if (!chips.length) return;
+      const current = chips.indexOf(document.activeElement as HTMLButtonElement);
+      let next = current;
+      const rtl = getComputedStyle(root).direction === "rtl";
+      if (key === "Home") next = 0;
+      else if (key === "End") next = chips.length - 1;
+      else if (key === "ArrowRight") next = current + (rtl ? -1 : 1);
+      else if (key === "ArrowLeft") next = current + (rtl ? 1 : -1);
+      next = Math.max(0, Math.min(chips.length - 1, next));
+      event.preventDefault();
+      chips[next].focus();
+      chips[next].click();
     },
   },
 });
@@ -234,9 +280,8 @@ export default defineComponent({
 .qr-filters {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 14px;
-  max-height: 90px;
   min-width: 0;
   max-width: 100%;
 }
@@ -328,14 +373,14 @@ export default defineComponent({
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-block: 1px;
+  padding-block: 2px;
 }
 
 .chips-scroll::-webkit-scrollbar {
@@ -345,22 +390,26 @@ export default defineComponent({
 .chip {
   appearance: none;
   flex: 0 0 auto;
-  height: 30px;
+  min-height: 44px;
+  height: 44px;
   box-sizing: border-box;
   border: 1.5px solid rgba(22, 19, 16, 0.16);
   background: rgba(255, 255, 255, 0.55);
   color: #161310;
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 700;
   line-height: 1;
   border-radius: 999px;
-  padding: 0 9px;
+  padding: 0 14px;
   cursor: pointer;
   white-space: nowrap;
 }
 
-/* Wide desktop: wrap the longer event-type row so chips are not clipped */
+/*
+ * Wide desktop: wrap only the shorter event-type row.
+ * Style/category chips stay a single scroll row (many categories in v2).
+ */
 @media (min-width: 1200px) {
   .qr-filters {
     max-height: none;
@@ -463,6 +512,10 @@ export default defineComponent({
 @media (max-width: 600px) {
   .qr-filters {
     max-height: none;
+  }
+
+  .qr-grid {
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
   }
 }
 </style>
