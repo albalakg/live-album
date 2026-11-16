@@ -1,18 +1,6 @@
 <template>
   <div class="ov-page" dir="rtl">
-    <div v-if="shotError" class="ov-banner ov-banner--error">
-      לא הצלחנו לטעון את הנתונים
-    </div>
-
-    <div v-else-if="shotLoading" class="ov-loading" aria-busy="true">
-      <div class="ov-loading__hero" />
-      <div class="ov-loading__keys">
-        <div v-for="n in 4" :key="n" class="ov-loading__key" />
-      </div>
-      <div class="ov-loading__block" />
-    </div>
-
-    <template v-else-if="shotEmpty || isSetupEmpty">
+    <template v-if="isSetupEmpty">
       <header class="ov-setup">
         <p class="ov-setup__eyebrow">סקירה</p>
         <h1>האירוע עדיין בהקמה</h1>
@@ -115,29 +103,6 @@ const EMPTY_RATES = {
   upload_to_gallery: 0,
 };
 
-/** Neutral SVG placeholders for shot modes — no people. */
-const SHOT_PLACEHOLDER =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
-      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop stop-color="#efe8de"/><stop offset="1" stop-color="#d9d0c3"/>
-      </linearGradient></defs>
-      <rect width="320" height="320" fill="url(#g)"/>
-      <rect x="36" y="36" width="248" height="248" rx="22" fill="#f7f2ea" stroke="#cfc5b6"/>
-      <circle cx="118" cy="128" r="26" fill="#d9d0c3"/>
-      <path d="M56 236l62-70 38 42 30-26 78 54H56z" fill="#d9d0c3"/>
-    </svg>`
-  );
-
-type ShotMode =
-  | ""
-  | "no-uploads"
-  | "with-uploads"
-  | "past"
-  | "live"
-  | "analytics-empty";
-
 export default defineComponent({
   name: "EventHomeView",
 
@@ -164,34 +129,6 @@ export default defineComponent({
   },
 
   computed: {
-    shotEmpty(): boolean {
-      return this.$route.query.empty === "1";
-    },
-    shotLoading(): boolean {
-      return this.$route.query.loading === "1";
-    },
-    shotError(): boolean {
-      return this.$route.query.error === "1";
-    },
-    shotMode(): ShotMode {
-      const raw = String(this.$route.query.shot || "");
-      if (
-        raw === "no-uploads" ||
-        raw === "with-uploads" ||
-        raw === "past" ||
-        raw === "live" ||
-        raw === "analytics-empty"
-      ) {
-        return raw;
-      }
-      return "";
-    },
-    forceAnalyticsEmpty(): boolean {
-      return (
-        this.shotMode === "analytics-empty" ||
-        this.$route.query.analytics === "0"
-      );
-    },
     event(): Record<string, unknown> | null {
       return this.$store.getters["event/getEvent"] || null;
     },
@@ -202,28 +139,18 @@ export default defineComponent({
       return this.$store.getters["event/getEventName"] || "";
     },
     displayName(): string {
-      if (this.shotMode === "live") return this.eventName || "אירוע לדוגמה";
-      if (this.shotMode === "past") return this.eventName || "אירוע לדוגמה";
-      if (this.shotMode === "no-uploads") return this.eventName || "אירוע חדש";
       return this.eventName;
     },
     eventPath(): string {
       return this.$store.getters["event/getEventPath"] || "";
     },
     isSetupEmpty(): boolean {
-      if (this.shotMode) return false;
       return !String(this.eventName || "").trim();
     },
     storeStatus(): number | null {
       return this.$store.getters["event/getEventStatus"];
     },
     effectiveStatus(): number | null {
-      if (this.shotMode === "live") return StatusEnum.IN_PROGRESS;
-      if (this.shotMode === "past") return StatusEnum.ACTIVE;
-      if (this.shotMode === "no-uploads") return StatusEnum.READY;
-      if (this.shotMode === "with-uploads") return StatusEnum.READY;
-      // Keep analytics-empty focused on quiet analytics, not past-event chrome.
-      if (this.shotMode === "analytics-empty") return StatusEnum.READY;
       return this.storeStatus;
     },
     statusLabel(): string {
@@ -237,28 +164,9 @@ export default defineComponent({
       return "סטטוס";
     },
     startsAt(): string {
-      if (this.shotMode === "live") {
-        return new Date(Date.now() - 3600000).toISOString();
-      }
-      if (this.shotMode === "past") {
-        return new Date(Date.now() - 7 * 86400000).toISOString();
-      }
-      if (
-        this.shotMode === "no-uploads" ||
-        this.shotMode === "with-uploads" ||
-        this.shotMode === "analytics-empty"
-      ) {
-        return new Date(Date.now() + 5 * 86400000).toISOString();
-      }
       return this.$store.getters["event/getEventStartTime"] || "";
     },
     finishedAt(): string {
-      if (this.shotMode === "live") {
-        return new Date(Date.now() + 3600000).toISOString();
-      }
-      if (this.shotMode === "past") {
-        return new Date(Date.now() - 6 * 86400000).toISOString();
-      }
       return this.$store.getters["event/getEventFinishTime"] || "";
     },
     dateLabel(): string {
@@ -284,13 +192,6 @@ export default defineComponent({
       });
     },
     totalAssets(): number {
-      if (this.shotMode === "no-uploads") return 0;
-      if (this.shotMode === "with-uploads" || this.shotMode === "live") {
-        return Math.max(Number(this.$store.getters["event/getTotalAssets"] || 0), 6);
-      }
-      if (this.shotMode === "past") {
-        return Math.max(Number(this.$store.getters["event/getTotalAssets"] || 0), 4);
-      }
       return Number(this.$store.getters["event/getTotalAssets"] || 0);
     },
     filesCap(): string {
@@ -301,7 +202,6 @@ export default defineComponent({
       return (this.$store.getters["event/getPendingAssets"] || []).length;
     },
     pendingDisplay(): number {
-      if (this.shotMode === "no-uploads") return 0;
       return this.analytics ? this.analytics.pending : this.pendingFallback;
     },
     guestCountFallback(): number {
@@ -331,7 +231,6 @@ export default defineComponent({
       return this.analytics?.active_visitors_15m ?? 0;
     },
     analyticsAvailable(): boolean {
-      if (this.forceAnalyticsEmpty) return false;
       return Boolean(this.analytics) && !this.analyticsUnavailable;
     },
     analyticsPhotos(): number | null {
@@ -410,15 +309,6 @@ export default defineComponent({
       return items;
     },
     effectiveHubPublished(): boolean | null {
-      if (
-        this.shotMode === "no-uploads" ||
-        this.shotMode === "with-uploads" ||
-        this.shotMode === "live" ||
-        this.shotMode === "past" ||
-        this.shotMode === "analytics-empty"
-      ) {
-        return true;
-      }
       return this.hubPublished;
     },
     storeAssets(): unknown[] {
@@ -439,21 +329,6 @@ export default defineComponent({
       });
     },
     recentUploads(): OverviewUploadThumb[] {
-      if (this.shotMode === "no-uploads") return [];
-      // Shot modes: neutral placeholders only (never real people photos).
-      if (
-        this.shotMode === "with-uploads" ||
-        this.shotMode === "live" ||
-        this.shotMode === "past" ||
-        this.shotMode === "analytics-empty"
-      ) {
-        return Array.from({ length: 8 }, (_, i) => ({
-          id: `shot-${i}`,
-          src: SHOT_PLACEHOLDER,
-          alt: "תמונה לדוגמה",
-          isVideo: i === 3,
-        }));
-      }
       return pickOverviewRecentUploads(this.storeAssets, 8);
     },
     quickActionItems(): OverviewQuickActionItem[] {
@@ -568,12 +443,6 @@ export default defineComponent({
       }
     },
     async loadAnalytics(eventId: number) {
-      if (this.forceAnalyticsEmpty) {
-        this.analytics = null;
-        this.analyticsUnavailable = true;
-        this.analyticsLoading = false;
-        return;
-      }
       this.analyticsLoading = true;
       this.analyticsUnavailable = false;
       try {
@@ -612,48 +481,11 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 1100px;
+  /* Fill the content column beside the sidebar, like the other dashboard views. */
   min-width: 0;
   width: 100%;
   padding-bottom: 28px;
   overflow-x: hidden;
-}
-
-.ov-banner {
-  border-radius: 16px;
-  padding: 14px 18px;
-  font-weight: 800;
-}
-
-.ov-banner--error {
-  background: #fff4f4;
-  color: #9a3036;
-}
-
-.ov-loading__hero,
-.ov-loading__block,
-.ov-loading__key {
-  border-radius: 22px;
-  background: linear-gradient(90deg, #ebe4da, #f7f2ea, #ebe4da);
-  background-size: 200% 100%;
-}
-
-.ov-loading__hero {
-  height: 140px;
-}
-
-.ov-loading__keys {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.ov-loading__key {
-  height: 96px;
-}
-
-.ov-loading__block {
-  height: 120px;
 }
 
 .ov-setup {
@@ -695,35 +527,9 @@ export default defineComponent({
   font-weight: 800;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .ov-loading__hero,
-  .ov-loading__block,
-  .ov-loading__key {
-    animation: ov-page-shimmer 1.2s infinite;
-  }
-}
-
-@keyframes ov-page-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
-}
-
-@media (max-width: 1024px) {
-  .ov-loading__keys {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 600px) {
   .ov-page {
     gap: 14px;
-  }
-  .ov-loading__keys {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>
