@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, onBeforeUnmount, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import LandingRenderer from "@/components/landing/LandingRenderer.vue";
 import { landingFixtures } from "@/components/landing/fixtures";
@@ -30,6 +30,16 @@ export default defineComponent({
     const hubConfig = computed(() => landingFixtures[templateId.value] || null);
     const meta = computed(() => getTemplate(templateId.value));
     const shot = computed(() => Boolean(route.query.shot));
+
+    function syncMockbarClass() {
+      if (typeof document === "undefined") return;
+      document.body.classList.toggle("has-mockbar", !shot.value);
+    }
+    onMounted(syncMockbarClass);
+    watch(shot, syncMockbarClass);
+    onBeforeUnmount(() => {
+      document.body.classList.remove("has-mockbar");
+    });
 
     return { templateId, hubConfig, meta, shot };
   },

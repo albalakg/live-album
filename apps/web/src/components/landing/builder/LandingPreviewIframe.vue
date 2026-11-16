@@ -35,6 +35,7 @@ import type { HubConfig } from "../types";
 const MSG_TYPE = "snapshare:landing-preview";
 const READY_TYPE = "snapshare:landing-preview-ready";
 const PING_TYPE = "snapshare:landing-preview-ping";
+const SCROLL_TYPE = "snapshare:landing-preview-scroll";
 const PHONE_W = 390;
 const PHONE_H = 844;
 const DESKTOP_W = 1440;
@@ -46,8 +47,12 @@ export default defineComponent({
     hubConfig: { type: Object as PropType<HubConfig>, required: true },
     mode: { type: String as PropType<"phone" | "desktop">, required: true },
     title: { type: String, default: "תצוגה מקדימה" },
+    /** Block id to scroll to inside the preview. Bump `scrollTick` to scroll to the same id again. */
+    scrollSection: { type: String, default: "" },
+    scrollTick: { type: Number, default: 0 },
   },
-  setup(props) {
+  emits: ["ready"],
+  setup(props, { emit, expose }) {
     const hostEl = ref<HTMLElement | null>(null);
     const iframeEl = ref<HTMLIFrameElement | null>(null);
     const stageW = ref(0);
@@ -171,6 +176,18 @@ export default defineComponent({
       }, 120);
     }
 
+    /** Ask the preview frame to scroll to a section (`sec-{blockId}`). Safe to call before ready. */
+    function scrollToSection(sectionId: string, instant = false) {
+      if (!sectionId) return;
+      const win = iframeEl.value?.contentWindow;
+      if (!win || !frameReady.value) return;
+      try {
+        win.postMessage({ type: SCROLL_TYPE, sectionId, instant }, window.location.origin);
+      } catch {
+        /* ignore */
+      }
+    }
+
     function onFrameReady() {
       frameReady.value = true;
       if (pingTimer) {
@@ -178,6 +195,11 @@ export default defineComponent({
         pingTimer = null;
       }
       postConfig();
+      emit("ready");
+      if (props.scrollSection) {
+        // Let the renderer paint the first config before scrolling.
+        setTimeout(() => scrollToSection(props.scrollSection, true), 250);
+      }
     }
 
     function onMessage(ev: MessageEvent) {
@@ -234,6 +256,15 @@ export default defineComponent({
       },
       { deep: true }
     );
+
+    watch(
+      () => [props.scrollSection, props.scrollTick] as const,
+      ([id]) => {
+        if (id) scrollToSection(id);
+      }
+    );
+
+    expose({ scrollToSection });
 
     return {
       hostEl,

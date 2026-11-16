@@ -18,7 +18,7 @@
       </div>
     </template>
   </notifications>
-  <HostAssist v-if="!isFullScreen" />
+  <HostAssist v-if="!isFullScreen && !hideHostAssist" />
   <router-view v-if="isFullScreen" />
   <div class="app-wrapper" v-else>
     <template v-if="$bp.isMobile">
@@ -84,6 +84,12 @@ export default defineComponent({
         if (path.includes(this.links[index])) return true;
       }
       return false;
+    },
+
+    /** Hide floating «צור קשר» on the event-page builder so it never overlaps the action bar. */
+    hideHostAssist(): boolean {
+      const path = this.$route.path;
+      return path === "/event/page" || path.startsWith("/event/page/");
     },
 
     toastPosition(): string {

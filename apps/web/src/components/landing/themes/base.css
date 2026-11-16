@@ -172,7 +172,9 @@ body.shot .mockbar { display: none; }
   color: var(--ink);
 }
 body.shot .site-nav { top: 0; }
-body:not(.shot) .site-nav { top: 42px; }
+/* Offset only when design-gallery mockbar is present — never leave a beige strip on public/preview */
+body.has-mockbar:not(.shot) .site-nav { top: 42px; }
+body:not(.shot) .site-nav { top: 0; }
 .nav-brand { flex: none; min-width: 0; }
 .nav-event {
   display: block; font-family: var(--font-display, var(--display));
@@ -214,9 +216,9 @@ body:not(.shot) .site-nav { top: 42px; }
 }
 .hero-stage, .hero-cinema,
 section[id^="sec-"], .decor-band, .quote-band { scroll-margin-top: 76px; }
-body:not(.shot) .hero-stage,
-body:not(.shot) .hero-cinema,
-body:not(.shot) section[id^="sec-"] { scroll-margin-top: 118px; }
+body.has-mockbar:not(.shot) .hero-stage,
+body.has-mockbar:not(.shot) .hero-cinema,
+body.has-mockbar:not(.shot) section[id^="sec-"] { scroll-margin-top: 118px; }
 
 /* Mobile / tablet drawer — enters from the right (RTL start) */
 .drawer-back {

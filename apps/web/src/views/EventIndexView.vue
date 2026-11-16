@@ -14,7 +14,10 @@
     <div
       class="event-main"
       v-else
-      :class="{ 'is-sidebar-collapsed': sidebarCollapsed }"
+      :class="{
+        'is-sidebar-collapsed': sidebarCollapsed,
+        'is-builder-page': isBuilderPage,
+      }"
       :style="mainStyle"
     >
       <aside class="event-sidebar">
@@ -106,6 +109,10 @@ export default defineComponent({
         this.$route.path.includes("uploads") ||
         this.$route.path.includes("full-screen")
       );
+    },
+    /** Event-page wizard owns the bottom chrome (action bar + preview FAB). */
+    isBuilderPage(): boolean {
+      return this.$route.path === "/event/page" || this.$route.path.startsWith("/event/page/");
     },
     pendingCount(): number {
       return (this.$store.getters["event/getPendingAssets"] || []).length;
@@ -263,6 +270,14 @@ export default defineComponent({
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(22, 19, 16, 0.11);
     padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  /* Wizard action bar replaces the host bottom tabs on דף אירוע */
+  .event-main.is-builder-page .event-mobile-nav {
+    display: none;
+  }
+  .event-main.is-builder-page {
+    padding-bottom: 24px;
   }
 }
 

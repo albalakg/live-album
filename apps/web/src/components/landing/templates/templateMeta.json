@@ -51,7 +51,8 @@
       "FOOTER",
       "SNAPSHARE_CTA",
       "RICH_TEXT",
-      "TRIVIA_CTA"
+      "TRIVIA_CTA",
+      "GIFT"
     ],
     "default_enabled": {
       "STORY": true,
@@ -68,7 +69,8 @@
       "FOOTER": true,
       "SNAPSHARE_CTA": true,
       "RICH_TEXT": false,
-      "TRIVIA_CTA": false
+      "TRIVIA_CTA": false,
+      "GIFT": false
     },
     "nav": [
       {
@@ -179,7 +181,8 @@
       "FOOTER",
       "SNAPSHARE_CTA",
       "RICH_TEXT",
-      "RSVP"
+      "RSVP",
+      "GIFT"
     ],
     "default_enabled": {
       "QUOTE": true,
@@ -196,7 +199,8 @@
       "FOOTER": true,
       "SNAPSHARE_CTA": true,
       "RICH_TEXT": false,
-      "RSVP": false
+      "RSVP": false,
+      "GIFT": false
     },
     "nav": [
       {
@@ -699,7 +703,8 @@
       "FOOTER",
       "SNAPSHARE_CTA",
       "RICH_TEXT",
-      "TRIVIA_CTA"
+      "TRIVIA_CTA",
+      "GIFT"
     ],
     "default_enabled": {
       "ABOUT": true,
@@ -716,7 +721,8 @@
       "FOOTER": true,
       "SNAPSHARE_CTA": true,
       "RICH_TEXT": false,
-      "TRIVIA_CTA": false
+      "TRIVIA_CTA": false,
+      "GIFT": false
     },
     "nav": [
       {
@@ -827,7 +833,8 @@
       "FOOTER",
       "SNAPSHARE_CTA",
       "RICH_TEXT",
-      "TRIVIA_CTA"
+      "TRIVIA_CTA",
+      "GIFT"
     ],
     "default_enabled": {
       "ABOUT": true,
@@ -844,7 +851,8 @@
       "FOOTER": true,
       "SNAPSHARE_CTA": true,
       "RICH_TEXT": false,
-      "TRIVIA_CTA": false
+      "TRIVIA_CTA": false,
+      "GIFT": false
     },
     "nav": [
       {
@@ -955,7 +963,8 @@
       "FOOTER",
       "SNAPSHARE_CTA",
       "RICH_TEXT",
-      "TRIVIA_CTA"
+      "TRIVIA_CTA",
+      "GIFT"
     ],
     "default_enabled": {
       "ABOUT": true,
@@ -972,7 +981,8 @@
       "FOOTER": true,
       "SNAPSHARE_CTA": true,
       "RICH_TEXT": false,
-      "TRIVIA_CTA": false
+      "TRIVIA_CTA": false,
+      "GIFT": false
     },
     "nav": [
       {
@@ -1352,7 +1362,8 @@
       "RICH_TEXT",
       "WISHING_WELL",
       "RSVP",
-      "TRIVIA_CTA"
+      "TRIVIA_CTA",
+      "GIFT"
     ],
     "default_enabled": {
       "ABOUT": true,
@@ -1370,7 +1381,8 @@
       "RICH_TEXT": false,
       "WISHING_WELL": false,
       "RSVP": false,
-      "TRIVIA_CTA": false
+      "TRIVIA_CTA": false,
+      "GIFT": false
     },
     "nav": [
       {
@@ -1477,7 +1489,8 @@
       "SNAPSHARE_CTA",
       "RICH_TEXT",
       "WISHING_WELL",
-      "TRIVIA_CTA"
+      "TRIVIA_CTA",
+      "GIFT"
     ],
     "default_enabled": {
       "ABOUT": true,
@@ -1494,7 +1507,8 @@
       "SNAPSHARE_CTA": true,
       "RICH_TEXT": false,
       "WISHING_WELL": false,
-      "TRIVIA_CTA": false
+      "TRIVIA_CTA": false,
+      "GIFT": false
     },
     "nav": [
       {

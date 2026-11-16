@@ -18,6 +18,9 @@ import type { HubConfig } from "@/components/landing/types";
 const MSG_TYPE = "snapshare:landing-preview";
 const READY_TYPE = "snapshare:landing-preview-ready";
 const PING_TYPE = "snapshare:landing-preview-ping";
+/** { type, sectionId, instant? } — scroll the preview to a section (`sec-{block id}`). */
+const SCROLL_TYPE = "snapshare:landing-preview-scroll";
+const FLASH_CLASS = "lpf-flash";
 
 export default defineComponent({
   name: "LandingPreviewFrameView",
@@ -33,12 +36,42 @@ export default defineComponent({
       }
     }
 
+    let scrollRaf = 0;
+
+    function scrollToSection(sectionId: string, instant: boolean, tries = 0) {
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      const el = document.getElementById(`sec-${sectionId}`);
+      if (!el) {
+        // The section may have just been enabled: wait for the renderer to paint it.
+        if (tries < 40) {
+          scrollRaf = requestAnimationFrame(() => scrollToSection(sectionId, instant, tries + 1));
+        }
+        return;
+      }
+      const reduce =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({ behavior: instant || reduce ? "auto" : "smooth", block: "start" });
+      if (!reduce) {
+        el.classList.remove(FLASH_CLASS);
+        void el.offsetWidth;
+        el.classList.add(FLASH_CLASS);
+        window.setTimeout(() => el.classList.remove(FLASH_CLASS), 1300);
+      }
+    }
+
     function onMessage(ev: MessageEvent) {
       if (ev.origin !== window.location.origin) return;
       const data = ev.data;
       if (!data || typeof data !== "object") return;
       if (data.type === PING_TYPE) {
         postReady();
+        return;
+      }
+      if (data.type === SCROLL_TYPE) {
+        if (typeof data.sectionId === "string" && data.sectionId) {
+          scrollToSection(data.sectionId, Boolean(data.instant));
+        }
         return;
       }
       if (data.type !== MSG_TYPE) return;
@@ -70,6 +103,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
       window.removeEventListener("message", onMessage);
       document.documentElement.removeAttribute("data-landing-preview-frame");
     });
@@ -78,6 +112,21 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+/* Brief highlight on the section the host is editing (preview frame only). */
+html[data-landing-preview-frame] .lpf-flash {
+  animation: lpf-flash 1.2s ease-out;
+}
+@keyframes lpf-flash {
+  0% {
+    box-shadow: inset 0 0 0 4px #dc5b66;
+  }
+  100% {
+    box-shadow: inset 0 0 0 4px transparent;
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 .lpf {

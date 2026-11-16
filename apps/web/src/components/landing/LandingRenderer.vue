@@ -7,7 +7,7 @@
   >
     <a class="skip" href="#sec-hero">דילוג לתוכן</a>
 
-    <header class="site-nav" id="site-nav">
+    <header class="site-nav" :class="templateClass" id="site-nav">
       <a class="nav-brand" href="#sec-hero" @click.prevent="scrollTo('hero')">
         <span class="nav-event">{{ eventTitle }}</span>
       </a>
@@ -144,6 +144,7 @@ export default defineComponent({
     let toastTimer: ReturnType<typeof setTimeout> | null = null;
     let fontLink: HTMLLinkElement | null = null;
     let observer: IntersectionObserver | null = null;
+    let overrideStyle: HTMLStyleElement | null = null;
 
     const shot = computed(
       () => String(route.query.shot || "") === "1" || String(route.query.shot || "") === "hero"
@@ -364,9 +365,72 @@ export default defineComponent({
       els.forEach((el) => observer?.observe(el));
     }
 
+    /**
+     * Host-chosen palette / font. The template classes (.t-*) re-declare the same custom
+     * properties on .page and .site-nav, so root-level inline vars never win there.
+     * Scoped rules with higher specificity do. Only explicit overrides are emitted, so
+     * untouched templates render exactly as before.
+     */
+    function buildOverrideCss(): string {
+      const theme = props.hubConfig.theme;
+      const id = props.templateId;
+      if (!theme || !id || id === "legacy") return "";
+      const dark = isDark.value;
+      const sel = `.landing-root .page.t-${id}, .landing-root .site-nav.t-${id}`;
+      let css = "";
+      const a = theme.primary_color;
+      const b = theme.secondary_color;
+      if (a && b) {
+        const strong = dark ? a : b;
+        css +=
+          `${sel}{--accent:${a};--accent-2:${a};--count-ink:${strong};--cta-bg:${strong};--cta-ink:#fff;` +
+          `--nav-on-bg:${strong};--nav-on-ink:#fff;}`;
+        if (!dark) {
+          css += `.landing-root .page.t-${id} .enames,.landing-root .page.t-${id} .sec-title{color:${b};}`;
+        }
+      }
+      // Dark heroes: transparent sticky nav so it sits over the cover without a beige band
+      if (dark) {
+        css +=
+          `.landing-root .site-nav.t-${id}{--nav-bg:transparent;background:transparent;border-bottom-color:rgba(255,255,255,.12);color:#F7F1E8;}` +
+          `.landing-root .site-nav.t-${id} .nav-event,.landing-root .site-nav.t-${id} .nav-links a{color:rgba(247,241,232,.92);}` +
+          `.landing-root .site-nav.t-${id} .nav-burger span{background:#F7F1E8;}`;
+      } else if (a && b) {
+        css +=
+          `.landing-root .site-nav.t-${id}{--nav-bg:rgba(247,241,232,.92);}` +
+          `.landing-root .site-nav.t-${id} .nav-links a.on{background:${b};color:#fff;}`;
+      }
+      const font = theme.font_family;
+      if (font && font !== meta.value?.default_font) {
+        const f = `"${font}", serif`;
+        const body = `"${font === "Frank Ruhl Libre" ? "Heebo" : font}", sans-serif`;
+        css +=
+          `${sel}{--font-display:${f};--font-body:${body};}` +
+          `.landing-root .page.t-${id} .enames,.landing-root .page.t-${id} .sec-title,` +
+          `.landing-root .page.t-${id} .welcome .body{font-family:${f} !important;}`;
+      }
+      return css;
+    }
+
+    function applyOverrideCss() {
+      const css = buildOverrideCss();
+      if (!css) {
+        overrideStyle?.remove();
+        overrideStyle = null;
+        return;
+      }
+      if (!overrideStyle) {
+        overrideStyle = document.createElement("style");
+        overrideStyle.setAttribute("data-landing-overrides", "1");
+        document.head.appendChild(overrideStyle);
+      }
+      overrideStyle.textContent = css;
+    }
+
     function applyThemeVars() {
       const root = document.querySelector(".landing-root") as HTMLElement | null;
       if (!root) return;
+      applyOverrideCss();
       const vars = themeStyleVars.value;
       Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
       const coverUrl = props.coverImage?.url;
@@ -429,6 +493,8 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       observer?.disconnect();
+      overrideStyle?.remove();
+      overrideStyle = null;
       document.body.classList.remove("landing-active", "dark", "drawer-open");
       if (toastTimer) clearTimeout(toastTimer);
     });

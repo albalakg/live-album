@@ -1,156 +1,204 @@
 <template>
-  <div class="epb" dir="rtl" lang="he">
+  <div class="epb-wizard epb-wizard--page" dir="rtl" lang="he">
     <div v-if="loadState === 'loading'" class="epb-state" role="status">טוען את דף האירוע…</div>
 
-    <div v-else-if="loadState === 'error'" class="epb-state epb-error" role="alert">
+    <div v-else-if="loadState === 'error' || !state" class="epb-state" role="alert">
       <h2>לא הצלחנו לטעון את דף האירוע</h2>
       <p>{{ loadError }}</p>
-      <button type="button" class="btn primary" @click="load">נסו שוב</button>
+      <button type="button" class="btn btn-primary" @click="load">נסו שוב</button>
     </div>
 
     <template v-else>
-      <header class="epb-head">
-        <div>
-          <h1>דף אירוע</h1>
-          <p class="lede">
-            בונים עמוד נחיתה לאורחים: עיצוב, סעיפים, צבעים ופרסום בכתובת ייחודית.
-          </p>
-          <p class="muted-note">
-            כרטיס ה־QR ממשיך להוביל לעמוד ההעלאה — לא לדף האירוע.
-          </p>
+      <!-- Page head -->
+      <div v-if="view === 'wizard'" class="phead with-steps">
+        <div class="ph-t"><h1>דף האירוע</h1></div>
+        <BuilderStepper :step="step" :max-step="maxStep" @go="go" />
+        <SaveIndicator :status="saveStatus" :published="state.is_published" @retry="retrySave" />
+      </div>
+      <div v-else class="phead">
+        <div class="ph-t">
+          <h1>דף האירוע</h1>
+          <p>עמוד אחד ויפה לאורחים: כל הפרטים, וגם הקישור להעלאת תמונות.</p>
         </div>
-        <div class="epb-head-actions">
-          <div class="epb-save-meta">
-            <span class="save-status" :class="saveStatusClass">{{ saveStatusLabel }}</span>
-            <button
-              v-if="saveUi === 'failed'"
-              type="button"
-              class="btn retry"
-              :disabled="saving || backendOutdated"
-              @click="save"
-            >נסו שוב</button>
-          </div>
-          <button
-            type="button"
-            class="btn primary"
-            :disabled="saving || !hasTemplate || backendOutdated"
-            :title="backendOutdated ? backendOutdatedTooltip : undefined"
-            @click="save"
-          >{{ saving ? "שומר…" : "שמירה" }}</button>
-          <button
-            v-if="hasTemplate"
-            type="button"
-            class="btn"
-            @click="showPicker = true"
-          >החלפת עיצוב</button>
-        </div>
-      </header>
-
-      <div
-        v-if="backendOutdated"
-        class="epb-banner"
-        role="alert"
-      >
-        <p v-for="(line, i) in backendOutdatedLines" :key="i">{{ line }}</p>
       </div>
 
-      <p
-        v-else-if="saveUi === 'failed' && saveErrorMessage"
-        class="epb-inline-err"
-        role="alert"
-      >{{ saveErrorMessage }}</p>
+      <div v-if="backendOutdated" class="epb-banner" role="alert">
+        <p v-for="(line, i) in backendOutdatedLines" :key="i">{{ line }}</p>
+      </div>
+      <div v-else-if="saveStatus === 'error' && saveErrorText" class="epb-banner" role="alert">
+        <p>{{ saveErrorText }}</p>
+      </div>
 
-      <LandingTemplatePicker
-        v-if="!hasTemplate || showPicker"
-        :event-type="eventType"
-        :heading="hasTemplate ? 'החלפת עיצוב' : 'בחרו עיצוב'"
-        :lede="hasTemplate
-          ? 'בחירת עיצוב חדש תחליף את תוכן הסעיפים בברירת המחדל. כותרת, תאריך ומקום יישמרו.'
-          : 'בחרו עיצוב כדי להתחיל. אפשר לשנות הכל אחר כך.'"
-        @select="onPickTemplate"
+      <!-- Published / hidden summary -->
+      <PublishedSummary
+        v-if="view === 'published' && previewConfig"
+        :live="state.is_published"
+        :slug="serverSlug || effectiveSlug"
+        :title-text="titleText"
+        :template-name="templateName"
+        :section-count="sectionCount"
+        :published-at="publishedAt"
+        :template-id="state.template_id"
+        :hub-config="previewConfig"
+        :busy="publishing"
+        @edit="editFromSummary"
+        @hide="onHide"
+        @republish="onRepublish"
       />
 
-      <template v-if="hasTemplate && hubConfig && !showPicker">
-        <LandingPublishBar
-          :is-published="isPublished"
-          :public-url="publicUrl"
-          :can-publish="canPublish && !backendOutdated"
-          :busy="acting"
-          @publish="onPublish"
-          @unpublish="onUnpublish"
+      <!-- Step 1: choose a design -->
+      <template v-else-if="step === 1">
+        <TemplatePicker
+          :event-type="state.event.type"
+          :selected-id="state.template_id"
+          :filter="filter"
+          @select="pickTemplate"
+          @preview="openTemplatePreview"
+          @filter="filter = $event"
         />
+        <BuilderActionBar
+          info-prefix="העיצוב שבחרתם:"
+          :info-strong="templateName"
+          primary-label="המשך"
+          @primary="next(2)"
+        />
+      </template>
 
-        <div class="epb-slug-wrap">
-          <LandingSlugField
-            v-model="slug"
-            :event-id="eventId"
-            @availability="onSlugAvailability"
-          />
-        </div>
-
-        <div class="epb-layout">
-          <div class="epb-editor">
-            <div class="epb-panes">
-              <button type="button" :class="{ on: pane === 'blocks' }" @click="pane = 'blocks'">סעיפים</button>
-              <button type="button" :class="{ on: pane === 'theme' }" @click="pane = 'theme'">עיצוב</button>
-            </div>
-
-            <div v-show="pane === 'blocks'" class="epb-blocks">
-              <LandingBlockList
-                :blocks="hubConfig.blocks"
-                :selected-id="selectedBlockId"
-                :template-id="templateId"
-                @select="selectedBlockId = $event"
-                @toggle="onToggle"
-                @move="onMove"
-              />
-              <LandingBlockEditor
-                :block="selectedBlock"
-                :event-id="eventId"
-                :template-id="templateId"
-                :errors="fieldErrors"
-                @update="onBlockUpdate"
-              />
-            </div>
-
-            <LandingThemePanel
-              v-show="pane === 'theme'"
-              :theme="hubConfig.theme"
-              :template-id="templateId"
+      <!-- Step 2: details -->
+      <template v-else-if="step === 2">
+        <div class="split">
+          <div class="fcol">
+            <DetailsForm
+              :event="state.event"
+              :error="essentialsError"
+              @update="onEventField"
+              @focus-hero="scrollPreviewTo('hero')"
+            />
+            <SectionCardList
+              v-model:reorder="reorder"
+              :kinds="orderedKinds"
+              :sections="state.sections"
+              :content="state.content"
+              :event="state.event"
               :event-id="eventId"
-              @update="onThemeUpdate"
+              :template-id="state.template_id"
+              :asset-urls="assetUrls"
+              :errors="kindErrors"
+              :open-kinds="openKinds"
+              :flash-kind="flashKind"
+              @toggle="onToggleKind"
+              @toggle-open="onToggleOpen"
+              @content="onContent"
+              @focus-kind="scrollPreviewTo"
+              @reorder="onReorder"
+            />
+            <AdvancedDesignCard
+              v-model:open="advOpen"
+              :theme="state.theme"
+              :title-text="titleText"
+              :template-font-id="templateFontId"
+              @palette="onPalette"
+              @font="onFont"
             />
           </div>
-
-          <LandingBuilderPreview
-            :template-id="templateId"
-            :hub-config="hubConfig"
-            @open-sheet="mobilePreview = true"
-          />
+          <div v-if="previewConfig" class="pcol">
+            <LivePreviewPane
+              v-model:device="device"
+              :template-id="state.template_id"
+              :hub-config="previewConfig"
+              :url-text="urlText"
+              :scroll-section="scrollTarget.id"
+              :scroll-tick="scrollTarget.tick"
+            />
+          </div>
         </div>
+        <button type="button" class="fab" @click="sheetOpen = true">
+          <BuilderIcon name="eye" />תצוגה מקדימה
+        </button>
+        <BuilderActionBar
+          back-label="חזרה לבחירת עיצוב"
+          :primary-label="state.is_published ? 'סיום' : 'המשך לפרסום'"
+          @back="go(1)"
+          @primary="state.is_published ? finishEditing() : next(3)"
+        />
+      </template>
+
+      <!-- Step 3: address + publish -->
+      <template v-else>
+        <div class="split">
+          <div class="fcol">
+            <PublishStep
+              :slug="state.slug"
+              :slug-touched="state.slugTouched"
+              :status="slugStatus"
+              :suggestions="slugSuggestions"
+              :prefix="prefix"
+              :template-name="templateName"
+              :title-text="titleText"
+              :date-text="dateText"
+              :time-text="state.event.time"
+              :section-count="sectionCount"
+              @update:slug="onSlugInput"
+              @blur="onSlugBlur"
+              @suggest="onSuggest"
+              @go="go"
+            />
+          </div>
+          <div v-if="previewConfig" class="pcol">
+            <LivePreviewPane
+              v-model:device="device"
+              :template-id="state.template_id"
+              :hub-config="previewConfig"
+              :url-text="urlText"
+            />
+          </div>
+        </div>
+        <button type="button" class="fab" @click="sheetOpen = true">
+          <BuilderIcon name="eye" />תצוגה מקדימה
+        </button>
+        <BuilderActionBar
+          back-label="חזרה לפרטים"
+          primary-kind="publish"
+          :primary-label="state.is_published ? 'עדכון הכתובת' : 'פרסום העמוד'"
+          busy-label="מפרסמים…"
+          :busy="publishing"
+          :disabled="slugStatus !== 'free'"
+          :arrow="false"
+          @back="go(2)"
+          @primary="onPublish"
+        />
       </template>
     </template>
 
-    <div
-      v-if="mobilePreview && hasTemplate && hubConfig"
-      class="epb-sheet"
-      role="dialog"
-      aria-modal="true"
-      aria-label="תצוגה מקדימה"
-    >
-      <header class="epb-sheet-head">
-        <strong>תצוגה מקדימה</strong>
-        <button type="button" class="btn" @click="mobilePreview = false">סגירה</button>
-      </header>
-      <div class="epb-sheet-body">
-        <LandingPreviewIframe
-          :template-id="templateId"
-          :hub-config="hubConfig"
-          mode="phone"
-          title="תצוגה מקדימה בטלפון"
-        />
-      </div>
-    </div>
+    <!-- Overlays -->
+    <TemplatePreviewModal
+      v-if="previewTpl && previewTplConfig"
+      :template="previewTpl"
+      :hub-config="previewTplConfig"
+      :selected="previewTpl.id === state?.template_id"
+      :device="previewDevice"
+      :type-label="typeLabel(previewTpl.type)"
+      :url-text="urlText"
+      @update:device="previewDevice = $event"
+      @pick="onPickFromPreview"
+      @close="previewTplId = ''"
+    />
+    <BuilderPreviewSheet
+      v-if="sheetOpen && state && previewConfig"
+      v-model:device="device"
+      :template-id="state.template_id"
+      :hub-config="previewConfig"
+      :url-text="urlText"
+      :scroll-section="scrollTarget.id"
+      :scroll-tick="scrollTarget.tick"
+      @close="sheetOpen = false"
+    />
+    <PublishSuccessDialog
+      v-if="showSuccess && state"
+      :slug="serverSlug || effectiveSlug"
+      :title-text="titleText"
+      @close="onSuccessDone"
+    />
   </div>
 </template>
 
@@ -158,6 +206,7 @@
 import {
   computed,
   defineComponent,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -169,152 +218,485 @@ import {
   checkHubSlug,
   classifyHubError,
   getAdminHub,
+  getHubAssets,
   publishHub,
   updateHub,
-  type SlugCheckReason,
+  type UpdateHubPayload,
 } from "@/api/eventHub";
 import { notify } from "@/helpers/notify";
-import type { HubBlock, HubConfig, HubTheme } from "../types";
-import LandingTemplatePicker from "./LandingTemplatePicker.vue";
-import LandingBlockList from "./LandingBlockList.vue";
-import LandingBlockEditor from "./LandingBlockEditor.vue";
-import LandingThemePanel from "./LandingThemePanel.vue";
-import LandingSlugField from "./LandingSlugField.vue";
-import LandingPublishBar from "./LandingPublishBar.vue";
-import LandingBuilderPreview from "./LandingBuilderPreview.vue";
-import LandingPreviewIframe from "./LandingPreviewIframe.vue";
+import { getDefaultHubConfig, getTemplate, listTemplates } from "../templates/registry";
+import type { HubBlock, HubConfig, TemplateMeta } from "../types";
+import "./builderWizard.css";
+import "./builderWizardExtra.css";
+import { isHttpsUrl } from "./builderFields";
+import type { PreviewDevice, SaveStatus, ScrollTarget, SlugUiStatus } from "./builderTypes";
 import {
-  applyTemplateConfig,
-  friendlyHubError,
-  hasTemplateId,
-  mapAxiosValidationErrors,
-  moveBlock,
-  setBlockEnabled,
-  snapshotHub,
-  updateBlockData,
-  validateHubConfigClient,
-  type FieldError,
-} from "./hubBuilderUtils";
+  CATEGORIES,
+  baseKind,
+  dateHe,
+  defaultContent,
+  ensureGiftBlock,
+  fromHubConfig,
+  isKindOnByDefault,
+  kindMeta,
+  localSlugStatus,
+  normalizeEventType,
+  normalizeOrder,
+  normalizeSlug,
+  slugCandidates,
+  suggestSlug,
+  templateKinds,
+  templateTypeOf,
+  titleOf,
+  toHubConfig,
+} from "./hubWizardModel";
+import type { KindContent, WizardContent, WizardEvent, WizardState } from "./hubWizardModel";
+import { applyTemplateConfig, hasTemplateId, mapAxiosValidationErrors } from "./hubBuilderUtils";
+import { hubDisplayUrl, hubPrefix } from "./hubPublicUrl";
+import AdvancedDesignCard from "./AdvancedDesignCard.vue";
+import BuilderActionBar from "./BuilderActionBar.vue";
+import BuilderIcon from "./BuilderIcon.vue";
+import BuilderPreviewSheet from "./BuilderPreviewSheet.vue";
+import BuilderStepper from "./BuilderStepper.vue";
+import DetailsForm from "./DetailsForm.vue";
+import LivePreviewPane from "./LivePreviewPane.vue";
+import PublishedSummary from "./PublishedSummary.vue";
+import PublishStep from "./PublishStep.vue";
+import PublishSuccessDialog from "./PublishSuccessDialog.vue";
+import SaveIndicator from "./SaveIndicator.vue";
+import SectionCardList from "./SectionCardList.vue";
+import TemplatePicker from "./TemplatePicker.vue";
+import TemplatePreviewModal from "./TemplatePreviewModal.vue";
 
-type SaveUi = "clean" | "dirty" | "saving" | "saved" | "failed";
+const DEBOUNCE_MS = 800;
+const RETRY_MS = [5000, 15000, 30000];
+const SLUG_DEBOUNCE_MS = 400;
 
+const FONT_BY_FAMILY: Record<string, string> = {
+  "Frank Ruhl Libre": "classic",
+  Heebo: "clean",
+  "Varela Round": "soft",
+  Rubik: "clean",
+  "Secular One": "soft",
+};
+
+type AssetUrls = Record<string, { url: string; thumb_url?: string }>;
+
+function isNarrow(): boolean {
+  return typeof window !== "undefined" && window.innerWidth <= 900;
+}
+
+function sortedBlocks(blocks: HubBlock[]): HubBlock[] {
+  return [...blocks].sort((a, b) => a.order - b.order);
+}
+
+function clone<T>(v: T): T {
+  return JSON.parse(JSON.stringify(v)) as T;
+}
+
+function lsGet(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function lsSet(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    /* private mode: ignore */
+  }
+}
+
+/** Event row start time ("2027/06/10 19:00:00" or ISO) -> "2027-06-10T19:00:00". */
+function normalizeStart(raw: unknown): string {
+  const s = String(raw || "").trim();
+  const m = /^(\d{4})[-/](\d{2})[-/](\d{2})(?:[T ](\d{2}):(\d{2}))?/.exec(s);
+  if (!m) return "";
+  return `${m[1]}-${m[2]}-${m[3]}T${m[4] || "19"}:${m[5] || "00"}:00`;
+}
+
+/**
+ * The «דף אירוע» tab: a three-step wizard (design, details, publish) that saves itself.
+ * The wizard state lives per section kind; the draft hub_config is projected from it for the
+ * live preview and for autosave. The event row is only read (prefill), never written.
+ */
 export default defineComponent({
   name: "EventPageBuilderTab",
   components: {
-    LandingTemplatePicker,
-    LandingBlockList,
-    LandingBlockEditor,
-    LandingThemePanel,
-    LandingSlugField,
-    LandingPublishBar,
-    LandingBuilderPreview,
-    LandingPreviewIframe,
+    AdvancedDesignCard,
+    BuilderActionBar,
+    BuilderIcon,
+    BuilderPreviewSheet,
+    BuilderStepper,
+    DetailsForm,
+    LivePreviewPane,
+    PublishedSummary,
+    PublishStep,
+    PublishSuccessDialog,
+    SaveIndicator,
+    SectionCardList,
+    TemplatePicker,
+    TemplatePreviewModal,
   },
   setup() {
     const store = useStore();
+
+    /* ---------------- core state ---------------- */
     const loadState = ref<"loading" | "ready" | "error">("loading");
     const loadError = ref("");
-    const hubConfig = ref<HubConfig | null>(null);
-    const slug = ref("");
-    const isPublished = ref(false);
-    const savedSnap = ref("");
-    const selectedBlockId = ref("");
-    const pane = ref<"blocks" | "theme">("blocks");
-    const showPicker = ref(false);
-    const mobilePreview = ref(false);
-    const saving = ref(false);
-    const acting = ref(false);
-    const fieldErrors = ref<FieldError[]>([]);
-    const slugAvailable = ref(false);
-    const slugReason = ref<SlugCheckReason>(null);
+    const state = ref<WizardState | null>(null);
+    const view = ref<"wizard" | "published">("wizard");
+    const step = ref(1);
+    const maxStep = ref(1);
+    const filter = ref("all");
+    const device = ref<PreviewDevice>(isNarrow() ? "phone" : "desktop");
+    const serverSlug = ref<string | null>(null);
+    const savedTemplateId = ref("");
+    const publishedAt = ref<string | null>(null);
+    const assetUrls = ref<AssetUrls>({});
+
+    const reorder = ref(false);
+    const advOpen = ref(false);
+    const openKinds = ref<string[]>([]);
+    const flashKind = ref("");
+    const sheetOpen = ref(false);
+    const scrollTarget = ref<ScrollTarget>({ id: "", tick: 0 });
+    const previewTplId = ref("");
+    const previewDevice = ref<PreviewDevice>(device.value);
+    const showSuccess = ref(false);
+    const publishing = ref(false);
+
+    const saveStatus = ref<SaveStatus>("saved");
+    const saveErrorText = ref("");
     const backendOutdated = ref(false);
-    const saveUi = ref<SaveUi>("clean");
-    const savedAtLabel = ref("");
-    const saveErrorMessage = ref("");
+    const kindErrors = ref<Record<string, string>>({});
+    const essentialsError = ref("");
+
+    const slugStatus = ref<SlugUiStatus>("idle");
+    const slugSuggestions = ref<string[]>([]);
+    const freeSlug = ref("");
 
     const event = computed(() => store.getters["event/getEvent"]);
     const eventId = computed(() => Number(event.value?.id || 0));
-    const eventType = computed(() => String(event.value?.event_type || ""));
-    const hasTemplate = computed(() => hasTemplateId(hubConfig.value));
-    const templateId = computed(() => String(hubConfig.value?.template_id || ""));
-    const dirty = computed(() => {
-      if (!hubConfig.value) return false;
-      return snapshotHub(hubConfig.value, slug.value, isPublished.value) !== savedSnap.value;
-    });
-    const selectedBlock = computed<HubBlock | null>(() => {
-      if (!hubConfig.value) return null;
-      return hubConfig.value.blocks.find((b) => b.id === selectedBlockId.value) || null;
-    });
-    const publicUrl = computed(() => {
-      if (!isPublished.value || !slug.value) return "";
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
-      return `${origin}/h/${slug.value}`;
-    });
-    const canPublish = computed(
-      () => hasTemplate.value && Boolean(slug.value) && slugAvailable.value
-    );
 
     const backendOutdatedLines = computed(() =>
       backendOutdatedMessage().split("\n").filter(Boolean)
     );
-    const backendOutdatedTooltip =
-      "השרת המחובר לא מכיר עדיין את דף האירוע החדש — לא ניתן לשמור או לפרסם.";
 
-    const saveStatusLabel = computed(() => {
-      if (saveUi.value === "saving" || saving.value) return "שומר…";
-      if (saveUi.value === "failed") return "השמירה נכשלה";
-      if (dirty.value || saveUi.value === "dirty") return "לא נשמר";
-      if (savedAtLabel.value) return `נשמר ✓ ${savedAtLabel.value}`;
-      return "";
+    /* ---------------- derived: template + draft ---------------- */
+    const defaults = computed<HubConfig | null>(() =>
+      state.value ? getDefaultHubConfig(state.value.template_id) : null
+    );
+    const templateMeta = computed<TemplateMeta | null>(() =>
+      state.value ? getTemplate(state.value.template_id) : null
+    );
+    const templateName = computed(() => templateMeta.value?.name_he || "");
+    const templateFontId = computed(
+      () => FONT_BY_FAMILY[templateMeta.value?.default_font || ""] || "classic"
+    );
+
+    /** Wizard cards for the chosen template (gift included for the types that get one). */
+    const allKinds = computed(() => {
+      const d = defaults.value;
+      if (!d || !state.value) return [];
+      const blocks = ensureGiftBlock(sortedBlocks(d.blocks), templateTypeOf(state.value.template_id));
+      return templateKinds(blocks);
+    });
+    const orderedKinds = computed(() =>
+      normalizeOrder(
+        state.value?.order,
+        allKinds.value.map((p) => p.kind)
+      )
+    );
+    const kindBlockIds = computed(() => {
+      const map: Record<string, string> = {};
+      for (const p of allKinds.value) map[p.kind] = p.block.id;
+      const hero = defaults.value?.blocks.find((b) => b.type === "HERO_COUNTDOWN");
+      map.hero = hero?.id || "hero";
+      return map;
     });
 
-    const saveStatusClass = computed(() => {
-      if (saveUi.value === "saving" || saving.value) return "busy";
-      if (saveUi.value === "failed") return "bad";
-      if (dirty.value || saveUi.value === "dirty") return "dirty";
-      if (savedAtLabel.value) return "ok";
-      return "";
-    });
+    function kindOn(kind: string): boolean {
+      const v = state.value?.sections[kind];
+      return v !== undefined ? !!v : isKindOnByDefault(kind);
+    }
+    const sectionCount = computed(() => orderedKinds.value.filter(kindOn).length + 1);
 
-    function formatClock(d = new Date()): string {
-      const hh = String(d.getHours()).padStart(2, "0");
-      const mm = String(d.getMinutes()).padStart(2, "0");
-      return `${hh}:${mm}`;
+    function buildConfig(st: WizardState): HubConfig | null {
+      const d = getDefaultHubConfig(st.template_id);
+      if (!d) return null;
+      return toHubConfig(st, sortedBlocks(d.blocks), d.theme);
     }
 
-    function markSaved(fromSave = false) {
-      if (!hubConfig.value) return;
-      savedSnap.value = snapshotHub(hubConfig.value, slug.value, isPublished.value);
-      if (fromSave) {
-        savedAtLabel.value = formatClock();
-        saveUi.value = "saved";
-      } else {
-        saveUi.value = "clean";
+    const draftConfig = computed<HubConfig | null>(() =>
+      state.value ? buildConfig(state.value) : null
+    );
+
+    /** Host photos need a url for the preview (the saved config keeps only asset_id). */
+    function withAssetUrls(cfg: HubConfig): HubConfig {
+      const urls = assetUrls.value;
+      const out = clone(cfg);
+      for (const b of out.blocks) {
+        const imgs = b.data?.images;
+        if (!Array.isArray(imgs)) continue;
+        for (const item of imgs as Array<Record<string, unknown>>) {
+          const ref = item?.image as Record<string, unknown> | undefined;
+          const hit = ref && ref.asset_id != null ? urls[String(ref.asset_id)] : undefined;
+          if (ref && hit) {
+            ref.url = hit.url;
+            ref.thumb_url = hit.thumb_url || hit.url;
+          }
+        }
       }
-      saveErrorMessage.value = "";
+      return out;
     }
 
+    const previewConfig = computed<HubConfig | null>(() =>
+      draftConfig.value ? withAssetUrls(draftConfig.value) : null
+    );
+
+    /** Another design previewed with the host's own content (template modal). */
+    function mergedContentFor(st: WizardState, templateId: string): WizardContent {
+      const d = getDefaultHubConfig(templateId);
+      if (!d) return st.content;
+      const type = templateTypeOf(templateId);
+      const blocks = ensureGiftBlock(sortedBlocks(d.blocks), type);
+      const fresh = defaultContent(blocks, st.event, type);
+      const merged: WizardContent = { ...st.content };
+      for (const k of Object.keys(fresh)) if (!merged[k]) merged[k] = fresh[k];
+      const imgs = merged.gallery?.images || [];
+      if (imgs.length && imgs.every((im) => im.stock && /\/album-\d+$/.test(im.stock))) {
+        merged.gallery = fresh.gallery;
+      }
+      return merged;
+    }
+
+    const previewTpl = computed<TemplateMeta | null>(() =>
+      previewTplId.value ? getTemplate(previewTplId.value) : null
+    );
+    const previewTplConfig = computed<HubConfig | null>(() => {
+      const st = state.value;
+      if (!st || !previewTplId.value) return null;
+      const cfg = buildConfig({
+        ...st,
+        template_id: previewTplId.value,
+        order: [],
+        theme: { palette_id: "original", font_id: null },
+        content: mergedContentFor(st, previewTplId.value),
+      });
+      return cfg ? withAssetUrls(cfg) : null;
+    });
+
+    const titleText = computed(() => (state.value ? titleOf(state.value.event) : ""));
+    const dateText = computed(() => (state.value ? dateHe(state.value.event.date) : ""));
+    const effectiveSlug = computed(() => normalizeSlug(state.value?.slug || ""));
+    const urlText = computed(() => hubDisplayUrl(effectiveSlug.value || "…"));
+    const prefix = hubPrefix();
+
+    function typeLabel(type: string): string {
+      return CATEGORIES.find((c) => c.id === type)?.he || "";
+    }
+
+    /* ---------------- autosave ---------------- */
+    let debounceT: ReturnType<typeof setTimeout> | null = null;
+    let retryT: ReturnType<typeof setTimeout> | null = null;
+    let inFlight: Promise<void> | null = null;
+    let dirty = false;
+    let attempt = 0;
+
+    function clearTimers() {
+      if (debounceT) clearTimeout(debounceT);
+      if (retryT) clearTimeout(retryT);
+      debounceT = null;
+      retryT = null;
+    }
+
+    /** Any host edit: show "שומר…" now, save 800ms after the last change. */
+    function touch() {
+      if (!state.value) return;
+      dirty = true;
+      saveStatus.value = "saving";
+      if (retryT) {
+        clearTimeout(retryT);
+        retryT = null;
+      }
+      if (debounceT) clearTimeout(debounceT);
+      debounceT = setTimeout(() => {
+        debounceT = null;
+        void runSave();
+      }, DEBOUNCE_MS);
+    }
+
+    function buildPayload(): UpdateHubPayload | null {
+      const cfg = draftConfig.value;
+      const st = state.value;
+      if (!cfg || !st) return null;
+      const out = clone(cfg);
+      // The preview shows what was typed; the server only gets valid links.
+      for (const { kind, block } of templateKinds(out.blocks)) {
+        const k = baseKind(kind);
+        if (k === "gift" && block.data.url && !isHttpsUrl(String(block.data.url))) block.data.url = null;
+        if (k === "map" && block.data.waze_url && !isHttpsUrl(String(block.data.waze_url))) {
+          block.data.waze_url = null;
+        }
+      }
+      const slug = st.is_published
+        ? serverSlug.value
+        : freeSlug.value && freeSlug.value === effectiveSlug.value
+          ? freeSlug.value
+          : serverSlug.value;
+      return { slug, is_published: st.is_published, hub_config: out };
+    }
+
+    function runSave(): Promise<void> {
+      if (inFlight) return inFlight;
+      if (!dirty || !state.value || !eventId.value) return Promise.resolve();
+      if (backendOutdated.value) {
+        saveStatus.value = "error";
+        saveErrorText.value = backendOutdatedLines.value[0] || "";
+        return Promise.resolve();
+      }
+      const payload = buildPayload();
+      if (!payload) return Promise.resolve();
+      dirty = false;
+      saveStatus.value = "saving";
+      inFlight = (async () => {
+        try {
+          await updateHub(eventId.value, payload);
+          attempt = 0;
+          if (payload.slug) serverSlug.value = payload.slug;
+          savedTemplateId.value = payload.hub_config.template_id;
+          kindErrors.value = {};
+          essentialsError.value = "";
+          saveErrorText.value = "";
+          if (!dirty) saveStatus.value = "saved";
+        } catch (err) {
+          dirty = true; // keep the local draft; the preview keeps working
+          onSaveError(err, payload);
+        } finally {
+          inFlight = null;
+        }
+        // Edits that arrived while this request was in flight: one more save.
+        if (dirty && !debounceT && !retryT && saveStatus.value !== "error") {
+          await runSave();
+        }
+      })();
+      return inFlight;
+    }
+
+    function onSaveError(err: unknown, payload: UpdateHubPayload) {
+      const cls = classifyHubError(err, { usesTemplate: true });
+      saveStatus.value = "error";
+      saveErrorText.value = cls.message.split("\n")[0];
+      if (cls.kind === "backend_outdated") {
+        backendOutdated.value = true;
+        return;
+      }
+      if (cls.kind === "validation") {
+        showFieldErrors(err, payload.hub_config.blocks);
+        return; // same content would fail again: wait for the next edit or a manual retry
+      }
+      if (cls.kind === "unauthorized" || cls.kind === "forbidden") return;
+      if (attempt < RETRY_MS.length) {
+        retryT = setTimeout(() => {
+          retryT = null;
+          void runSave();
+        }, RETRY_MS[attempt++]);
+      }
+    }
+
+    /** 422 `hub_config.blocks.N.data.X` -> the matching section card (opened) with the message. */
+    function showFieldErrors(err: unknown, blocks: HubBlock[]) {
+      const mapped = mapAxiosValidationErrors(err, blocks);
+      if (!mapped.length) return;
+      const kinds = templateKinds(blocks);
+      const byId = new Map(kinds.map((p) => [p.block.id, p.kind]));
+      const heroId = blocks.find((b) => b.type === "HERO_COUNTDOWN")?.id;
+      const next: Record<string, string> = {};
+      let essentials = "";
+      let firstKind = "";
+      for (const m of mapped) {
+        let id = m.blockId;
+        if (id.startsWith("__index_")) id = blocks[Number(id.replace("__index_", ""))]?.id || "";
+        const kind = byId.get(id);
+        if (kind) {
+          next[kind] = next[kind] || m.message;
+          firstKind = firstKind || kind;
+        } else if (id && id === heroId) {
+          essentials = essentials || m.message;
+        } else if (!essentials) {
+          saveErrorText.value = m.message;
+        }
+      }
+      kindErrors.value = next;
+      essentialsError.value = essentials;
+      if (firstKind) {
+        if (view.value === "published") view.value = "wizard";
+        if (step.value !== 2) step.value = 2;
+        if (!openKinds.value.includes(firstKind)) openKinds.value = [...openKinds.value, firstKind];
+        nextTick(() => {
+          document
+            .querySelector(`.epb-wizard .sec[data-kind="${firstKind}"]`)
+            ?.scrollIntoView({ block: "center", behavior: "smooth" });
+        });
+      }
+    }
+
+    function retrySave() {
+      attempt = 0;
+      if (retryT) clearTimeout(retryT);
+      retryT = null;
+      dirty = true;
+      void runSave();
+    }
+
+    /** Save whatever is pending and wait for it. Resolves false when the save failed. */
+    async function flush(): Promise<boolean> {
+      if (debounceT) {
+        clearTimeout(debounceT);
+        debounceT = null;
+      }
+      if (retryT) {
+        clearTimeout(retryT);
+        retryT = null;
+      }
+      for (let i = 0; i < 5; i++) {
+        if (inFlight) await inFlight;
+        if (!dirty) return saveStatus.value !== "error";
+        await runSave();
+        if (saveStatus.value === "error") return false;
+      }
+      return !dirty;
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === "hidden") void flush();
+    }
+    function onBeforeUnload() {
+      void flush();
+    }
+
+    /* ---------------- load / hydrate ---------------- */
     function eventPrefill() {
+      const e = event.value || {};
       return {
-        name: event.value?.name,
-        starts_at: event.value?.starts_at,
-        welcome_text: event.value?.config?.welcome_text,
-        event_type: event.value?.event_type,
+        name: e.name as string | undefined,
+        starts_at: normalizeStart(e.starts_at),
+        welcome_text: e.config?.welcome_text as string | undefined,
+        event_type: e.event_type as string | undefined,
       };
     }
 
-    async function probeBackendCapabilities() {
-      if (!eventId.value) return;
-      try {
-        await checkHubSlug(eventId.value, slug.value || "x-probe");
-        backendOutdated.value = false;
-      } catch (err) {
-        const status = (err as { response?: { status?: number } })?.response?.status;
-        if (status === 404) {
-          backendOutdated.value = true;
-        }
-        // Other errors (422 invalid slug, network) — do not treat as outdated
-      }
+    function defaultTemplateFor(eventType: string): string {
+      const type = normalizeEventType(eventType, "wedding");
+      const hit = listTemplates().find((t) => t.type === type);
+      return (hit || listTemplates()[0])?.id || "wedding-1";
+    }
+
+    function storageKey(): string {
+      return `snapshare.hub.maxStep.${eventId.value}`;
     }
 
     async function load() {
@@ -326,521 +708,713 @@ export default defineComponent({
       loadState.value = "loading";
       loadError.value = "";
       backendOutdated.value = false;
+      clearTimers();
+      dirty = false;
       try {
         const hub = await getAdminHub(eventId.value);
-        const cfg = (hub.hub_config || { theme: {}, blocks: [] }) as HubConfig;
-        hubConfig.value = {
-          template_id: cfg.template_id || "",
-          theme: cfg.theme || ({} as HubTheme),
-          blocks: Array.isArray(cfg.blocks) ? cfg.blocks : [],
-        };
-        slug.value = hub.slug || "";
-        isPublished.value = Boolean(hub.is_published);
-        selectedBlockId.value =
-          hubConfig.value.blocks.find((b) => b.type === "HERO_COUNTDOWN")?.id ||
-          hubConfig.value.blocks[0]?.id ||
-          "";
-        showPicker.value = !hasTemplateId(hubConfig.value);
-        markSaved(false);
+        const raw = (hub.hub_config || {}) as Partial<HubConfig>;
+        const saved = hasTemplateId(raw as HubConfig);
+        const prefill = eventPrefill();
+        let config: HubConfig;
+        if (saved) {
+          config = {
+            template_id: String(raw.template_id),
+            theme: raw.theme || ({} as HubConfig["theme"]),
+            blocks: Array.isArray(raw.blocks) ? raw.blocks : [],
+          };
+        } else {
+          // Fresh hub: start from the design that matches the event type, prefilled from the event
+          // (first load only, and only inside the page: the event row is never written).
+          config = applyTemplateConfig(defaultTemplateFor(String(prefill.event_type || "")), {
+            event: prefill,
+          }) as HubConfig;
+        }
+        const hydrated = fromHubConfig(config, prefill, eventId.value, {
+          slug: hub.slug,
+          is_published: Boolean(hub.is_published),
+        });
+        if (!saved) {
+          // Sample venue from the design is not the host's venue.
+          hydrated.event.venue = "";
+          hydrated.event.city = "";
+        }
+        state.value = hydrated;
+        serverSlug.value = hub.slug || null;
+        savedTemplateId.value = saved ? config.template_id : "";
+        publishedAt.value = hub.updated_at || null;
+        freeSlug.value = "";
+        slugStatus.value = "idle";
+        slugSuggestions.value = [];
+        saveStatus.value = "saved";
+        saveErrorText.value = "";
+        kindErrors.value = {};
+        essentialsError.value = "";
+        openKinds.value = [];
+        reorder.value = false;
+        filter.value = CATEGORIES.some((c) => c.id === hydrated.event.type) ? hydrated.event.type : "all";
+
+        // Default route
+        const stored = Number(lsGet(storageKey()));
+        const wasPublished = lsGet(`snapshare.hub.published.${eventId.value}`) === "1";
+        if (hub.is_published || (wasPublished && hub.slug && saved)) {
+          view.value = "published";
+          maxStep.value = 3;
+          step.value = 3;
+        } else {
+          view.value = "wizard";
+          const start = stored >= 1 && stored <= 3 ? stored : saved ? 2 : 1;
+          maxStep.value = start;
+          step.value = start;
+        }
         loadState.value = "ready";
-        await probeBackendCapabilities();
+        void probeBackend();
+        void ensureAssetUrls();
+        if (step.value === 3) scheduleSlugCheck(true);
       } catch (err) {
         console.error(err);
+        const cls = classifyHubError(err, { usesTemplate: true });
         loadState.value = "error";
-        loadError.value = friendlyHubError(err, false);
+        loadError.value = cls.message.split("\n")[0];
+        if (cls.kind === "backend_outdated") backendOutdated.value = true;
       }
     }
 
-    function onPickTemplate(id: string) {
-      if (!hubConfig.value) return;
-      const switching = hasTemplateId(hubConfig.value);
-      if (switching) {
-        const ok = window.confirm(
-          "להחליף עיצוב? התוכן של הסעיפים יוחלף בברירת המחדל של העיצוב החדש"
-        );
-        if (!ok) return;
-      }
-      const next = applyTemplateConfig(id, {
-        event: eventPrefill(),
-        previous: hubConfig.value,
-        keepHero: switching,
-      });
-      if (!next) return;
-      hubConfig.value = next;
-      selectedBlockId.value =
-        next.blocks.find((b) => b.type === "HERO_COUNTDOWN")?.id || next.blocks[0]?.id || "";
-      showPicker.value = false;
-      pane.value = "blocks";
-      fieldErrors.value = [];
-      saveUi.value = "dirty";
-    }
-
-    function onToggle(blockId: string, enabled: boolean) {
-      if (!hubConfig.value) return;
-      hubConfig.value = {
-        ...hubConfig.value,
-        blocks: setBlockEnabled(hubConfig.value.blocks, blockId, enabled),
-      };
-    }
-
-    function onMove(blockId: string, dir: -1 | 1) {
-      if (!hubConfig.value) return;
-      hubConfig.value = {
-        ...hubConfig.value,
-        blocks: moveBlock(hubConfig.value.blocks, blockId, dir),
-      };
-    }
-
-    function onBlockUpdate(data: Record<string, unknown>) {
-      if (!hubConfig.value || !selectedBlockId.value) return;
-      hubConfig.value = {
-        ...hubConfig.value,
-        blocks: updateBlockData(hubConfig.value.blocks, selectedBlockId.value, data),
-      };
-    }
-
-    function onThemeUpdate(theme: HubTheme) {
-      if (!hubConfig.value) return;
-      hubConfig.value = { ...hubConfig.value, theme };
-    }
-
-    function onSlugAvailability(payload: {
-      available: boolean;
-      reason: Exclude<SlugCheckReason, null> | null;
-      slug: string;
-    }) {
-      slugAvailable.value = payload.available;
-      slugReason.value = payload.reason;
-    }
-
-    function scrollToFieldError(err: FieldError) {
-      const sel = err.listIndex != null && err.listSubKey
-        ? `[data-field="${err.blockId}.${err.fieldKey}.${err.listIndex}.${err.listSubKey}"]`
-        : `[data-field="${err.blockId}.${err.fieldKey}"]`;
-      const el = document.querySelector(sel) as HTMLElement | null;
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.classList.add("epb-flash");
-        setTimeout(() => el.classList.remove("epb-flash"), 1600);
-      }
-      if (err.blockId && !err.blockId.startsWith("__index_")) {
-        selectedBlockId.value = err.blockId;
-        pane.value = "blocks";
-      } else if (err.blockId.startsWith("__index_") && hubConfig.value) {
-        const idx = Number(err.blockId.replace("__index_", ""));
-        const b = hubConfig.value.blocks[idx];
-        if (b) selectedBlockId.value = b.id;
-        pane.value = "blocks";
-      }
-    }
-
-    async function save(): Promise<boolean> {
-      if (!hubConfig.value || !eventId.value) return false;
-      if (backendOutdated.value) {
-        saveUi.value = "failed";
-        saveErrorMessage.value = backendOutdatedMessage();
-        notify({ text: saveErrorMessage.value.split("\n")[0], type: "error", duration: 5000 });
-        return false;
-      }
-      const clientErrors = validateHubConfigClient(hubConfig.value);
-      if (clientErrors.length) {
-        fieldErrors.value = clientErrors;
-        scrollToFieldError(clientErrors[0]);
-        saveUi.value = "failed";
-        saveErrorMessage.value = clientErrors[0].message;
-        notify({ text: clientErrors[0].message, type: "error", duration: 4000 });
-        return false;
-      }
-      saving.value = true;
-      saveUi.value = "saving";
-      fieldErrors.value = [];
-      saveErrorMessage.value = "";
+    async function probeBackend() {
       try {
-        await updateHub(eventId.value, {
-          slug: slug.value || null,
-          is_published: isPublished.value,
-          hub_config: hubConfig.value,
-        });
-        markSaved(true);
-        notify({ text: "העמוד נשמר", type: "success", duration: 3000 });
-        return true;
+        await checkHubSlug(eventId.value, serverSlug.value || "probe-slug");
       } catch (err) {
-        const classified = classifyHubError(err, { usesTemplate: hasTemplate.value });
-        if (classified.kind === "backend_outdated") {
+        if ((err as { response?: { status?: number } })?.response?.status === 404) {
           backendOutdated.value = true;
-          saveUi.value = "failed";
-          saveErrorMessage.value = classified.message;
-          notify({ text: classified.message.split("\n")[0], type: "error", duration: 5500 });
-          return false;
         }
-        const mapped = mapAxiosValidationErrors(err, hubConfig.value?.blocks);
-        if (mapped.length) {
-          fieldErrors.value = mapped.map((e) => {
-            if (e.blockId.startsWith("__index_") && hubConfig.value) {
-              const idx = Number(e.blockId.replace("__index_", ""));
-              const b = hubConfig.value.blocks[idx];
-              return b ? { ...e, blockId: b.id } : e;
-            }
-            return e;
-          });
-          scrollToFieldError(fieldErrors.value[0]);
-          saveUi.value = "failed";
-          saveErrorMessage.value = fieldErrors.value[0].message;
-          notify({ text: fieldErrors.value[0].message, type: "error", duration: 4500 });
-        } else {
-          saveUi.value = "failed";
-          saveErrorMessage.value = classified.message;
-          notify({ text: classified.message.split("\n")[0], type: "error", duration: 4500 });
-        }
-        return false;
-      } finally {
-        saving.value = false;
       }
+    }
+
+    /* ---------------- host photos ---------------- */
+    let assetLoading = false;
+    async function ensureAssetUrls() {
+      const st = state.value;
+      if (!st || !eventId.value || assetLoading) return;
+      const need = new Set<string>();
+      for (const im of st.content.gallery?.images || []) {
+        if (im.asset_id != null && im.asset_id !== "" && !assetUrls.value[String(im.asset_id)]) {
+          need.add(String(im.asset_id));
+        }
+      }
+      if (!need.size) return;
+      assetLoading = true;
+      try {
+        for (let page = 1; page <= 6 && need.size; page++) {
+          const res = await getHubAssets(eventId.value, page, 60);
+          const add: AssetUrls = {};
+          for (const a of res.data) {
+            add[String(a.id)] = { url: a.url, thumb_url: a.thumb_url };
+            need.delete(String(a.id));
+          }
+          assetUrls.value = { ...assetUrls.value, ...add };
+          if (page >= res.last_page) break;
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        assetLoading = false;
+      }
+    }
+
+    watch(
+      () =>
+        (state.value?.content.gallery?.images || [])
+          .map((i) => i.asset_id ?? "")
+          .join(","),
+      () => void ensureAssetUrls()
+    );
+
+    /* ---------------- navigation ---------------- */
+    function persistStep() {
+      lsSet(storageKey(), String(maxStep.value));
+    }
+
+    function go(n: number) {
+      if (!state.value) return;
+      if (n < 1 || n > 3 || n > maxStep.value) return;
+      if (view.value === "wizard" && n === step.value) return;
+      leaveStep();
+      view.value = "wizard";
+      step.value = n;
+    }
+
+    function next(n: number) {
+      if (!state.value) return;
+      maxStep.value = Math.max(maxStep.value, n);
+      persistStep();
+      go(n);
+    }
+
+    /** Leaving a step flushes the pending save; a design picked on step 1 is always persisted. */
+    function leaveStep() {
+      if (state.value && !savedTemplateId.value) touch();
+      void flush();
+      sheetOpen.value = false;
+    }
+
+    function finishEditing() {
+      leaveStep();
+      view.value = "published";
+    }
+
+    function editFromSummary() {
+      view.value = "wizard";
+      step.value = 2;
+      maxStep.value = 3;
+    }
+
+    watch(step, (n) => {
+      window.scrollTo({ top: 0 });
+      if (n === 3) scheduleSlugCheck(true);
+    });
+    watch(view, () => window.scrollTo({ top: 0 }));
+
+    /* ---------------- step 1: design ---------------- */
+    function pickTemplate(id: string) {
+      const st = state.value;
+      if (!st || id === st.template_id) return;
+      st.content = mergedContentFor(st, id);
+      st.template_id = id;
+      st.order = [];
+      st.theme.font_id = null;
+      openKinds.value = [];
+      kindErrors.value = {};
+      touch();
+    }
+
+    function openTemplatePreview(id: string) {
+      previewDevice.value = device.value;
+      previewTplId.value = id;
+    }
+
+    function onPickFromPreview(id: string) {
+      pickTemplate(id);
+      previewTplId.value = "";
+    }
+
+    /* ---------------- step 2: details ---------------- */
+    function scrollPreviewTo(kind: string) {
+      const id = kindBlockIds.value[kind];
+      if (!id) return;
+      scrollTarget.value = { id, tick: scrollTarget.value.tick + 1 };
+    }
+
+    function onEventField(field: keyof WizardEvent, value: string) {
+      const st = state.value;
+      if (!st) return;
+      (st.event as unknown as Record<string, string>)[field] = value;
+      if (!st.slugTouched) st.slug = suggestSlug(st.event);
+      if (essentialsError.value) essentialsError.value = "";
+      touch();
+    }
+
+    function addOpen(kind: string) {
+      if (!openKinds.value.includes(kind)) openKinds.value = [...openKinds.value, kind];
+    }
+
+    function onToggleKind(kind: string, on: boolean) {
+      const st = state.value;
+      if (!st) return;
+      st.sections = { ...st.sections, [kind]: on };
+      if (on && kindMeta(kind).fields.length) addOpen(kind);
+      else openKinds.value = openKinds.value.filter((k) => k !== kind);
+      touch();
+      if (on) {
+        flashKind.value = kind;
+        window.setTimeout(() => {
+          if (flashKind.value === kind) flashKind.value = "";
+        }, 1300);
+        window.setTimeout(() => scrollPreviewTo(kind), 150);
+      }
+    }
+
+    function onToggleOpen(kind: string) {
+      if (openKinds.value.includes(kind)) {
+        openKinds.value = openKinds.value.filter((k) => k !== kind);
+      } else {
+        addOpen(kind);
+        scrollPreviewTo(kind);
+      }
+    }
+
+    function onContent(base: string, content: KindContent) {
+      const st = state.value;
+      if (!st) return;
+      st.content = { ...st.content, [base]: content };
+      if (Object.keys(kindErrors.value).length) {
+        const next = { ...kindErrors.value };
+        for (const k of Object.keys(next)) if (baseKind(k) === base) delete next[k];
+        kindErrors.value = next;
+      }
+      touch();
+    }
+
+    function onReorder(order: string[]) {
+      if (!state.value) return;
+      state.value.order = order;
+      touch();
+    }
+
+    function onPalette(id: string) {
+      if (!state.value) return;
+      state.value.theme = { ...state.value.theme, palette_id: id };
+      touch();
+    }
+
+    function onFont(id: string) {
+      if (!state.value) return;
+      state.value.theme = {
+        ...state.value.theme,
+        font_id: id === templateFontId.value ? null : id,
+      };
+      touch();
+    }
+
+    /* ---------------- step 3: address ---------------- */
+    const slugCache = new Map<string, "free" | "taken" | "reserved" | "invalid">();
+    let slugT: ReturnType<typeof setTimeout> | null = null;
+    let slugReq = 0;
+
+    function statusFromReason(reason: string | null): SlugUiStatus {
+      switch (reason) {
+        case "reserved":
+          return "reserved";
+        case "too_short":
+          return "short";
+        case "too_long":
+          return "long";
+        case "invalid":
+          return "invalid";
+        default:
+          return "taken";
+      }
+    }
+
+    async function checkOne(slug: string): Promise<"free" | "taken" | "reserved" | "invalid"> {
+      if (slug === serverSlug.value) return "free";
+      const hit = slugCache.get(slug);
+      if (hit) return hit;
+      const res = await checkHubSlug(eventId.value, slug);
+      const out = res.available
+        ? "free"
+        : res.reason === "reserved"
+          ? "reserved"
+          : res.reason === "invalid"
+            ? "invalid"
+            : "taken";
+      slugCache.set(slug, out);
+      return out;
+    }
+
+    async function loadSuggestions(slug: string, req: number) {
+      const st = state.value;
+      if (!st) return;
+      const cands = slugCandidates(slug, st.event).slice(0, 6);
+      const results = await Promise.all(
+        cands.map((c) => checkOne(c).then((r) => (r === "free" ? c : "")).catch(() => ""))
+      );
+      if (req !== slugReq) return;
+      slugSuggestions.value = results.filter(Boolean).slice(0, 3);
+    }
+
+    function scheduleSlugCheck(immediate = false) {
+      if (slugT) clearTimeout(slugT);
+      slugT = null;
+      const s = effectiveSlug.value;
+      const local = localSlugStatus(s);
+      if (local !== "ok") {
+        slugReq++;
+        slugStatus.value = local;
+        slugSuggestions.value = [];
+        return;
+      }
+      if (s === serverSlug.value) {
+        slugReq++;
+        slugStatus.value = "free";
+        slugSuggestions.value = [];
+        freeSlug.value = s;
+        return;
+      }
+      slugStatus.value = "checking";
+      slugSuggestions.value = [];
+      slugT = setTimeout(() => void runSlugCheck(s), immediate ? 0 : SLUG_DEBOUNCE_MS);
+    }
+
+    async function runSlugCheck(s: string) {
+      const req = ++slugReq;
+      try {
+        const result = await checkOne(s);
+        if (req !== slugReq || s !== effectiveSlug.value) return;
+        if (result === "free") {
+          slugStatus.value = "free";
+          freeSlug.value = s;
+          slugSuggestions.value = [];
+          // The address is saved together with the page, but only once it is known to be free.
+          if (state.value && !state.value.is_published && s !== serverSlug.value) touch();
+        } else {
+          slugStatus.value = result === "invalid" ? "invalid" : result;
+          await loadSuggestions(s, req);
+        }
+      } catch (err) {
+        if (req !== slugReq) return;
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404) backendOutdated.value = true;
+        else if (status === 422) slugStatus.value = statusFromReason("invalid");
+        else slugStatus.value = "error";
+      }
+    }
+
+    function onSlugInput(value: string) {
+      if (!state.value) return;
+      state.value.slug = value;
+      state.value.slugTouched = true;
+      scheduleSlugCheck();
+    }
+
+    function onSlugBlur() {
+      if (!state.value) return;
+      const n = normalizeSlug(state.value.slug);
+      if (n !== state.value.slug) {
+        state.value.slug = n;
+        scheduleSlugCheck();
+      }
+    }
+
+    function onSuggest(slug: string) {
+      if (!state.value) return;
+      state.value.slug = slug;
+      state.value.slugTouched = true;
+      slugStatus.value = "free";
+      freeSlug.value = slug;
+      slugSuggestions.value = [];
+      slugReq++;
+      if (!state.value.is_published) touch();
+    }
+
+    watch(
+      () => state.value?.slug,
+      () => {
+        // Names edited on step 2 change the suggestion; the check runs when step 3 opens.
+        if (step.value === 3 && view.value === "wizard" && !state.value?.slugTouched) scheduleSlugCheck();
+      }
+    );
+
+    /* ---------------- publish / hide ---------------- */
+    function rememberPublished() {
+      lsSet(`snapshare.hub.published.${eventId.value}`, "1");
+    }
+
+    function httpStatus(err: unknown): number | undefined {
+      return (err as { response?: { status?: number } })?.response?.status;
     }
 
     async function onPublish() {
-      if (!eventId.value || backendOutdated.value) return;
-      if (dirty.value) {
-        const ok = window.confirm("יש שינויים שלא נשמרו. לשמור ואז לפרסם?");
-        if (!ok) return;
-        const saved = await save();
-        if (!saved) return;
-      }
-      if (!slug.value || !slugAvailable.value) {
-        notify({ text: "בחרו כתובת פנויה לפני הפרסום", type: "error", duration: 3500 });
-        return;
-      }
-      acting.value = true;
+      const st = state.value;
+      if (!st || publishing.value || slugStatus.value !== "free") return;
+      publishing.value = true;
       try {
+        const ok = await flush();
+        if (!ok) {
+          notify({ text: "לא הצלחנו לשמור את השינויים. נסו שוב.", type: "error", duration: 4000 });
+          return;
+        }
+        const slug = effectiveSlug.value;
+        const res = await publishHub(eventId.value, { is_published: true, slug });
+        st.is_published = Boolean(res.is_published);
+        serverSlug.value = res.slug || slug;
+        publishedAt.value = res.updated_at || new Date().toISOString();
+        rememberPublished();
+        showSuccess.value = true;
+      } catch (err) {
+        const cls = classifyHubError(err, { usesTemplate: true });
+        const code = httpStatus(err);
+        if (cls.kind === "backend_outdated") {
+          backendOutdated.value = true;
+        } else if (code === 409 || (code === 422 && !hasHubConfigErrors(err))) {
+          // Taken while the host was typing: back to the taken state with suggestions.
+          slugCache.set(effectiveSlug.value, "taken");
+          slugStatus.value = "taken";
+          const req = ++slugReq;
+          await loadSuggestions(effectiveSlug.value, req);
+        } else {
+          if (cls.kind === "validation") showFieldErrors(err, buildPayload()?.hub_config.blocks || []);
+          notify({ text: cls.message.split("\n")[0], type: "error", duration: 4500 });
+        }
+      } finally {
+        publishing.value = false;
+      }
+    }
+
+    function hasHubConfigErrors(err: unknown): boolean {
+      const errors = (err as { response?: { data?: { errors?: Record<string, unknown> } } })?.response
+        ?.data?.errors;
+      return !!errors && Object.keys(errors).some((k) => k.startsWith("hub_config"));
+    }
+
+    function onSuccessDone() {
+      showSuccess.value = false;
+      view.value = "published";
+      maxStep.value = 3;
+      persistStep();
+    }
+
+    async function onHide() {
+      const st = state.value;
+      if (!st || publishing.value) return;
+      publishing.value = true;
+      try {
+        await flush();
+        const res = await publishHub(eventId.value, { is_published: false });
+        st.is_published = Boolean(res.is_published);
+        publishedAt.value = res.updated_at || publishedAt.value;
+      } catch (err) {
+        const cls = classifyHubError(err, { usesTemplate: true });
+        if (cls.kind === "backend_outdated") backendOutdated.value = true;
+        notify({ text: cls.message.split("\n")[0], type: "error", duration: 4500 });
+      } finally {
+        publishing.value = false;
+      }
+    }
+
+    async function onRepublish() {
+      const st = state.value;
+      if (!st || publishing.value) return;
+      publishing.value = true;
+      try {
+        await flush();
         const res = await publishHub(eventId.value, {
           is_published: true,
-          slug: slug.value,
+          slug: serverSlug.value || effectiveSlug.value,
         });
-        isPublished.value = Boolean(res.is_published);
-        slug.value = res.slug || slug.value;
-        markSaved(true);
-        notify({ text: "העמוד פורסם", type: "success", duration: 3000 });
+        st.is_published = Boolean(res.is_published);
+        serverSlug.value = res.slug || serverSlug.value;
+        publishedAt.value = res.updated_at || new Date().toISOString();
+        notify({ text: "העמוד חזר לאוויר", type: "success", duration: 3000 });
       } catch (err) {
-        const classified = classifyHubError(err, { usesTemplate: hasTemplate.value });
-        if (classified.kind === "backend_outdated") backendOutdated.value = true;
-        notify({
-          text: classified.message.split("\n")[0],
-          type: "error",
-          duration: 4500,
-        });
+        const cls = classifyHubError(err, { usesTemplate: true });
+        if (cls.kind === "backend_outdated") backendOutdated.value = true;
+        notify({ text: cls.message.split("\n")[0], type: "error", duration: 4500 });
       } finally {
-        acting.value = false;
+        publishing.value = false;
       }
     }
 
-    async function onUnpublish() {
-      if (!eventId.value || backendOutdated.value) return;
-      acting.value = true;
-      try {
-        const res = await publishHub(eventId.value, { is_published: false });
-        isPublished.value = Boolean(res.is_published);
-        markSaved(true);
-        notify({ text: "הפרסום הוסר", type: "success", duration: 3000 });
-      } catch (err) {
-        const classified = classifyHubError(err, { usesTemplate: hasTemplate.value });
-        if (classified.kind === "backend_outdated") backendOutdated.value = true;
-        notify({
-          text: classified.message.split("\n")[0],
-          type: "error",
-          duration: 4500,
-        });
-      } finally {
-        acting.value = false;
-      }
+    /* ---------------- lifecycle ---------------- */
+    let mq: MediaQueryList | null = null;
+    function onMq() {
+      // Phone is the default on small screens; the host's own choice persists after that.
+      if (isNarrow() && device.value === "desktop") device.value = "phone";
     }
 
-    function onBeforeUnload(e: BeforeUnloadEvent) {
-      if (!dirty.value) return;
-      e.preventDefault();
-      e.returnValue = "";
-    }
-
-    function onKeydown(e: KeyboardEvent) {
-      const key = e.key?.toLowerCase?.() || "";
-      if (!(e.ctrlKey || e.metaKey) || key !== "s") return;
-      if (loadState.value !== "ready" || !hasTemplate.value) return;
-      e.preventDefault();
-      if (!saving.value && !backendOutdated.value) save();
+    function attachShotHook() {
+      if (typeof window === "undefined") return;
+      if (!new URLSearchParams(window.location.search).has("shot")) return;
+      (window as unknown as { __epb?: Record<string, unknown> }).__epb = {
+        forceStep(n: number) {
+          const s = Math.min(3, Math.max(1, n));
+          // For shots: maxStep == current so future steps stay disabled (not ✓).
+          maxStep.value = s;
+          view.value = "wizard";
+          step.value = s;
+          if (state.value) {
+            state.value = { ...state.value, is_published: false };
+          }
+          saveStatus.value = "saved";
+        },
+        forceMaxStep(n: number) {
+          maxStep.value = Math.min(3, Math.max(1, n));
+        },
+        forceView(v: "wizard" | "published") {
+          view.value = v;
+          if (v === "published") {
+            maxStep.value = 3;
+            step.value = 3;
+          }
+        },
+        forcePublished(live: boolean) {
+          if (!state.value) return;
+          state.value = { ...state.value, is_published: live };
+          view.value = "published";
+          maxStep.value = 3;
+          step.value = 3;
+          if (live) lsSet(`snapshare.hub.published.${eventId.value}`, "1");
+        },
+        resetDemoEvent() {
+          if (!state.value) return;
+          state.value = {
+            ...state.value,
+            is_published: false,
+            event: {
+              ...state.value.event,
+              type: "wedding",
+              name1: "עמית",
+              name2: "גל",
+              title: "עמית וגל",
+              date: "2027-06-10",
+              time: "19:00",
+              venue: "אולם הדוגמה",
+              city: "השרון",
+            },
+            slug: "amit-and-gal",
+            slugTouched: false,
+          };
+          saveStatus.value = "saved";
+        },
+        forceSave(s: SaveStatus) {
+          saveStatus.value = s;
+        },
+        forceSlug(status: SlugUiStatus, suggestions: string[] = []) {
+          slugStatus.value = status;
+          slugSuggestions.value = suggestions;
+        },
+        forceFilter(f: string) {
+          filter.value = f;
+        },
+        forceDevice(d: PreviewDevice) {
+          device.value = d;
+        },
+        forceOpenKinds(kinds: string[]) {
+          openKinds.value = kinds;
+        },
+        forceAdv(open: boolean) {
+          advOpen.value = open;
+        },
+        forceReorder(on: boolean) {
+          reorder.value = on;
+        },
+        forceSheet(on: boolean) {
+          sheetOpen.value = on;
+        },
+        forceSuccess(on: boolean) {
+          showSuccess.value = on;
+        },
+        getState: () => state.value,
+        setGiftOn() {
+          if (!state.value) return;
+          state.value = {
+            ...state.value,
+            sections: { ...state.value.sections, gift: true },
+            content: {
+              ...state.value.content,
+              gift: {
+                ...(state.value.content.gift || {}),
+                text: state.value.content.gift?.text || "למתנה",
+                url: state.value.content.gift?.url || "https://pay.example/gift",
+              },
+            },
+          };
+          openKinds.value = Array.from(new Set([...openKinds.value, "gift"]));
+        },
+        setPalette(id: string) {
+          onPalette(id);
+        },
+      };
     }
 
     onMounted(() => {
-      load();
+      void load().then(() => attachShotHook());
+      document.addEventListener("visibilitychange", onVisibility);
       window.addEventListener("beforeunload", onBeforeUnload);
-      window.addEventListener("keydown", onKeydown);
-    });
-
-    onBeforeUnmount(() => {
-      window.removeEventListener("beforeunload", onBeforeUnload);
-      window.removeEventListener("keydown", onKeydown);
-    });
-
-    watch(eventId, (id, prev) => {
-      if (id && id !== prev) load();
-    });
-
-    watch(dirty, (isDirty) => {
-      if (isDirty && saveUi.value !== "saving" && saveUi.value !== "failed") {
-        saveUi.value = "dirty";
+      if (typeof window.matchMedia === "function") {
+        mq = window.matchMedia("(max-width: 900px)");
+        mq.addEventListener?.("change", onMq);
       }
     });
 
+    onBeforeUnmount(() => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      mq?.removeEventListener?.("change", onMq);
+      if (slugT) clearTimeout(slugT);
+      if (typeof window !== "undefined") {
+        delete (window as unknown as { __epb?: unknown }).__epb;
+      }
+      void flush();
+    });
+
+    watch(eventId, (id, prev) => {
+      if (id && id !== prev) void load();
+    });
+
     return {
+      // state
       loadState,
       loadError,
-      load,
-      hubConfig,
-      slug,
-      isPublished,
-      dirty,
-      hasTemplate,
-      templateId,
+      state,
+      view,
+      step,
+      maxStep,
+      filter,
+      device,
       eventId,
-      eventType,
-      selectedBlockId,
-      selectedBlock,
-      pane,
-      showPicker,
-      mobilePreview,
-      saving,
-      acting,
-      fieldErrors,
-      publicUrl,
-      canPublish,
+      serverSlug,
+      publishedAt,
+      assetUrls,
+      reorder,
+      advOpen,
+      openKinds,
+      flashKind,
+      sheetOpen,
+      scrollTarget,
+      previewTplId,
+      previewTpl,
+      previewTplConfig,
+      previewDevice,
+      showSuccess,
+      publishing,
+      saveStatus,
+      saveErrorText,
       backendOutdated,
       backendOutdatedLines,
-      backendOutdatedTooltip,
-      saveUi,
-      saveErrorMessage,
-      saveStatusLabel,
-      saveStatusClass,
-      onPickTemplate,
-      onToggle,
-      onMove,
-      onBlockUpdate,
-      onThemeUpdate,
-      onSlugAvailability,
-      save,
+      kindErrors,
+      essentialsError,
+      slugStatus,
+      slugSuggestions,
+      // derived
+      previewConfig,
+      templateName,
+      templateFontId,
+      orderedKinds,
+      sectionCount,
+      titleText,
+      dateText,
+      effectiveSlug,
+      urlText,
+      prefix,
+      // actions
+      load,
+      go,
+      next,
+      finishEditing,
+      editFromSummary,
+      retrySave,
+      pickTemplate,
+      openTemplatePreview,
+      onPickFromPreview,
+      scrollPreviewTo,
+      onEventField,
+      onToggleKind,
+      onToggleOpen,
+      onContent,
+      onReorder,
+      onPalette,
+      onFont,
+      onSlugInput,
+      onSlugBlur,
+      onSuggest,
       onPublish,
-      onUnpublish,
+      onSuccessDone,
+      onHide,
+      onRepublish,
+      typeLabel,
+      // used by EventPageBuilderView
+      flush,
+      dirty: computed(() => false),
     };
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.epb {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-.epb-state {
-  padding: 32px 8px;
-  color: #5e564e;
-}
-.epb-error h2 {
-  margin: 0 0 8px;
-  font-size: 1.4rem;
-}
-.epb-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-.epb-head h1 {
-  margin: 0;
-  font-size: clamp(1.9rem, 3vw, 2.55rem);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-.lede {
-  margin: 8px 0 0;
-  color: #5e564e;
-  font-size: 1.05rem;
-  max-width: 42em;
-}
-.muted-note {
-  margin: 8px 0 0;
-  color: #8a8278;
-  font-size: 0.88rem;
-}
-.epb-head-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-.epb-save-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.save-status {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #8a8278;
-  white-space: nowrap;
-}
-.save-status.dirty {
-  color: #a66a12;
-}
-.save-status.ok {
-  color: #2f7a45;
-}
-.save-status.bad {
-  color: #b42318;
-}
-.save-status.busy {
-  color: #5e564e;
-}
-.btn.retry {
-  padding: 6px 12px;
-  font-size: 0.85rem;
-}
-.epb-banner {
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: #fff4f0;
-  border: 1px solid rgba(180, 35, 24, 0.22);
-  color: #7a1f16;
-  line-height: 1.45;
-}
-.epb-banner p {
-  margin: 0;
-}
-.epb-banner p + p {
-  margin-top: 6px;
-  font-size: 0.92rem;
-}
-.epb-inline-err {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #fff4f0;
-  border: 1px solid rgba(180, 35, 24, 0.18);
-  color: #7a1f16;
-  white-space: pre-line;
-}
-.btn {
-  border: 0;
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-  background: rgba(22, 19, 16, 0.08);
-}
-.btn.primary {
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent-2, #dc5b66), var(--accent, #c9a36a));
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.epb-slug-wrap {
-  max-width: 520px;
-}
-.epb-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(380px, 46%);
-  gap: 18px;
-  align-items: start;
-  max-width: 100%;
-  width: 100%;
-}
-.epb-layout > :last-child {
-  min-width: 0;
-  width: 100%;
-}
-.epb-editor {
-  min-width: 0;
-  display: grid;
-  gap: 12px;
-}
-.epb-panes {
-  display: inline-flex;
-  background: rgba(22, 19, 16, 0.06);
-  border-radius: 999px;
-  padding: 3px;
-  gap: 2px;
-}
-.epb-panes button {
-  border: 0;
-  background: transparent;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-}
-.epb-panes button.on {
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
-.epb-blocks {
-  display: grid;
-  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-}
-.epb-sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: #0e0c0a;
-  display: grid;
-  grid-template-rows: auto 1fr;
-}
-.epb-sheet-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 14px;
-  background: #1c1814;
-  color: #f3eee6;
-}
-.epb-sheet-body {
-  overflow: hidden;
-  background: #1c1814;
-  padding: 12px;
-  min-height: 0;
-}
-.epb-sheet-body :deep(.lpi) {
-  height: 100%;
-}
-:deep(.epb-flash) {
-  animation: epbFlash 1.4s ease;
-}
-@keyframes epbFlash {
-  0%,
-  100% {
-    background: transparent;
-  }
-  30% {
-    background: rgba(220, 91, 102, 0.18);
-  }
-}
-
-@media (max-width: 1100px) {
-  .epb-layout {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 720px) {
-  .epb-blocks {
-    grid-template-columns: 1fr;
-  }
-  .epb-head-actions {
-    width: 100%;
-  }
-}
-</style>
