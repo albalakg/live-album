@@ -8,8 +8,11 @@
     }"
   >
     <div class="qr-card-frame__stack">
+      <!-- Solid white quiet-zone plate; QR modules stay dark-on-white for scan. -->
       <div class="qr-card-frame__qr">
-        <slot name="qr" />
+        <div class="qr-card-frame__qr-plate">
+          <slot name="qr" />
+        </div>
       </div>
       <!-- Soft plate masks template signature/dotted lines under live text -->
       <div class="qr-card-frame__plate">
@@ -124,14 +127,30 @@ export default defineComponent({
 }
 
 .qr-card-frame__qr {
-  width: 48%;
-  max-width: 48%;
+  /* ~52% of the inset window — keeps a sensible print size and helps scanners */
+  width: 52%;
+  max-width: 52%;
   min-width: 0;
   flex: 0 0 auto;
   line-height: 0;
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
+}
+
+/*
+ * Quiet zone ≈ 4 modules: plate padding on each side
+ * around the glyph area (margin=4 on EventQR + this white field).
+ */
+.qr-card-frame__qr-plate {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11%;
+  background: #ffffff !important;
+  border-radius: 2.5%;
+  line-height: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 }
 
 .qr-card-frame__qr :deep(.qr-code),
