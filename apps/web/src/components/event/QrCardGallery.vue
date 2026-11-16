@@ -195,7 +195,7 @@ export default defineComponent({
 
 .qr-search {
   position: relative;
-  flex: 1 1 260px;
+  flex: 1 1 180px;
   min-width: 0;
   max-width: 420px;
 }
@@ -254,12 +254,14 @@ export default defineComponent({
   flex: none;
 }
 
+/* Count + clear sit on their own quiet row so the controls row never wraps
+   (the gallery column is narrow next to the card preview). */
 .qr-filter-meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-inline-start: auto;
-  flex: none;
+  flex: 1 1 100%;
+  min-height: 20px;
 }
 
 .qr-result-count {
@@ -285,7 +287,6 @@ export default defineComponent({
 @media (max-width: 767.98px) {
   .qr-search { flex: 1 1 100%; max-width: none; }
   .qr-filter-menus { flex: 1 1 auto; }
-  .qr-filter-meta { margin-inline-start: auto; }
 }
 
 .qr-grid {
