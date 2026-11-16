@@ -2,35 +2,55 @@
   <aside class="lbp" dir="rtl" aria-label="תצוגה מקדימה">
     <div class="lbp-toolbar">
       <div class="seg" role="group" aria-label="גודל תצוגה">
-        <button type="button" :class="{ on: viewport === 'phone' }" @click="viewport = 'phone'">טלפון</button>
-        <button type="button" :class="{ on: viewport === 'desktop' }" @click="viewport = 'desktop'">מחשב</button>
+        <button
+          type="button"
+          :class="{ on: viewport === 'phone' }"
+          @click="setViewport('phone')"
+        >טלפון</button>
+        <button
+          type="button"
+          :class="{ on: viewport === 'desktop' }"
+          @click="setViewport('desktop')"
+        >מחשב</button>
       </div>
       <button type="button" class="mob-open" @click="$emit('open-sheet')">תצוגה מקדימה</button>
     </div>
 
     <div class="lbp-stage" :class="viewport">
-      <div class="lbp-frame" :style="frameStyle">
-        <div class="lbp-scale" :style="scaleStyle">
-          <LandingRenderer
-            v-if="templateId && hubConfig"
-            :template-id="templateId"
-            :hub-config="hubConfig"
-            mode="preview"
-          />
-        </div>
+      <div class="lbp-frame" :class="viewport">
+        <LandingPreviewIframe
+          v-if="templateId && hubConfig"
+          :template-id="templateId"
+          :hub-config="hubConfig"
+          :mode="viewport"
+          title="תצוגה מקדימה בדף האירוע"
+        />
       </div>
     </div>
   </aside>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, type PropType } from "vue";
-import LandingRenderer from "../LandingRenderer.vue";
+import { defineComponent, onMounted, ref, type PropType } from "vue";
+import LandingPreviewIframe from "./LandingPreviewIframe.vue";
 import type { HubConfig } from "../types";
+
+const STORAGE_KEY = "snapshare-landing-preview-viewport";
+
+function defaultViewport(): "phone" | "desktop" {
+  if (typeof window === "undefined") return "phone";
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === "phone" || saved === "desktop") return saved;
+  } catch {
+    /* ignore */
+  }
+  return window.innerWidth >= 1280 ? "desktop" : "phone";
+}
 
 export default defineComponent({
   name: "LandingBuilderPreview",
-  components: { LandingRenderer },
+  components: { LandingPreviewIframe },
   props: {
     templateId: { type: String, required: true },
     hubConfig: { type: Object as PropType<HubConfig>, required: true },
@@ -39,32 +59,20 @@ export default defineComponent({
   setup() {
     const viewport = ref<"phone" | "desktop">("phone");
 
-    const frameStyle = computed(() => {
-      if (viewport.value === "phone") {
-        return { width: "390px", height: "760px" };
+    function setViewport(next: "phone" | "desktop") {
+      viewport.value = next;
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        /* ignore */
       }
-      return { width: "100%", height: "760px" };
+    }
+
+    onMounted(() => {
+      viewport.value = defaultViewport();
     });
 
-    const scaleStyle = computed(() => {
-      if (viewport.value === "phone") {
-        return {
-          width: "390px",
-          transform: "scale(1)",
-          transformOrigin: "top center",
-        };
-      }
-      // Show a scaled 1440 desktop inside the available width
-      const scale = 0.42;
-      return {
-        width: "1440px",
-        transform: `scale(${scale})`,
-        transformOrigin: "top center",
-        height: `${760 / scale}px`,
-      };
-    });
-
-    return { viewport, frameStyle, scaleStyle };
+    return { viewport, setViewport };
   },
 });
 </script>
@@ -73,7 +81,12 @@ export default defineComponent({
 .lbp {
   display: grid;
   gap: 10px;
+  width: 100%;
   min-width: 0;
+  position: sticky;
+  top: 12px;
+  align-self: stretch;
+  justify-self: stretch;
 }
 .lbp-toolbar {
   display: flex;
@@ -106,26 +119,33 @@ export default defineComponent({
   background: rgba(22, 19, 16, 0.08);
 }
 .lbp-stage {
-  display: flex;
-  justify-content: center;
+  display: block;
+  width: 100%;
   background: rgba(22, 19, 16, 0.04);
   border-radius: 20px;
   padding: 16px;
   overflow: hidden;
+  min-height: 760px;
+  height: min(76vh, 820px);
+  box-sizing: border-box;
 }
 .lbp-frame {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   border-radius: 28px;
-  overflow: auto;
-  background: #111;
+  overflow: hidden;
+  background: #1c1814;
   box-shadow: 0 18px 40px rgba(22, 19, 16, 0.18);
   border: 8px solid #1c1814;
+  padding: 10px;
+  box-sizing: border-box;
 }
-.lbp-stage.desktop .lbp-frame {
+.lbp-frame.desktop {
   border-radius: 16px;
   border-width: 4px;
-}
-.lbp-scale {
-  pointer-events: none;
+  padding: 8px;
 }
 
 @media (max-width: 1100px) {

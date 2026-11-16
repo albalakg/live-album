@@ -99,6 +99,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/TermsAndConditionsView.vue"),
   },
   {
+    path: "/h-preview",
+    name: "landingPreviewFrame",
+    // Same-origin iframe for builder device preview (no guard, no app chrome)
+    component: () => import("@/views/LandingPreviewFrameView.vue"),
+  },
+  {
     path: "/h/:slug",
     name: "eventHubPublic",
     // Public for logged-out AND logged-in visitors (no Guard.guest)
