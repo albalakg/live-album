@@ -1,0 +1,59 @@
+/* Event page workspace (builder v3): glue between the mock styles (builderWorkspace.css) and the app. */
+html.bw3-lock,
+html.bw3-lock body {
+  height: 100%;
+  overflow: hidden;
+}
+/* Focus mode: the workspace covers the admin shell (side menu, top bar, floating contact button). */
+.bw3.app {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  text-align: right;
+}
+.bw3 .save[data-s="error"] { color: var(--err); background: var(--err-bg); cursor: pointer; }
+.bw3 button.save { border: 0; font: inherit; font-size: 13px; font-weight: 600; }
+.bw3 .ws-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--ink-2); font-weight: 600; }
+.bw3 .ws-state h2 { color: var(--ink); font-size: 20px; }
+.bw3 .ws-banner { background: var(--err-bg); color: var(--err); border-radius: var(--r); padding: 10px 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 12px; }
+.bw3 .ws-banner p + p { margin-top: 4px; }
+.bw3 .fld-err { color: var(--err); font-size: 12.5px; font-weight: 700; margin: 0 0 8px; display: block; }
+.bw3 .stage .devwrap { opacity: 0; transition: opacity .2s; }
+.bw3 .stage.loaded .devwrap { opacity: 1; }
+.bw3.shot .stage .devwrap { opacity: 1; }
+.bw3 .tcard, .bw3 .sw-btn, .bw3 .font-btn, .bw3 .rmain, .bw3 .basics-h { font: inherit; }
+
+/* SectionFields (shared with the wizard) inside the workspace: same look as the mock's inline editors. */
+.bw3 .sfields .fld + .fld { margin-top: 10px; }
+.bw3 .sfields .fld > label { font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+.bw3 .sfields .fld .opt { font-weight: 500; color: var(--muted); }
+.bw3 .sfields .inp {
+  width: 100%; height: 40px; padding: 0 11px; border: 1.5px solid var(--line-2); border-radius: 10px;
+  background: #fff; color: var(--ink); font-size: 14.5px;
+}
+.bw3 .sfields textarea.inp { height: auto; min-height: 84px; padding: 8px 11px; resize: vertical; line-height: 1.45; }
+.bw3 .sfields .inp:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(36,27,21,.12); }
+.bw3 .sfields .inp.invalid { border-color: var(--err); }
+.bw3 .sfields .fld-err { margin: 4px 0 0; }
+.bw3 .sfields .note { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--ink-2); background: var(--surface-2); border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; }
+.bw3 .sfields .note svg { width: 16px; height: 16px; margin-top: 2px; }
+.bw3 .sfields .trow { display: grid; grid-template-columns: 96px 1fr 30px; gap: 6px; align-items: center; }
+.bw3 .sfields .trow .inp { height: 38px; }
+.bw3 .sfields .qrow { display: grid; grid-template-columns: 1fr 30px; gap: 6px; align-items: start; background: var(--surface-2); border-radius: 12px; padding: 8px; }
+.bw3 .sfields .qa { display: flex; flex-direction: column; gap: 6px; background: none; padding: 0; }
+.bw3 .sfields .qa input.inp { font-weight: 700; height: 38px; }
+.bw3 .sfields .qa textarea.inp { min-height: 60px; }
+.bw3 .sfields .x { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; color: var(--ink); }
+.bw3 .sfields .x:hover { background: var(--bg-2); }
+.bw3 .sfields .x svg { width: 16px; height: 16px; }
+.bw3 .sfields .add { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-weight: 700; font-size: 13.5px; color: var(--ink); padding: 6px 4px; }
+.bw3 .sfields .add svg { width: 16px; height: 16px; }
+.bw3 .sfields .imgs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.bw3 .sfields .im { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--bg-2); }
+.bw3 .sfields .im img { width: 100%; height: 100%; object-fit: cover; }
+.bw3 .sfields .im .x { position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgba(30,24,19,.78); color: #fff; }
+.bw3 .sfields .addimg { aspect-ratio: 1; border-radius: 10px; border: 1.5px dashed var(--line-2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12.5px; font-weight: 700; color: var(--ink); background: #fff; }
+.bw3 .sfields .help { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.bw3 .lip-back { z-index: 1200; }
+/* Guard against app-wide generic classes (e.g. `.phone .screen` aspect-ratio from the QR/phone mocks). */
+.bw3 .dev .screen { aspect-ratio: auto; position: static; width: auto; height: auto; }
