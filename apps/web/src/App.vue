@@ -78,6 +78,8 @@ export default defineComponent({
       // Public event landing / builder preview frame — no marketing/app chrome
       if (path === "/h-preview" || path === "/h" || path.startsWith("/h/")) return true;
       if (path.includes("/event/trivia/")) return true;
+      // Event page builder: focus mode, its own full-height workspace (no app bars, footer or side menu).
+      if (path === "/event/page" || path.startsWith("/event/page/")) return true;
       if (path.includes("open-album") || path.includes("open-gallery")) return true;
       if (path.startsWith("/preview/")) return true;
       for (let index = 0; index < this.links.length; index++) {
