@@ -1,0 +1,226 @@
+/*
+ * Desktop gallery layout (>= 768px container, including the builder's
+ * desktop preview frame). Staggered bento / masonry — mixed tile sizes,
+ * rounded corners (theme --tile-r), hover lift. Not literal hexagons:
+ * hex cells crop faces awkwardly; this keeps a honeycomb rhythm with
+ * a featured tile and a dense grid of supporting shots.
+ *
+ * Driven by a class on the section, set from the section's own width
+ * (ResizeObserver), so a 390px builder phone iframe stays a carousel.
+ */
+
+.gal-sec.gal-bento .gal-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: minmax(108px, 11vw);
+  grid-auto-flow: dense;
+  gap: 12px;
+  overflow: visible;
+  overflow-x: hidden;
+  scroll-snap-type: none;
+  margin-inline: 0;
+  padding: 8px 0 0;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+.gal-sec.gal-bento .gal-bento-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.gal-sec.gal-bento .gal-bento-grid .g-item {
+  width: auto !important;
+  min-width: 0;
+  flex: none;
+  scroll-snap-align: unset;
+  grid-column: span 4;
+  grid-row: span 2;
+  min-height: 160px;
+  transition: transform 0.28s var(--ease, ease), box-shadow 0.28s var(--ease, ease);
+}
+.gal-sec.gal-bento .gal-bento-grid .g-item img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+
+.gal-sec.gal-bento .gal-bento-grid .g-item:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 16px 32px color-mix(in srgb, var(--ink) 18%, transparent),
+    0 2px 0 color-mix(in srgb, var(--accent) 35%, transparent);
+  z-index: 1;
+}
+
+/* ---- 1: single hero ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="1"] .g-item:nth-child(1) {
+  grid-column: span 12;
+  grid-row: span 4;
+  min-height: 420px;
+}
+
+/* ---- 2: two equal large tiles ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="2"] .g-item {
+  grid-column: span 6;
+  grid-row: span 3;
+  min-height: 320px;
+}
+
+/* ---- 3: large left, two stacked right ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="3"] .g-item:nth-child(1) {
+  grid-column: span 8;
+  grid-row: span 4;
+  min-height: 380px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="3"] .g-item:nth-child(2),
+.gal-sec.gal-bento .gal-bento-grid[data-count="3"] .g-item:nth-child(3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+/* ---- 4: balanced 2x2 ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="4"] .g-item {
+  grid-column: span 6;
+  grid-row: span 3;
+  min-height: 240px;
+}
+
+/* ---- 5: large left, two stacked right, two wide below ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="5"] .g-item:nth-child(1) {
+  grid-column: span 8;
+  grid-row: span 4;
+  min-height: 320px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="5"] .g-item:nth-child(2),
+.gal-sec.gal-bento .gal-bento-grid[data-count="5"] .g-item:nth-child(3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="5"] .g-item:nth-child(4),
+.gal-sec.gal-bento .gal-bento-grid[data-count="5"] .g-item:nth-child(5) {
+  grid-column: span 6;
+  grid-row: span 2;
+}
+
+/* ---- 6: featured cluster + three below ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="6"] .g-item:nth-child(1) {
+  grid-column: span 8;
+  grid-row: span 4;
+  min-height: 300px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="6"] .g-item:nth-child(2),
+.gal-sec.gal-bento .gal-bento-grid[data-count="6"] .g-item:nth-child(3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="6"] .g-item:nth-child(n+4) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+/* ---- 7: same cluster, four below with a wide last tile ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="7"] .g-item:nth-child(1) {
+  grid-column: span 8;
+  grid-row: span 4;
+  min-height: 300px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="7"] .g-item:nth-child(2),
+.gal-sec.gal-bento .gal-bento-grid[data-count="7"] .g-item:nth-child(3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="7"] .g-item:nth-child(n+4) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="7"] .g-item:nth-child(7) {
+  grid-column: span 12;
+  grid-row: span 2;
+}
+
+/* ---- 8: two heroes + six regular ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="8"] .g-item:nth-child(1),
+.gal-sec.gal-bento .gal-bento-grid[data-count="8"] .g-item:nth-child(2) {
+  grid-column: span 6;
+  grid-row: span 3;
+  min-height: 240px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="8"] .g-item:nth-child(n+3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+/* ---- 9: featured cluster + six regular ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="9"] .g-item:nth-child(1) {
+  grid-column: span 8;
+  grid-row: span 4;
+  min-height: 300px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="9"] .g-item:nth-child(2),
+.gal-sec.gal-bento .gal-bento-grid[data-count="9"] .g-item:nth-child(3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="9"] .g-item:nth-child(n+4) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+/* ---- 10: cluster + three + a row of four ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="10"] .g-item:nth-child(1) {
+  grid-column: span 8;
+  grid-row: span 4;
+  min-height: 280px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="10"] .g-item:nth-child(2),
+.gal-sec.gal-bento .gal-bento-grid[data-count="10"] .g-item:nth-child(3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="10"] .g-item:nth-child(4),
+.gal-sec.gal-bento .gal-bento-grid[data-count="10"] .g-item:nth-child(5),
+.gal-sec.gal-bento .gal-bento-grid[data-count="10"] .g-item:nth-child(6) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="10"] .g-item:nth-child(n+7) {
+  grid-column: span 3;
+  grid-row: span 2;
+}
+
+/* ---- 11: two heroes + nine regular ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="11"] .g-item:nth-child(1),
+.gal-sec.gal-bento .gal-bento-grid[data-count="11"] .g-item:nth-child(2) {
+  grid-column: span 6;
+  grid-row: span 3;
+  min-height: 240px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="11"] .g-item:nth-child(n+3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+/* ---- 12: featured cluster + nine regular ---- */
+.gal-sec.gal-bento .gal-bento-grid[data-count="12"] .g-item:nth-child(1) {
+  grid-column: span 8;
+  grid-row: span 4;
+  min-height: 280px;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="12"] .g-item:nth-child(2),
+.gal-sec.gal-bento .gal-bento-grid[data-count="12"] .g-item:nth-child(3) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.gal-sec.gal-bento .gal-bento-grid[data-count="12"] .g-item:nth-child(n+4) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+@media (min-width: 1100px) {
+  .gal-sec.gal-bento .gal-bento-grid {
+    gap: 14px;
+    grid-auto-rows: minmax(120px, 9.5vw);
+  }
+}
