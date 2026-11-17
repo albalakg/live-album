@@ -58,7 +58,8 @@ export function resolveStock(key: string): StockEntry | null {
     const stem = key.slice(4);
     if (/^album-\d+/i.test(stem)) return null;
     const url = `/landing/art/${stem}.webp`;
-    return { url, alt: artAltFallback[stem] || `עיטור ${stem}` };
+    // Never use the file stem (fl-rich1, …) as alt text — only a known Hebrew label, or empty.
+    return { url, alt: artAltFallback[stem] || "" };
   }
 
   // template-id/hero | template-id/album-N

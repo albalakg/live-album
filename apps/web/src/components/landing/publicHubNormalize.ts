@@ -3,6 +3,7 @@ import {
   resolveImageRef,
   resolveStock,
 } from "./templates/registry";
+import { accessibleAlt, isStockImageRef } from "./sampleCaption";
 import type {
   EventMeta,
   HubBlock,
@@ -48,7 +49,7 @@ export function resolvePublicImageRef(
   if (typeof ref === "object" && "type" in ref && ref.type === "stock" && ref.key) {
     const stock = resolveStock(ref.key);
     if (!stock) return null;
-    return { url: stock.url, alt: stock.alt || fallbackAlt, thumb_url: stock.url };
+    return { url: stock.url, alt: accessibleAlt(fallbackAlt, stock.alt, true), thumb_url: stock.url };
   }
 
   if (typeof ref === "object" && "type" in ref && ref.type === "asset") {
@@ -57,7 +58,7 @@ export function resolvePublicImageRef(
     return {
       url,
       thumb_url: ref.thumb_url ? String(ref.thumb_url) : url,
-      alt: ref.alt || fallbackAlt,
+      alt: accessibleAlt(ref.alt, fallbackAlt, false),
     };
   }
 
@@ -65,7 +66,7 @@ export function resolvePublicImageRef(
   if (!resolved) return null;
   return {
     ...resolved,
-    alt: resolved.alt || fallbackAlt,
+    alt: accessibleAlt(fallbackAlt, resolved.alt, isStockImageRef(ref)),
   };
 }
 
