@@ -1,0 +1,24 @@
+/* Grab cursor for horizontal overflow strips. Overrides theme zoom-in on tiles. */
+.hub-drag-scroll {
+  cursor: grab;
+  touch-action: pan-x;
+}
+.hub-drag-scroll .g-item,
+.hub-drag-scroll .g-item img,
+.hub-drag-scroll figure,
+.hub-drag-scroll img {
+  cursor: grab;
+}
+.hub-drag-scroll img,
+.hub-drag-scroll .g-item img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+.hub-drag-scroll.is-dragging,
+.hub-drag-scroll.is-dragging .g-item,
+.hub-drag-scroll.is-dragging .g-item img,
+.hub-drag-scroll.is-dragging figure,
+.hub-drag-scroll.is-dragging img {
+  cursor: grabbing;
+  user-select: none;
+}

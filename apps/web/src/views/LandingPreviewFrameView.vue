@@ -14,6 +14,7 @@
 import { defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
 import LandingRenderer from "@/components/landing/LandingRenderer.vue";
 import type { HubConfig } from "@/components/landing/types";
+import { isDragScrollClick } from "@/composables/useDragScroll";
 
 const MSG_TYPE = "snapshare:landing-preview";
 const READY_TYPE = "snapshare:landing-preview-ready";
@@ -106,6 +107,8 @@ export default defineComponent({
 
     function onClickCapture(ev: MouseEvent) {
       if (!editOn) return;
+      // A drag on a carousel must not select the section (a plain click still does).
+      if (isDragScrollClick()) return;
       const el = sectionFrom(ev.target);
       if (!el) return;
       // In edit mode a click selects the section instead of following its buttons.
