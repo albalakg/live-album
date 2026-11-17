@@ -27,7 +27,7 @@
           @keydown.enter.prevent="open(i)"
         >
           <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
-          <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
+          <figcaption v-if="im.isSample || im.caption"><span v-if="im.isSample" class="ex-tag">דוגמה</span>{{ im.caption }}</figcaption>
         </figure>
       </div>
       <div
@@ -47,7 +47,7 @@
           @keydown.enter.prevent="open(i)"
         >
           <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
-          <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
+          <figcaption v-if="im.isSample || im.caption"><span v-if="im.isSample" class="ex-tag">דוגמה</span>{{ im.caption }}</figcaption>
         </figure>
       </div>
       <div
@@ -66,7 +66,7 @@
           @keydown.enter.prevent="open(i)"
         >
           <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
-          <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
+          <figcaption v-if="im.isSample || im.caption"><span v-if="im.isSample" class="ex-tag">דוגמה</span>{{ im.caption }}</figcaption>
         </figure>
       </div>
       <div
@@ -85,7 +85,7 @@
           @keydown.enter.prevent="open(i)"
         >
           <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
-          <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
+          <figcaption v-if="im.isSample || im.caption"><span v-if="im.isSample" class="ex-tag">דוגמה</span>{{ im.caption }}</figcaption>
         </figure>
       </div>
     </div>
@@ -102,7 +102,7 @@
       <button type="button" class="lb-nav lb-prev" aria-label="הקודמת" @click.stop="prev">‹</button>
       <figure class="lb-fig" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
         <img class="lb-img" :src="images[lbIndex].url" :alt="images[lbIndex].alt" />
-        <figcaption>{{ images[lbIndex].alt }}</figcaption>
+        <figcaption v-if="images[lbIndex].caption">{{ images[lbIndex].caption }}</figcaption>
       </figure>
       <button type="button" class="lb-nav lb-next" aria-label="הבאה" @click.stop="next">›</button>
     </div>
@@ -112,6 +112,7 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
 import { useLandingImage } from "../useLandingImage";
+import { accessibleAlt, isStockImageRef, visibleCaption } from "../sampleCaption";
 import dragScroll from "@/directives/dragScroll";
 import "../galleryBento.css";
 
@@ -139,17 +140,19 @@ export default defineComponent({
     const images = computed(() =>
       (props.data.images || [])
         .map((im: { image?: unknown; caption?: string }) => {
-          const img = resolve(im.image as never, im.caption || "תמונה מהאירוע");
+          const img = resolve(im.image as never, im.caption || "");
           if (!img) return null;
-          const alt = im.caption || img.alt || "תמונה מהאירוע";
+          const isSample = isStockImageRef(im.image);
           return {
             url: img.url,
             thumb: img.thumb_url || img.url,
-            alt,
+            alt: accessibleAlt(im.caption, img.alt, isSample),
+            caption: visibleCaption(im.caption, img.alt, isSample),
+            isSample,
           };
         })
         .filter(Boolean)
-        .slice(0, MAX_IMAGES) as Array<{ url: string; thumb: string; alt: string }>
+        .slice(0, MAX_IMAGES) as Array<{ url: string; thumb: string; alt: string; caption: string; isSample: boolean }>
     );
 
     function measureWide() {

@@ -16,7 +16,7 @@
       <div v-if="photos.length" class="people-photos">
         <figure v-for="(ph, i) in photos" :key="i" class="g-item">
           <img :src="ph.thumb || ph.url" :alt="ph.alt || ph.caption" loading="lazy" />
-          <figcaption>{{ ph.caption || ph.alt }}</figcaption>
+          <figcaption v-if="ph.caption">{{ ph.caption }}</figcaption>
         </figure>
       </div>
     </div>
@@ -26,6 +26,7 @@
 <script lang="ts">
 import { computed, defineComponent } from "vue";
 import { useLandingImage } from "../useLandingImage";
+import { accessibleAlt, isStockImageRef, visibleCaption } from "../sampleCaption";
 
 export default defineComponent({
   name: "LandingPeople",
@@ -39,13 +40,14 @@ export default defineComponent({
     const photos = computed(() =>
       (props.data.photos || [])
         .map((ph: { image?: unknown; caption?: string }) => {
-          const img = resolve(ph.image as never, ph.caption || "תמונה מהאירוע");
+          const img = resolve(ph.image as never, ph.caption || "");
           if (!img) return null;
+          const isSample = isStockImageRef(ph.image);
           return {
             url: img.url,
             thumb: img.thumb_url || img.url,
-            alt: img.alt || "תמונה מהאירוע",
-            caption: ph.caption || img.alt,
+            alt: accessibleAlt(ph.caption, img.alt, isSample),
+            caption: visibleCaption(ph.caption, img.alt, isSample),
           };
         })
         .filter(Boolean)
