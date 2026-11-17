@@ -2,8 +2,8 @@ import { inject } from "vue";
 import { LANDING_CTX } from "./landingContext";
 import { resolveImageRef, resolveStock } from "./templates/registry";
 import type { ImageRef, ResolvedImage } from "./types";
+import { accessibleAlt, isStockImageRef } from "./sampleCaption";
 
-const ASSET_ALT = "תמונה מהאירוע";
 
 export function useLandingImage() {
   const ctx = inject(LANDING_CTX, null);
@@ -15,7 +15,7 @@ export function useLandingImage() {
     if (typeof ref === "object" && "type" in ref && ref.type === "stock" && ref.key) {
       const stock = resolveStock(ref.key);
       if (!stock) return null;
-      return { url: stock.url, alt: stock.alt || fallbackAlt, thumb_url: stock.url };
+      return { url: stock.url, alt: accessibleAlt(fallbackAlt, stock.alt, true), thumb_url: stock.url };
     }
     if (typeof ref === "object" && "type" in ref && ref.type === "asset") {
       const url = ref.url ? String(ref.url) : "";
@@ -23,13 +23,13 @@ export function useLandingImage() {
       return {
         url,
         thumb_url: ref.thumb_url ? String(ref.thumb_url) : url,
-        alt: ref.alt || fallbackAlt || ASSET_ALT,
+        alt: accessibleAlt(ref.alt, fallbackAlt, false),
       };
     }
 
     const img = resolveImageRef(ref, ctx?.resolvedImages);
     if (!img) return null;
-    return { ...img, alt: img.alt || fallbackAlt || ASSET_ALT };
+    return { ...img, alt: accessibleAlt(fallbackAlt, img.alt, isStockImageRef(ref)) };
   }
 
   return { resolve, ctx };

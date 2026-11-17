@@ -77,6 +77,19 @@ export interface SectionNavItem {
   icon: string;
 }
 
+/** Keep the first item when two sections share a visible label (e.g. STEPS + SNAPSHARE_CTA both "העלאה"). */
+export function uniqueNavItems(items: SectionNavItem[]): SectionNavItem[] {
+  const seen = new Set<string>();
+  const out: SectionNavItem[] = [];
+  for (const n of items) {
+    const key = String(n.label || "").trim();
+    if (key && seen.has(key)) continue;
+    if (key) seen.add(key);
+    out.push(n);
+  }
+  return out;
+}
+
 /** Tab bar holds at most 5 slots: 4 sections + "עוד" when there are more. */
 const TAB_SLOTS = 5;
 /** Desktop pill holds up to 7 links before the rest go under "עוד". */
@@ -95,8 +108,9 @@ export default defineComponent({
     const isMobile = ref(false);
     let mq: MediaQueryList | null = null;
 
+    const items = computed(() => uniqueNavItems(props.items));
     const split = (slots: number) => {
-      const all = props.items;
+      const all = items.value;
       if (all.length <= slots) return { main: all, more: [] as SectionNavItem[] };
       return { main: all.slice(0, slots - 1), more: all.slice(slots - 1) };
     };

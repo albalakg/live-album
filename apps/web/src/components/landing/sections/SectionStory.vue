@@ -16,7 +16,7 @@
         class="about-fig"
         :style="{ backgroundImage: `url('${image.url}')` }"
       >
-        <figcaption>{{ data.image_caption || image.alt }}</figcaption>
+        <figcaption v-if="caption">{{ caption }}</figcaption>
       </figure>
     </div>
   </section>
@@ -25,6 +25,7 @@
 <script lang="ts">
 import { computed, defineComponent } from "vue";
 import { useLandingImage } from "../useLandingImage";
+import { isStockImageRef, visibleCaption } from "../sampleCaption";
 
 export default defineComponent({
   name: "LandingStory",
@@ -36,7 +37,10 @@ export default defineComponent({
   setup(props) {
     const { resolve } = useLandingImage();
     const image = computed(() => resolve(props.data.image as never));
-    return { image };
+    const caption = computed(() =>
+      visibleCaption(String(props.data.image_caption || ""), image.value?.alt, isStockImageRef(props.data.image))
+    );
+    return { image, caption };
   },
 });
 </script>
