@@ -57,3 +57,5 @@ html.bw3-lock body {
 .bw3 .lip-back { z-index: 1200; }
 /* Guard against app-wide generic classes (e.g. `.phone .screen` aspect-ratio from the QR/phone mocks). */
 .bw3 .dev .screen { aspect-ratio: auto; position: static; width: auto; height: auto; }
+.bw3 .sfields textarea.inp { min-height: 104px; }
+.bw3 .sfields .qa textarea.inp { min-height: 60px; }

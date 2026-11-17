@@ -429,12 +429,13 @@ export default defineComponent({
     const labels = computed(() => {
       const out: Record<string, string> = {};
       for (const [kind, id] of Object.entries(kindBlockIds.value)) {
-        out[id] = kind === "hero" ? "הפרטים הבסיסיים" : kindMeta(kind).name;
+        out[id] = kind === "hero" ? "הפתיחה" : kindMeta(kind).name;
       }
       return out;
     });
     const selectedBlockId = computed(() => (openKind.value ? kindBlockIds.value[openKind.value] || "" : ""));
-    const sectionCount = computed(() => orderedKinds.value.filter(kindOn).length + 1);
+    /** Visible sections (the opening is always there and not counted, like the «החלקים בעמוד» badge). */
+    const sectionCount = computed(() => orderedKinds.value.filter(kindOn).length);
     const sampleNames = computed(() =>
       orderedKinds.value
         .filter((k) => kindOn(k) && isSampleContent(k, state.value?.content[baseKind(k)]))
