@@ -92,7 +92,7 @@
 
     <div
       v-if="lbIndex !== null"
-      class="overlay center"
+      class="overlay center on"
       role="dialog"
       aria-modal="true"
       aria-label="תמונה מוגדלת"
@@ -133,6 +133,7 @@ export default defineComponent({
     const isWide = ref(false);
     let touchX = 0;
     let ro: ResizeObserver | null = null;
+    let roTick = 0;
 
     const style = computed(() => String(props.data.style || "masonry"));
     const images = computed(() =>
@@ -153,7 +154,17 @@ export default defineComponent({
 
     function measureWide() {
       const w = rootEl.value?.clientWidth ?? 0;
-      isWide.value = w >= WIDE_MIN;
+      const next = w >= WIDE_MIN;
+      if (isWide.value !== next) isWide.value = next;
+    }
+    function scheduleMeasure() {
+      if (roTick) return;
+      // rAF avoids the "ResizeObserver loop completed with undelivered notifications"
+      // overlay webpack-dev-server shows when the bento class changes layout.
+      roTick = requestAnimationFrame(() => {
+        roTick = 0;
+        measureWide();
+      });
     }
 
     function open(i: number) {
@@ -191,12 +202,14 @@ export default defineComponent({
       window.addEventListener("keydown", onKey);
       measureWide();
       if (typeof ResizeObserver !== "undefined" && rootEl.value) {
-        ro = new ResizeObserver(() => measureWide());
+        ro = new ResizeObserver(() => scheduleMeasure());
         ro.observe(rootEl.value);
       }
     });
     onBeforeUnmount(() => {
       window.removeEventListener("keydown", onKey);
+      if (roTick) cancelAnimationFrame(roTick);
+      roTick = 0;
       ro?.disconnect();
       ro = null;
     });
