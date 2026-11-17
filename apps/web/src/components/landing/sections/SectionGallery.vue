@@ -1,11 +1,22 @@
 <template>
-  <section :id="'sec-' + sectionId" :class="['block', 'wide', 'gal-sec', alt && 'alt']">
+  <section
+    ref="rootEl"
+    :id="'sec-' + sectionId"
+    :class="['block', 'wide', 'gal-sec', alt && 'alt', isWide && 'gal-bento']"
+  >
     <div class="wrap">
       <p v-if="data.kicker" class="sec-kicker">{{ data.kicker }}</p>
       <h2 v-if="data.heading" class="sec-title">{{ data.heading }}</h2>
       <p v-if="data.note" class="media-note" style="margin-bottom:22px">{{ data.note }}</p>
 
-      <div v-if="style === 'carousel'" class="g-carousel" tabindex="0">
+      <div
+        v-if="style === 'carousel'"
+        class="g-carousel"
+        :class="{ 'gal-bento-grid': isWide }"
+        :data-count="isWide ? images.length : undefined"
+        tabindex="0"
+        v-drag-scroll="!isWide"
+      >
         <figure
           v-for="(im, i) in images"
           :key="i"
@@ -15,11 +26,17 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
-      <div v-else-if="style === 'filmstrip'" class="g-film">
+      <div
+        v-else-if="style === 'filmstrip'"
+        class="g-film"
+        :class="{ 'gal-bento-grid': isWide }"
+        :data-count="isWide ? images.length : undefined"
+        v-drag-scroll="!isWide"
+      >
         <figure
           v-for="(im, i) in images"
           :key="i"
@@ -29,11 +46,16 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
-      <div v-else-if="style === 'grid'" class="g-grid">
+      <div
+        v-else-if="style === 'grid'"
+        class="g-grid"
+        :class="{ 'gal-bento-grid': isWide }"
+        :data-count="isWide ? images.length : undefined"
+      >
         <figure
           v-for="(im, i) in images"
           :key="i"
@@ -43,11 +65,16 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
-      <div v-else class="g-masonry">
+      <div
+        v-else
+        class="g-masonry"
+        :class="{ 'gal-bento-grid': isWide }"
+        :data-count="isWide ? images.length : undefined"
+      >
         <figure
           v-for="(im, i) in images"
           :key="i"
@@ -57,7 +84,7 @@
           @click="open(i)"
           @keydown.enter.prevent="open(i)"
         >
-          <img :src="im.thumb" :alt="im.alt" loading="lazy" />
+          <img :src="im.thumb" :alt="im.alt" loading="lazy" draggable="false" />
           <figcaption><span class="ex-tag">דוגמה</span>{{ im.alt }}</figcaption>
         </figure>
       </div>
@@ -85,9 +112,15 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
 import { useLandingImage } from "../useLandingImage";
+import dragScroll from "@/directives/dragScroll";
+import "../galleryBento.css";
+
+const WIDE_MIN = 768;
+const MAX_IMAGES = 12;
 
 export default defineComponent({
   name: "LandingGallery",
+  directives: { dragScroll },
   props: {
     data: { type: Object, required: true },
     sectionId: { type: String, required: true },
@@ -96,7 +129,10 @@ export default defineComponent({
   setup(props) {
     const { resolve } = useLandingImage();
     const lbIndex = ref<number | null>(null);
+    const rootEl = ref<HTMLElement | null>(null);
+    const isWide = ref(false);
     let touchX = 0;
+    let ro: ResizeObserver | null = null;
 
     const style = computed(() => String(props.data.style || "masonry"));
     const images = computed(() =>
@@ -111,8 +147,14 @@ export default defineComponent({
             alt,
           };
         })
-        .filter(Boolean) as Array<{ url: string; thumb: string; alt: string }>
+        .filter(Boolean)
+        .slice(0, MAX_IMAGES) as Array<{ url: string; thumb: string; alt: string }>
     );
+
+    function measureWide() {
+      const w = rootEl.value?.clientWidth ?? 0;
+      isWide.value = w >= WIDE_MIN;
+    }
 
     function open(i: number) {
       lbIndex.value = i;
@@ -145,10 +187,21 @@ export default defineComponent({
       else next();
     }
 
-    onMounted(() => window.addEventListener("keydown", onKey));
-    onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
+    onMounted(() => {
+      window.addEventListener("keydown", onKey);
+      measureWide();
+      if (typeof ResizeObserver !== "undefined" && rootEl.value) {
+        ro = new ResizeObserver(() => measureWide());
+        ro.observe(rootEl.value);
+      }
+    });
+    onBeforeUnmount(() => {
+      window.removeEventListener("keydown", onKey);
+      ro?.disconnect();
+      ro = null;
+    });
 
-    return { style, images, lbIndex, open, close, next, prev, onTouchStart, onTouchEnd };
+    return { style, images, lbIndex, open, close, next, prev, onTouchStart, onTouchEnd, rootEl, isWide };
   },
 });
 </script>
