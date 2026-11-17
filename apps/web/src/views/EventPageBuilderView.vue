@@ -1,5 +1,5 @@
 <template>
-  <EventPageBuilderTab ref="builder" />
+  <EventPageWorkspace ref="builder" />
 </template>
 
 <script lang="ts">
@@ -8,12 +8,12 @@ import type {
   NavigationGuardNext,
   RouteLocationNormalized,
 } from "vue-router";
-import EventPageBuilderTab from "@/components/landing/builder/EventPageBuilderTab.vue";
+import EventPageWorkspace from "@/components/landing/builder/EventPageWorkspace.vue";
 
 export default defineComponent({
   name: "EventPageBuilderView",
-  components: { EventPageBuilderTab },
-  // The wizard saves itself: leaving only flushes the pending save (no "unsaved changes" prompt).
+  components: { EventPageWorkspace },
+  // The workspace saves itself: leaving only flushes the pending save (no "unsaved changes" prompt).
   async beforeRouteLeave(
     _to: RouteLocationNormalized,
     _from: RouteLocationNormalized,

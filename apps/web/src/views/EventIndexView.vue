@@ -107,7 +107,9 @@ export default defineComponent({
     isFullScreen(): boolean {
       return (
         this.$route.path.includes("uploads") ||
-        this.$route.path.includes("full-screen")
+        this.$route.path.includes("full-screen") ||
+        // Event page builder = focus mode (its own full-height workspace, no side menu).
+        this.isBuilderPage
       );
     },
     /** Event-page wizard owns the bottom chrome (action bar + preview FAB). */
