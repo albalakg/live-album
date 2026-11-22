@@ -4,6 +4,7 @@ import {
   resolveStock,
 } from "./templates/registry";
 import { accessibleAlt, isStockImageRef } from "./sampleCaption";
+import { withRenderHints } from "./variants/variants";
 import type {
   EventMeta,
   HubBlock,
@@ -184,6 +185,8 @@ export function normalizePublicHub(payload: PublicHubPayload, slug: string): Nor
     enabled: b.enabled !== false,
     order: typeof b.order === "number" ? b.order : i + 1,
     data: (b.data || {}) as Record<string, unknown>,
+    // Gen-2 layout (hero / gallery / schedule); unknown values fall back to the preset at render time.
+    ...(typeof b.variant === "string" || b.variant === null ? { variant: b.variant } : {}),
   }));
 
   const rawTheme: HubTheme = {
@@ -196,11 +199,14 @@ export function normalizePublicHub(payload: PublicHubPayload, slug: string): Nor
     ? { theme: rawTheme, blocks: rawBlocks }
     : fillNullSlots(rawTheme, rawBlocks, templateId);
 
-  const hubConfig: HubConfig = {
-    template_id: templateId || "legacy",
-    theme: filled.theme,
-    blocks: filled.blocks,
-  };
+  const hubConfig: HubConfig = withRenderHints(
+    {
+      template_id: templateId || "legacy",
+      theme: filled.theme,
+      blocks: filled.blocks,
+    },
+    templateId || "legacy"
+  );
 
   const coverRef =
     (filled.theme.cover as ImageRef | null | undefined) ||

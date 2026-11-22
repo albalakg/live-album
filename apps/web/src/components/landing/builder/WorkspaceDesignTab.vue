@@ -41,9 +41,17 @@
             ><img :src="thumb(t.id)" alt="" loading="lazy" /><i v-if="t.id === templateId" class="tcheck"
               ><BuilderIcon name="check" /></i
           ></span>
-          <span class="tname">{{ t.name_he }}</span><span class="ttype">{{ typeHe(t.type) }}</span>
+          <span class="tname">{{ t.name_he }}</span>
+          <span v-if="isGen2(t)" class="tmeta">
+            <span class="tsw" aria-hidden="true"
+              ><i v-for="(c, ci) in swatchesOf(t)" :key="ci" :style="{ background: c }"></i></span
+            ><span class="tfont" :style="{ fontFamily: `'${t.default_font}', serif` }">{{ t.default_font }}</span>
+          </span>
+          <span v-if="isGen2(t)" class="ttype tpreset">{{ presetLine(t) }}</span>
+          <span v-else class="ttype">{{ typeHe(t.type) }} · תבנית קודמת</span>
         </button>
       </div>
+      <p class="grp-note tnote">התבנית קובעת צבעים, גופנים וסגנון ברירת מחדל לפתיחה, לגלריה וללו״ז. התוכן לא משתנה.</p>
     </section>
     <section class="grp">
       <div class="grp-h"><h3>צבעים</h3><span class="grp-note">{{ paletteName }}</span></div>
@@ -87,6 +95,8 @@ import { listTemplates } from "../templates/registry";
 import BuilderIcon from "./BuilderIcon.vue";
 import { CATEGORIES, FONTS, PALETTES, type Palette } from "./hubWizardModel";
 import { thumbFor } from "./templateThumbs";
+import { VARIANT_BLOCK_TYPES, presetFor, variantLabel } from "../variants/variants";
+import type { TemplateMeta } from "../types";
 
 /** עיצוב tab: template grid + multiselect event-type filter, palette swatches, heading font. */
 export default defineComponent({
@@ -96,6 +106,8 @@ export default defineComponent({
     templateId: { type: String, required: true },
     paletteId: { type: String, required: true },
     fontId: { type: String, required: true },
+    /** The page's template when the builder opened: an old (pre-gen-2) one stays listed for that page only. */
+    loadedTemplateId: { type: String, default: "" },
     filter: { type: Array as PropType<string[]>, required: true },
     filterOpen: { type: Boolean, default: false },
     sampleWord: { type: String, default: "אבג" },
@@ -103,14 +115,29 @@ export default defineComponent({
   emits: ["template", "palette", "font", "update:filter", "update:filterOpen"],
   setup(props, { emit }) {
     const msEl = ref<HTMLElement | null>(null);
-    const all = listTemplates();
+    const isGen2 = (t: TemplateMeta) => t.generation === 2;
+    const typesOf = (t: TemplateMeta) => (t.types && t.types.length ? t.types : [t.type]);
+    /** The 9 gen-2 templates; the 14 old ones are hidden unless this page already uses one. */
+    const all = computed(() =>
+      listTemplates().filter(
+        (t) => isGen2(t) || t.id === props.templateId || (props.loadedTemplateId && t.id === props.loadedTemplateId)
+      )
+    );
     const cats = CATEGORIES.filter((c) => c.id !== "all");
-    const list = computed(() => all.filter((t) => !props.filter.length || props.filter.includes(t.type)));
+    const list = computed(() =>
+      all.value.filter((t) => !props.filter.length || typesOf(t).some((x) => props.filter.includes(x)))
+    );
+    const presetLine = (t: TemplateMeta) =>
+      VARIANT_BLOCK_TYPES.map((type) => variantLabel(type, presetFor(t.id, type))).join(" · ");
+    const swatchesOf = (t: TemplateMeta) => {
+      const c = (t.colors || {}) as Record<string, string>;
+      return [c.bg, c.accent, c.ink].filter(Boolean);
+    };
     const typeHe = (type: string) => CATEGORIES.find((c) => c.id === type)?.he || "";
     const filterLabel = computed(() =>
       props.filter.length ? props.filter.map(typeHe).join(", ") : "כל סוגי האירועים"
     );
-    const countFor = (type: string) => all.filter((t) => t.type === type).length;
+    const countFor = (type: string) => all.value.filter((t) => typesOf(t).includes(type)).length;
     const paletteName = computed(() => PALETTES.find((p) => p.id === props.paletteId)?.name || "");
     function toggleCat(id: string) {
       const next = props.filter.includes(id) ? props.filter.filter((x) => x !== id) : [...props.filter, id];
@@ -141,7 +168,50 @@ export default defineComponent({
       toggleCat,
       swStyle,
       thumb: thumbFor,
+      isGen2,
+      presetLine,
+      swatchesOf,
     };
   },
 });
 </script>
+
+<style scoped>
+.tmeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 4px 0;
+  min-width: 0;
+}
+.tsw {
+  display: inline-flex;
+  flex: none;
+}
+.tsw i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1px rgba(30, 24, 19, 0.15);
+}
+.tsw i + i {
+  margin-inline-start: -4px;
+}
+.tfont {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tpreset {
+  font-size: 11.5px;
+}
+.tnote {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+</style>

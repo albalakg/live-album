@@ -56,6 +56,8 @@ const KEY_TYPE = "snapshare:landing-preview-key";
 const EDIT_TYPE = "snapshare:landing-preview-edit";
 const SELECT_TYPE = "snapshare:landing-preview-select";
 const PICK_TYPE = "snapshare:landing-preview-pick";
+const VARIANT_CYCLE_TYPE = "ss:variant-cycle";
+const VARIANT_OPEN_TYPE = "ss:variant-open";
 
 /**
  * The workspace stage: the real public renderer (/h-preview) in an iframe, scaled to fit.
@@ -74,13 +76,18 @@ export default defineComponent({
     editOn: { type: Boolean, default: true },
     /** block id -> section name, for the «עריכה · …» chip; only these are clickable. */
     labels: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
+    /** Gen-2 style chip: block id -> { index, count, label } (empty on old templates). */
+    variants: {
+      type: Object as PropType<Record<string, { index: number; count: number; label: string }>>,
+      default: () => ({}),
+    },
     selectedId: { type: String, default: "" },
     scrollId: { type: String, default: "" },
     scrollTick: { type: Number, default: 0 },
     urlText: { type: String, default: "" },
     showHint: { type: Boolean, default: false },
   },
-  emits: ["pick", "hint-ok", "exit-full", "escape"],
+  emits: ["pick", "hint-ok", "exit-full", "escape", "variant-cycle", "variant-open"],
   setup(props, { emit }) {
     const stageEl = ref<HTMLElement | null>(null);
     const frameEl = ref<HTMLIFrameElement | null>(null);
@@ -163,7 +170,14 @@ export default defineComponent({
       });
     }
     function postEdit() {
-      post({ type: EDIT_TYPE, on: props.editOn && !props.full, labels: { ...props.labels } });
+      post({
+        type: EDIT_TYPE,
+        on: props.editOn && !props.full,
+        labels: { ...props.labels },
+        variants: JSON.parse(JSON.stringify(props.variants)),
+        // Mobile builder: the preview hides the guest bottom tab bar.
+        mobile: props.mobile,
+      });
       post({ type: SELECT_TYPE, sectionId: props.full ? "" : props.selectedId });
     }
     function schedulePost() {
@@ -192,6 +206,10 @@ export default defineComponent({
         }
       } else if (d.type === PICK_TYPE && typeof d.sectionId === "string") {
         emit("pick", d.sectionId);
+      } else if (d.type === VARIANT_CYCLE_TYPE && typeof d.sectionId === "string") {
+        emit("variant-cycle", d.sectionId, Number(d.dir) < 0 ? -1 : 1);
+      } else if (d.type === VARIANT_OPEN_TYPE && typeof d.sectionId === "string") {
+        emit("variant-open", d.sectionId);
       } else if (d.type === KEY_TYPE && d.key === "Escape") {
         emit("escape");
       }
@@ -211,7 +229,9 @@ export default defineComponent({
     }
 
     watch(() => [props.hubConfig, props.templateId], schedulePost, { deep: true });
-    watch(() => [props.editOn, props.full, props.selectedId, props.labels], postEdit, { deep: true });
+    watch(() => [props.editOn, props.full, props.selectedId, props.labels, props.variants, props.mobile], postEdit, {
+      deep: true,
+    });
     watch(
       () => props.scrollTick,
       () => {

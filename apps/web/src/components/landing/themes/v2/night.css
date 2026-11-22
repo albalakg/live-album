@@ -1,0 +1,14 @@
+/* Gen-2 template «לילה וזהב» — tokens only; layout lives in themes/v2/v2.css. */
+.t-night {
+  --bg: #0E0D0B; --bg2: #17150F; --stage: #17150F; --surface: #1C1913;
+  --ink: #F3E9D2; --muted: #B8AA8C; --accent: #C9A45C; --accent-2: #6E5A33;
+  --on-accent: #15120C; --hero-ink: #F3E9D2; --count-ink: #F3E9D2;
+  --cta-bg: #C9A45C; --cta-ink: #15120C;
+  --nav-bg: color-mix(in srgb, #1C1913 88%, transparent); --nav-on-bg: #C9A45C; --nav-on-ink: #15120C;
+  --font-display: "Bellefair", serif;
+  --font-body: "Heebo", "Heebo", sans-serif;
+  --line: #332D21; --line-strong: color-mix(in srgb, #F3E9D2 30%, transparent);
+  --r: 10px; --btn-r: 10px; --card-r: 10px; --tile-r: 10px;
+  --hw: 400;
+  --hero-art: none; --stage-img: none;
+}

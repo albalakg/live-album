@@ -1,0 +1,14 @@
+/* Gen-2 template «מגזין נועז» — tokens only; layout lives in themes/v2/v2.css. */
+.t-editorial {
+  --bg: #F1EDE6; --bg2: #E6E0D6; --stage: #E6E0D6; --surface: #FBF9F5;
+  --ink: #0E0E0E; --muted: #5A5550; --accent: #E0401C; --accent-2: #0E0E0E;
+  --on-accent: #FFFFFF; --hero-ink: #0E0E0E; --count-ink: #0E0E0E;
+  --cta-bg: #E0401C; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #FBF9F5 88%, transparent); --nav-on-bg: #E0401C; --nav-on-ink: #FFFFFF;
+  --font-display: "Frank Ruhl Libre", serif;
+  --font-body: "Rubik", "Heebo", sans-serif;
+  --line: #D4CCBF; --line-strong: color-mix(in srgb, #0E0E0E 30%, transparent);
+  --r: 0px; --btn-r: 6px; --card-r: 0px; --tile-r: 0px;
+  --hw: 900;
+  --hero-art: none; --stage-img: none;
+}

@@ -1,0 +1,14 @@
+/* Gen-2 template «תאגידי נקי» — tokens only; layout lives in themes/v2/v2.css. */
+.t-corporate {
+  --bg: #F3F5FA; --bg2: #E6EBF5; --stage: #E6EBF5; --surface: #FFFFFF;
+  --ink: #0D1A3A; --muted: #56627E; --accent: #2356F6; --accent-2: #00B8A9;
+  --on-accent: #FFFFFF; --hero-ink: #0D1A3A; --count-ink: #0D1A3A;
+  --cta-bg: #2356F6; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #FFFFFF 88%, transparent); --nav-on-bg: #2356F6; --nav-on-ink: #FFFFFF;
+  --font-display: "Heebo", sans-serif;
+  --font-body: "Assistant", "Heebo", sans-serif;
+  --line: #DAE0EC; --line-strong: color-mix(in srgb, #0D1A3A 30%, transparent);
+  --r: 12px; --btn-r: 12px; --card-r: 12px; --tile-r: 12px;
+  --hw: 800;
+  --hero-art: none; --stage-img: none;
+}

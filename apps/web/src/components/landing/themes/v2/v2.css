@@ -1,0 +1,58 @@
+/*
+ * Gen-2 templates — shared layer + per-template personality (from the approved mock).
+ * Loaded with each themes/v2/<id>.css. Every rule is scoped to the 9 gen-2 classes,
+ * so the 14 original templates are untouched.
+ */
+:is(.t-classic,.t-minimal,.t-botanical,.t-editorial,.t-night,.t-mitzva,.t-pastel,.t-corporate,.t-party) { font-family: var(--font-body); }
+:is(.t-classic,.t-minimal,.t-botanical,.t-editorial,.t-night,.t-mitzva,.t-pastel,.t-corporate,.t-party) .block.alt { background: var(--bg2, var(--bg)); }
+:is(.t-classic,.t-minimal,.t-botanical,.t-editorial,.t-night,.t-mitzva,.t-pastel,.t-corporate,.t-party) .sec-title { font-family: var(--font-display); font-weight: var(--hw, 700); letter-spacing: -.01em; line-height: 1.1; }
+:is(.t-classic,.t-minimal,.t-botanical,.t-editorial,.t-night,.t-mitzva,.t-pastel,.t-corporate,.t-party) .sec-kicker { font-size: 12.5px; font-weight: 700; letter-spacing: .22em; color: var(--accent); }
+:is(.t-classic,.t-minimal,.t-botanical,.t-editorial,.t-night,.t-mitzva,.t-pastel,.t-corporate,.t-party) .btn { border-radius: max(var(--r, 12px), 6px); }
+
+/* classic */
+.t-classic .sec-kicker, .t-classic .vh-kick { font-family: var(--font-display); letter-spacing: .3em; font-weight: 500; }
+.t-classic blockquote { font-style: italic; }
+
+/* minimal */
+.t-minimal .sec-kicker, .t-minimal .vh-kick { color: var(--muted); letter-spacing: .35em; font-weight: 500; }
+.t-minimal .block.alt { background: var(--bg); border-top: 1px solid var(--line); }
+.t-minimal .btn-primary { background: var(--ink); color: var(--bg); }
+
+/* editorial */
+.t-editorial .sec-title { letter-spacing: -.02em; font-size: clamp(38px, 9cqi, 72px); }
+.t-editorial .sec-kicker, .t-editorial .vh-kick {
+  display: inline-block; width: max-content; background: var(--accent); color: #fff;
+  padding: 3px 9px; letter-spacing: .12em;
+}
+.t-editorial .vs-card { border: 2px solid var(--ink); }
+
+/* night */
+.t-night .sec-kicker, .t-night .vh-kick { letter-spacing: .35em; font-weight: 500; }
+.t-night .sec-title, .t-night .vh-title {
+  background: linear-gradient(180deg, #F7E7BF, #C9A45C 70%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.t-night .vh-full .vh-title { background: none; color: #F4E3B8; text-shadow: 0 2px 24px rgba(0,0,0,.45); }
+
+/* mitzva */
+.t-mitzva .sec-kicker, .t-mitzva .vh-kick { color: var(--accent-2); }
+.t-mitzva .vs-card:nth-child(2n) .vs-ic { background: var(--accent-2); }
+.t-mitzva .btn { box-shadow: 0 4px 0 rgba(0,0,0,.18); }
+
+/* pastel (Amatic SC needs larger sizes) */
+.t-pastel .vh-title { font-size: clamp(76px, 20cqi, 150px); }
+.t-pastel .vx-hero.is-wide .vh-title { font-size: clamp(96px, 11cqi, 160px); }
+.t-pastel .sec-title { font-size: clamp(46px, 10cqi, 72px); }
+.t-pastel .vh-cd b, .t-pastel .vs-tm, .t-pastel .vs-lb { font-size: 32px; }
+.t-pastel .vs-lb small { font-size: 13.5px; }
+.t-pastel .vx-sch h3 { font-size: 30px; }
+
+/* corporate */
+.t-corporate .sec-kicker, .t-corporate .vh-kick { color: var(--accent-2); letter-spacing: .12em; }
+
+/* party (Karantina needs larger sizes) */
+.t-party .vh-title { font-size: clamp(80px, 22cqi, 170px); letter-spacing: .01em; text-shadow: 0 0 30px rgba(255,79,163,.6); }
+.t-party .vx-hero.is-wide .vh-title { font-size: clamp(110px, 12cqi, 180px); }
+.t-party .sec-title { font-size: clamp(48px, 11cqi, 84px); letter-spacing: .01em; }
+.t-party .sec-kicker, .t-party .vh-kick { color: var(--accent-2); }
+.t-party .vs-tm, .t-party .vs-lb { font-size: 30px; }

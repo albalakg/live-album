@@ -1,0 +1,14 @@
+/* Gen-2 template «בוטני» — tokens only; layout lives in themes/v2/v2.css. */
+.t-botanical {
+  --bg: #EEF0E5; --bg2: #E1E6D3; --stage: #E1E6D3; --surface: #F8F9F3;
+  --ink: #22301D; --muted: #5F6B57; --accent: #55703D; --accent-2: #B9C79C;
+  --on-accent: #FFFFFF; --hero-ink: #22301D; --count-ink: #22301D;
+  --cta-bg: #55703D; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #F8F9F3 88%, transparent); --nav-on-bg: #55703D; --nav-on-ink: #FFFFFF;
+  --font-display: "Suez One", sans-serif;
+  --font-body: "Assistant", "Heebo", sans-serif;
+  --line: #D3DAC2; --line-strong: color-mix(in srgb, #22301D 30%, transparent);
+  --r: 22px; --btn-r: 22px; --card-r: 22px; --tile-r: 22px;
+  --hw: 400;
+  --hero-art: none; --stage-img: none;
+}
