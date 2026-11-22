@@ -1826,5 +1826,1395 @@
       "festival-2/album-5",
       "festival-2/album-6"
     ]
+  },
+  "classic": {
+    "id": "classic",
+    "type": "wedding",
+    "name_he": "שנהב קלאסי",
+    "type_he": "חתונה",
+    "direction": "rtl",
+    "dark": false,
+    "heroStyle": "card",
+    "slug": "classic",
+    "gallery_style": "grid",
+    "default_font": "Frank Ruhl Libre",
+    "palettes": {
+      "default": {
+        "background_type": "LIGHT",
+        "primary": "#A9823F",
+        "secondary": "#D8B98A",
+        "accent": "#A9823F",
+        "background": "#F7F1E8",
+        "text": "#2B2119"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "classic/hero",
+      "classic/album-1",
+      "classic/album-2",
+      "classic/album-3",
+      "classic/album-4",
+      "classic/album-5",
+      "classic/album-6",
+      "classic/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "wedding"
+    ],
+    "mood_he": "חם ואלגנטי, סריף עדין וזהב",
+    "body_font": "Assistant",
+    "heading_weight": 500,
+    "radius": 14,
+    "presets": {
+      "HERO_COUNTDOWN": "arch",
+      "GALLERY": "honey",
+      "EVENT_TIMELINE": "timeline"
+    },
+    "colors": {
+      "bg": "#F7F1E8",
+      "bg2": "#EFE5D6",
+      "surface": "#FFFCF7",
+      "ink": "#2B2119",
+      "muted": "#76685B",
+      "accent": "#A9823F",
+      "accent2": "#D8B98A",
+      "line": "#E4D6C1",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "החתונה של",
+      "title": "עמית וגל"
+    }
+  },
+  "minimal": {
+    "id": "minimal",
+    "type": "wedding",
+    "name_he": "לבן מינימלי",
+    "type_he": "חתונה",
+    "direction": "rtl",
+    "dark": false,
+    "heroStyle": "card",
+    "slug": "minimal",
+    "gallery_style": "grid",
+    "default_font": "Heebo",
+    "palettes": {
+      "default": {
+        "background_type": "LIGHT",
+        "primary": "#121212",
+        "secondary": "#BDBDBD",
+        "accent": "#121212",
+        "background": "#FFFFFF",
+        "text": "#121212"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "minimal/hero",
+      "minimal/album-1",
+      "minimal/album-2",
+      "minimal/album-3",
+      "minimal/album-4",
+      "minimal/album-5",
+      "minimal/album-6",
+      "minimal/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "wedding",
+      "birthday",
+      "corporate"
+    ],
+    "mood_he": "הרבה אוויר, שחור על לבן",
+    "body_font": "Heebo",
+    "heading_weight": 300,
+    "radius": 2,
+    "presets": {
+      "HERO_COUNTDOWN": "split",
+      "GALLERY": "bento",
+      "EVENT_TIMELINE": "list"
+    },
+    "colors": {
+      "bg": "#FFFFFF",
+      "bg2": "#F4F4F2",
+      "surface": "#FFFFFF",
+      "ink": "#121212",
+      "muted": "#6E6E6E",
+      "accent": "#121212",
+      "accent2": "#BDBDBD",
+      "line": "#E6E6E6",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "מתחתנים",
+      "title": "נועה ואורי"
+    }
+  },
+  "botanical": {
+    "id": "botanical",
+    "type": "wedding",
+    "name_he": "בוטני",
+    "type_he": "חתונה",
+    "direction": "rtl",
+    "dark": false,
+    "heroStyle": "card",
+    "slug": "botanical",
+    "gallery_style": "grid",
+    "default_font": "Suez One",
+    "palettes": {
+      "default": {
+        "background_type": "LIGHT",
+        "primary": "#55703D",
+        "secondary": "#B9C79C",
+        "accent": "#55703D",
+        "background": "#EEF0E5",
+        "text": "#22301D"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "botanical/hero",
+      "botanical/album-1",
+      "botanical/album-2",
+      "botanical/album-3",
+      "botanical/album-4",
+      "botanical/album-5",
+      "botanical/album-6",
+      "botanical/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "wedding",
+      "brit"
+    ],
+    "mood_he": "ירוק זית, עלים ושקט של גינה",
+    "body_font": "Assistant",
+    "heading_weight": 400,
+    "radius": 22,
+    "presets": {
+      "HERO_COUNTDOWN": "full",
+      "GALLERY": "bento",
+      "EVENT_TIMELINE": "timeline"
+    },
+    "colors": {
+      "bg": "#EEF0E5",
+      "bg2": "#E1E6D3",
+      "surface": "#F8F9F3",
+      "ink": "#22301D",
+      "muted": "#5F6B57",
+      "accent": "#55703D",
+      "accent2": "#B9C79C",
+      "line": "#D3DAC2",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "החתונה של",
+      "title": "שירה ויואב"
+    }
+  },
+  "editorial": {
+    "id": "editorial",
+    "type": "birthday",
+    "name_he": "מגזין נועז",
+    "type_he": "יום הולדת",
+    "direction": "rtl",
+    "dark": false,
+    "heroStyle": "card",
+    "slug": "editorial",
+    "gallery_style": "grid",
+    "default_font": "Frank Ruhl Libre",
+    "palettes": {
+      "default": {
+        "background_type": "LIGHT",
+        "primary": "#E0401C",
+        "secondary": "#0E0E0E",
+        "accent": "#E0401C",
+        "background": "#F1EDE6",
+        "text": "#0E0E0E"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "editorial/hero",
+      "editorial/album-1",
+      "editorial/album-2",
+      "editorial/album-3",
+      "editorial/album-4",
+      "editorial/album-5",
+      "editorial/album-6",
+      "editorial/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "wedding",
+      "birthday",
+      "corporate",
+      "festival"
+    ],
+    "mood_he": "כותרות ענק, אדום על נייר",
+    "body_font": "Rubik",
+    "heading_weight": 900,
+    "radius": 0,
+    "presets": {
+      "HERO_COUNTDOWN": "split",
+      "GALLERY": "honey",
+      "EVENT_TIMELINE": "cards"
+    },
+    "colors": {
+      "bg": "#F1EDE6",
+      "bg2": "#E6E0D6",
+      "surface": "#FBF9F5",
+      "ink": "#0E0E0E",
+      "muted": "#5A5550",
+      "accent": "#E0401C",
+      "accent2": "#0E0E0E",
+      "line": "#D4CCBF",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "גיליון מיוחד",
+      "title": "דנה בת 40"
+    }
+  },
+  "night": {
+    "id": "night",
+    "type": "wedding",
+    "name_he": "לילה וזהב",
+    "type_he": "חתונה",
+    "direction": "rtl",
+    "dark": true,
+    "heroStyle": "card",
+    "slug": "night",
+    "gallery_style": "grid",
+    "default_font": "Bellefair",
+    "palettes": {
+      "default": {
+        "background_type": "DARK",
+        "primary": "#C9A45C",
+        "secondary": "#6E5A33",
+        "accent": "#C9A45C",
+        "background": "#0E0D0B",
+        "text": "#F3E9D2"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "night/hero",
+      "night/album-1",
+      "night/album-2",
+      "night/album-3",
+      "night/album-4",
+      "night/album-5",
+      "night/album-6",
+      "night/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "wedding",
+      "corporate",
+      "barmitzvah",
+      "festival",
+      "party"
+    ],
+    "mood_he": "כהה, יוקרתי, נצנוץ זהב",
+    "body_font": "Heebo",
+    "heading_weight": 400,
+    "radius": 10,
+    "presets": {
+      "HERO_COUNTDOWN": "full",
+      "GALLERY": "honey",
+      "EVENT_TIMELINE": "timeline"
+    },
+    "colors": {
+      "bg": "#0E0D0B",
+      "bg2": "#17150F",
+      "surface": "#1C1913",
+      "ink": "#F3E9D2",
+      "muted": "#B8AA8C",
+      "accent": "#C9A45C",
+      "accent2": "#6E5A33",
+      "line": "#332D21",
+      "on": "#15120C"
+    },
+    "sample": {
+      "kicker": "ערב גאלה",
+      "title": "עמית וגל"
+    }
+  },
+  "mitzva": {
+    "id": "mitzva",
+    "type": "barmitzvah",
+    "name_he": "חגיגה צבעונית",
+    "type_he": "בר/בת מצווה",
+    "direction": "rtl",
+    "dark": false,
+    "heroStyle": "card",
+    "slug": "mitzva",
+    "gallery_style": "grid",
+    "default_font": "Secular One",
+    "palettes": {
+      "default": {
+        "background_type": "LIGHT",
+        "primary": "#FF6A3D",
+        "secondary": "#2FB4FF",
+        "accent": "#FF6A3D",
+        "background": "#FFF7E8",
+        "text": "#1C2757"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "mitzva/hero",
+      "mitzva/album-1",
+      "mitzva/album-2",
+      "mitzva/album-3",
+      "mitzva/album-4",
+      "mitzva/album-5",
+      "mitzva/album-6",
+      "mitzva/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "barmitzvah"
+    ],
+    "mood_he": "שמח, צבעוני, כיפי לנוער",
+    "body_font": "Rubik",
+    "heading_weight": 400,
+    "radius": 24,
+    "presets": {
+      "HERO_COUNTDOWN": "split",
+      "GALLERY": "polaroid",
+      "EVENT_TIMELINE": "cards"
+    },
+    "colors": {
+      "bg": "#FFF7E8",
+      "bg2": "#FFE9C6",
+      "surface": "#FFFFFF",
+      "ink": "#1C2757",
+      "muted": "#56608A",
+      "accent": "#FF6A3D",
+      "accent2": "#2FB4FF",
+      "line": "#F1DDB8",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "בר המצווה של",
+      "title": "יונתן"
+    }
+  },
+  "pastel": {
+    "id": "pastel",
+    "type": "brit",
+    "name_he": "פסטל רך",
+    "type_he": "ברית / בריתה",
+    "direction": "rtl",
+    "dark": false,
+    "heroStyle": "card",
+    "slug": "pastel",
+    "gallery_style": "grid",
+    "default_font": "Amatic SC",
+    "palettes": {
+      "default": {
+        "background_type": "LIGHT",
+        "primary": "#9C84C8",
+        "secondary": "#F2C3CE",
+        "accent": "#9C84C8",
+        "background": "#F7F2F8",
+        "text": "#4A3E5C"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "pastel/hero",
+      "pastel/album-1",
+      "pastel/album-2",
+      "pastel/album-3",
+      "pastel/album-4",
+      "pastel/album-5",
+      "pastel/album-6",
+      "pastel/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "brit",
+      "birthday"
+    ],
+    "mood_he": "רך ועגול, לילך וורוד אבקה",
+    "body_font": "Varela Round",
+    "heading_weight": 700,
+    "radius": 28,
+    "presets": {
+      "HERO_COUNTDOWN": "arch",
+      "GALLERY": "polaroid",
+      "EVENT_TIMELINE": "list"
+    },
+    "colors": {
+      "bg": "#F7F2F8",
+      "bg2": "#EFE6F2",
+      "surface": "#FFFFFF",
+      "ink": "#4A3E5C",
+      "muted": "#7E7290",
+      "accent": "#9C84C8",
+      "accent2": "#F2C3CE",
+      "line": "#E7DCEC",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "ברוכה הבאה",
+      "title": "ליה"
+    }
+  },
+  "corporate": {
+    "id": "corporate",
+    "type": "corporate",
+    "name_he": "תאגידי נקי",
+    "type_he": "אירוע חברה",
+    "direction": "rtl",
+    "dark": false,
+    "heroStyle": "card",
+    "slug": "corporate",
+    "gallery_style": "grid",
+    "default_font": "Heebo",
+    "palettes": {
+      "default": {
+        "background_type": "LIGHT",
+        "primary": "#2356F6",
+        "secondary": "#00B8A9",
+        "accent": "#2356F6",
+        "background": "#F3F5FA",
+        "text": "#0D1A3A"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "corporate/hero",
+      "corporate/album-1",
+      "corporate/album-2",
+      "corporate/album-3",
+      "corporate/album-4",
+      "corporate/album-5",
+      "corporate/album-6",
+      "corporate/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "corporate"
+    ],
+    "mood_he": "כחול חד, מסודר ומקצועי",
+    "body_font": "Assistant",
+    "heading_weight": 800,
+    "radius": 12,
+    "presets": {
+      "HERO_COUNTDOWN": "full",
+      "GALLERY": "bento",
+      "EVENT_TIMELINE": "cards"
+    },
+    "colors": {
+      "bg": "#F3F5FA",
+      "bg2": "#E6EBF5",
+      "surface": "#FFFFFF",
+      "ink": "#0D1A3A",
+      "muted": "#56627E",
+      "accent": "#2356F6",
+      "accent2": "#00B8A9",
+      "line": "#DAE0EC",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "הכנס השנתי",
+      "title": "נובה 2027"
+    }
+  },
+  "party": {
+    "id": "party",
+    "type": "birthday",
+    "name_he": "מסיבת יום הולדת",
+    "type_he": "יום הולדת",
+    "direction": "rtl",
+    "dark": true,
+    "heroStyle": "card",
+    "slug": "party",
+    "gallery_style": "grid",
+    "default_font": "Karantina",
+    "palettes": {
+      "default": {
+        "background_type": "DARK",
+        "primary": "#FF4FA3",
+        "secondary": "#FFD23F",
+        "accent": "#FF4FA3",
+        "background": "#170C2B",
+        "text": "#FFF6FF"
+      }
+    },
+    "allowed_sections": [
+      "HERO_COUNTDOWN",
+      "FOOTER",
+      "ABOUT",
+      "BEEN_THERE",
+      "CARDS",
+      "EVENT_TIMELINE",
+      "FAQ",
+      "GALLERY",
+      "GIFT",
+      "GROUNDS",
+      "HASHTAG",
+      "LINEUP",
+      "MAP",
+      "MILESTONES",
+      "NETWORKING",
+      "PEOPLE",
+      "PLAYLIST",
+      "QUOTE",
+      "RICH_TEXT",
+      "RSVP",
+      "RULES",
+      "SNAPSHARE_CTA",
+      "SPEAKERS",
+      "SPONSORS",
+      "STEPS",
+      "STORY",
+      "TRIVIA_CTA",
+      "WISHING_WELL",
+      "ZONES"
+    ],
+    "default_enabled": {
+      "HERO_COUNTDOWN": true,
+      "QUOTE": true,
+      "STORY": true,
+      "EVENT_TIMELINE": true,
+      "GALLERY": true,
+      "CARDS": true,
+      "STEPS": true,
+      "MAP": true,
+      "WISHING_WELL": false,
+      "GIFT": false,
+      "RSVP": false,
+      "FAQ": true,
+      "FOOTER": true
+    },
+    "nav": [
+      {
+        "id": "hero",
+        "label": "ראשי"
+      },
+      {
+        "id": "story",
+        "label": "הסיפור"
+      },
+      {
+        "id": "schedule",
+        "label": "לו״ז"
+      },
+      {
+        "id": "gallery",
+        "label": "גלריה"
+      },
+      {
+        "id": "dress",
+        "label": "לבוש"
+      },
+      {
+        "id": "join",
+        "label": "העלאה"
+      },
+      {
+        "id": "arrive",
+        "label": "הגעה"
+      },
+      {
+        "id": "wishes",
+        "label": "ברכות"
+      },
+      {
+        "id": "gift",
+        "label": "מתנה"
+      },
+      {
+        "id": "rsvp",
+        "label": "אישור"
+      },
+      {
+        "id": "faq",
+        "label": "שאלות"
+      }
+    ],
+    "hero_art": "",
+    "stock_keys": [
+      "party/hero",
+      "party/album-1",
+      "party/album-2",
+      "party/album-3",
+      "party/album-4",
+      "party/album-5",
+      "party/album-6",
+      "party/album-7"
+    ],
+    "generation": 2,
+    "types": [
+      "birthday",
+      "party",
+      "festival"
+    ],
+    "mood_he": "ניאון, סגול ופוקסיה, אנרגיה",
+    "body_font": "Rubik",
+    "heading_weight": 700,
+    "radius": 18,
+    "presets": {
+      "HERO_COUNTDOWN": "full",
+      "GALLERY": "polaroid",
+      "EVENT_TIMELINE": "list"
+    },
+    "colors": {
+      "bg": "#170C2B",
+      "bg2": "#22123D",
+      "surface": "#2A1749",
+      "ink": "#FFF6FF",
+      "muted": "#C9B6E4",
+      "accent": "#FF4FA3",
+      "accent2": "#FFD23F",
+      "line": "#3D2763",
+      "on": "#FFFFFF"
+    },
+    "sample": {
+      "kicker": "חוגגים",
+      "title": "גל בת 30"
+    }
   }
 }

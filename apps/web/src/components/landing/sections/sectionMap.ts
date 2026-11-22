@@ -1,11 +1,8 @@
 import type { Component } from "vue";
-import HeroCountdown from "./HeroCountdown.vue";
 import SectionStory from "./SectionStory.vue";
 import SectionAbout from "./SectionAbout.vue";
 import SectionPeople from "./SectionPeople.vue";
-import EventTimeline from "./EventTimeline.vue";
 import SectionCards from "./SectionCards.vue";
-import SectionGallery from "./SectionGallery.vue";
 import SectionSteps from "./SectionSteps.vue";
 import MapSection from "./MapSection.vue";
 import WishingWell from "./WishingWell.vue";
@@ -31,15 +28,19 @@ import RichText from "./RichText.vue";
 import SmartNavigation from "./SmartNavigation.vue";
 import LinkList from "./LinkList.vue";
 import MediaStrip from "./MediaStrip.vue";
+// Gen-2 templates: variant wrappers (they render the original component for the 14 old templates).
+import VariantHeroSection from "./variants/VariantHeroSection.vue";
+import VariantGallerySection from "./variants/VariantGallerySection.vue";
+import VariantScheduleSection from "./variants/VariantScheduleSection.vue";
 
 export const sectionComponents: Record<string, Component> = {
-  HERO_COUNTDOWN: HeroCountdown,
+  HERO_COUNTDOWN: VariantHeroSection,
   STORY: SectionStory,
   ABOUT: SectionAbout,
   PEOPLE: SectionPeople,
-  EVENT_TIMELINE: EventTimeline,
+  EVENT_TIMELINE: VariantScheduleSection,
   CARDS: SectionCards,
-  GALLERY: SectionGallery,
+  GALLERY: VariantGallerySection,
   STEPS: SectionSteps,
   MAP: MapSection,
   WISHING_WELL: WishingWell,

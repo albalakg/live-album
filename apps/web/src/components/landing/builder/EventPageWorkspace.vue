@@ -99,6 +99,7 @@
               v-model:filter="filter"
               v-model:filter-open="filterOpen"
               :template-id="state.template_id"
+              :loaded-template-id="loadedTemplateId"
               :palette-id="state.theme.palette_id"
               :font-id="fontNow"
               :sample-word="state.event.name1 || state.event.title || 'אבג'"
@@ -136,7 +137,12 @@
               :errors="kindErrors"
               :essentials-error="essentialsError"
               :scroller="pbodyEl"
+              :variant-rows="variantRows"
+              :style-open="styleOpenKind"
+              :strip-sample="stripSample"
               @open="openRow"
+              @variant="onVariantPick"
+              @style-open="onStyleOpen"
               @toggle="setOn"
               @move="moveKind"
               @reorder="onReorder"
@@ -154,12 +160,15 @@
           :mobile="isMobile"
           :full="full"
           :labels="labels"
+          :variants="variantChips"
           :selected-id="selectedBlockId"
           :scroll-id="scrollTarget.id"
           :scroll-tick="scrollTarget.tick"
           :url-text="urlText"
           :show-hint="hint && !full"
           @pick="onPick"
+          @variant-cycle="onVariantCycle"
+          @variant-open="onVariantOpen"
           @hint-ok="dismissHint"
           @exit-full="setFull(false)"
           @escape="onEscape"
@@ -264,6 +273,24 @@ import WorkspaceDesignTab from "./WorkspaceDesignTab.vue";
 import WorkspacePublishDialog from "./WorkspacePublishDialog.vue";
 import WorkspaceSettingsTab from "./WorkspaceSettingsTab.vue";
 import WorkspaceStage from "./WorkspaceStage.vue";
+import { variantStripSample } from "./variantStrip";
+import { ensureGen2Fonts } from "../sections/variants/useVariantBlock";
+import {
+  VARIANTS,
+  VARIANT_BLOCK_HE,
+  finalizeHubConfig,
+  fixGen2ContentSamples,
+  isGen2Template,
+  isVariantBlockType,
+  presetFor,
+  readVariants,
+  resolveVariant,
+  storedVariant,
+  variantLabel,
+  variantsAfterSwitch,
+  type VariantBlockType,
+  type VariantMap,
+} from "../variants/variants";
 
 const DEBOUNCE_MS = 800;
 const RETRY_MS = [5000, 15000, 30000];
@@ -309,6 +336,17 @@ function normalizeStart(raw: unknown): string {
   if (!m) return "";
   return `${m[1]}-${m[2]}-${m[3]}T${m[4] || "19"}:${m[5] || "00"}:00`;
 }
+/**
+ * Gen-2 style picks live on the wizard state as an extra `variants` map (hubWizardModel is
+ * not edited: toHubConfig drops `variant`, buildConfig writes it back). Part of snap()/undo.
+ */
+type StateWithVariants = WizardState & { variants?: VariantMap };
+function variantsOf(st: WizardState | null | undefined): VariantMap {
+  return ((st as StateWithVariants | null | undefined)?.variants || {}) as VariantMap;
+}
+function setVariants(st: WizardState, map: VariantMap): void {
+  (st as StateWithVariants).variants = { ...map };
+}
 const mobileNow = () => typeof window !== "undefined" && window.innerWidth < 760;
 
 /**
@@ -338,6 +376,8 @@ export default defineComponent({
     const state = ref<WizardState | null>(null);
     const serverSlug = ref<string | null>(null);
     const savedTemplateId = ref("");
+    /** Template the page had when the builder opened (an old one stays pickable for that page). */
+    const loadedTemplateId = ref("");
     const everPublished = ref(false);
     const assetUrls = ref<AssetUrls>({});
 
@@ -451,7 +491,8 @@ export default defineComponent({
     function buildConfig(st: WizardState): HubConfig | null {
       const d = getDefaultHubConfig(st.template_id);
       if (!d) return null;
-      return toHubConfig(st, sortedBlocks(d.blocks), d.theme);
+      // + gen-2 `variant` per hero / gallery / schedule block, and the gen-2 sample gallery keys.
+      return finalizeHubConfig(toHubConfig(st, sortedBlocks(d.blocks), d.theme), variantsOf(st), st.template_id);
     }
     const draftConfig = computed<HubConfig | null>(() => (state.value ? buildConfig(state.value) : null));
     function withAssetUrls(cfg: HubConfig): HubConfig {
@@ -487,7 +528,7 @@ export default defineComponent({
       if (imgs.length && imgs.every((im) => im.stock && /\/album-\d+$/.test(im.stock))) {
         merged.gallery = fresh.gallery;
       }
-      return merged;
+      return fixGen2ContentSamples(merged, templateId);
     }
 
     const titleText = computed(() => (state.value ? titleOf(state.value.event) : ""));
@@ -723,8 +764,13 @@ export default defineComponent({
     }
     function defaultTemplateFor(eventType: string): string {
       const type = normalizeEventType(eventType, "wedding");
-      const hit = listTemplates().find((t) => t.type === type);
-      return (hit || listTemplates()[0])?.id || "wedding-1";
+      // New pages start on a gen-2 template (the 14 original ones stay only for existing pages).
+      const gen2 = listTemplates().filter((t) => t.generation === 2);
+      const hit =
+        gen2.find((t) => t.type === type) ||
+        gen2.find((t) => (t.types || []).includes(type)) ||
+        listTemplates().find((t) => t.type === type);
+      return (hit || gen2[0] || listTemplates()[0])?.id || "classic";
     }
     async function load() {
       if (!eventId.value) {
@@ -762,9 +808,12 @@ export default defineComponent({
           hydrated.event.venue = "";
           hydrated.event.city = "";
         }
+        setVariants(hydrated, saved ? readVariants(config.blocks, config.template_id) : {});
+        fixGen2ContentSamples(hydrated.content, hydrated.template_id);
         state.value = hydrated;
         serverSlug.value = hub.slug || null;
         savedTemplateId.value = saved ? config.template_id : "";
+        loadedTemplateId.value = config.template_id;
         everPublished.value =
           Boolean(hub.is_published) || lsGet(`snapshare.hub.published.${eventId.value}`) === "1";
         freeSlug.value = "";
@@ -913,12 +962,21 @@ export default defineComponent({
       st.template_id = id;
       st.order = [];
       st.theme.font_id = null;
+      // Manual style picks are kept; null ones follow the new template's presets.
+      const sw = variantsAfterSwitch(variantsOf(st), id);
+      setVariants(st, sw.map);
       kindErrors.value = {};
       if (openKind.value && openKind.value !== "hero" && !allKinds.value.some((p) => p.kind === openKind.value)) {
         openKind.value = "";
       }
       touch();
-      showToast(`העיצוב הוחלף ל«${getTemplate(id)?.name_he || ""}»`, true);
+      const shown = isGen2Template(id)
+        ? " · " +
+          (Object.keys(sw.shown) as VariantBlockType[])
+            .map((t) => `${VARIANT_BLOCK_HE[t]}: ${variantLabel(t, sw.shown[t])}`)
+            .join(" · ")
+        : "";
+      showToast(`העיצוב הוחלף ל«${getTemplate(id)?.name_he || ""}»${shown}`, true);
       setTimeout(() => scrollPreviewTo("hero"), 120);
     }
     function onPalette(id: string) {
@@ -1016,13 +1074,107 @@ export default defineComponent({
       const d = getDefaultHubConfig(st.template_id);
       const type = templateTypeOf(st.template_id);
       const blocks = d ? ensureGiftBlock(sortedBlocks(d.blocks), type) : [];
-      st.content = defaultContent(blocks, st.event, type);
+      st.content = fixGen2ContentSamples(defaultContent(blocks, st.event, type), st.template_id);
       st.sections = {};
       st.order = [];
       st.theme = { palette_id: "original", font_id: null };
+      setVariants(st, {});
       openKind.value = "";
       touch();
       showToast("התחלנו מחדש עם העיצוב הזה", true);
+    }
+
+    /* ---------------- gen-2 styles (hero / gallery / schedule) ---------------- */
+    const styleOpenKind = ref("");
+    /** kind → block type for the three variant blocks (hero is the pinned basics card). */
+    const variantKinds = computed(() => {
+      const out: Record<string, VariantBlockType> = {};
+      if (!state.value) return out;
+      out.hero = "HERO_COUNTDOWN";
+      for (const p of allKinds.value) {
+        if (isVariantBlockType(p.block.type) && !(p.kind in out)) out[p.kind] = p.block.type;
+      }
+      return out;
+    });
+    /** Content-tab chips + strips. Old templates get `legacy` (the row shows a short note instead). */
+    const variantRows = computed(() => {
+      const st = state.value;
+      const out: Record<
+        string,
+        { type: VariantBlockType; current: string; preset: string; legacy: boolean; options: Array<{ id: string; he: string; desc: string }> }
+      > = {};
+      if (!st) return out;
+      const gen2 = isGen2Template(st.template_id);
+      const map = variantsOf(st);
+      for (const [kind, type] of Object.entries(variantKinds.value)) {
+        out[kind] = {
+          type,
+          current: gen2 ? resolveVariant(st.template_id, type, map[type]) : "",
+          preset: gen2 ? presetFor(st.template_id, type) : "",
+          legacy: !gen2,
+          options: VARIANTS[type],
+        };
+      }
+      return out;
+    });
+    /** In-preview chip: blockId → «סגנון i/n · name». */
+    const variantChips = computed(() => {
+      const out: Record<string, { index: number; count: number; label: string }> = {};
+      const st = state.value;
+      if (!st || !isGen2Template(st.template_id)) return out;
+      for (const [kind, row] of Object.entries(variantRows.value)) {
+        const id = kindBlockIds.value[kind];
+        if (!id) continue;
+        const i = row.options.findIndex((o) => o.id === row.current);
+        out[id] = { index: Math.max(0, i), count: row.options.length, label: variantLabel(row.type, row.current) };
+      }
+      return out;
+    });
+    const stripSample = computed(() =>
+      variantStripSample(previewConfig.value, state.value?.template_id || "")
+    );
+    // Strip previews + design cards show the gen-2 heading fonts in the builder page itself.
+    watch(
+      () => state.value?.template_id || "",
+      (id) => id && ensureGen2Fonts(id),
+      { immediate: true }
+    );
+    function setVariant(type: VariantBlockType, pick: string) {
+      const st = state.value;
+      if (!st || !isGen2Template(st.template_id)) return;
+      const next = storedVariant(st.template_id, type, pick);
+      const cur = variantsOf(st)[type] ?? null;
+      if (next === cur) return;
+      remember(); // one undo step per style change
+      setVariants(st, { ...variantsOf(st), [type]: next });
+      touch();
+    }
+    function onVariantPick(kind: string, pick: string) {
+      const type = variantKinds.value[kind];
+      if (!type) return;
+      setVariant(type, pick);
+      scrollPreviewTo(kind);
+    }
+    function onStyleOpen(kind: string) {
+      styleOpenKind.value = styleOpenKind.value === kind ? "" : kind;
+    }
+    function kindOfBlock(blockId: string): string {
+      return Object.entries(kindBlockIds.value).find(([, id]) => id === blockId)?.[0] || "";
+    }
+    function onVariantCycle(blockId: string, dir: number) {
+      const kind = kindOfBlock(blockId);
+      const row = kind ? variantRows.value[kind] : null;
+      if (!row || row.legacy) return;
+      const list = row.options;
+      const i = list.findIndex((o) => o.id === row.current);
+      const n = (Math.max(0, i) + (dir < 0 ? -1 : 1) + list.length) % list.length;
+      setVariant(row.type, list[n].id);
+    }
+    function onVariantOpen(blockId: string) {
+      const kind = kindOfBlock(blockId);
+      if (!kind) return;
+      onPick(blockId);
+      styleOpenKind.value = kind;
     }
 
     /* ---------------- slug ---------------- */
@@ -1232,6 +1384,7 @@ export default defineComponent({
           if (o.filter) filter.value = o.filter as string[];
           if (o.filterOpen !== undefined) filterOpen.value = !!o.filterOpen;
           if (o.toast !== undefined) toast.msg = "";
+          if (o.styleOpen !== undefined) styleOpenKind.value = String(o.styleOpen);
         },
         scrollTo: (kind: string) => scrollPreviewTo(kind),
         getState: () => clone(state.value),
@@ -1301,6 +1454,15 @@ export default defineComponent({
       orderedKinds,
       onMap,
       labels,
+      variantRows,
+      variantChips,
+      stripSample,
+      styleOpenKind,
+      onVariantPick,
+      onStyleOpen,
+      onVariantCycle,
+      onVariantOpen,
+      loadedTemplateId,
       selectedBlockId,
       sectionCount,
       sampleNames,

@@ -38,6 +38,8 @@ export interface HubBlock {
   enabled: boolean;
   order: number;
   data: Record<string, unknown>;
+  /** Gen-2 templates: hero / gallery / schedule layout. null or missing = the template preset. */
+  variant?: string | null;
 }
 
 export interface HubConfig {
@@ -93,4 +95,15 @@ export interface TemplateMeta {
   nav: Array<{ id: string; label: string }>;
   hero_art: string;
   stock_keys: string[];
+  /** 2 = gen-2 template (palette + fonts + preset variants). Missing = the original 14. */
+  generation?: number;
+  /** Event types this template is offered for (gen-2). */
+  types?: string[];
+  mood_he?: string;
+  body_font?: string;
+  heading_weight?: number;
+  radius?: number;
+  presets?: Partial<Record<"HERO_COUNTDOWN" | "GALLERY" | "EVENT_TIMELINE", string>>;
+  colors?: Record<string, string>;
+  sample?: { kicker: string; title: string };
 }

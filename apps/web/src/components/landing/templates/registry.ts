@@ -187,6 +187,10 @@ export function googleFontsHref(families: string[]): string {
       if (f === "Heebo") return "family=Heebo:wght@400;500;600;700;800;900";
       if (f === "Rubik") return "family=Rubik:wght@400;500;600;700;800";
       if (f === "Assistant") return "family=Assistant:wght@400;500;600;700;800";
+      // Gen-2 fonts with limited weights (a wght range they lack makes Google Fonts 400 the whole request).
+      if (f === "Bellefair" || f === "Suez One") return `family=${enc}`;
+      if (f === "Amatic SC") return "family=Amatic+SC:wght@400;700";
+      if (f === "Karantina") return "family=Karantina:wght@300;400;700";
       return `family=${enc}:wght@400;500;600;700;800`;
     })
     .join("&");
@@ -236,6 +240,33 @@ export async function loadTemplateTheme(templateId: string): Promise<void> {
       break;
     case "festival-2":
       await import("../themes/festival-2.css");
+      break;
+    case "classic":
+      await Promise.all([import("../themes/v2/classic.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "minimal":
+      await Promise.all([import("../themes/v2/minimal.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "botanical":
+      await Promise.all([import("../themes/v2/botanical.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "editorial":
+      await Promise.all([import("../themes/v2/editorial.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "night":
+      await Promise.all([import("../themes/v2/night.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "mitzva":
+      await Promise.all([import("../themes/v2/mitzva.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "pastel":
+      await Promise.all([import("../themes/v2/pastel.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "corporate":
+      await Promise.all([import("../themes/v2/corporate.css"), import("../themes/v2/v2.css")]);
+      break;
+    case "party":
+      await Promise.all([import("../themes/v2/party.css"), import("../themes/v2/v2.css")]);
       break;
     default:
       break;

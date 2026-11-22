@@ -1,0 +1,14 @@
+/* Gen-2 template «חגיגה צבעונית» — tokens only; layout lives in themes/v2/v2.css. */
+.t-mitzva {
+  --bg: #FFF7E8; --bg2: #FFE9C6; --stage: #FFE9C6; --surface: #FFFFFF;
+  --ink: #1C2757; --muted: #56608A; --accent: #FF6A3D; --accent-2: #2FB4FF;
+  --on-accent: #FFFFFF; --hero-ink: #1C2757; --count-ink: #1C2757;
+  --cta-bg: #FF6A3D; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #FFFFFF 88%, transparent); --nav-on-bg: #FF6A3D; --nav-on-ink: #FFFFFF;
+  --font-display: "Secular One", sans-serif;
+  --font-body: "Rubik", "Heebo", sans-serif;
+  --line: #F1DDB8; --line-strong: color-mix(in srgb, #1C2757 30%, transparent);
+  --r: 24px; --btn-r: 24px; --card-r: 24px; --tile-r: 24px;
+  --hw: 400;
+  --hero-art: none; --stage-img: none;
+}

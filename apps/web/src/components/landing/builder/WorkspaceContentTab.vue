@@ -2,18 +2,40 @@
   <div class="ws-content" @focusin="onFocusIn">
     <!-- pinned basics card -->
     <div class="basics" :class="{ open: openKind === 'hero' }" data-row="hero">
-      <button
-        type="button"
-        class="basics-h"
-        :aria-expanded="openKind === 'hero' ? 'true' : 'false'"
-        @click="$emit('open', openKind === 'hero' ? '' : 'hero')"
-      >
-        <span class="ric hero-ic"><BuilderIcon name="sparkle" /></span>
-        <span class="rtxt"
-          ><b>הפרטים הבסיסיים</b><small>{{ openKind === "hero" ? "מופיעים בפתיחה של העמוד" : summary }}</small></span
+      <div class="basics-row">
+        <button
+          type="button"
+          class="basics-h"
+          :aria-expanded="openKind === 'hero' ? 'true' : 'false'"
+          @click="$emit('open', openKind === 'hero' ? '' : 'hero')"
         >
-        <span class="rchev"><span v-if="openKind !== 'hero'" class="edit-l">עריכה</span><BuilderIcon name="chev" /></span>
-      </button>
+          <span class="ric hero-ic"><BuilderIcon name="sparkle" /></span>
+          <span class="rtxt"
+            ><b>הפרטים הבסיסיים</b><small>{{ openKind === "hero" ? "מופיעים בפתיחה של העמוד" : summary }}</small></span
+          >
+          <span class="rchev"><span v-if="openKind !== 'hero'" class="edit-l">עריכה</span><BuilderIcon name="chev" /></span>
+        </button>
+        <button
+          v-if="vrow('hero')"
+          type="button"
+          class="stylebtn stylebtn--basics"
+          :class="{ on: styleOpen === 'hero' }"
+          :aria-expanded="styleOpen === 'hero' ? 'true' : 'false'"
+          title="סגנון תצוגה"
+          @click="$emit('style-open', 'hero')"
+        >
+          <span class="swap" aria-hidden="true">⇄</span>{{ vname("hero") }}
+        </button>
+      </div>
+      <WorkspaceVariantStrip
+        v-if="vrow('hero') && styleOpen === 'hero'"
+        block-he="פתיחה"
+        :options="vrow('hero')?.options || []"
+        :current="vrow('hero')?.current || ''"
+        :preset="vrow('hero')?.preset || ''"
+        :sample="stripSample"
+        @pick="$emit('variant', 'hero', $event)"
+      />
       <div v-if="openKind === 'hero'" class="basics-b">
         <p v-if="essentialsError" class="fld-err" role="alert">{{ essentialsError }}</p>
         <div class="f2">
@@ -78,6 +100,17 @@
             >
             <span class="rchev"><BuilderIcon name="chev" /></span>
           </button>
+          <button
+            v-if="vrow(k)"
+            type="button"
+            class="stylebtn"
+            :class="{ on: styleOpen === k }"
+            :aria-expanded="styleOpen === k ? 'true' : 'false'"
+            title="סגנון תצוגה"
+            @click="$emit('style-open', k)"
+          >
+            <span class="swap" aria-hidden="true">⇄</span>{{ vname(k) }}
+          </button>
           <label class="tgl" title="הצגה בעמוד"
             ><input
               type="checkbox"
@@ -86,7 +119,17 @@
               @click.prevent="$emit('toggle', k, false)" /><i></i
           ></label>
         </div>
+        <WorkspaceVariantStrip
+          v-if="vrow(k) && styleOpen === k"
+          :block-he="meta(k).name"
+          :options="vrow(k)?.options || []"
+          :current="vrow(k)?.current || ''"
+          :preset="vrow(k)?.preset || ''"
+          :sample="stripSample"
+          @pick="$emit('variant', k, $event)"
+        />
         <div v-if="openKind === k" class="rbody">
+          <p v-if="legacyVariant(k)" class="help vnote"><BuilderIcon name="info" /> סגנונות זמינים בתבניות החדשות</p>
           <p v-if="errors[k]" class="fld-err" role="alert">{{ errors[k] }}</p>
           <SectionFields
             v-if="meta(k).fields.length"
@@ -133,8 +176,18 @@
 import { computed, defineComponent, reactive, ref, type PropType } from "vue";
 import BuilderIcon from "./BuilderIcon.vue";
 import SectionFields from "./SectionFields.vue";
+import WorkspaceVariantStrip from "./WorkspaceVariantStrip.vue";
+import type { VariantStripSample } from "./variantStrip";
 import { baseKind, dateHe, isSampleContent, kindMeta, titleOf } from "./hubWizardModel";
 import type { WizardContent, WizardEvent } from "./hubWizardModel";
+
+type VariantRow = {
+  type: string;
+  current: string;
+  preset: string;
+  legacy: boolean;
+  options: Array<{ id: string; he: string; desc: string }>;
+};
 
 /**
  * תוכן tab: pinned basics card, one-open accordion of visible sections (drag grip + up/down),
@@ -142,7 +195,7 @@ import type { WizardContent, WizardEvent } from "./hubWizardModel";
  */
 export default defineComponent({
   name: "WorkspaceContentTab",
-  components: { BuilderIcon, SectionFields },
+  components: { BuilderIcon, SectionFields, WorkspaceVariantStrip },
   props: {
     event: { type: Object as PropType<WizardEvent>, required: true },
     content: { type: Object as PropType<WizardContent>, required: true },
@@ -159,13 +212,28 @@ export default defineComponent({
     errors: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
     essentialsError: { type: String, default: "" },
     scroller: { type: Object as PropType<HTMLElement | null>, default: null },
+    /** Gen-2 styles: kind -> { current, preset, options, legacy } for the hero / gallery / schedule rows. */
+    variantRows: { type: Object as PropType<Record<string, VariantRow>>, default: () => ({}) },
+    /** Kind whose style strip is open ("" = none). */
+    styleOpen: { type: String, default: "" },
+    stripSample: { type: Object as PropType<VariantStripSample>, required: true },
   },
-  emits: ["open", "toggle", "move", "reorder", "content", "event-field", "focus-field"],
+  emits: ["open", "toggle", "move", "reorder", "content", "event-field", "focus-field", "variant", "style-open"],
   setup(props, { emit }) {
     const listEl = ref<HTMLElement | null>(null);
     const onKinds = computed(() => props.order.filter((k) => props.on[k]));
     const offKinds = computed(() => props.order.filter((k) => !props.on[k]));
     const meta = (k: string) => kindMeta(k);
+    /** Row with a style chip (gen-2 template only). */
+    const vrow = (k: string): VariantRow | null => {
+      const r = props.variantRows[k];
+      return r && !r.legacy ? r : null;
+    };
+    const legacyVariant = (k: string) => Boolean(props.variantRows[k]?.legacy);
+    const vname = (k: string) => {
+      const r = props.variantRows[k];
+      return r?.options.find((o) => o.id === r.current)?.he || "";
+    };
     const base = (k: string) => baseKind(k);
     const isSample = (k: string) => isSampleContent(k, props.content[baseKind(k)]);
     const summary = computed(() => {
@@ -248,7 +316,70 @@ export default defineComponent({
       grip.addEventListener("pointercancel", up);
     }
 
-    return { listEl, onKinds, offKinds, meta, base, isSample, summary, autoText, ev, onFocusIn, drag, startDrag };
+    return {
+      listEl,
+      onKinds,
+      offKinds,
+      meta,
+      vrow,
+      vname,
+      legacyVariant,
+      base,
+      isSample,
+      summary,
+      autoText,
+      ev,
+      onFocusIn,
+      drag,
+      startDrag,
+    };
   },
 });
 </script>
+
+<style scoped>
+.stylebtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  margin-inline-end: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: #fbf8f3;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.stylebtn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: #fff;
+}
+.stylebtn.on {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.stylebtn .swap {
+  font-size: 13px;
+  line-height: 1;
+}
+.basics-row {
+  display: flex;
+  align-items: center;
+}
+.basics-row .basics-h {
+  flex: 1;
+  min-width: 0;
+}
+.stylebtn--basics {
+  margin-inline-end: 12px;
+}
+.vnote {
+  margin-bottom: 10px;
+}
+</style>

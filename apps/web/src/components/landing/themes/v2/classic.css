@@ -1,0 +1,14 @@
+/* Gen-2 template «שנהב קלאסי» — tokens only; layout lives in themes/v2/v2.css. */
+.t-classic {
+  --bg: #F7F1E8; --bg2: #EFE5D6; --stage: #EFE5D6; --surface: #FFFCF7;
+  --ink: #2B2119; --muted: #76685B; --accent: #A9823F; --accent-2: #D8B98A;
+  --on-accent: #FFFFFF; --hero-ink: #2B2119; --count-ink: #2B2119;
+  --cta-bg: #A9823F; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #FFFCF7 88%, transparent); --nav-on-bg: #A9823F; --nav-on-ink: #FFFFFF;
+  --font-display: "Frank Ruhl Libre", serif;
+  --font-body: "Assistant", "Heebo", sans-serif;
+  --line: #E4D6C1; --line-strong: color-mix(in srgb, #2B2119 30%, transparent);
+  --r: 14px; --btn-r: 14px; --card-r: 14px; --tile-r: 14px;
+  --hw: 500;
+  --hero-art: none; --stage-img: none;
+}

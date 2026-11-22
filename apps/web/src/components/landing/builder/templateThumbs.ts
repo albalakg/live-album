@@ -23,6 +23,10 @@ export const TEMPLATE_THUMBS: Record<string, string> = {
   "festival-2": asUrl(require("@/assets/landing-thumbs/festival-2.jpg")),
 };
 
+/** Gen-2 templates: pre-rendered public-page heroes (public/landing/thumbs/v2/<id>.webp, 800x500). */
+const GEN2_THUMBS = new Set(["classic", "minimal", "botanical", "editorial", "night", "mitzva", "pastel", "corporate", "party"]);
+
 export function thumbFor(templateId: string): string {
+  if (GEN2_THUMBS.has(templateId)) return `/landing/thumbs/v2/${templateId}.webp`;
   return TEMPLATE_THUMBS[templateId] || "";
 }

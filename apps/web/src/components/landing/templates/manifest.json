@@ -15,7 +15,16 @@
     "party-1": "party",
     "party-2": "party",
     "festival-1": "festival",
-    "festival-2": "festival"
+    "festival-2": "festival",
+    "classic": "v2/classic",
+    "minimal": "v2/minimal",
+    "botanical": "v2/botanical",
+    "editorial": "v2/editorial",
+    "night": "v2/night",
+    "mitzva": "v2/mitzva",
+    "pastel": "v2/pastel",
+    "corporate": "v2/corporate",
+    "party": "v2/party"
   },
   "pools": {
     "wedding": {
@@ -226,6 +235,312 @@
       "album-6": {
         "file": "album-6.jpg",
         "alt": "שטח פתוח"
+      }
+    },
+    "v2/classic": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/minimal": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/botanical": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/editorial": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/night": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/mitzva": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/pastel": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/corporate": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
+      }
+    },
+    "v2/party": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "תמונת פתיחה לדוגמה"
+      },
+      "album-1": {
+        "file": "album-1.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-2": {
+        "file": "album-2.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-3": {
+        "file": "album-3.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-4": {
+        "file": "album-4.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-5": {
+        "file": "album-5.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-6": {
+        "file": "album-6.webp",
+        "alt": "תמונה לדוגמה"
+      },
+      "album-7": {
+        "file": "album-7.webp",
+        "alt": "תמונה לדוגמה"
       }
     }
   }

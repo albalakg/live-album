@@ -1,0 +1,14 @@
+/* Gen-2 template «מסיבת יום הולדת» — tokens only; layout lives in themes/v2/v2.css. */
+.t-party {
+  --bg: #170C2B; --bg2: #22123D; --stage: #22123D; --surface: #2A1749;
+  --ink: #FFF6FF; --muted: #C9B6E4; --accent: #FF4FA3; --accent-2: #FFD23F;
+  --on-accent: #FFFFFF; --hero-ink: #FFF6FF; --count-ink: #FFF6FF;
+  --cta-bg: #FF4FA3; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #2A1749 88%, transparent); --nav-on-bg: #FF4FA3; --nav-on-ink: #FFFFFF;
+  --font-display: "Karantina", sans-serif;
+  --font-body: "Rubik", "Heebo", sans-serif;
+  --line: #3D2763; --line-strong: color-mix(in srgb, #FFF6FF 30%, transparent);
+  --r: 18px; --btn-r: 18px; --card-r: 18px; --tile-r: 18px;
+  --hw: 700;
+  --hero-art: none; --stage-img: none;
+}

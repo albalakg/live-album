@@ -1,0 +1,14 @@
+/* Gen-2 template «פסטל רך» — tokens only; layout lives in themes/v2/v2.css. */
+.t-pastel {
+  --bg: #F7F2F8; --bg2: #EFE6F2; --stage: #EFE6F2; --surface: #FFFFFF;
+  --ink: #4A3E5C; --muted: #7E7290; --accent: #9C84C8; --accent-2: #F2C3CE;
+  --on-accent: #FFFFFF; --hero-ink: #4A3E5C; --count-ink: #4A3E5C;
+  --cta-bg: #9C84C8; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #FFFFFF 88%, transparent); --nav-on-bg: #9C84C8; --nav-on-ink: #FFFFFF;
+  --font-display: "Amatic SC", sans-serif;
+  --font-body: "Varela Round", "Heebo", sans-serif;
+  --line: #E7DCEC; --line-strong: color-mix(in srgb, #4A3E5C 30%, transparent);
+  --r: 28px; --btn-r: 28px; --card-r: 28px; --tile-r: 28px;
+  --hw: 700;
+  --hero-art: none; --stage-img: none;
+}

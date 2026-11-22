@@ -1,0 +1,14 @@
+/* Gen-2 template «לבן מינימלי» — tokens only; layout lives in themes/v2/v2.css. */
+.t-minimal {
+  --bg: #FFFFFF; --bg2: #F4F4F2; --stage: #F4F4F2; --surface: #FFFFFF;
+  --ink: #121212; --muted: #6E6E6E; --accent: #121212; --accent-2: #BDBDBD;
+  --on-accent: #FFFFFF; --hero-ink: #121212; --count-ink: #121212;
+  --cta-bg: #121212; --cta-ink: #FFFFFF;
+  --nav-bg: color-mix(in srgb, #FFFFFF 88%, transparent); --nav-on-bg: #121212; --nav-on-ink: #FFFFFF;
+  --font-display: "Heebo", sans-serif;
+  --font-body: "Heebo", "Heebo", sans-serif;
+  --line: #E6E6E6; --line-strong: color-mix(in srgb, #121212 30%, transparent);
+  --r: 2px; --btn-r: 6px; --card-r: 2px; --tile-r: 2px;
+  --hw: 300;
+  --hero-art: none; --stage-img: none;
+}
