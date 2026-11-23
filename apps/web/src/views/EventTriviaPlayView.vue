@@ -54,6 +54,17 @@
         <p class="hint">הפודיום על המסך באירוע</p>
       </section>
 
+      <!-- removed by the host -->
+      <section v-else-if="view === 'removed'" class="g-wait g-removed" data-testid="trivia-removed">
+        <p class="eyebrow">{{ title }}</p>
+        <h1>המנחה הסיר אותך מהמשחק</h1>
+        <p v-if="rejoinBlocked" class="hint">ההצטרפות מחדש מהטלפון הזה נחסמה. אפשר להמשיך ליהנות מהמסך הגדול.</p>
+        <template v-else>
+          <p class="hint">אם זו טעות, אפשר להצטרף שוב עם כינוי אחר.</p>
+          <button type="button" class="g-go" @click="rejoin">להצטרף שוב</button>
+        </template>
+      </section>
+
       <!-- join -->
       <section v-else-if="view === 'join'" class="g-join">
         <p class="eyebrow">{{ title }}</p>
@@ -70,7 +81,11 @@
               minlength="2"
               placeholder="למשל: נועה"
               autocomplete="nickname"
+              @input="nicknameHint?.check(nickname)"
             />
+            <span v-if="nicknameFlagged" class="nick-hint" role="status" data-testid="trivia-nick-hint">
+              הכינוי הזה לא יעבור על המסך. נסו כינוי אחר 🙂
+            </span>
           </label>
 
           <label class="selfie-wrap">
@@ -127,6 +142,7 @@
             type="submit"
             :disabled="
               submitting ||
+              nicknameFlagged ||
               nickname.trim().length < 2 ||
               (needsTeam && !team) ||
               (needsTable && !table)
@@ -192,6 +208,14 @@
         </p>
         <p class="hint podium-hint">הפודיום על המסך באירוע</p>
       </section>
+
+      <TriviaGuestReactionBar
+        v-if="showReactions"
+        :event-path="eventPath"
+        :session-token="sessionToken"
+        @removed="markRemoved(false)"
+        @disabled="reactionsEnabled = false"
+      />
     </div>
   </main>
 </template>
@@ -210,6 +234,9 @@ import {
   normalizeTriviaTheme,
 } from "@/helpers/triviaTypes";
 import TriviaGuestQuestion from "@/components/event/trivia/TriviaGuestQuestion.vue";
+import TriviaGuestReactionBar from "@/components/event/trivia/TriviaGuestReactionBar.vue";
+import { getOrCreateDeviceId } from "@/helpers/deviceAnalytics";
+import { TriviaTextHint, triviaErrorReason } from "@/helpers/triviaModeration";
 
 type PlayView =
   | "loading"
@@ -220,7 +247,8 @@ type PlayView =
   | "looking"
   | "feedback"
   | "result"
-  | "closed";
+  | "closed"
+  | "removed";
 
 interface TriviaResult {
   score: number;
@@ -270,7 +298,7 @@ const FEEDBACK_MS = 1300;
 export default defineComponent({
   name: "EventTriviaPlayView",
 
-  components: { TriviaGuestQuestion },
+  components: { TriviaGuestQuestion, TriviaGuestReactionBar },
 
   data() {
     return {
@@ -301,6 +329,11 @@ export default defineComponent({
       clockTimer: null as ReturnType<typeof setInterval> | null,
       feedbackTimer: null as ReturnType<typeof setTimeout> | null,
       autoSubmittedId: null as number | null,
+      reactionsEnabled: true,
+      rejoinBlocked: false,
+      nicknameFlagged: false,
+      nicknameHint: null as TriviaTextHint | null,
+      sessionToken: "",
     };
   },
 
@@ -345,14 +378,30 @@ export default defineComponent({
     feedbackUnscored(): boolean {
       return isUnscoredType(this.question?.type || "");
     },
+
+    showReactions(): boolean {
+      return (
+        this.reactionsEnabled &&
+        !!this.sessionToken &&
+        ["waiting-for-host", "looking", "question", "feedback", "result"].includes(this.view)
+      );
+    },
   },
 
   created() {
+    this.sessionToken = this.token();
+    this.nicknameHint = new TriviaTextHint(
+      () => this.eventPath,
+      (flagged) => {
+        this.nicknameFlagged = flagged;
+      }
+    );
     this.bootstrap();
     this.pollTimer = setInterval(() => this.tickPoll(), POLL_MS);
   },
 
   beforeUnmount() {
+    this.nicknameHint?.dispose();
     if (this.pollTimer) clearInterval(this.pollTimer);
     this.stopClock();
     if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
@@ -362,6 +411,32 @@ export default defineComponent({
   methods: {
     token(): string {
       return localStorage.getItem(this.sessionKey) || "";
+    },
+
+    /** The host removed this player: forget the session (kept for the rejoin-block check). */
+    markRemoved(blocked: boolean) {
+      const current = this.token();
+      if (current) localStorage.setItem(`${this.sessionKey}:prev`, current);
+      localStorage.removeItem(this.sessionKey);
+      this.sessionToken = "";
+      this.rejoinBlocked = blocked;
+      this.stopClock();
+      this.view = "removed";
+    },
+
+    handleRemoved(error: unknown): boolean {
+      const reason = triviaErrorReason(error);
+      if (reason === "removed") {
+        this.markRemoved(false);
+        return true;
+      }
+      return false;
+    },
+
+    rejoin() {
+      this.nickname = "";
+      this.nicknameFlagged = false;
+      this.view = "join";
     },
 
     headers() {
@@ -410,6 +485,8 @@ export default defineComponent({
         const screen = res.data.data;
         this.title = screen.title || "טריוויה";
         this.theme = normalizeTriviaTheme(screen.theme);
+        this.reactionsEnabled = screen.fx?.reactions_enabled !== false;
+        if (this.view === "removed") return;
         if (screen.pace) this.pace = screen.pace;
 
         if (screen.teams?.mode === "sides") {
@@ -518,8 +595,10 @@ export default defineComponent({
         } else {
           this.view = "waiting";
         }
-      } catch {
+      } catch (error) {
+        if (this.handleRemoved(error)) return;
         localStorage.removeItem(this.sessionKey);
+        this.sessionToken = "";
         this.view = "join";
       }
     },
@@ -546,9 +625,18 @@ export default defineComponent({
           form.append("team", this.table.trim().replace(/\s+/g, " ").slice(0, 40));
         }
 
-        const res = await axios.post(`events/${this.eventPath}/trivia/join`, form);
+        form.append("device_id", getOrCreateDeviceId());
+
+        const previous = localStorage.getItem(`${this.sessionKey}:prev`) || "";
+        const res = await axios.post(
+          `events/${this.eventPath}/trivia/join`,
+          form,
+          previous ? { headers: { "X-Trivia-Session": previous } } : undefined
+        );
         const data = res.data.data;
         localStorage.setItem(this.sessionKey, data.session_token);
+        this.sessionToken = data.session_token;
+        this.rejoinBlocked = false;
         this.avatarUrl = data.player?.avatar_url || "";
         if (data.pace) this.pace = data.pace;
         if (data.teams_mode) this.teamsMode = data.teams_mode;
@@ -560,6 +648,12 @@ export default defineComponent({
         }
         await this.loadQuestion();
       } catch (error) {
+        const reason = triviaErrorReason(error);
+        if (reason === "rejoin_blocked") {
+          this.markRemoved(true);
+          return;
+        }
+        if (reason === "nickname_blocked") this.nicknameFlagged = true;
         this.fail(error, "לא הצלחנו להכניס אותך למשחק");
       } finally {
         this.submitting = false;
@@ -657,6 +751,7 @@ export default defineComponent({
           this.question = q;
         }
       } catch (error) {
+        if (this.handleRemoved(error)) return;
         if (!opts.silent) {
           this.fail(error, "לא הצלחנו לטעון שאלה");
         }
@@ -784,6 +879,7 @@ export default defineComponent({
         this.view = "feedback";
         this.scheduleAfterFeedback(data);
       } catch (error) {
+        if (this.handleRemoved(error)) return;
         this.fail(error, "לא הצלחנו לשמור את התשובה");
         if (this.question && this.isSharedPace) {
           await this.loadQuestion({ silent: true });
@@ -816,7 +912,8 @@ export default defineComponent({
         this.feedbackShownFor = this.lastSubmit.question_id;
         this.view = "feedback";
         this.scheduleAfterFeedback(data);
-      } catch {
+      } catch (error) {
+        if (this.handleRemoved(error)) return;
         this.view = "looking";
       } finally {
         this.submitting = false;
@@ -863,7 +960,8 @@ export default defineComponent({
         };
         this.view = "result";
         this.stopClock();
-      } catch {
+      } catch (error) {
+        if (this.handleRemoved(error)) return;
         this.view = "closed";
       }
     },
@@ -994,6 +1092,18 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.nick-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--g-rose);
+}
+
+.g-removed .g-go {
+  margin-top: 18px;
 }
 
 .table-hint {
