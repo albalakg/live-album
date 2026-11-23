@@ -16,7 +16,7 @@ import {
 
 export { TRIVIA_QUESTION_CAP };
 
-export type BuilderTabId = "build" | "theme" | "settings" | "results";
+export type BuilderTabId = "build" | "theme" | "settings" | "results" | "live";
 export type MobilePaneId = "list" | "edit" | "preview";
 
 export interface TriviaBuilderOption {
@@ -39,6 +39,8 @@ export interface TriviaBuilderQuestion {
   time_limit_seconds: number;
   max_points: number;
   options: TriviaBuilderOption[];
+  /** Free-text questions only: answers wait for host approval before the screen. */
+  requires_approval?: boolean;
 }
 
 export interface TriviaBuilderGame {
@@ -123,6 +125,7 @@ export function questionFromApi(
     config,
     time_limit_seconds: raw.time_limit_seconds ?? 20,
     max_points: raw.max_points ?? (isUnscoredType(type) ? 0 : 1000),
+    requires_approval: !!raw.requires_approval,
     options: (raw.options || []).map((o: any, i: number) => {
       const prevOpt = prev?.options?.[i];
       const byId = o.id

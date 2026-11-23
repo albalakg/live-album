@@ -82,6 +82,11 @@
       <router-link class="stage-panel-btn" to="/event/gallery">חזרה לניהול</router-link>
     </aside>
 
+    <TriviaScreenFx
+      v-if="triviaScreen && (showTriviaLive || showTriviaPodium)"
+      :screen="triviaScreen"
+    />
+
     <GuestAlbumCta v-if="showGuestCta" />
   </div>
 </template>
@@ -99,6 +104,7 @@ import EventGalleryGrid3X3 from "@/components/event/EventGalleryGrid3X3.vue";
 import EventTriviaLiveStage from "@/components/event/EventTriviaLiveStage.vue";
 import EventTriviaPodium from "@/components/event/EventTriviaPodium.vue";
 import GuestAlbumCta from "@/components/event/GuestAlbumCta.vue";
+import TriviaScreenFx from "@/components/event/trivia/TriviaScreenFx.vue";
 
 const HEADER_HIDE_DELAY_MS = 3000;
 
@@ -115,6 +121,7 @@ export default defineComponent({
     EventTriviaLiveStage,
     EventTriviaPodium,
     GuestAlbumCta,
+    TriviaScreenFx,
   },
 
   data() {
@@ -127,6 +134,7 @@ export default defineComponent({
       hideHeaderTimeoutId: null as ReturnType<typeof setTimeout> | null,
       triviaScreen: null as any,
       triviaPollIntervalId: null as ReturnType<typeof setInterval> | null,
+      triviaReactionsCursor: null as number | null,
       arrival: false,
       seenIds: new Set<number>(),
       seenReady: false,
@@ -305,8 +313,17 @@ export default defineComponent({
       if (!path) return;
 
       try {
-        const res = await axios.get(`events/${path}/trivia/screen`);
-        this.triviaScreen = res.data?.data || null;
+        // The cursor makes the server send only new guest reactions.
+        const params =
+          this.triviaReactionsCursor !== null
+            ? { reactions_after: this.triviaReactionsCursor }
+            : {};
+        const res = await axios.get(`events/${path}/trivia/screen`, { params });
+        const screen = res.data?.data || null;
+        if (screen?.reactions && typeof screen.reactions.cursor === "number") {
+          this.triviaReactionsCursor = screen.reactions.cursor;
+        }
+        this.triviaScreen = screen;
       } catch (error) {
         this.triviaScreen = null;
       }

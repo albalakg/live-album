@@ -86,6 +86,7 @@
         :current-phase="game.current_phase"
         @phase="setLivePhase"
         @photos="runPhotos"
+        @moderate="setTab('live')"
       />
 
       <p v-if="questionsLocked && tab === 'build'" class="tb-lock-note">
@@ -121,6 +122,7 @@
           @change-type="openGalleryForChange"
           @duplicate="duplicateQuestion"
           @delete="deleteQuestion"
+          @approval="setQuestionApproval"
         />
       </div>
 
@@ -135,6 +137,12 @@
         :game="game"
         :guest-url="guestUrl"
         @patch="onSettingsPatch"
+      />
+
+      <TriviaHostLivePanel
+        v-if="tab === 'live' && eventId"
+        :event-id="eventId"
+        :is-live="isLive"
       />
 
       <TriviaReportPanel
@@ -218,6 +226,7 @@ import TriviaReportPanel, {
 } from "@/components/event/trivia/TriviaReportPanel.vue";
 import TriviaTemplatesModal from "@/components/event/trivia/TriviaTemplatesModal.vue";
 import TriviaHostRemote from "@/components/event/trivia/TriviaHostRemote.vue";
+import TriviaHostLivePanel from "@/components/event/trivia/TriviaHostLivePanel.vue";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@/helpers/notify";
 import Time from "@/helpers/time";
@@ -245,7 +254,7 @@ import {
   toPublicQuestion,
 } from "@/helpers/triviaBuilder";
 
-const TABS: BuilderTabId[] = ["build", "theme", "settings", "results"];
+const TABS: BuilderTabId[] = ["build", "theme", "settings", "results", "live"];
 const AUTOSAVE_MS = 800;
 
 export default defineComponent({
@@ -263,6 +272,7 @@ export default defineComponent({
     TriviaReportPanel,
     TriviaTemplatesModal,
     TriviaHostRemote,
+    TriviaHostLivePanel,
   },
 
   data() {
@@ -381,6 +391,7 @@ export default defineComponent({
         { id: "theme", label: "עיצוב" },
         { id: "settings", label: "הגדרות" },
         { id: "results", label: "תוצאות" },
+        { id: "live", label: "ניהול חי" },
       ];
     },
     albumPhotos(): { id: number; url: string; kind: string }[] {
@@ -492,6 +503,8 @@ export default defineComponent({
           theme: "theme",
           settings: "settings",
           results: "results",
+          live: "live",
+          moderation: "live",
           questions: "build",
         };
         this.tab = map[next] || "build";
@@ -1183,6 +1196,26 @@ export default defineComponent({
         this.fail(error, "לא הצלחנו לעדכן את שלב המשחק");
       } finally {
         this.acting = false;
+      }
+    },
+
+    async setQuestionApproval(required: boolean) {
+      const q = this.selectedQuestion;
+      if (!q?.id) return;
+      const previous = !!q.requires_approval;
+      q.requires_approval = required;
+      try {
+        await axios.post(`events/${this.eventId}/trivia/admin/questions/${q.id}/approval`, {
+          requires_approval: required,
+        });
+        notify({
+          text: required ? "התשובות יחכו לאישור לפני המסך" : "התשובות יעלו למסך מיד",
+          type: "success",
+          duration: 2500,
+        });
+      } catch (error) {
+        q.requires_approval = previous;
+        this.fail(error, "לא הצלחנו לעדכן את האישור");
       }
     },
 

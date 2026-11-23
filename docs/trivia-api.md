@@ -433,3 +433,37 @@ Unchanged shape, plus `type` on questions and `team` on players.
 ## `trivia:tick`
 
 Artisan command still promotes `scheduled → live` and `live → results` by datetime. For `pace=auto` it also advances `question → reveal` after `time_limit_seconds`, then to the next question (or podium) after `reveal_seconds`.
+
+
+## Moderation, screen sound and reactions (2026-11-24)
+
+Server: snapshare-server `cursor/gal-local-plus-v4` b128b5d, migration
+`2026_11_24_000001_add_trivia_moderation_sound_reactions`.
+
+Guests (header `X-Trivia-Session` where noted):
+
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/api/events/{path}/trivia/join` | Now also takes `device_id` (form) and the previous `X-Trivia-Session`. 422 `data.reason=nickname_blocked` for an offensive nickname; 403 `data.reason=rejoin_blocked` if the host blocked this device/session. Table names are masked. |
+| POST | `/api/events/{path}/trivia/text-check` | `{text}` → `{flagged, masked}`. Client hint only (throttle 60/min). |
+| POST | `/api/events/{path}/trivia/react` | Session. `{kind: heart|party|laugh|clap|mazel}`. 429 when over 5 per 10 s per player or 40 per 5 s per event; 403 `reactions_off` / `removed`. |
+| GET | `/api/events/{path}/trivia/screen?reactions_after={cursor}` | Adds `fx {sound_enabled, sound_volume, reactions_enabled}` and `reactions {cursor, items[]}` (no backlog without a cursor). |
+
+Any session endpoint returns 403 `data.reason=removed` after the host removes the player.
+Free-text answers (cloud / finish) are masked on the server; masked answers are never on
+the screen. Hidden answers and answers waiting for approval are left out of `tallies.words`.
+
+Host (auth):
+
+| Method | Path | Body |
+|---|---|---|
+| GET | `/api/events/{id}/trivia/admin/live` | players (incl. removed), current question answers with `state` visible/hidden/pending/filtered, free-text questions, fx, reactions in the last minute |
+| PUT | `/api/events/{id}/trivia/admin/fx` | `sound_enabled`, `sound_volume` 0–100, `reactions_enabled` |
+| POST | `/api/events/{id}/trivia/admin/players/{player}/kick` | `{block: bool}` |
+| POST | `/api/events/{id}/trivia/admin/players/{player}/restore` | — |
+| POST | `/api/events/{id}/trivia/admin/players/{player}/rename` | `{nickname}` |
+| POST | `/api/events/{id}/trivia/admin/answers/hide` | `{answer_ids[], hidden}` |
+| POST | `/api/events/{id}/trivia/admin/answers/approve` | `{answer_ids[], approved}` (false = reject) |
+| POST | `/api/events/{id}/trivia/admin/questions/{question}/approval` | `{requires_approval}`; works while live |
+
+Word lists: `resources/profanity/{he,en,allow}.txt` (see the README there).

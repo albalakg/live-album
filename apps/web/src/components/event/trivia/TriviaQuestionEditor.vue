@@ -270,6 +270,11 @@
           <p class="tb-hint-row tb-hint-box">
             כתבו רק את השאלה. האורחים יכתבו מילה או שתיים, והמילים יעלו למסך כענן. בלי תשובה נכונה.
           </p>
+          <TriviaApprovalToggle
+            :checked="!!question.requires_approval"
+            :disabled="!question.id"
+            @toggle="$emit('approval', $event)"
+          />
         </template>
 
         <!-- finish -->
@@ -288,6 +293,11 @@
           <p class="tb-hint-row">
             האורחים משלימים את המשפט, והתשובות עולות למסך. בלי תשובה נכונה.
           </p>
+          <TriviaApprovalToggle
+            :checked="!!question.requires_approval"
+            :disabled="!question.id"
+            @toggle="$emit('approval', $event)"
+          />
         </template>
 
         <!-- fillblank -->
@@ -585,6 +595,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import TriviaMapPin from "@/components/event/trivia/TriviaMapPin.vue";
+import TriviaApprovalToggle from "@/components/event/trivia/TriviaApprovalToggle.vue";
 import {
   TriviaBuilderQuestion,
   nextBuilderKey,
@@ -614,7 +625,7 @@ const HEBREW_DECOYS = ["א", "ב", "ג", "ד", "ה", "ו", "ל", "מ", "נ", "ר
 export default defineComponent({
   name: "TriviaQuestionEditor",
 
-  components: { TriviaMapPin },
+  components: { TriviaMapPin, TriviaApprovalToggle },
 
   props: {
     question: {
@@ -630,7 +641,7 @@ export default defineComponent({
     },
   },
 
-  emits: ["update", "change-type", "duplicate", "delete"],
+  emits: ["update", "change-type", "duplicate", "delete", "approval"],
 
   data() {
     return {

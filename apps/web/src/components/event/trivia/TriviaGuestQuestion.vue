@@ -146,6 +146,9 @@
         autocomplete="off"
         enterkeyhint="send"
       />
+      <p v-if="textFlagged" class="g-text-hint" role="status" data-testid="trivia-text-hint">
+        נראה שיש כאן מילה לא מתאימה. היא תוסתר ולא תופיע על המסך.
+      </p>
       <button class="g-go" type="submit" :disabled="disabled || !textValue">שליחה</button>
     </form>
 
@@ -233,6 +236,7 @@ import TriviaFillBlankTiles from "@/components/event/trivia/TriviaFillBlankTiles
 import TriviaMapPin from "@/components/event/trivia/TriviaMapPin.vue";
 import TriviaMatchPairs from "@/components/event/trivia/TriviaMatchPairs.vue";
 import TriviaOrderList from "@/components/event/trivia/TriviaOrderList.vue";
+import { TriviaTextHint } from "@/helpers/triviaModeration";
 import {
   TRIVIA_LETTERS,
   TRIVIA_LETTER_COLORS,
@@ -302,6 +306,8 @@ export default defineComponent({
       orderIds: [] as number[],
       mapPoint: null as { x: number; y: number } | null,
       matchPairs: [] as { left_id: number; right_id: number }[],
+      textFlagged: false,
+      textHint: null as TriviaTextHint | null,
     };
   },
 
@@ -501,11 +507,28 @@ export default defineComponent({
         this.resetLocal();
       },
     },
+    textValue(value: string) {
+      if (!this.isTextType) return;
+      if (!this.textHint) {
+        this.textHint = new TriviaTextHint(
+          () => String(this.$route?.params?.event_path || ""),
+          (flagged) => {
+            this.textFlagged = flagged;
+          }
+        );
+      }
+      this.textHint.check(value);
+    },
+  },
+
+  beforeUnmount() {
+    this.textHint?.dispose();
   },
 
   methods: {
     resetLocal() {
       this.textValue = "";
+      this.textFlagged = false;
       this.fillValue = "";
       this.dateIso = "";
       this.orderIds = [];
@@ -961,6 +984,13 @@ h1.emoji-prompt {
 .g-order .g-go,
 .g-match .g-go {
   margin-top: 16px;
+}
+
+.g-text-hint {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--g-rose, #dc5b66);
 }
 
 .g-input {

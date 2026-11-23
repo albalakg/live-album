@@ -17,6 +17,7 @@
     <button type="button" :disabled="busy" @click="$emit('phase', 'leaderboard')">ניקוד</button>
     <button type="button" :disabled="busy" @click="$emit('phase', 'podium')">פודיום</button>
     <button type="button" :disabled="busy" @click="$emit('photos')">חזרה לתמונות</button>
+    <button type="button" class="moderate" @click="$emit('moderate')">ניהול חי · סאונד · שחקנים</button>
   </div>
 </template>
 
@@ -33,6 +34,13 @@ export default defineComponent({
     currentPhase: { type: String, default: "lobby" },
   },
 
-  emits: ["phase", "photos"],
+  emits: ["phase", "photos", "moderate"],
 });
 </script>
+
+<style lang="scss">
+.trivia-builder .tb-control-strip button.moderate {
+  background: var(--tb-ink, #161310);
+  color: #fff;
+}
+</style>

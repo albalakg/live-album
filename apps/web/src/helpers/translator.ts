@@ -31,6 +31,12 @@ const errorsList = {
   "Confirm replace existing questions": "יש כבר שאלות — להחליף בתבנית?",
   "Trivia phase update failed": "לא הצלחנו לעדכן את שלב המשחק",
   "This question type is not available yet": "סוג השאלה הזה עדיין לא זמין",
+  "Please choose a different nickname": "הכינוי הזה לא יעבור על המסך. נסו כינוי אחר 🙂",
+  "The host removed you from this trivia game": "המנחה הסיר אותך מהמשחק",
+  "The host blocked rejoining this trivia game": "המנחה חסם הצטרפות מחדש מהטלפון הזה",
+  "Reactions are turned off": "התגובות כבויות כרגע",
+  "Too many reactions, slow down": "רגע, לאט לאט 🙂",
+  "Unsupported trivia question type": "סוג השאלה לא נתמך",
 } as Record<string, string>;
 
 
