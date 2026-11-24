@@ -42,11 +42,43 @@ export interface HubBlock {
   variant?: string | null;
 }
 
+export type HubPresentation = "landing" | "save_the_date";
+
+/** Save-the-date slice stored on hub_config. Optional on existing landings. */
+export interface SaveTheDateSlice {
+  style?: string;
+  style_opts?: Record<string, Record<string, unknown>>;
+  content?: {
+    kind?: string;
+    a?: string;
+    b?: string;
+    title?: string;
+    sub?: string;
+    date?: string;
+    time?: string;
+    venue?: string;
+    city?: string;
+    line?: string;
+    photo?: unknown;
+  };
+  show?: {
+    countdown?: boolean;
+    calendar?: boolean;
+    whatsapp?: boolean;
+    line?: boolean;
+    venue?: boolean;
+    hebdate?: boolean;
+    footer?: boolean;
+  };
+}
+
 export interface HubConfig {
   /** Template id, or "legacy" for hubs without template_id. */
   template_id: string;
   theme: HubTheme;
   blocks: HubBlock[];
+  presentation?: HubPresentation;
+  save_the_date?: SaveTheDateSlice;
 }
 
 export interface ResolvedImage {

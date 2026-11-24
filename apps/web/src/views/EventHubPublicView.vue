@@ -1,8 +1,14 @@
 <template>
-  <div class="event-hub-public">
+  <div class="event-hub-public" :class="{ 'is-std': isStd }">
     <LandingLoadingSkeleton v-if="status === 'loading'" />
     <LandingNotFoundState v-else-if="status === 'not_found'" />
     <LandingErrorState v-else-if="status === 'error'" @retry="load" />
+    <SaveTheDatePage
+      v-else-if="status === 'ready' && stdCfg"
+      :cfg="stdCfg"
+      :state="stdState"
+      :still="stdStill"
+    />
     <LandingRenderer
       v-else-if="status === 'ready' && normalized"
       :template-id="normalized.templateId"
@@ -22,6 +28,9 @@ import LandingRenderer from "@/components/landing/LandingRenderer.vue";
 import LandingLoadingSkeleton from "@/components/landing/LandingLoadingSkeleton.vue";
 import LandingNotFoundState from "@/components/landing/LandingNotFoundState.vue";
 import LandingErrorState from "@/components/landing/LandingErrorState.vue";
+import SaveTheDatePage from "@/components/save-the-date/SaveTheDatePage.vue";
+import { toStdCfg } from "@/components/save-the-date/saveTheDateModel";
+import type { StdCfg } from "@/components/save-the-date/saveTheDateCatalog";
 import {
   normalizePublicHub,
   type NormalizedPublicHub,
@@ -35,13 +44,18 @@ export default defineComponent({
     LandingLoadingSkeleton,
     LandingNotFoundState,
     LandingErrorState,
+    SaveTheDatePage,
   },
   setup() {
     const route = useRoute();
     const status = ref<"loading" | "ready" | "not_found" | "error">("loading");
     const normalized = ref<NormalizedPublicHub | null>(null);
+    const stdCfg = ref<StdCfg | null>(null);
 
     const slug = computed(() => String(route.params.slug || "").trim());
+    const isStd = computed(() => status.value === "ready" && !!stdCfg.value);
+    const stdStill = computed(() => String(route.query.shot || "") === "1" || String(route.query.shot || "") === "true");
+    const stdState = computed(() => String(route.query.state || ""));
 
     let prevTitle = "";
     let prevLang = "";
@@ -106,6 +120,7 @@ export default defineComponent({
       const s = slug.value;
       status.value = "loading";
       normalized.value = null;
+      stdCfg.value = null;
       if (!s) {
         status.value = "not_found";
         return;
@@ -121,6 +136,11 @@ export default defineComponent({
         return;
       }
       try {
+        if (result.data.presentation === "save_the_date" && result.data.save_the_date) {
+          stdCfg.value = toStdCfg(result.data.save_the_date, s);
+          status.value = "ready";
+          return;
+        }
         const n = normalizePublicHub(result.data, s);
         normalized.value = n;
         status.value = "ready";
@@ -145,7 +165,7 @@ export default defineComponent({
       restoreMeta();
     });
 
-    return { status, normalized, load };
+    return { status, normalized, stdCfg, isStd, stdState, stdStill, load };
   },
 });
 </script>
@@ -155,5 +175,13 @@ export default defineComponent({
   min-height: 100vh;
   width: 100%;
   overflow-x: clip;
+}
+.event-hub-public.is-std {
+  min-height: 0;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
 }
 </style>

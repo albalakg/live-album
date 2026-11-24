@@ -1,5 +1,5 @@
 import axios, { type AxiosError } from "axios";
-import type { HubBlock, HubConfig, HubTheme, ImageRef } from "@/components/landing/types";
+import type { HubBlock, HubConfig, HubPresentation, HubTheme, ImageRef, SaveTheDateSlice } from "@/components/landing/types";
 
 /** Public GET /api/public/hubs/{slug} payload (M1). */
 export interface PublicHubIntegrations {
@@ -16,6 +16,8 @@ export interface PublicHubPayload {
   theme: HubTheme;
   blocks: Array<Omit<HubBlock, "enabled"> & { enabled?: boolean }>;
   integrations: PublicHubIntegrations;
+  presentation?: HubPresentation;
+  save_the_date?: SaveTheDateSlice;
 }
 
 export type PublicHubFetchResult =
