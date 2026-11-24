@@ -10,11 +10,14 @@
           class="tcard"
           role="listitem"
           :class="{ on: current === s.id }"
+          :aria-label="s.he + ' · ' + s.desc"
           :aria-pressed="current === s.id ? 'true' : 'false'"
           @click="$emit('style', s.id)"
         >
           <div class="tthumb">
-            <SaveTheDateFrame :cfg="thumbCfg(s.id)" mode="thumb" state="open" still />
+            <div class="tthumb-stage">
+              <SaveTheDateFrame :cfg="thumbCfg(s.id)" mode="thumb" state="open" still />
+            </div>
           </div>
           <div class="tmeta">
             <b>{{ s.he }}</b>
@@ -101,11 +104,53 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Portrait phone stage, scaled to the tile — avoids the landscape
+   container query that made names and the date collide on מינימלי. */
 .tthumb {
-  height: 88px;
+  position: relative;
+  height: auto;
+  aspect-ratio: 390 / 600;
   overflow: hidden;
   pointer-events: none;
   border-radius: 10px;
+  container-type: size;
+  background: var(--bg-2, #f1eee8);
+}
+.tthumb-stage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 390px;
+  height: 600px;
+  transform-origin: top right;
+  transform: scale(calc(100cqw / 390px));
+}
+.tthumb-stage :deep(.save-the-date-frame),
+.tthumb-stage :deep(.std) {
+  width: 100%;
+  height: 100%;
+}
+.tmeta {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  padding: 8px 4px 2px;
+  text-align: start;
+}
+.tmeta b,
+.tmeta small {
+  display: block;
+  line-height: 1.35;
+}
+.tmeta b {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+.tmeta small {
+  color: var(--muted, #6b6158);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 .swatches {
   display: flex;
