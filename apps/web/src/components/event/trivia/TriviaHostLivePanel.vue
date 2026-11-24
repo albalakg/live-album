@@ -214,7 +214,7 @@ import axios from "axios";
 import { defineComponent } from "vue";
 import ErrorsHandler from "@/helpers/errorsHandler";
 import { notify } from "@/helpers/notify";
-import { DEFAULT_TRIVIA_FX, TriviaFxSettings } from "@/helpers/triviaModeration";
+import { DEFAULT_TRIVIA_FX, TriviaFxSettings, triviaErrorReason } from "@/helpers/triviaModeration";
 
 interface LivePlayer {
   id: number;
@@ -368,13 +368,20 @@ export default defineComponent({
       }
     },
 
-    async act(request: () => Promise<any>, fallback: string) {
+    async act(request: () => Promise<any>, fallback: string): Promise<boolean> {
       this.busy = true;
       try {
         const res = await request();
         this.apply(res.data.data);
+        return true;
       } catch (error) {
-        notify({ text: ErrorsHandler.getErrorMessage(error, fallback), type: "error", duration: 4000 });
+        // Production hides server messages, so known cases are matched by reason.
+        const text =
+          triviaErrorReason(error) === "nickname_blocked"
+            ? "הכינוי הזה לא יעבור על המסך. נסו כינוי אחר"
+            : ErrorsHandler.getErrorMessage(error, fallback);
+        notify({ text, type: "error", duration: 4000 });
+        return false;
       } finally {
         this.busy = false;
       }
@@ -436,11 +443,12 @@ export default defineComponent({
     async saveRename(id: number) {
       const nickname = this.renameDraft.trim();
       if (nickname.length < 2) return;
-      await this.act(
+      const ok = await this.act(
         () => axios.post(`events/${this.eventId}/trivia/admin/players/${id}/rename`, { nickname }),
         "לא הצלחנו לשנות את השם"
       );
-      this.renaming = null;
+      // Keep the field open on a blocked name so the host can fix it.
+      if (ok) this.renaming = null;
     },
 
     startKick(id: number) {
