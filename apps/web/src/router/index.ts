@@ -171,6 +171,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/EventPageBuilderView.vue"),
       },
       {
+        path: "save-the-date",
+        name: "eventSaveTheDate",
+        component: () => import("../views/EventSaveTheDateView.vue"),
+      },
+      {
         path: "album",
         name: "eventAlbum",
         component: () => import("../views/EventAlbumView.vue"),

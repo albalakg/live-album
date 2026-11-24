@@ -6,6 +6,11 @@ html.save-the-date-lock body {
   overflow: hidden;
   overscroll-behavior: none;
 }
+html.save-the-date-lock #app,
+html.save-the-date-lock .lpf,
+html.save-the-date-lock .save-the-date-frame {
+  height: 100%;
+}
 html.shot .std *,
 html.shot .std *::before,
 html.shot .std *::after {

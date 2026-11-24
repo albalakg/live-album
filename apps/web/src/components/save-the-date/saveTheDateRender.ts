@@ -340,7 +340,11 @@ function wire(host, cfg, opts) {
     const reveal = () => { if (root.classList.contains("revealed")) return; root.classList.add("revealed"); if (root.classList.contains("o-confetti")) confetti(root, palette); };
     const setup = () => {
       if (root.classList.contains("revealed")) return;
-      const w = tk.offsetWidth, h = tk.offsetHeight; if (!w) return;
+      const w = tk.offsetWidth, h = tk.offsetHeight;
+      if (!w || !h) {
+        if ((setup._tries = (setup._tries || 0) + 1) < 40) requestAnimationFrame(setup);
+        return;
+      }
       cv.width = w; cv.height = h; const x = cv.getContext("2d");
       const cs = getComputedStyle(root), g = x.createLinearGradient(0, 0, w, h);
       const f1 = cs.getPropertyValue("--foil1").trim() || "#ddd", f2 = cs.getPropertyValue("--foil2").trim() || "#999";
@@ -352,7 +356,7 @@ function wire(host, cfg, opts) {
       let down = false, moves = 0;
       const pt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * w / r.width, (e.clientY - r.top) * h / r.height]; };
       const draw = e => { const [px, py] = pt(e); x.beginPath(); x.arc(px, py, Math.max(18, h * .2, w * .045), 0, 7); x.fill(); if (++moves % 8 === 0) check(); };
-      const check = () => { const d = x.getImageData(0, 0, w, h).data; let cl = 0, n = 0; for (let i = 3; i < d.length; i += 4 * 37) { n++; if (d[i] === 0) cl++; } if (cl / n > .4) reveal(); };
+      const check = () => { const d = x.getImageData(0, 0, w, h).data; let cl = 0, n = 0; for (let i = 3; i < d.length; i += 4 * 37) { n++; if (d[i] === 0) cl++; } if (cl / n > .32) reveal(); };
       cv.addEventListener("pointerdown", e => { down = true; cv.setPointerCapture(e.pointerId); draw(e); });
       cv.addEventListener("pointermove", e => { if (down) draw(e); });
       cv.addEventListener("pointerup", () => { down = false; check(); });

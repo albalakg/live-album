@@ -7,6 +7,7 @@
           <button type="button" class="icon-btn" aria-label="סגירה" @click="$emit('close')"><BuilderIcon name="x" /></button>
         </div>
         <p class="dlg-sub">האורחים ייכנסו מהקישור או מסריקת ה־QR. אפשר להמשיך לערוך גם אחרי הפרסום.</p>
+        <p v-if="warning" class="dlg-warn" role="alert">{{ warning }}</p>
         <WorkspaceSlugField
           :slug="slug"
           :status="slugStatus"
@@ -17,7 +18,7 @@
           @blur="$emit('slug-blur')"
           @suggest="$emit('suggest', $event)"
         />
-        <ul class="check">
+        <ul v-if="!hideChecks" class="check">
           <li :class="basicsOk ? 'ok' : 'warn'">
             <BuilderIcon :name="basicsOk ? 'check' : 'info'" /><span>{{
               basicsOk ? "הפרטים הבסיסיים מלאים" : "חסרים שם או תאריך בפרטים הבסיסיים"
@@ -26,6 +27,13 @@
           <li class="ok"><BuilderIcon name="check" /><span>{{ sectionCount }} חלקים בעמוד</span></li>
           <li v-if="samples.length" class="warn">
             <BuilderIcon name="info" /><span>עוד טקסט לדוגמה ב: {{ samples.join(", ") }}. אפשר לפרסם בכל זאת.</span>
+          </li>
+        </ul>
+        <ul v-else class="check">
+          <li :class="basicsOk ? 'ok' : 'warn'">
+            <BuilderIcon :name="basicsOk ? 'check' : 'info'" /><span>{{
+              basicsOk ? "השם והתאריך מלאים" : "חסרים שם או תאריך"
+            }}</span>
           </li>
         </ul>
         <div class="dlg-f">
@@ -89,6 +97,10 @@ export default defineComponent({
     busy: { type: Boolean, default: false },
     live: { type: Boolean, default: true },
     titleText: { type: String, default: "" },
+    /** Optional alert, e.g. the event landing is already live at this slug. */
+    warning: { type: String, default: "" },
+    /** Hide landing section/sample checks (Save the Date publish). Default off. */
+    hideChecks: { type: Boolean, default: false },
   },
   emits: ["close", "publish", "slug", "slug-blur", "suggest"],
   setup(props, { emit }) {
@@ -139,3 +151,15 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.dlg-warn {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff4e5;
+  color: #6a3b00;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+</style>

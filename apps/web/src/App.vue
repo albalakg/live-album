@@ -80,6 +80,7 @@ export default defineComponent({
       if (path.includes("/event/trivia/")) return true;
       // Event page builder: focus mode, its own full-height workspace (no app bars, footer or side menu).
       if (path === "/event/page" || path.startsWith("/event/page/")) return true;
+      if (path === "/event/save-the-date" || path.startsWith("/event/save-the-date/")) return true;
       if (path.includes("open-album") || path.includes("open-gallery")) return true;
       if (path.startsWith("/preview/")) return true;
       for (let index = 0; index < this.links.length; index++) {
@@ -91,7 +92,12 @@ export default defineComponent({
     /** Hide floating «צור קשר» on the event-page builder so it never overlaps the action bar. */
     hideHostAssist(): boolean {
       const path = this.$route.path;
-      return path === "/event/page" || path.startsWith("/event/page/");
+      return (
+        path === "/event/page" ||
+        path.startsWith("/event/page/") ||
+        path === "/event/save-the-date" ||
+        path.startsWith("/event/save-the-date/")
+      );
     },
 
     toastPosition(): string {

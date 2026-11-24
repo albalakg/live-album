@@ -38,6 +38,13 @@
         <BuilderIcon name="qr" />קישור, QR ווואטסאפ
       </button>
     </section>
+    <section v-if="showGraduate" class="grp">
+      <div class="grp-h"><h3>הדף המלא</h3></div>
+      <p class="help">{{ graduateHint }}</p>
+      <button type="button" class="btn btn-line wide" :disabled="busy" @click="$emit('graduate')">
+        {{ graduateLabel }}
+      </button>
+    </section>
     <section class="grp quiet">
       <button type="button" class="link" @click="$emit('reset')">להתחיל מחדש עם העיצוב הזה</button>
     </section>
@@ -65,7 +72,14 @@ export default defineComponent({
     published: { type: Boolean, default: false },
     everPublished: { type: Boolean, default: false },
     busy: { type: Boolean, default: false },
+    /** When true, show «המשך לדף אירוע מלא». Default off so דף האירוע is unchanged. */
+    showGraduate: { type: Boolean, default: false },
+    graduateLabel: { type: String, default: "המשך לדף אירוע מלא" },
+    graduateHint: {
+      type: String,
+      default: "החתונה או האירוע מתקרבים? עברו לדף האירוע המלא. Save the Date נשמר כטיוטה.",
+    },
   },
-  emits: ["slug", "slug-blur", "suggest", "visible", "publish", "share", "reset"],
+  emits: ["slug", "slug-blur", "suggest", "visible", "publish", "share", "reset", "graduate"],
 });
 </script>

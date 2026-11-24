@@ -114,7 +114,13 @@ export default defineComponent({
     },
     /** Event-page wizard owns the bottom chrome (action bar + preview FAB). */
     isBuilderPage(): boolean {
-      return this.$route.path === "/event/page" || this.$route.path.startsWith("/event/page/");
+      const path = this.$route.path;
+      return (
+        path === "/event/page" ||
+        path.startsWith("/event/page/") ||
+        path === "/event/save-the-date" ||
+        path.startsWith("/event/save-the-date/")
+      );
     },
     pendingCount(): number {
       return (this.$store.getters["event/getPendingAssets"] || []).length;
@@ -136,6 +142,7 @@ export default defineComponent({
         { text: "אלבום חי", path: "/event/gallery", isActive: false },
         { text: "עמוד העלאה", path: "/event/upload", isActive: false },
         { text: "דף אירוע", path: "/event/page", isActive: false },
+        { text: "Save the Date", path: "/event/save-the-date", isActive: false },
         { text: "כרטיס QR", path: "/event/qr", isActive: false },
         {
           text: "כל הקבצים",

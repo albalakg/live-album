@@ -1,7 +1,15 @@
 <template>
-  <div class="lpf" dir="rtl" lang="he">
+  <div class="lpf" :class="{ 'is-std': isStd }" dir="rtl" lang="he">
+    <SaveTheDateFrame
+      v-if="ready && isStd && stdCfg"
+      :cfg="stdCfg"
+      mode="builder"
+      state="open"
+      builder
+      :replay-tick="replayTick"
+    />
     <LandingRenderer
-      v-if="ready && templateId && hubConfig"
+      v-else-if="ready && templateId && hubConfig"
       :template-id="templateId"
       :hub-config="hubConfig"
       mode="preview"
@@ -11,8 +19,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import LandingRenderer from "@/components/landing/LandingRenderer.vue";
+import SaveTheDateFrame from "@/components/save-the-date/SaveTheDateFrame.vue";
+import { toStdCfg } from "@/components/save-the-date/saveTheDateModel";
+import type { StdCfg } from "@/components/save-the-date/saveTheDateCatalog";
 import type { HubConfig } from "@/components/landing/types";
 import { isDragScrollClick } from "@/composables/useDragScroll";
 import { withRenderHints } from "@/components/landing/variants/variants";
@@ -44,11 +55,26 @@ const CHEV_SVG =
 
 export default defineComponent({
   name: "LandingPreviewFrameView",
-  components: { LandingRenderer },
+  components: { LandingRenderer, SaveTheDateFrame },
   setup() {
     const ready = ref(false);
     const templateId = ref("");
     const hubConfig = ref<HubConfig | null>(null);
+    const isStd = computed(() => hubConfig.value?.presentation === "save_the_date");
+    const stdCfg = computed<StdCfg | null>(() => {
+      const cfg = hubConfig.value;
+      if (!cfg || cfg.presentation !== "save_the_date" || !cfg.save_the_date) return null;
+      const slug = (cfg as HubConfig & { slug?: string }).slug || "preview";
+      return toStdCfg(cfg.save_the_date, slug);
+    });
+    const replayTick = computed(() => Number((hubConfig.value as HubConfig & { std_replay_tick?: number })?.std_replay_tick || 0));
+    watch(
+      isStd,
+      (v) => {
+        document.documentElement.classList.toggle("save-the-date-lock", v);
+      },
+      { immediate: true }
+    );
 
     function postReady() {
       if (window.parent && window.parent !== window) {
@@ -191,6 +217,17 @@ export default defineComponent({
       if (!editOn) return;
       // A drag on a carousel must not select the section (a plain click still does).
       if (isDragScrollClick()) return;
+      const stdEl = ev.target instanceof Element ? ev.target.closest("[data-edit]") : null;
+      if (stdEl && isStd.value) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const key = stdEl.getAttribute("data-edit") || "";
+        selId = key;
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: PICK_TYPE, sectionId: key }, window.location.origin);
+        }
+        return;
+      }
       const el = sectionFrom(ev.target);
       if (!el) return;
       // In edit mode a click selects the section instead of following its buttons.
@@ -265,7 +302,9 @@ export default defineComponent({
       if (data.type !== MSG_TYPE) return;
       const nextId = typeof data.templateId === "string" ? data.templateId : "";
       const nextCfg = data.hubConfig;
-      if (!nextId || !nextCfg || typeof nextCfg !== "object") return;
+      if (!nextCfg || typeof nextCfg !== "object") return;
+      const std = (nextCfg as HubConfig).presentation === "save_the_date";
+      if (!std && !nextId) return;
       templateId.value = nextId;
       // Copy each block's gen-2 `variant` into render hints (data.__variant) — the renderer passes only data.
       hubConfig.value = withRenderHints(nextCfg as HubConfig, nextId);
@@ -319,10 +358,11 @@ export default defineComponent({
       tagEl?.remove();
       chipEl?.remove();
       document.documentElement.classList.remove("lpf-mobile");
+      document.documentElement.classList.remove("save-the-date-lock");
       document.documentElement.removeAttribute("data-landing-preview-frame");
     });
 
-    return { ready, templateId, hubConfig };
+    return { ready, templateId, hubConfig, isStd, stdCfg, replayTick };
   },
 });
 </script>
@@ -459,5 +499,18 @@ html.lpf-edit .lpf-vchip.on {
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.lpf.is-std {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+.lpf.is-std .save-the-date-frame,
+.lpf.is-std .std {
+  width: 100%;
+  height: 100%;
 }
 </style>

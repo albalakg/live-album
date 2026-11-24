@@ -4,7 +4,8 @@
 
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, ref, watch, type PropType } from "vue";
-import type { StdCfg } from "./saveTheDateCatalog";
+import { styleById, type StdCfg } from "./saveTheDateCatalog";
+import { googleFontsHref } from "./saveTheDateModel";
 import { render, wire } from "./saveTheDateRender";
 import "./saveTheDate.css";
 
@@ -16,10 +17,23 @@ export default defineComponent({
     state: { type: String, default: "" },
     still: { type: Boolean, default: false },
     builder: { type: Boolean, default: false },
+    replayTick: { type: Number, default: 0 },
   },
   setup(props) {
     const hostEl = ref<HTMLElement | null>(null);
     let unwire: (() => void) | null = null;
+    let linkEl: HTMLLinkElement | null = null;
+
+    function ensureFonts() {
+      const href = googleFontsHref(styleById(props.cfg.style).fonts);
+      if (linkEl && linkEl.getAttribute("href") === href) return;
+      if (linkEl) linkEl.remove();
+      linkEl = document.createElement("link");
+      linkEl.rel = "stylesheet";
+      linkEl.href = href;
+      linkEl.setAttribute("data-std-fonts", "1");
+      document.head.appendChild(linkEl);
+    }
 
     function paint() {
       const host = hostEl.value;
@@ -28,6 +42,7 @@ export default defineComponent({
         unwire();
         unwire = null;
       }
+      ensureFonts();
       host.innerHTML = render(props.cfg, {
         mode: props.mode,
         state: props.state,
@@ -36,10 +51,22 @@ export default defineComponent({
       unwire = wire(host, props.cfg, { builder: props.builder, still: props.still }) || null;
     }
 
+    function replay() {
+      const root = hostEl.value?.querySelector(".std") as (HTMLElement & { _replay?: () => void }) | null;
+      if (root && typeof root._replay === "function") root._replay();
+    }
+
     watch(
       () => [props.cfg, props.mode, props.state, props.still, props.builder],
       () => paint(),
       { deep: true, flush: "post" }
+    );
+
+    watch(
+      () => props.replayTick,
+      (n, prev) => {
+        if (n && n !== prev) replay();
+      }
     );
 
     watch(hostEl, (el) => {
@@ -49,6 +76,10 @@ export default defineComponent({
     onBeforeUnmount(() => {
       if (unwire) unwire();
       unwire = null;
+      if (linkEl) {
+        linkEl.remove();
+        linkEl = null;
+      }
     });
 
     return { hostEl };
