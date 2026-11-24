@@ -5,6 +5,20 @@ import { hubFullUrl } from "@/components/landing/builder/hubPublicUrl";
 import { BASE_SHOW, defaultsFor, styleById } from "./saveTheDateCatalog";
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+/** True when white text on this accent would fail WCAG AA for normal text (4.5:1). */
+function accentIsLight(hex) {
+  const h = String(hex || "").trim().replace("#", "");
+  if (h.length < 6) return false;
+  const lin = (v) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  const r = lin(parseInt(h.slice(0, 2), 16));
+  const g = lin(parseInt(h.slice(2, 4), 16));
+  const b = lin(parseInt(h.slice(4, 6), 16));
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return (1.05) / (L + 0.05) < 4.5;
+}
 const RM = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- dates (Asia/Jerusalem) ---------- */
@@ -76,7 +90,7 @@ function namesHtml(c, cls) {
 const kicker = (he) => `<p class="kick" data-edit="kicker"><span class="en">Save the Date</span>${he === false ? "" : `<span class="he">${esc(he || "שמרו את התאריך")}</span>`}</p>`;
 function countdownHtml(D, show) {
   if (!show.countdown) return "";
-  return `<div class="cd" data-cd="${D.start.toISOString()}" data-edit="countdown" aria-label="ספירה לאחור">${[["d", "ימים"], ["h", "שעות"], ["m", "דקות"], ["s", "שניות"]].map(([u, he]) => `<span class="cu"><b data-u="${u}">00</b><i>${he}</i></span>`).join("")}</div>`;
+  return `<div class="cd" dir="ltr" data-cd="${D.start.toISOString()}" data-edit="countdown" aria-label="ספירה לאחור">${[["d", "ימים"], ["h", "שעות"], ["m", "דקות"], ["s", "שניות"]].map(([u, he]) => `<span class="cu"><b data-u="${u}">00</b><i dir="rtl">${he}</i></span>`).join("")}</div>`;
 }
 function actionsHtml(c, show, slug) {
   if (!show.calendar && !show.whatsapp) return "";
@@ -87,7 +101,6 @@ function actionsHtml(c, show, slug) {
 const lineHtml = (c, show) => show.line && c.line ? `<p class="line" data-edit="line">${esc(c.line)}</p>` : "";
 const footHtml = show => show.footer ? `<p class="foot"><i></i>SnapShare</p>` : "";
 const venueHtml = (c, show, pin) => show.venue && (c.venue || c.city) ? `<p class="venue" data-edit="venue">${pin ? I.pin : ""}<span>${esc(placeOf(c))}</span></p>` : "";
-const hebHtml = (D, show) => show.hebdate && D.heb ? `<span class="heb">${esc(D.heb)}</span>` : "";
 
 /* ---------- styles ---------- */
 const R = {};
@@ -124,20 +137,21 @@ R.calendar = (c, D, sh, o, slug) => {
     return `<div class="mgrid">${h}</div>`;
   };
   const circle = () => `<svg class="circ" viewBox="0 0 120 100" preserveAspectRatio="none"><path pathLength="1" d="M70 8C40 4 10 20 9 48c-1 30 30 46 60 44 30-2 46-22 44-44C111 22 86 6 56 9 44 10 32 15 26 20"/></svg>`;
+  const calHeb = sh.hebdate && D.heb ? `<span class="cal-heb">${esc(D.heb)}</span>` : "";
   return `
   <div class="cal-col">
     <div class="cal ${o.grid ? "has-grid" : ""}" data-edit="date">
       <div class="rings">${"<i></i>".repeat(6)}</div>
       <div class="page prev"><div class="ph"><span>היום</span></div><div class="pb"><b>${today.getDate()}</b><span>${new Intl.DateTimeFormat("he-IL", { weekday: "long" }).format(today)}</span></div></div>
       <div class="page cur"><div class="ph"><span>${esc(D.mon)} ${D.y}</span></div>
-        <div class="pb">${o.grid ? grid() : `<b class="big">${D.d}${circle()}</b><span class="dw">${esc(D.dow)}</span>`}</div></div>
+        <div class="pb">${o.grid ? `${grid()}${calHeb}` : `<b class="big">${D.d}${circle()}</b><span class="dw">${esc(D.dow)}</span>${calHeb}`}</div></div>
       <div class="page under"></div>
     </div>
   </div>
   <div class="txt-col">
     ${kicker("שמרו את התאריך")}
     ${namesHtml(c)}
-    <p class="cmeta" data-edit="date"><b>${esc(D.dow)}, ${esc(D.long)}</b>${D.time ? `<span>בשעה ${esc(D.time)}</span>` : ""}${hebHtml(D, sh)}</p>
+    <p class="cmeta" data-edit="date"><b>${esc(D.dow)}, ${esc(D.long)}</b>${D.time ? `<span>בשעה ${esc(D.time)}</span>` : ""}</p>
     ${venueHtml(c, sh, true)}
     ${countdownHtml(D, sh)}
     ${actionsHtml(c, sh, slug)}
@@ -259,7 +273,8 @@ function render(cfg, opts) {
   if (opts.state === "open" || opts.mode === "thumb") cls.push("is-open", "revealed");
   if (opts.still) cls.push("still");
   const foil = acc.foil ? `--foil1:${acc.foil[0]};--foil2:${acc.foil[1]};` : "";
-  return `<div class="${cls.join(" ")}" style="--acc:${acc.acc};--bg:${acc.bg};--bg2:${acc.bg2};${foil}--fh:'${st.fonts[0]}';--fb:'${st.fonts[1] || st.fonts[0]}'" data-style="${st.id}">
+  const accTone = accentIsLight(acc.acc) ? "acc-light" : "acc-dark";
+  return `<div class="${cls.join(" ")} ${accTone}" style="--acc:${acc.acc};--bg:${acc.bg};--bg2:${acc.bg2};${foil}--fh:'${st.fonts[0]}';--fb:'${st.fonts[1] || st.fonts[0]}'" data-style="${st.id}">
     <div class="sx">${R[st.id](c, D, sh, o, cfg.slug)}</div><canvas class="confetti" aria-hidden="true"></canvas></div>`;
 }
 
