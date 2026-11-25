@@ -1,0 +1,322 @@
+/* Guest CRM + seating planner shared UI. Everything is scoped under .gs-ui. */
+.gs-ui {
+  --gs-ink: #161310;
+  --gs-muted: #5e564e;
+  --gs-faint: #8a8278;
+  --gs-line: rgba(22, 19, 16, 0.11);
+  --gs-paper: #fffcfa;
+  --gs-bg: #f3eee6;
+  --gs-bg2: #e8e0d4;
+  --gs-soft: #f7f1e8;
+  --gs-deep: #12100e;
+  --gs-gold: #c9a36a;
+  --gs-gold-ink: #6b4b1d;
+  --gs-rose: #dc5b66;
+  --gs-danger: #8a1c28;
+  --gs-ok: #1d5c3a;
+  --gs-r: 18px;
+  --gs-shadow: 0 24px 60px rgba(18, 16, 14, 0.16);
+  --gs-shadow-sm: 0 8px 24px rgba(18, 16, 14, 0.08);
+  color: var(--gs-ink);
+  font-family: var(--font, Heebo, "Segoe UI", Tahoma, sans-serif);
+  direction: rtl;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .gs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--gs-line);
+    background: var(--gs-paper);
+    color: var(--gs-ink);
+    font: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    &:hover:not(:disabled) {
+      background: var(--gs-soft);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--gs-gold);
+      outline-offset: 2px;
+    }
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+  .gs-btn-sm {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+  .gs-btn-deep {
+    background: var(--gs-deep);
+    border-color: var(--gs-deep);
+    color: #f3eee6;
+    &:hover:not(:disabled) {
+      background: #2a231c;
+    }
+  }
+  .gs-btn-gold {
+    background: var(--gs-gold);
+    border-color: var(--gs-gold);
+    color: #161310;
+    &:hover:not(:disabled) {
+      background: #d4b07c;
+    }
+  }
+  .gs-btn-danger {
+    color: var(--gs-danger);
+    &:hover:not(:disabled) {
+      background: #fde8ea;
+    }
+  }
+  .gs-btn-ghost {
+    background: transparent;
+  }
+  .gs-icon-btn {
+    width: 34px;
+    padding: 0;
+  }
+
+  .gs-input,
+  .gs-select,
+  .gs-textarea {
+    width: 100%;
+    height: 40px;
+    border: 1px solid var(--gs-line);
+    border-radius: 12px;
+    background: var(--gs-paper);
+    color: var(--gs-ink);
+    font: inherit;
+    font-size: 14px;
+    padding: 0 12px;
+    &:focus {
+      outline: 2px solid rgba(201, 163, 106, 0.7);
+      outline-offset: 0;
+      border-color: var(--gs-gold);
+    }
+    &[aria-invalid="true"] {
+      border-color: var(--gs-danger);
+    }
+  }
+  .gs-textarea {
+    height: auto;
+    min-height: 84px;
+    padding: 10px 12px;
+    resize: vertical;
+  }
+  .gs-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gs-muted);
+    margin-bottom: 6px;
+  }
+  .gs-field {
+    margin-bottom: 14px;
+  }
+  .gs-hint {
+    font-size: 12px;
+    color: var(--gs-muted);
+    margin-top: 4px;
+  }
+  .gs-error {
+    font-size: 12px;
+    color: var(--gs-danger);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  .gs-card {
+    background: var(--gs-paper);
+    border: 1px solid var(--gs-line);
+    border-radius: var(--gs-r);
+    box-shadow: var(--gs-shadow-sm);
+  }
+
+  .gs-ava {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 12px;
+    color: #fffcfa;
+    background: #5c4a3a;
+    flex: none;
+    letter-spacing: 0.02em;
+  }
+
+  .gs-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    background: var(--gs-bg2);
+    color: var(--gs-ink);
+    border: 0;
+  }
+  .gs-pill.st-0 { background: #f6ecd2; color: #5c4210; }
+  .gs-pill.st-1 { background: #dff1e5; color: #14502f; }
+  .gs-pill.st-2 { background: #fbe3e5; color: #7d1a25; }
+  .gs-pill.st-3 { background: #ece6f6; color: #43306b; }
+  .gs-pill.st-4 { background: #e6e2dc; color: #4a443d; }
+  .gs-pill.table { background: #ece4d8; color: var(--gs-ink); }
+  .gs-pill.none { background: transparent; color: var(--gs-muted); border: 1px dashed var(--gs-line); }
+
+  .gs-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #f1e8da;
+    color: var(--gs-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex: none;
+    }
+  }
+
+  /* overlay / dialog */
+  .gs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(18, 16, 14, 0.42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .gs-dialog {
+    width: min(560px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    background: var(--gs-paper);
+    color: var(--gs-ink);
+    border-radius: 24px;
+    box-shadow: var(--gs-shadow);
+    padding: 22px 24px;
+    h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .gs-dialog-lede {
+      margin: 0 0 16px;
+      color: var(--gs-muted);
+      font-size: 14px;
+    }
+  }
+  .gs-dialog-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .gs-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gs-line);
+    font-size: 14px;
+    cursor: pointer;
+    input {
+      margin-top: 3px;
+      accent-color: #8a6a38;
+      width: 16px;
+      height: 16px;
+      flex: none;
+    }
+    small {
+      display: block;
+      color: var(--gs-muted);
+      font-size: 12px;
+    }
+  }
+
+  .gs-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) {
+    .gs-overlay {
+      align-items: flex-end;
+      padding: 0;
+    }
+    .gs-dialog {
+      width: 100%;
+      max-height: 92vh;
+      border-radius: 22px 22px 0 0;
+      padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* Mobile bottom sheets for the seating rail/inspector (teleported to body, so not scoped). */
+.gs-ui.is-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2100;
+  width: auto !important;
+  max-height: 64vh;
+  border-radius: 22px 22px 0 0 !important;
+  box-shadow: 0 -18px 40px rgba(22, 19, 16, 0.22);
+  transform: translateY(105%);
+  transition: transform 0.22s ease;
+  padding-bottom: env(safe-area-inset-bottom);
+  &.sheet-open {
+    transform: none;
+  }
+}
+.gs-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2090;
+  background: rgba(18, 16, 14, 0.32);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs-ui.is-sheet {
+    transition: none;
+  }
+}

@@ -31,6 +31,10 @@ const ICONS: Record<string, string> = {
   "/event/plan": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M4 9.5h16v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5z"/><path fill="none" d="M8 9.5V6.8A4 4 0 0 1 12 3a4 4 0 0 1 4 3.8v2.7"/></svg>`,
   /* Lucide message-circle-question style */
   "/event/trivia": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/><path fill="none" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path fill="none" d="M12 17h.01"/></svg>`,
+  /* People + list lines */
+  "/event/guests": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" cx="9" cy="8" r="3.2"/><path fill="none" d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><path fill="none" d="M16 7.5h4.5M16 11.5h4.5M17.5 15.5h3"/></svg>`,
+  /* Round table with chairs */
+  "/event/seating": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle fill="none" cx="12" cy="12" r="4.6"/><circle fill="none" cx="12" cy="3.6" r="1.4"/><circle fill="none" cx="12" cy="20.4" r="1.4"/><circle fill="none" cx="3.6" cy="12" r="1.4"/><circle fill="none" cx="20.4" cy="12" r="1.4"/></svg>`,
   "/event/whatsapp": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M5 19l1.5-4A7.5 7.5 0 1 1 12 19.5H7z"/><path fill="none" d="M9 11c.5 2 2 3.5 4 4"/></svg>`,
 };
 

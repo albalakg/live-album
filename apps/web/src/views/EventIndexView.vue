@@ -17,6 +17,7 @@
       :class="{
         'is-sidebar-collapsed': sidebarCollapsed,
         'is-builder-page': isBuilderPage,
+        'is-seating-page': isSeatingPage,
       }"
       :style="mainStyle"
     >
@@ -43,7 +44,7 @@
 import Sidebar from "@/components/library/app/SideBar.vue";
 import MobileScrollBar from "@/components/library/app/MobileScrollBar.vue";
 import { defineComponent } from "vue";
-import { isWhatsAppEnabled } from "@/helpers/features";
+import { isSeatingEnabled, isWhatsAppEnabled } from "@/helpers/features";
 import { IMobileScrollBarItem } from "@/helpers/interfaces";
 
 const SIDEBAR_STORAGE_KEY = "snapshare.sidebarCollapsed";
@@ -122,6 +123,10 @@ export default defineComponent({
         path.startsWith("/event/save-the-date/")
       );
     },
+    /** Seating floor plan: full-height canvas inside the normal host chrome. */
+    isSeatingPage(): boolean {
+      return this.$route.path === "/event/seating";
+    },
     pendingCount(): number {
       return (this.$store.getters["event/getPendingAssets"] || []).length;
     },
@@ -151,6 +156,10 @@ export default defineComponent({
           badge: pending > 0 ? pending : undefined,
         },
         { text: "טריוויה", path: "/event/trivia", isActive: false },
+        { text: "אורחים", path: "/event/guests", isActive: false },
+        ...(isSeatingEnabled()
+          ? [{ text: "הושבה", path: "/event/seating", isActive: false }]
+          : []),
         { text: "חבילה", path: "/event/plan", isActive: false },
         ...(isWhatsAppEnabled()
           ? [{ text: "WhatsApp", path: "/event/whatsapp", isActive: false }]
@@ -288,6 +297,18 @@ export default defineComponent({
   .event-main.is-builder-page {
     padding-bottom: 24px;
   }
+  /* Seating canvas owns the screen height on mobile (its own bottom sheets) */
+  .event-main.is-seating-page {
+    padding-bottom: 76px;
+  }
+}
+
+.event-main.is-seating-page {
+  padding-bottom: 12px;
+}
+.event-main.is-seating-page .event-content {
+  padding-bottom: 0;
+  overflow: visible;
 }
 
 .host-empty {

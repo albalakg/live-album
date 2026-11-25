@@ -1,7 +1,7 @@
 import { installReveal } from "@snapshare/design/reveal";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Guard from "@/helpers/guard";
-import { isWhatsAppEnabled } from "@/helpers/features";
+import { isSeatingEnabled, isWhatsAppEnabled } from "@/helpers/features";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -205,6 +205,20 @@ const routes: Array<RouteRecordRaw> = [
         name: "eventTrivia",
         component: () => import("../views/EventTriviaView.vue"),
       },
+      {
+        path: "guests",
+        name: "eventGuests",
+        component: () => import("../views/EventGuestsView.vue"),
+      },
+      ...(isSeatingEnabled()
+        ? [
+            {
+              path: "seating",
+              name: "eventSeating",
+              component: () => import("../views/EventSeatingView.vue"),
+            },
+          ]
+        : []),
       ...(isWhatsAppEnabled()
         ? [
             {
