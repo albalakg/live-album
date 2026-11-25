@@ -504,7 +504,7 @@ export default defineComponent({
   padding: 14px;
   border-radius: 16px;
   border: 1.5px solid var(--line, rgba(22, 19, 16, 0.12));
-  background: #fffcfa;
+  background: var(--paper, #fffcfa);
   cursor: pointer;
   color: inherit;
   font: inherit;
@@ -530,7 +530,7 @@ export default defineComponent({
   height: 88px;
   padding: 10px;
   border-radius: 12px;
-  background: #1c1814;
+  background: var(--deep-2, #1c1814);
 }
 
 .layout-preview[data-layout="single"] {
@@ -587,7 +587,7 @@ export default defineComponent({
 }
 
 .blocked-toggle input {
-  accent-color: #dc5b66;
+  accent-color: var(--rose-fill, #8a3540);
   margin: 0;
 }
 
@@ -604,7 +604,7 @@ export default defineComponent({
 }
 
 .more {
-  background: #fff;
+  background: var(--paper, #fffcfa);
   border-radius: 22px;
   padding: 14px 18px 18px;
   box-shadow: 0 8px 24px rgba(18, 16, 14, 0.06);
@@ -613,7 +613,7 @@ export default defineComponent({
 .more summary {
   cursor: pointer;
   font-weight: 800;
-  color: #5e564e;
+  color: var(--muted, #5e564e);
   padding: 6px 0 10px;
 }
 
@@ -638,7 +638,7 @@ export default defineComponent({
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 800;
-  color: #8a8278;
+  color: var(--muted, #5e564e);
 }
 
 .txt {
@@ -646,7 +646,7 @@ export default defineComponent({
   border-radius: 14px;
   padding: 12px 14px;
   font: inherit;
-  background: #fffcfa;
+  background: var(--paper, #fffcfa);
 }
 
 @media (max-width: 700px) {

@@ -161,7 +161,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: #f8f9fa;
+    background-color: var(--deep, #12100e);
     height: 100%;
     width: 100%;
     position: relative;
@@ -170,7 +170,7 @@ export default defineComponent({
 .album-wrapper {
     width: 100%;
     height: 100%;
-    background-color: #222;
+    background-color: var(--deep-2, #1c1814);
 }
 
 .title-container {
@@ -187,7 +187,7 @@ export default defineComponent({
 .gallery-title {
     font-family: 'Great Vibes', cursive;
     font-size: 3rem;
-    color: #333;
+    color: var(--ink, #161310);
 }
 
 .arrow-button {
@@ -211,7 +211,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background-color: #000;
+    background-color: var(--deep, #12100e);
 }
 
 .hide-menu {

@@ -169,14 +169,14 @@ export default defineComponent({
 .qr-ms-btn {
   display: inline-flex; align-items: center; gap: 6px;
   height: 40px; padding: 0 14px;
-  border-radius: 999px; border: 1px solid #e4dbcf; background: #fff;
-  color: #12100e; font: inherit; font-size: 0.88rem; font-weight: 700;
+  border-radius: 999px; border: 1px solid var(--line, rgba(22, 19, 16, 0.11)); background: var(--paper, #fffcfa);
+  color: var(--ink, #161310); font: inherit; font-size: 0.88rem; font-weight: 700;
   cursor: pointer; white-space: nowrap;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.qr-ms-btn:hover { border-color: #c9b9a4; }
-.qr-ms-btn:focus-visible { outline: 2px solid #c9a36a; outline-offset: 2px; }
-.qr-ms.active .qr-ms-btn { background: #12100e; color: #fff; border-color: #12100e; }
+.qr-ms-btn:hover { border-color: var(--gold, #c9a36a); }
+.qr-ms-btn:focus-visible { outline: 2px solid var(--gold, #c9a36a); outline-offset: 2px; }
+.qr-ms.active .qr-ms-btn { background: var(--espresso, #12100e); color: var(--on-dark, #f3eee6); border-color: var(--espresso, #12100e); }
 .qr-ms-count { font-weight: 800; }
 .qr-ms-caret { width: 12px; height: 12px; transition: transform 0.15s ease; }
 .qr-ms.open .qr-ms-caret { transform: rotate(180deg); }
@@ -185,37 +185,37 @@ export default defineComponent({
   position: absolute; top: calc(100% + 6px); inset-inline-start: 0; z-index: 60;
   width: 260px; max-height: min(420px, 70vh);
   display: flex; flex-direction: column;
-  background: #fff; border: 1px solid #ece4d9; border-radius: 16px;
+  background: var(--paper, #fffcfa); border: 1px solid var(--line, rgba(22, 19, 16, 0.11)); border-radius: 16px;
   box-shadow: 0 18px 44px rgba(18, 16, 14, 0.16);
   overflow: hidden;
   font-family: var(--font, Heebo, sans-serif);
-  color: #12100e;
+  color: var(--ink, #161310);
 }
 .qr-ms-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 14px 8px; font-size: 0.9rem;
 }
 .qr-ms-clear {
-  border: 0; background: none; color: #a06a2c; font: inherit; font-size: 0.82rem;
+  border: 0; background: none; color: var(--gold-ink, #6e5228); font: inherit; font-size: 0.82rem;
   font-weight: 700; cursor: pointer; padding: 4px 6px; border-radius: 8px;
 }
-.qr-ms-clear:disabled { color: #b9b0a6; cursor: default; }
+.qr-ms-clear:disabled { color: var(--muted, #5e564e); opacity: 0.7; cursor: default; }
 .qr-ms-list { overflow-y: auto; padding: 2px 6px 8px; overscroll-behavior: contain; }
 .qr-ms-opt {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px; border-radius: 10px; cursor: pointer;
   font-size: 0.9rem; font-weight: 600;
 }
-.qr-ms-opt:hover { background: #f6f1ea; }
+.qr-ms-opt:hover { background: var(--bg-2, #e8e0d4); }
 .qr-ms-opt input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 .qr-ms-box {
   width: 18px; height: 18px; flex: none; border-radius: 5px;
-  border: 1.5px solid #cdbfae; display: grid; place-items: center; color: transparent;
-  background: #fff;
+  border: 1.5px solid var(--line, rgba(22, 19, 16, 0.28)); display: grid; place-items: center; color: transparent;
+  background: var(--paper, #fffcfa);
 }
 .qr-ms-box svg { width: 12px; height: 12px; }
-.qr-ms-opt.on .qr-ms-box { background: #12100e; border-color: #12100e; color: #fff; }
-.qr-ms-opt:focus-within { outline: 2px solid #c9a36a; outline-offset: -2px; }
+.qr-ms-opt.on .qr-ms-box { background: var(--espresso, #12100e); border-color: var(--espresso, #12100e); color: var(--on-dark, #f3eee6); }
+.qr-ms-opt:focus-within { outline: 2px solid var(--gold, #c9a36a); outline-offset: -2px; }
 
 /* Mobile bottom sheet (teleported to body) */
 .qr-ms-backdrop {
@@ -229,14 +229,14 @@ export default defineComponent({
   padding-bottom: env(safe-area-inset-bottom, 0px);
   animation: qr-ms-up 0.22s ease both;
 }
-.qr-ms-grip { width: 40px; height: 4px; border-radius: 4px; background: #ddd3c6; margin: 10px auto 2px; }
+.qr-ms-grip { width: 40px; height: 4px; border-radius: 4px; background: var(--bg-2, #e8e0d4); margin: 10px auto 2px; }
 .sheet .qr-ms-head { padding: 8px 18px 10px; font-size: 1rem; }
 .sheet .qr-ms-list { padding: 0 10px 8px; }
 .sheet .qr-ms-opt { padding: 13px 10px; font-size: 1rem; }
-.qr-ms-foot { padding: 10px 16px 14px; border-top: 1px solid #f0e9df; }
+.qr-ms-foot { padding: 10px 16px 14px; border-top: 1px solid var(--line, rgba(22, 19, 16, 0.11)); }
 .qr-ms-done {
   width: 100%; height: 48px; border: 0; border-radius: 14px;
-  background: #12100e; color: #fff; font: inherit; font-weight: 800; font-size: 0.98rem; cursor: pointer;
+  background: var(--espresso, #12100e); color: var(--on-dark, #f3eee6); font: inherit; font-weight: 800; font-size: 0.98rem; cursor: pointer;
 }
 
 @keyframes qr-ms-up { from { transform: translateY(100%); } to { transform: none; } }

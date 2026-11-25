@@ -1,0 +1,10 @@
+/* Derived, text-safe companions for the SnapShare tokens.
+   Brand --rose / --gold stay as-is for decorative fills; these are for text and solid buttons. */
+:root {
+  --rose-ink: #8a3540;
+  --rose-fill: #8a3540;
+  --gold-ink: #6e5228;
+  --on-dark: #f3eee6;
+  --on-light: #161310;
+  --live-on-dark: #5ee392;
+}

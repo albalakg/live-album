@@ -1,4 +1,5 @@
 import type { QrCategoryId } from "@/helpers/qrCardCategories";
+import { contrastIssues } from "@/helpers/snapsharePalette";
 
 /** Synthetic asset key — not a real file under /assets. */
 export const V2_FILE_PREFIX = "v2:" as const;
@@ -97,14 +98,14 @@ export const QR_CARD_DESIGNS_V2: QrV2Design[] = [
     eventTypes: ["wedding", "birthday"],
     motif: "floral-spray",
     vars: {
-      bg: "#f4f0e8",
-      bg2: "#e8f0e4",
-      accent: "#c45c6a",
-      accent2: "#6a8f5a",
-      ink: "#2a241c",
+      bg: "#f3eee6",
+      bg2: "#e8e0d4",
+      accent: "#8a3540",
+      accent2: "#6E7D45",
+      ink: "#161310",
     },
-    qrColor: "#1a1510",
-    textColor: "#2a241c",
+    qrColor: "#12100e",
+    textColor: "#161310",
   }),
   v2({
     id: "floral-rose",
@@ -148,14 +149,14 @@ export const QR_CARD_DESIGNS_V2: QrV2Design[] = [
     eventTypes: ["wedding", "corporate", "birthday"],
     motif: "sand-dots",
     vars: {
-      bg: "#f3ebe0",
-      bg2: "#e8dcc8",
-      accent: "#9a7b52",
-      accent2: "#c4a882",
-      ink: "#3a3024",
+      bg: "#f3eee6",
+      bg2: "#e8e0d4",
+      accent: "#c9a36a",
+      accent2: "#6e5228",
+      ink: "#161310",
     },
-    qrColor: "#2a2218",
-    textColor: "#3a3024",
+    qrColor: "#12100e",
+    textColor: "#161310",
   }),
   v2({
     id: "neon-pulse",
@@ -633,14 +634,14 @@ export const QR_CARD_DESIGNS_V2: QrV2Design[] = [
     eventTypes: ["birthday", "party", "corporate"],
     motif: "ribbon",
     vars: {
-      bg: "#f8f4ee",
-      bg2: "#ece4d4",
-      accent: "#c45c66",
+      bg: "#f3eee6",
+      bg2: "#e8e0d4",
+      accent: "#8a3540",
       accent2: "#c9a36a",
-      ink: "#2a241c",
+      ink: "#161310",
     },
-    qrColor: "#1a1610",
-    textColor: "#2a241c",
+    qrColor: "#12100e",
+    textColor: "#161310",
   }),
 ];
 
@@ -665,6 +666,15 @@ export function assertV2RegistryInvariants(): string[] {
     if (!d.whitePlate) errors.push(`${d.id}: missing whitePlate`);
     if (!d.categories.length) errors.push(`${d.id}: no categories`);
     if (!d.label.trim()) errors.push(`${d.id}: empty label`);
+    errors.push(
+      ...contrastIssues([
+        { name: `${d.id} ink/bg`, fg: d.vars.ink, bg: d.vars.bg },
+        { name: `${d.id} text/bg`, fg: d.textColor, bg: d.vars.bg },
+        { name: `${d.id} ink/bg2`, fg: d.vars.ink, bg: d.vars.bg2 },
+        { name: `${d.id} text/bg2`, fg: d.textColor, bg: d.vars.bg2 },
+        { name: `${d.id} qr/white`, fg: d.qrColor, bg: "#ffffff" },
+      ])
+    );
   }
   return errors;
 }

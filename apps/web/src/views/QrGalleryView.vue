@@ -35,7 +35,7 @@ export default defineComponent({
   font-family: var(--font, Heebo, sans-serif);
   color: var(--ink, #161310);
 }
-.kicker { color: var(--rose, #dc5b66); font-weight: 800; margin-bottom: 8px; }
+.kicker { color: var(--rose-ink, #8a3540); font-weight: 800; margin-bottom: 8px; }
 h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; line-height: 1.15; }
 .lead { color: var(--muted, #5e564e); max-width: 40rem; margin: 10px 0 22px; }
 .hint { margin-top: 18px; }

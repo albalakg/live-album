@@ -188,7 +188,7 @@ export default defineComponent({
   position: relative;
   width: 100%;
   height: 100%;
-  background: #000;
+  background: var(--deep, #12100e);
   overflow: hidden;
 }
 

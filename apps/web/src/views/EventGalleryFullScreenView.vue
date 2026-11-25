@@ -2,6 +2,7 @@
   <div
     class="stage"
     :class="{ 'has-guest-cta': showGuestCta }"
+    :style="stageVars"
     v-if="event"
   >
     <header class="stage-bar">
@@ -105,6 +106,7 @@ import EventTriviaLiveStage from "@/components/event/EventTriviaLiveStage.vue";
 import EventTriviaPodium from "@/components/event/EventTriviaPodium.vue";
 import GuestAlbumCta from "@/components/event/GuestAlbumCta.vue";
 import TriviaScreenFx from "@/components/event/trivia/TriviaScreenFx.vue";
+import { SNAPSHARE, contrastSafeFill, isHex, resolveBuilderPalette } from "@/helpers/snapsharePalette";
 
 const HEADER_HIDE_DELAY_MS = 3000;
 
@@ -231,6 +233,45 @@ export default defineComponent({
     liveAssetIds(): number[] {
       const assets = this.$store.getters["event/getDisplayGalleryAssets"] || [];
       return assets.map((asset: { id: number }) => asset.id);
+    },
+
+    stageVars(): Record<string, string> {
+      const event = (this.event || {}) as {
+        hub_config?: { theme?: Record<string, unknown> };
+        theme?: Record<string, unknown>;
+        primary_color?: unknown;
+        secondary_color?: unknown;
+      };
+      const theme = (event.hub_config && event.hub_config.theme) || event.theme || {};
+      const colors = (theme.colors || {}) as Record<string, unknown>;
+      const query = this.$route.query.palette;
+      const queryId = typeof query === "string" ? query : "";
+      const pal = resolveBuilderPalette(queryId);
+      const primary =
+        (pal && pal.a) ||
+        colors.primary ||
+        theme.primary_color ||
+        event.primary_color;
+      const secondary =
+        (pal && pal.b) ||
+        colors.secondary ||
+        theme.secondary_color ||
+        event.secondary_color;
+      const accent = isHex(primary) ? primary : SNAPSHARE.gold;
+      const heading = isHex(secondary) ? secondary : SNAPSHARE.espresso;
+      const chip = contrastSafeFill(accent);
+      return {
+        "--stage-bg": SNAPSHARE.deep,
+        "--stage-bar": SNAPSHARE.espresso,
+        "--stage-ink": SNAPSHARE.ivory,
+        "--stage-accent": accent,
+        "--stage-accent-ink": chip.ink,
+        "--stage-accent-fill": chip.fill,
+        "--stage-heading": heading,
+        "--stage-paper": SNAPSHARE.paper,
+        "--stage-paper-ink": SNAPSHARE.ink,
+        "--stage-live": SNAPSHARE.live,
+      };
     },
   },
 
@@ -360,8 +401,8 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   height: 100dvh;
-  background: #070605;
-  color: #f7f2eb;
+  background: var(--stage-bg, var(--deep, #12100e));
+  color: var(--stage-ink, var(--ivory, #f3eee6));
   font-family: var(--font, Heebo, sans-serif);
   overflow: hidden;
   display: flex;
@@ -375,7 +416,7 @@ export default defineComponent({
   justify-content: space-between;
   gap: 16px;
   padding: 0 22px;
-  background: #12100e;
+  background: var(--stage-bar, var(--espresso, #12100e));
   z-index: 6;
 }
 .stage-bar h1 {
@@ -387,9 +428,9 @@ export default defineComponent({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #f7f2eb;
+  color: var(--stage-ink, var(--ivory, #f3eee6));
 }
-.stage-brand { color: #c9a36a; font-family: Outfit, Heebo, sans-serif; font-weight: 800; }
+.stage-brand { color: var(--stage-accent, var(--gold, #c9a36a)); font-family: Outfit, Heebo, sans-serif; font-weight: 800; }
 .stage-screen { position: relative; flex: 1; min-height: 0; }
 .slideshow, .mosaic { position: absolute; inset: 0; }
 .slideshow, .stage-screen :deep(.gallery), .stage-screen :deep(.album-wrapper), .stage-screen :deep(.album) {
@@ -423,15 +464,15 @@ export default defineComponent({
   align-items: center;
   gap: 6px;
   margin: 0 0 6px;
-  color: #5ee392;
+  color: var(--live-on-dark, #5ee392);
   font-family: var(--brand, Outfit, sans-serif);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
 }
-.stage-live i { width: 7px; height: 7px; border-radius: 50%; background: #2fbe6a; }
-.stage-title h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); font-weight: 900; color: #f7f2eb; text-shadow: 0 8px 24px rgba(0,0,0,.45); }
-.stage-link { color: var(--gold, #c9a36a); font-weight: 800; }
+.stage-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--stage-live, var(--live, #2fbe6a)); }
+.stage-title h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); font-weight: 900; color: var(--stage-ink, var(--ivory, #f3eee6)); text-shadow: 0 8px 24px rgba(18, 16, 14, .45); }
+.stage-link { color: var(--stage-accent, var(--gold, #c9a36a)); font-weight: 800; }
 .stage-new {
   position: absolute;
   top: 22px;
@@ -439,8 +480,8 @@ export default defineComponent({
   transform: translateX(-50%);
   z-index: 5;
   margin: 0;
-  background: rgba(18,16,14,.72);
-  color: #fff;
+  background: var(--stage-bar, rgba(18,16,14,.86));
+  color: var(--stage-ink, var(--ivory, #f3eee6));
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 999px;
   padding: 6px 12px;
@@ -454,8 +495,8 @@ export default defineComponent({
   width: 168px;
   padding: 16px 16px 12px;
   border-radius: 18px;
-  background: #fff;
-  color: #161310;
+  background: var(--stage-paper, var(--paper, #fffcfa));
+  color: var(--stage-paper-ink, var(--ink, #161310));
   text-align: center;
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
   overflow: visible;
@@ -466,7 +507,7 @@ export default defineComponent({
   display: grid;
   place-items: center;
   overflow: visible;
-  background: #fff;
+  background: var(--stage-paper, var(--paper, #fffcfa));
   border-radius: 8px;
 }
 .stage-card-qr :deep(.qr-code),
@@ -484,7 +525,7 @@ export default defineComponent({
   position: static;
   border: 1px solid rgba(255,255,255,.2);
   background: rgba(18,16,14,.55);
-  color: #fff;
+  color: var(--stage-ink, var(--ivory, #f3eee6));
   border-radius: 999px;
   padding: 8px 14px;
   font-weight: 800;
@@ -502,8 +543,8 @@ export default defineComponent({
   gap: 8px;
   padding: 14px;
   border-radius: 16px;
-  background: rgba(18,16,14,.88);
-  color: #fff;
+  background: var(--stage-bar, rgba(18,16,14,.92));
+  color: var(--stage-ink, var(--ivory, #f3eee6));
 }
 .stage-panel-btn {
   box-sizing: border-box;
@@ -516,7 +557,7 @@ export default defineComponent({
   margin: 0;
   border: 1px solid rgba(255,255,255,.16);
   background: transparent;
-  color: #fff;
+  color: var(--stage-ink, var(--ivory, #f3eee6));
   border-radius: 999px;
   padding: 0 12px;
   font-size: 0.875rem;
@@ -527,7 +568,7 @@ export default defineComponent({
   cursor: pointer;
   font-family: inherit;
 }
-.stage-panel-btn.on { background: #fff; color: #12100e; }
+.stage-panel-btn.on { background: var(--stage-accent-fill, var(--gold, #c9a36a)); color: var(--stage-accent-ink, var(--ink, #161310)); }
 .stage-panel-sep {
   height: 1px;
   margin: 2px 0;

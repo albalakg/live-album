@@ -57,8 +57,8 @@ export default defineComponent({
   flex: none;
   align-items: center;
   justify-content: center;
-  background: var(--rose, #dc5b66);
-  color: #fff;
+  background: var(--rose-fill, #8a3540);
+  color: var(--on-dark, #f3eee6);
   font-weight: 800;
   text-decoration: none;
   border-radius: 999px;

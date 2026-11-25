@@ -207,7 +207,7 @@ export default defineComponent({
   width: 17px;
   height: 17px;
   transform: translateY(-50%);
-  color: #8a8178;
+  color: var(--muted, #5e564e);
   pointer-events: none;
 }
 
@@ -218,10 +218,10 @@ export default defineComponent({
   padding: 0 38px 0 34px;
   padding-inline-start: 38px;
   padding-inline-end: 34px;
-  border: 1px solid #e4dbcf;
+  border: 1px solid var(--line, rgba(22, 19, 16, 0.11));
   border-radius: 999px;
-  background: #fff;
-  color: #12100e;
+  background: var(--paper, #fffcfa);
+  color: var(--ink, #161310);
   font: inherit;
   font-size: 0.92rem;
   -webkit-appearance: none;
@@ -229,8 +229,8 @@ export default defineComponent({
 }
 
 .qr-search-input::-webkit-search-cancel-button { display: none; }
-.qr-search-input::placeholder { color: #9a9187; }
-.qr-search-input:focus { outline: none; border-color: #c9a36a; box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.22); }
+.qr-search-input::placeholder { color: var(--muted, #5e564e); }
+.qr-search-input:focus { outline: none; border-color: var(--gold, #c9a36a); box-shadow: 0 0 0 3px rgba(201, 163, 106, 0.22); }
 
 .qr-search-clear {
   position: absolute;
@@ -241,8 +241,8 @@ export default defineComponent({
   height: 28px;
   border: 0;
   border-radius: 50%;
-  background: #f1ebe3;
-  color: #5e564e;
+  background: var(--bg-2, #e8e0d4);
+  color: var(--ink, #161310);
   font-size: 1.05rem;
   line-height: 1;
   cursor: pointer;
@@ -267,14 +267,14 @@ export default defineComponent({
 .qr-result-count {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #8a8178;
+  color: var(--muted, #5e564e);
   white-space: nowrap;
 }
 
 .qr-clear-all {
   border: 0;
   background: none;
-  color: #a06a2c;
+  color: var(--gold-ink, #6e5228);
   font: inherit;
   font-size: 0.82rem;
   font-weight: 700;
@@ -308,7 +308,7 @@ export default defineComponent({
 }
 
 .qr-card.on .qr-thumb {
-  box-shadow: 0 0 0 3px #c9a36a;
+  box-shadow: 0 0 0 3px var(--gold, #c9a36a);
 }
 
 .qr-thumb {
@@ -316,7 +316,7 @@ export default defineComponent({
   display: block;
   border-radius: 14px;
   overflow: hidden;
-  background: #f3eee6;
+  background: var(--ivory, #f3eee6);
   aspect-ratio: 3 / 4;
 }
 
@@ -348,7 +348,7 @@ export default defineComponent({
 
 .qr-card p {
   margin: 2px;
-  color: #5e564e;
+  color: var(--muted, #5e564e);
   font-size: 0.82rem;
 }
 
@@ -358,8 +358,8 @@ export default defineComponent({
   padding: 0 18px;
   border: 0;
   border-radius: 999px;
-  background: #12100e;
-  color: #fff;
+  background: var(--espresso, #12100e);
+  color: var(--on-dark, #f3eee6);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -367,7 +367,7 @@ export default defineComponent({
 
 .empty {
   margin-top: 18px;
-  background: #fff;
+  background: var(--paper, #fffcfa);
   border-radius: 22px;
   padding: 28px;
   text-align: center;

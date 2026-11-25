@@ -440,12 +440,12 @@ export default defineComponent({
   line-height: 1;
 }
 .btn-primary {
-  background: linear-gradient(135deg, #dc5b66, #c9a36a);
-  color: #fff;
-  box-shadow: 0 8px 22px rgba(201, 163, 106, 0.45);
+  background: var(--espresso, #12100e);
+  color: var(--on-dark, #f3eee6);
+  box-shadow: 0 8px 22px rgba(18, 16, 14, 0.28);
 }
 .btn-outline {
-  background: #fff;
+  background: var(--paper, #fffcfa);
   color: var(--ink, #161310);
   border: 1.5px solid rgba(22, 19, 16, 0.18);
   box-shadow: none;
@@ -472,7 +472,7 @@ export default defineComponent({
   font: inherit;
   font-size: 0.88rem;
   font-weight: 600;
-  color: #8a8278;
+  color: var(--muted, #5e564e);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -514,7 +514,7 @@ export default defineComponent({
   overflow: hidden;
   isolation: isolate;
   box-shadow: 0 24px 60px rgba(18, 16, 14, 0.16);
-  background: #12100e;
+  background: var(--deep, #12100e);
 }
 .qr-live .bg,
 .qr-export-card .bg {
@@ -527,7 +527,7 @@ export default defineComponent({
 }
 .meta-card {
   margin-top: 18px;
-  background: #fff;
+  background: var(--paper, #fffcfa);
   border-radius: 26px;
   padding: 20px 22px;
   box-shadow: 0 8px 24px rgba(18, 16, 14, 0.08);
@@ -552,14 +552,14 @@ export default defineComponent({
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 800;
-  color: #8a8278;
+  color: var(--muted, #5e564e);
 }
 .txt {
   border: 1.5px solid rgba(22, 19, 16, 0.11);
   border-radius: 14px;
   padding: 12px 14px;
   font: inherit;
-  background: #fffcfa;
+  background: var(--paper, #fffcfa);
 }
 .sample-note {
   margin-top: 12px;
@@ -591,7 +591,7 @@ export default defineComponent({
   isolation: isolate;
   pointer-events: none;
   z-index: -1;
-  background: #12100e;
+  background: var(--deep, #12100e);
 }
 @media (max-width: 1024px) {
   .qr-layout {

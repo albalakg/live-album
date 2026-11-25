@@ -103,7 +103,7 @@ export default defineComponent({
 }
 
 .grid-cell {
-  background: #000;
+  background: var(--deep, #12100e);
   position: relative;
   overflow: hidden;
   width: calc(30vh - 20px);

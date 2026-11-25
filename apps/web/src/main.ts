@@ -3,6 +3,7 @@ import { installAnalytics } from "@snapshare/design/analytics";
 import { installReveal } from "@snapshare/design/reveal";
 import { GA4_MEASUREMENT_ID } from "@snapshare/design/site";
 import "@snapshare/design/tokens.css";
+import "@/styles/snapshare-palette.css";
 import "@snapshare/design/mock.css";
 import "@/styles/app-shell.scss";
 import App from "./App.vue";
