@@ -1,5 +1,6 @@
 <template>
-  <div class="gs-overlay import-overlay" @mousedown.self="close">
+  <Teleport to="body">
+  <div class="gs-ui gs-overlay import-overlay" @mousedown.self="close">
     <section class="gs-dialog import-dialog" role="dialog" aria-modal="true" aria-label="ייבוא אורחים">
       <header class="imp-head">
         <div>
@@ -139,6 +140,7 @@
       </div>
     </section>
   </div>
+  </Teleport>
 </template>
 
 <script lang="ts">

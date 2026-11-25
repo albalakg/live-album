@@ -1,5 +1,6 @@
 <template>
-  <div class="gs-overlay guest-drawer-overlay" @mousedown.self="$emit('close')">
+  <Teleport to="body">
+  <div class="gs-ui gs-overlay guest-drawer-overlay" @mousedown.self="$emit('close')">
     <form class="gs-dialog guest-drawer" role="dialog" aria-modal="true" :aria-label="title" @submit.prevent="save">
       <header class="drawer-head">
         <h2>{{ title }}</h2>
@@ -115,6 +116,7 @@
       </div>
     </form>
   </div>
+  </Teleport>
 </template>
 
 <script lang="ts">

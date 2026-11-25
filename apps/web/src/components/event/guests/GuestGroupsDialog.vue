@@ -1,5 +1,6 @@
 <template>
-  <div class="gs-overlay" @mousedown.self="$emit('close')">
+  <Teleport to="body">
+  <div class="gs-ui gs-overlay" @mousedown.self="$emit('close')">
     <section class="gs-dialog groups-dialog" role="dialog" aria-modal="true" aria-label="קבוצות">
       <h2>קבוצות וצדדים</h2>
       <p class="gs-dialog-lede">קבוצות עוזרות לשבץ משפחות וחברים יחד. הצבע מופיע ברשימה ובמפת האולם.</p>
@@ -51,6 +52,7 @@
       </div>
     </section>
   </div>
+  </Teleport>
 </template>
 
 <script lang="ts">
@@ -87,7 +89,16 @@ export default defineComponent({
     },
   },
 
+  mounted() {
+    window.addEventListener("keydown", this.onEsc);
+  },
+  beforeUnmount() {
+    window.removeEventListener("keydown", this.onEsc);
+  },
   methods: {
+    onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") this.$emit("close");
+    },
     onName(g: GuestGroup, e: Event) {
       this.update(g, { name: (e.target as HTMLInputElement).value });
     },

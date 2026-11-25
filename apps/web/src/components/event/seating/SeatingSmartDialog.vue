@@ -1,5 +1,6 @@
 <template>
-  <div class="gs-overlay" @mousedown.self="close">
+  <Teleport to="body">
+  <div class="gs-ui gs-overlay" @mousedown.self="close">
     <section class="gs-dialog smart-dialog" role="dialog" aria-modal="true" aria-label="שיבוץ חכם">
       <!-- options -->
       <template v-if="phase === 'options'">
@@ -92,6 +93,7 @@
       </template>
     </section>
   </div>
+  </Teleport>
 </template>
 
 <script lang="ts">

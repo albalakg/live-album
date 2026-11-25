@@ -1,5 +1,6 @@
 <template>
-  <div class="gs-overlay" @mousedown.self="$emit('close')">
+  <Teleport to="body">
+  <div class="gs-ui gs-overlay" @mousedown.self="$emit('close')">
     <section class="gs-dialog constraints-dialog" role="dialog" aria-modal="true" aria-label="אילוצי הושבה">
       <h2>אילוצי הושבה</h2>
       <p class="gs-dialog-lede">מי חייב לשבת יחד ומי עדיף שלא. השיבוץ החכם מתחשב בהם, ובמפה תופיע אזהרה אם משהו לא מתקיים. שום דבר לא נחסם.</p>
@@ -41,6 +42,7 @@
       </form>
     </section>
   </div>
+  </Teleport>
 </template>
 
 <script lang="ts">
@@ -84,7 +86,16 @@ export default defineComponent({
     },
   },
 
+  mounted() {
+    window.addEventListener("keydown", this.onEsc);
+  },
+  beforeUnmount() {
+    window.removeEventListener("keydown", this.onEsc);
+  },
   methods: {
+    onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") this.$emit("close");
+    },
     nameOf(id: number): string {
       return this.board.guestMap.get(id)?.full_name || `#${id}`;
     },

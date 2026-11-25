@@ -18,7 +18,10 @@
         :data-fx="f.id"
         :style="boxStyle(f)"
       >
-        <span>{{ f.label }}</span>
+        <div class="fx-inner" :style="fxInnerStyle(f)">
+          <i class="fx-ico" aria-hidden="true"></i>
+          <span class="fx-label">{{ f.label }}</span>
+        </div>
         <template v-if="single === f.id">
           <div v-for="h in cornerHandles" :key="h" class="handle" :class="h" :data-handle="h"></div>
         </template>
@@ -36,7 +39,8 @@
           v-for="c in chairsFor(t)"
           :key="c.i"
           class="chair"
-          :class="[c.cell ? 'filled' : 'empty', { hi: single === t.key && board.selectedSeat === c.i, over: dropSeat === t.key + ':' + c.i }]"
+          :class="[c.cell ? 'filled' : 'empty', { hi: single === t.key && board.selectedSeat === c.i, over: dropSeat === t.key + ':' + c.i, 'swap-over': swapSeat === t.key + ':' + c.i, 'swap-flash': flashSeat === t.key + ':' + c.i }]"
+          data-canvas-chair="1"
           :data-table="t.key"
           :data-seat="c.i"
           :data-guest="c.cell ? c.cell.guest.id : null"
@@ -91,6 +95,13 @@ import { initials, SIDE_COLORS, SIDE_LABELS } from "@/helpers/seating/labels";
 import { CrmGuest, Fixture, SeatTable } from "@/helpers/seating/types";
 
 type Item = SeatTable | Fixture;
+export interface ChairHit {
+  key: string;
+  seat: number;
+  x: number;
+  y: number;
+  guestId: number | null;
+}
 const GRID_HALF = 12;
 interface DragState {
   kind: "pan" | "move" | "resize" | "rotate" | "marquee" | "pinch";
@@ -126,6 +137,9 @@ export default defineComponent({
       marquee: null as { x: number; y: number; w: number; h: number } | null,
       dropKey: null as string | null,
       dropSeat: null as string | null,
+      swapSeat: null as string | null,
+      flashSeat: null as string | null,
+      guestDragLock: false,
       pointers: new Map<number, { x: number; y: number }>(),
       sideLabels: SIDE_LABELS,
       cornerHandles: ["nw", "ne", "sw", "se"],
@@ -179,6 +193,15 @@ export default defineComponent({
         width: t.w + "px",
         height: t.h + "px",
         transform: `rotate(${t.rot || 0}deg)`,
+      };
+    },
+    fxInnerStyle(f: Fixture): Record<string, string> {
+      const s = this.board.cam.scale || 1;
+      const cap = Math.max(8, Math.min(f.w, f.h) * 0.42);
+      const px = Math.min(18 / s, cap);
+      return {
+        fontSize: px + "px",
+        transform: `rotate(${-(f.rot || 0)}deg)`,
       };
     },
     handlesFor(t: SeatTable): string[] {
@@ -260,14 +283,23 @@ export default defineComponent({
         return;
       }
       if (e.button != null && e.button !== 0) return;
+      if (this.guestDragLock) return;
       const target = e.target as HTMLElement;
       if (target.closest(".zoom-fab, button, input, select, textarea, .canvas-overlay")) return;
       const wp = this.worldPoint(e.clientX, e.clientY);
       const base = { pointer: e.pointerId, startClient: { x: e.clientX, y: e.clientY }, startWorld: wp };
       const handle = target.closest("[data-handle]") as HTMLElement | null;
-      const chair = target.closest(".chair") as HTMLElement | null;
-      const tbl = target.closest(".tbl") as HTMLElement | null;
+      let chair = target.closest(".chair") as HTMLElement | null;
+      let tbl = target.closest(".tbl") as HTMLElement | null;
       const fx = target.closest(".fx") as HTMLElement | null;
+      // Prefer a nearby chair over grabbing the table (small targets when zoomed out).
+      if (!handle && !chair) {
+        const near = this.nearestChair(e.clientX, e.clientY, 22);
+        if (near) {
+          chair = this.chairEl(near.key, near.seat);
+          tbl = (chair && (chair.closest(".tbl") as HTMLElement)) || (this.$refs.viewport as HTMLElement).querySelector(`.tbl[data-key="${near.key}"]`) as HTMLElement | null;
+        }
+      }
       (this.$refs.viewport as HTMLElement).focus({ preventScroll: true });
 
       if (handle && (tbl || fx)) {
@@ -495,9 +527,79 @@ export default defineComponent({
     },
 
     /* ───────── guest drop highlight (called by the view while dragging a guest) ───────── */
-    highlight(key: string | null, seatKey: string | null) {
+    highlight(key: string | null, seatKey: string | null, swapKey: string | null = null) {
       this.dropKey = key;
       this.dropSeat = seatKey;
+      this.swapSeat = swapKey;
+    },
+    flashSwap(key: string, seat: number) {
+      this.flashSeat = `${key}:${seat}`;
+      window.setTimeout(() => {
+        if (this.flashSeat === `${key}:${seat}`) this.flashSeat = null;
+      }, 500);
+    },
+    setGuestDrag(on: boolean) {
+      this.guestDragLock = on;
+      if (on && this.drag) this.finishDrag(false);
+    },
+    panBy(dx: number, dy: number) {
+      this.board.cam.x += dx;
+      this.board.cam.y += dy;
+    },
+    chairEl(key: string, seat: number): HTMLElement | null {
+      return (this.$refs.viewport as HTMLElement).querySelector(`.chair[data-table="${key}"][data-seat="${seat}"]`);
+    },
+    /** Screen-space chairs, accounting for table rotation. */
+    chairHits(): ChairHit[] {
+      const r = this.rect();
+      const c = this.board.cam;
+      const out: ChairHit[] = [];
+      this.board.tables.forEach((t) => {
+        const rad = ((t.rot || 0) * Math.PI) / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        const cx = t.x + t.w / 2;
+        const cy = t.y + t.h / 2;
+        this.chairsFor(t).forEach((ch) => {
+          const dx = ch.x - t.w / 2;
+          const dy = ch.y - t.h / 2;
+          const wx = cx + dx * cos - dy * sin;
+          const wy = cy + dx * sin + dy * cos;
+          out.push({
+            key: t.key,
+            seat: ch.i,
+            x: r.left + c.x + wx * c.scale,
+            y: r.top + c.y + wy * c.scale,
+            guestId: ch.cell ? ch.cell.guest.id : null,
+          });
+        });
+      });
+      return out;
+    },
+    nearestChair(clientX: number, clientY: number, radius = 44): ChairHit | null {
+      let best: ChairHit | null = null;
+      let bestD = radius;
+      this.chairHits().forEach((h) => {
+        const d = Math.hypot(h.x - clientX, h.y - clientY);
+        if (d < bestD) {
+          best = h;
+          bestD = d;
+        }
+      });
+      return best;
+    },
+    tableAt(clientX: number, clientY: number): string | null {
+      const wp = this.worldPoint(clientX, clientY);
+      let hit: string | null = null;
+      this.board.tables.forEach((t) => {
+        const rad = ((t.rot || 0) * Math.PI) / 180;
+        const dx = wp.x - (t.x + t.w / 2);
+        const dy = wp.y - (t.y + t.h / 2);
+        const lx = dx * Math.cos(-rad) - dy * Math.sin(-rad);
+        const ly = dx * Math.sin(-rad) + dy * Math.cos(-rad);
+        if (Math.abs(lx) <= t.w / 2 && Math.abs(ly) <= t.h / 2) hit = t.key;
+      });
+      return hit;
     },
   },
 });
@@ -544,56 +646,98 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 13px;
   font-weight: 800;
-  padding: 6px;
-  letter-spacing: 0.04em;
+  padding: 8px;
   box-sizing: border-box;
   direction: rtl;
   cursor: move;
+  overflow: visible;
   &.selected {
     outline: 2px solid #c9a36a;
     outline-offset: 2px;
   }
-  &.dance {
-    background: repeating-linear-gradient(45deg, rgba(22, 19, 16, 0.05) 0 8px, transparent 8px 16px), rgba(255, 252, 250, 0.55);
-    color: #161310;
-    border: 1.5px dashed rgba(22, 19, 16, 0.3);
-    border-radius: 18px;
-  }
-  &.stage {
-    background: #2a231c;
-    color: #f3eee6;
-    border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(18, 16, 14, 0.18);
-  }
-  &.bar,
-  &.buffet {
-    background: #12100e;
-    color: #f3eee6;
-    border-radius: 14px;
-  }
-  &.dj {
-    background: #3d2e22;
-    color: #f3eee6;
-    border-radius: 14px;
-  }
-  &.door,
-  &.label {
-    background: #d9d0c3;
-    color: #161310;
-    border-radius: 12px;
-    border: 1px solid rgba(22, 19, 16, 0.16);
-  }
-  &.label {
-    background: rgba(255, 252, 250, 0.7);
-  }
-  &.chuppah {
-    background: #fffcfa;
-    color: #161310;
-    border: 2px solid #c9a36a;
-    border-radius: 50%;
-  }
+}
+.fx-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  line-height: 1.15;
+}
+.fx-label {
+  font-weight: 800;
+  max-width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+.fx-ico {
+  width: 1.35em;
+  height: 1.35em;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: var(--fx-ico) center / contain no-repeat;
+  mask: var(--fx-ico) center / contain no-repeat;
+}
+.fx.dance {
+  background: repeating-linear-gradient(45deg, rgba(201, 163, 106, 0.16) 0 10px, rgba(255, 252, 250, 0.7) 10px 20px);
+  color: #161310;
+  border: 1.5px dashed rgba(106, 75, 29, 0.45);
+  border-radius: 18px;
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><circle cx='8' cy='6' r='2.2'/><circle cx='16' cy='6' r='2.2'/><path d='M6 21v-2l2-5 2 3 2-6 2 6 2-3 2 5v2H6z'/></svg>");
+}
+.fx.stage {
+  background: linear-gradient(#5a4638, #3f3229);
+  color: #f3eee6;
+  border-radius: 16px;
+  border: 2px solid #c9a36a;
+  box-shadow: inset 0 7px 0 rgba(201, 163, 106, 0.35), 0 8px 20px rgba(18, 16, 14, 0.16);
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M3 18h18v2H3zM5 8l7-5 7 5v8H5V8z'/></svg>");
+}
+.fx.bar,
+.fx.buffet,
+.fx.dj {
+  background: linear-gradient(#fbf6ee, #eadcbc);
+  color: #161310;
+  border-radius: 14px;
+  border: 1.5px solid rgba(22, 19, 16, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 252, 250, 0.6), 0 6px 16px rgba(18, 16, 14, 0.1);
+}
+.fx.bar {
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M4 4h16l-7 8v6h3v2H8v-2h3v-6L4 4z'/></svg>");
+}
+.fx.buffet {
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M3 18h18v2H3zM5 8h14v8H5zM7 5h2v2H7zM11 4h2v3h-2zM15 5h2v2h-2z'/></svg>");
+}
+.fx.dj {
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><circle cx='8' cy='14' r='4'/><circle cx='16' cy='14' r='4'/><path d='M10 6h4v3h-4z'/></svg>");
+}
+.fx.door,
+.fx.label {
+  background: #f3eee6;
+  color: #161310;
+  border-radius: 12px;
+  border: 1.5px solid rgba(22, 19, 16, 0.18);
+}
+.fx.door {
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M6 21V3h12v18H6zm8-8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'/></svg>");
+}
+.fx.label {
+  background: rgba(255, 252, 250, 0.92);
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M4 6h16v2H4zm0 5h12v2H4zm0 5h16v2H4z'/></svg>");
+}
+.fx.chuppah {
+  background: radial-gradient(circle at 50% 40%, #fffdf9, #f4eadb);
+  color: #161310;
+  border: 2px solid #c9a36a;
+  border-radius: 50%;
+  --fx-ico: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><path d='M3 10l9-7 9 7v2H3v-2zm3 3h2v8H6zm10 0h2v8h-2zM11 13h2v8h-2z'/></svg>");
 }
 .tbl {
   position: absolute;
@@ -690,13 +834,40 @@ export default defineComponent({
   &.empty {
     color: transparent;
   }
-  &.over,
+  /* invisible hit padding so chairs are easier to grab when zoomed out */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
+  &.over {
+    box-shadow: 0 0 0 3px #c9a36a, 0 0 0 7px rgba(201, 163, 106, 0.45);
+    transform: scale(1.28);
+    z-index: 8;
+  }
+  &.swap-over {
+    box-shadow: 0 0 0 3px #6b4b1d, 0 0 0 7px rgba(201, 163, 106, 0.5);
+    transform: scale(1.28);
+    z-index: 8;
+  }
+  &.swap-flash {
+    animation: chair-swap 0.45s ease;
+  }
   &:hover {
     box-shadow: 0 0 0 2px #c9a36a, 0 2px 4px rgba(18, 16, 14, 0.1);
   }
   &.hi {
     box-shadow: 0 0 0 2px #dc5b66;
   }
+}
+@keyframes chair-swap {
+  0% { transform: scale(1.3) rotate(-8deg); }
+  50% { transform: scale(1.15) rotate(6deg); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chair.swap-flash { animation: none; }
+  .chair.over, .chair.swap-over { transform: none; }
 }
 .handle {
   position: absolute;
@@ -781,8 +952,9 @@ export default defineComponent({
 }
 .zoom-fab {
   position: absolute;
-  bottom: 28px;
-  left: 10px;
+  bottom: 12px;
+  left: auto;
+  right: 10px;
   display: flex;
   background: #fffcfa;
   border: 1px solid rgba(22, 19, 16, 0.11);
@@ -816,8 +988,8 @@ export default defineComponent({
 .hint-keys {
   position: absolute;
   bottom: 8px;
-  right: 12px;
-  left: 160px;
+  right: 148px;
+  left: 12px;
   margin: 0;
   font-size: 11px;
   color: #5e564e;
@@ -828,12 +1000,7 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
 }
-@media (max-width: 899px) {
-  .zoom-fab {
-    left: auto;
-    right: 10px;
-    bottom: 10px;
-  }
+@media (max-width: 1279px) {
   .hint-keys {
     display: none;
   }

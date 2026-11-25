@@ -207,26 +207,31 @@
     }
   }
 
-  /* overlay / dialog */
+  /* overlay / dialog — teleported to body so they sit above the site header
+     (.event-main creates a stacking context at z-index 11; DesktopBar is 100,
+     MobileBar 10000, mobile SideBar 10050). */
+  &.gs-overlay,
   .gs-overlay {
     position: fixed;
     inset: 0;
-    z-index: 200;
-    background: rgba(18, 16, 14, 0.42);
+    z-index: 12000;
+    background: rgba(18, 16, 14, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+    overflow: auto;
   }
   .gs-dialog {
     width: min(560px, 100%);
-    max-height: calc(100vh - 40px);
+    max-height: 100%;
     overflow: auto;
     background: var(--gs-paper);
     color: var(--gs-ink);
     border-radius: 24px;
     box-shadow: var(--gs-shadow);
     padding: 22px 24px;
+    margin: auto;
     h2 {
       margin: 0 0 6px;
       font-size: 22px;
@@ -245,6 +250,11 @@
     justify-content: flex-start;
     margin-top: 18px;
     flex-wrap: wrap;
+    position: sticky;
+    bottom: -22px;
+    padding: 12px 0 2px;
+    background: var(--gs-paper);
+    z-index: 1;
   }
   .gs-check {
     display: flex;
@@ -278,15 +288,21 @@
   }
 
   @media (max-width: 900px) {
+    &.gs-overlay,
     .gs-overlay {
       align-items: flex-end;
       padding: 0;
     }
     .gs-dialog {
       width: 100%;
-      max-height: 92vh;
+      max-height: min(92dvh, calc(100dvh - 8px));
       border-radius: 22px 22px 0 0;
       padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+      margin: 0;
+    }
+    .gs-dialog-actions {
+      bottom: calc(-18px - env(safe-area-inset-bottom));
+      padding-bottom: calc(4px + env(safe-area-inset-bottom));
     }
   }
 }
@@ -297,7 +313,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2100;
+  z-index: 12010;
   width: auto !important;
   max-height: 64vh;
   border-radius: 22px 22px 0 0 !important;
@@ -312,11 +328,35 @@
 .gs-sheet-scrim {
   position: fixed;
   inset: 0;
-  z-index: 2090;
+  z-index: 12000;
   background: rgba(18, 16, 14, 0.32);
 }
 @media (prefers-reduced-motion: reduce) {
   .gs-ui.is-sheet {
     transition: none;
   }
+}
+
+.gs-ui.is-dock {
+  position: fixed;
+  top: 80px;
+  bottom: 16px;
+  width: 260px;
+  z-index: 12010;
+  box-shadow: 0 16px 36px rgba(22, 19, 16, 0.18);
+  transition: transform 0.2s ease;
+  &.stage-rail {
+    left: 16px;
+    transform: translateX(-120%);
+    &.dock-open { transform: none; }
+  }
+  &.stage-insp {
+    right: 16px;
+    left: auto;
+    width: 300px;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs-ui.is-dock { transition: none; }
 }

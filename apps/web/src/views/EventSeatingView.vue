@@ -1,5 +1,5 @@
 <template>
-  <div ref="page" class="gs-ui seating-page" :style="pageStyle">
+  <div ref="page" class="gs-ui seating-page" :class="{ 'is-compact': isCompact, 'is-phone': isPhone }" :style="pageStyle">
     <!-- entitlement off -->
     <div v-if="loaded && !entitlement.enabled" class="locked gs-card">
       <h1>סידורי הושבה</h1>
@@ -37,6 +37,7 @@
             </div>
           </div>
           <button class="gs-btn gs-btn-sm hide-sm" type="button" @click="exportSeating">ייצוא לאקסל</button>
+          <button v-if="isCompact && !isPhone" class="gs-btn gs-btn-sm gs-btn-deep" type="button" :aria-expanded="railOpen" @click="railOpen = !railOpen">אורחים ({{ board.unseated.length }})</button>
           <span class="quota-pill" :title="quota.is_mock ? 'ספק AI מקומי לבדיקות' : ''">AI · נשארו {{ quota.remaining }} מתוך {{ quota.included }}</span>
         </div>
       </header>
@@ -52,14 +53,14 @@
         <button class="gs-btn gs-btn-sm gs-btn-deep" type="button" @click="keepMine">לשמור את הגרסה שלי</button>
       </div>
 
-      <div class="stage">
-        <Teleport to="body" :disabled="!isNarrow">
-          <div v-if="isNarrow && railOpen" class="gs-sheet-scrim" @click="railOpen = false"></div>
+      <div class="stage" :class="{ compact: isCompact }">
+        <Teleport to="body" :disabled="!(isPhone || isCompact)">
+          <div v-if="(isPhone || isCompact) && railOpen && !gdrag.active" class="gs-sheet-scrim" @click="railOpen = false"></div>
           <SeatingGuestRail
             class="stage-rail gs-ui"
-            :class="{ 'is-sheet': isNarrow, 'sheet-open': railOpen }"
+            :class="{ 'is-sheet': isPhone, 'sheet-open': isPhone && railOpen, 'is-dock': isCompact && !isPhone, 'dock-open': isCompact && !isPhone && railOpen }"
             :drop-over="gdrag.active && gdrag.overRail"
-            :closable="isNarrow"
+            :closable="isCompact || isPhone"
             @guest-down="onGuestDown"
             @guest-pick="pickGuest"
             @close="railOpen = false"
@@ -83,8 +84,8 @@
           <div v-if="!loaded" class="loading">טוען את המפה…</div>
         </div>
 
-        <Teleport to="body" :disabled="!isNarrow">
-          <SeatingTableInspector v-if="board.selected.length === 1" class="stage-insp gs-ui" :class="{ 'is-sheet': isNarrow, 'sheet-open': isNarrow }" @guest-down="onGuestDown" />
+        <Teleport to="body" :disabled="!(isPhone || isCompact)">
+          <SeatingTableInspector v-if="board.selected.length === 1" class="stage-insp gs-ui" :class="{ 'is-sheet': isPhone, 'sheet-open': isPhone, 'is-dock': isCompact && !isPhone, 'dock-open': isCompact && !isPhone }" @guest-down="onGuestDown" />
         </Teleport>
         <aside v-if="board.selected.length !== 1" class="stage-insp summary" aria-label="סיכום">
           <h2>סיכום</h2>
@@ -104,8 +105,16 @@
 
     </template>
 
-    <div v-if="gdrag.active" class="ghost" :style="{ left: gdrag.x + 'px', top: gdrag.y + 'px' }" aria-hidden="true">
-      {{ ghostName }}<small v-if="ghostParty > 1"> · {{ ghostParty }}</small>
+    <div
+      v-if="gdrag.active"
+      class="ghost" data-guest-ghost="1"
+      :class="{ snap: !!gdrag.snap, swap: !!gdrag.swapName }"
+      :style="ghostStyle"
+      aria-hidden="true"
+    >
+      <span class="gs-ava" :style="{ background: ghostColor }" aria-hidden="true">{{ ghostInitials }}</span>
+      <span class="gname">{{ ghostName }}<small v-if="ghostParty > 1"> · {{ ghostParty }}</small></span>
+      <span v-if="gdrag.swapName" class="gswap">⇄ {{ gdrag.swapName }}</span>
     </div>
 
     <SeatingSmartDialog v-if="showSmart" :event-id="eventId" :quota="quota" :flush="flush" @close="showSmart = false" @quota="quota = $event" @applied="onApplied" />
@@ -130,12 +139,26 @@ import { notify } from "@/helpers/notify";
 
 type SaveState = "idle" | "dirty" | "saving" | "saved" | "error" | "offline";
 
+interface ChairHit {
+  key: string;
+  seat: number;
+  x: number;
+  y: number;
+  guestId: number | null;
+}
+
 interface CanvasApi {
   fit: () => void;
   focusItem: (key: string, scale?: number) => void;
   viewCenter: () => { x: number; y: number };
   zoomBy: (f: number) => void;
-  highlight: (key: string | null, seatKey: string | null) => void;
+  highlight: (key: string | null, seatKey: string | null, swapKey?: string | null) => void;
+  flashSwap: (key: string, seat: number) => void;
+  setGuestDrag: (on: boolean) => void;
+  panBy: (dx: number, dy: number) => void;
+  nearestChair: (x: number, y: number, radius?: number) => ChairHit | null;
+  tableAt: (x: number, y: number) => string | null;
+  rect: () => DOMRect;
 }
 
 const SAVE_DEBOUNCE = 800;
@@ -168,11 +191,14 @@ export default defineComponent({
       showSmart: false,
       showConstraints: false,
       railOpen: false,
-      isNarrow: false,
+      isPhone: false,
+      isCompact: false,
       pageH: 0,
+      longPressTimer: 0,
+      dragRaf: 0,
       fixtureKinds: ["dance", "stage", "bar", "dj", "door", "buffet", "chuppah", "label"] as FixtureKind[],
       fixtureLabels: FIXTURE_DEFAULTS,
-      gdrag: { id: 0, pointer: -1, sx: 0, sy: 0, x: 0, y: 0, active: false, overRail: false, fromRail: false },
+      gdrag: { id: 0, pointer: -1, sx: 0, sy: 0, x: 0, y: 0, active: false, overRail: false, fromRail: false, snap: null as ChairHit | null, swapName: "" },
     };
   },
 
@@ -213,6 +239,28 @@ export default defineComponent({
     },
     ghostParty(): number {
       return this.board.guestMap.get(this.gdrag.id)?.party_size || 1;
+    },
+    ghostInitials(): string {
+      const n = this.ghostName;
+      const parts = n.trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return "";
+      return parts.length === 1 ? parts[0].slice(0, 2) : (parts[0][0] + parts[parts.length - 1][0]);
+    },
+    ghostColor(): string {
+      const g = this.board.guestMap.get(this.gdrag.id);
+      if (!g) return "#5c4a3a";
+      const group = g.group_id ? this.board.groupMap.get(g.group_id) : null;
+      return group?.color || { bride: "#8f3a44", groom: "#365646", shared: "#3b4a68", none: "#5c4a3a" }[g.side || "none"];
+    },
+    ghostStyle(): Record<string, string> {
+      const d = this.gdrag;
+      let x = d.x;
+      let y = d.y;
+      if (d.snap) {
+        x = d.x * 0.65 + d.snap.x * 0.35;
+        y = d.y * 0.65 + d.snap.y * 0.35;
+      }
+      return { transform: `translate3d(${x}px, ${y}px, 0)` };
     },
   },
 
@@ -383,7 +431,7 @@ export default defineComponent({
     addTable(shape: TableShape) {
       const c = this.canvasApi?.viewCenter() || { x: 600, y: 400 };
       const t = this.board.addTable(shape, c.x, c.y);
-      if (this.isNarrow) this.railOpen = false;
+      if (this.isPhone) this.railOpen = false;
       this.$nextTick(() => {
         if (this.board.tables.length === 1) this.canvasApi?.focusItem(t.key, 1);
       });
@@ -439,35 +487,114 @@ export default defineComponent({
       if (e.button != null && e.button > 0) return;
       if (this.gdrag.pointer !== -1) return;
       const fromRail = !!(e.target as HTMLElement).closest("[data-rail]");
-      this.gdrag = { id, pointer: e.pointerId, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, active: false, overRail: false, fromRail };
-      window.addEventListener("pointermove", this.onGuestMove);
+      this.gdrag = {
+        id,
+        pointer: e.pointerId,
+        sx: e.clientX,
+        sy: e.clientY,
+        x: e.clientX,
+        y: e.clientY,
+        active: false,
+        overRail: false,
+        fromRail,
+        snap: null,
+        swapName: "",
+      };
+      window.addEventListener("pointermove", this.onGuestMove, { passive: false });
       window.addEventListener("pointerup", this.onGuestUp);
       window.addEventListener("pointercancel", this.onGuestCancel);
+      const isTouch = e.pointerType === "touch" || e.pointerType === "pen";
+      if (isTouch) {
+        this.longPressTimer = window.setTimeout(() => this.armGuestDrag(e.pointerId), 260);
+      }
+    },
+    armGuestDrag(pointerId: number) {
+      const d = this.gdrag;
+      if (d.pointer !== pointerId || d.active) return;
+      d.active = true;
+      this.canvasApi?.setGuestDrag(true);
+      if (this.isPhone) this.railOpen = false;
+      this.ensureDragLoop();
     },
     onGuestMove(e: PointerEvent) {
       const d = this.gdrag;
       if (e.pointerId !== d.pointer) return;
-      if (!d.active && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 6) return;
-      if (!d.active) {
-        d.active = true;
-        if (this.isNarrow) this.railOpen = false;
-      }
-      e.preventDefault();
       d.x = e.clientX;
       d.y = e.clientY;
-      const hit = this.hitTest(e.clientX, e.clientY);
-      d.overRail = hit.rail;
-      this.canvasApi?.highlight(hit.key, hit.key != null && hit.seat != null ? `${hit.key}:${hit.seat}` : null);
+      const dist = Math.hypot(e.clientX - d.sx, e.clientY - d.sy);
+      const isTouch = e.pointerType === "touch" || e.pointerType === "pen";
+      if (!d.active) {
+        if (isTouch) {
+          if (dist > 10 && this.longPressTimer) {
+            window.clearTimeout(this.longPressTimer);
+            this.longPressTimer = 0;
+          }
+          return;
+        }
+        if (dist < 5) return;
+        d.active = true;
+        this.canvasApi?.setGuestDrag(true);
+        if (this.isPhone) this.railOpen = false;
+      }
+      e.preventDefault();
+      this.ensureDragLoop();
+    },
+    ensureDragLoop() {
+      if (this.dragRaf) return;
+      const step = () => {
+        this.dragRaf = 0;
+        if (!this.gdrag.active) return;
+        this.updateGuestDrag();
+        this.dragRaf = window.requestAnimationFrame(step);
+      };
+      this.dragRaf = window.requestAnimationFrame(step);
+    },
+    updateGuestDrag() {
+      const d = this.gdrag;
+      const cv = this.canvasApi;
+      // auto-pan near canvas edges
+      if (cv) {
+        const r = cv.rect();
+        const edge = 44;
+        let dx = 0;
+        let dy = 0;
+        if (d.x < r.left + edge) dx = Math.min(14, edge - (d.x - r.left));
+        else if (d.x > r.right - edge) dx = -Math.min(14, edge - (r.right - d.x));
+        if (d.y < r.top + edge) dy = Math.min(14, edge - (d.y - r.top));
+        else if (d.y > r.bottom - edge) dy = -Math.min(14, edge - (r.bottom - d.y));
+        if (dx || dy) cv.panBy(dx, dy);
+        const chair = cv.nearestChair(d.x, d.y, 48);
+        d.snap = chair;
+        if (chair) {
+          const occ = chair.guestId && chair.guestId !== d.id ? this.board.guestMap.get(chair.guestId) : null;
+          d.swapName = occ ? occ.full_name : "";
+          cv.highlight(chair.key, `${chair.key}:${chair.seat}`, occ ? `${chair.key}:${chair.seat}` : null);
+          d.overRail = false;
+        } else {
+          const key = cv.tableAt(d.x, d.y);
+          d.swapName = "";
+          cv.highlight(key, null, null);
+          d.overRail = this.overRailAt(d.x, d.y);
+        }
+      } else {
+        d.overRail = this.overRailAt(d.x, d.y);
+      }
     },
     onGuestUp(e: PointerEvent) {
       const d = this.gdrag;
       if (e.pointerId !== d.pointer) return;
       const id = d.id;
       if (d.active) {
-        const hit = this.hitTest(e.clientX, e.clientY);
-        if (hit.key != null && hit.seat != null) this.board.dropOnSeat(id, hit.key, hit.seat);
-        else if (hit.key != null) this.board.placeGuest(id, hit.key);
-        else if (hit.rail) this.board.unseat(id);
+        this.updateGuestDrag();
+        const snap = this.gdrag.snap;
+        const rail = this.gdrag.overRail;
+        const key = snap ? snap.key : this.canvasApi?.tableAt(e.clientX, e.clientY) || null;
+        if (snap) {
+          const wasSwap = !!this.gdrag.swapName;
+          this.board.dropOnSeat(id, snap.key, snap.seat);
+          if (wasSwap) this.canvasApi?.flashSwap(snap.key, snap.seat);
+        } else if (key) this.board.placeGuest(id, key);
+        else if (rail) this.board.unseat(id);
       } else if (d.fromRail) {
         this.pickGuest(id);
       }
@@ -477,20 +604,24 @@ export default defineComponent({
       this.endGuestDrag();
     },
     endGuestDrag() {
+      if (this.longPressTimer) {
+        window.clearTimeout(this.longPressTimer);
+        this.longPressTimer = 0;
+      }
+      if (this.dragRaf) {
+        window.cancelAnimationFrame(this.dragRaf);
+        this.dragRaf = 0;
+      }
       window.removeEventListener("pointermove", this.onGuestMove);
       window.removeEventListener("pointerup", this.onGuestUp);
       window.removeEventListener("pointercancel", this.onGuestCancel);
-      this.gdrag = { ...this.gdrag, pointer: -1, active: false, overRail: false };
-      this.canvasApi?.highlight(null, null);
+      this.canvasApi?.setGuestDrag(false);
+      this.canvasApi?.highlight(null, null, null);
+      this.gdrag = { ...this.gdrag, pointer: -1, active: false, overRail: false, snap: null, swapName: "" };
     },
-    hitTest(x: number, y: number): { key: string | null; seat: number | null; rail: boolean } {
+    overRailAt(x: number, y: number): boolean {
       const el = document.elementFromPoint(x, y) as HTMLElement | null;
-      if (!el) return { key: null, seat: null, rail: false };
-      const seatEl = el.closest("[data-seat][data-table]") as HTMLElement | null;
-      if (seatEl) return { key: seatEl.dataset.table || null, seat: Number(seatEl.dataset.seat), rail: false };
-      const tbl = el.closest(".tbl[data-key]") as HTMLElement | null;
-      if (tbl) return { key: tbl.dataset.key || null, seat: null, rail: false };
-      return { key: null, seat: null, rail: !!el.closest("[data-rail]") };
+      return !!el && !!el.closest("[data-rail]");
     },
     /** Tap/Enter on a rail guest: seat at the selected table (or the selected seat). */
     pickGuest(id: number) {
@@ -505,6 +636,13 @@ export default defineComponent({
 
     /* ───────── keyboard ───────── */
     onKey(e: KeyboardEvent) {
+      if (this.gdrag.pointer !== -1) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          this.endGuestDrag();
+        }
+        return;
+      }
       if (this.showSmart || this.showConstraints || !this.loaded || !this.entitlement.enabled) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.closest("input, textarea, select, [contenteditable='true']") || t.isContentEditable)) return;
@@ -559,17 +697,21 @@ export default defineComponent({
     },
 
     onResize() {
-      this.isNarrow = window.innerWidth < 900;
-      if (!this.isNarrow) this.railOpen = false;
+      const el = this.$refs.page as HTMLElement | undefined;
+      const pageW = el ? el.getBoundingClientRect().width : window.innerWidth;
+      const wasPhone = this.isPhone;
+      this.isPhone = window.innerWidth < 900;
+      this.isCompact = pageW < 920;
+      if ((wasPhone || this.isCompact) && !this.isPhone && !this.isCompact) this.railOpen = false;
       this.$nextTick(this.measure);
     },
     /** Fill the viewport below the page's real top (site header and title sit above it). */
     measure() {
       const el = this.$refs.page as HTMLElement | undefined;
       if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      const bottomGap = this.isNarrow ? 88 : 16;
-      this.pageH = Math.max(this.isNarrow ? 440 : 540, Math.round(window.innerHeight - top - bottomGap));
+      const top = el.getBoundingClientRect().top;
+      const bottomGap = this.isPhone ? 88 : 16;
+      this.pageH = Math.max(this.isPhone ? 440 : 520, Math.round(window.innerHeight - top - bottomGap));
     },
   },
 });
@@ -824,25 +966,85 @@ export default defineComponent({
 }
 .ghost {
   position: fixed;
-  z-index: 3000;
+  top: 0;
+  left: 0;
+  z-index: 12100;
   pointer-events: none;
-  transform: translate(-50%, -130%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: #12100e;
   color: #f3eee6;
-  padding: 7px 12px;
+  padding: 6px 12px 6px 6px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 700;
   box-shadow: 0 10px 24px rgba(22, 19, 16, 0.3);
   white-space: nowrap;
+  will-change: transform;
+  margin-top: -48px;
+  margin-left: -16px;
+  .gs-ava {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+  .gswap {
+    color: #f3eee6;
+    background: #6b4b1d;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+  &.snap {
+    box-shadow: 0 0 0 3px #c9a36a, 0 10px 24px rgba(22, 19, 16, 0.3);
+  }
+  &.swap {
+    background: #2a2218;
+  }
 }
 .mobile-bar {
   display: none;
 }
 
-@media (max-width: 1180px) {
+/* Mid-width (e.g. 1024 with the host sidebar): canvas gets the row, rail/inspector dock over it. */
+.seating-page.is-compact:not(.is-phone) {
   .stage {
-    grid-template-columns: 220px minmax(0, 1fr) 280px;
+    display: block;
+    position: relative;
+  }
+  .stage-canvas {
+    height: 100%;
+  }
+  .stage-rail,
+  .stage-insp:not(.summary) {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    z-index: 8;
+    box-shadow: 0 16px 36px rgba(22, 19, 16, 0.18);
+  }
+  .stage-rail {
+    left: 8px;
+    width: 250px;
+    transform: translateX(-120%);
+    transition: transform 0.2s ease;
+    &.dock-open {
+      transform: none;
+    }
+  }
+  .stage-insp:not(.summary) {
+    right: 8px;
+    width: 300px;
+  }
+  .summary {
+    display: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  .seating-page:not(.is-compact):not(.is-phone) .stage {
+    grid-template-columns: 200px minmax(0, 1fr) 260px;
   }
 }
 
