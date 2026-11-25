@@ -5,19 +5,73 @@ import { hubFullUrl } from "@/components/landing/builder/hubPublicUrl";
 import { BASE_SHOW, defaultsFor, styleById } from "./saveTheDateCatalog";
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-/** True when white text on this accent would fail WCAG AA for normal text (4.5:1). */
-function accentIsLight(hex) {
+const WHITE = "#FFFFFF";
+const BLACK = "#111111";
+function parseHex(hex) {
   const h = String(hex || "").trim().replace("#", "");
-  if (h.length < 6) return false;
+  if (h.length < 6 || /[^0-9a-fA-F]/.test(h)) return [0, 0, 0];
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+}
+function toHex(r, g, b) {
+  const c = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  return `#${c(r)}${c(g)}${c(b)}`;
+}
+function hexLum(hex) {
   const lin = (v) => {
     const s = v / 255;
     return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
   };
-  const r = lin(parseInt(h.slice(0, 2), 16));
-  const g = lin(parseInt(h.slice(2, 4), 16));
-  const b = lin(parseInt(h.slice(4, 6), 16));
-  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return (1.05) / (L + 0.05) < 4.5;
+  const [r, g, b] = parseHex(hex);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+function contrastRatio(a, b) {
+  const L1 = hexLum(a), L2 = hexLum(b);
+  const hi = Math.max(L1, L2), lo = Math.min(L1, L2);
+  return (hi + 0.05) / (lo + 0.05);
+}
+function mixHex(a, b, t) {
+  const A = parseHex(a), B = parseHex(b);
+  return toHex(A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t, A[2] + (B[2] - A[2]) * t);
+}
+/** Mix `fill` toward `toward` until contrast(fill, on) meets minRatio. */
+function adjustUntil(fill, on, minRatio, toward) {
+  if (contrastRatio(fill, on) >= minRatio) return fill;
+  let lo = 0, hi = 1, best = toward;
+  for (let i = 0; i < 18; i++) {
+    const mid = (lo + hi) / 2;
+    const cand = mixHex(fill, toward, mid);
+    if (contrastRatio(cand, on) >= minRatio) { best = cand; hi = mid; }
+    else lo = mid;
+  }
+  return best;
+}
+/**
+ * Per-palette contrast tokens. `--acc-fill` is the solid accent used as a
+ * background; `--on-acc` is text/icons on that fill; `--acc-ink` is the accent
+ * used as text on the page background. Dark fills get light text (and vice
+ * versa). If the raw accent cannot meet WCAG AA, the fill is darkened or
+ * lightened until it does.
+ */
+function paletteTokens(acc, bg, opts) {
+  const preferLightText = !!(opts && opts.preferLightText);
+  let fill = acc, onAcc;
+  if (preferLightText) {
+    onAcc = WHITE;
+    fill = adjustUntil(acc, WHITE, 4.5, "#140818");
+  } else {
+    onAcc = contrastRatio(WHITE, acc) >= contrastRatio(BLACK, acc) ? WHITE : BLACK;
+    if (contrastRatio(onAcc, acc) < 4.5) {
+      fill = adjustUntil(acc, onAcc, 4.5, onAcc === WHITE ? "#000000" : "#FFFFFF");
+    }
+  }
+  // 7:1 on the page bg so small kicker type still meets 4.5:1 over gradients/shadows.
+  const inkToward = hexLum(bg) > 0.45 ? "#1A1008" : WHITE;
+  const accInk = adjustUntil(acc, bg, 7, inkToward);
+  const accOnDark = adjustUntil(acc, "#111111", 7, WHITE);
+  const mutedBase = mixHex(accInk, bg, 0.62);
+  const accMuted = adjustUntil(mutedBase, bg, 4.5, inkToward);
+  const tone = contrastRatio(WHITE, fill) < 4.5 ? "acc-light" : "acc-dark";
+  return { fill, onAcc, accInk, accOnDark, accMuted, tone };
 }
 const RM = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -273,8 +327,10 @@ function render(cfg, opts) {
   if (opts.state === "open" || opts.mode === "thumb") cls.push("is-open", "revealed");
   if (opts.still) cls.push("still");
   const foil = acc.foil ? `--foil1:${acc.foil[0]};--foil2:${acc.foil[1]};` : "";
-  const accTone = accentIsLight(acc.acc) ? "acc-light" : "acc-dark";
-  return `<div class="${cls.join(" ")} ${accTone}" style="--acc:${acc.acc};--bg:${acc.bg};--bg2:${acc.bg2};${foil}--fh:'${st.fonts[0]}';--fb:'${st.fonts[1] || st.fonts[0]}'" data-style="${st.id}">
+  const tok = paletteTokens(acc.acc, acc.bg, { preferLightText: st.id === "neon" });
+  const onFoil = acc.foil ? (contrastRatio(WHITE, acc.foil[0]) >= contrastRatio(BLACK, acc.foil[0]) ? WHITE : BLACK) : "";
+  const foilOn = onFoil ? `--on-foil:${onFoil};` : "";
+  return `<div class="${cls.join(" ")} ${tok.tone}" style="--acc:${acc.acc};--acc-fill:${tok.fill};--on-acc:${tok.onAcc};--acc-ink:${tok.accInk};--acc-on-dark:${tok.accOnDark};--acc-muted:${tok.accMuted};--bg:${acc.bg};--bg2:${acc.bg2};${foil}${foilOn}--fh:'${st.fonts[0]}';--fb:'${st.fonts[1] || st.fonts[0]}'" data-style="${st.id}">
     <div class="sx">${R[st.id](c, D, sh, o, cfg.slug)}</div><canvas class="confetti" aria-hidden="true"></canvas></div>`;
 }
 
@@ -385,4 +441,7 @@ function wire(host, cfg, opts) {
   return () => timers.forEach(t => { clearInterval(t); clearTimeout(t); });
 }
 
-export { render, wire, esc, dateInfo, titleOf, gcalUrl, icsText, waUrl, confetti, tzDate };
+export { render, wire, paletteTokens, esc, dateInfo, titleOf, gcalUrl, icsText, waUrl, confetti, tzDate };
+if (typeof window !== "undefined") {
+  window.__std = { render, wire, paletteTokens };
+}
