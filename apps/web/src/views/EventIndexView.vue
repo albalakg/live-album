@@ -44,7 +44,7 @@
 import Sidebar from "@/components/library/app/SideBar.vue";
 import MobileScrollBar from "@/components/library/app/MobileScrollBar.vue";
 import { defineComponent } from "vue";
-import { isSeatingEnabled, isWhatsAppEnabled } from "@/helpers/features";
+import { isSeatingEnabled, isWhatsAppEnabled, isWhatsAppMessagingEnabled } from "@/helpers/features";
 import { IMobileScrollBarItem } from "@/helpers/interfaces";
 
 const SIDEBAR_STORAGE_KEY = "snapshare.sidebarCollapsed";
@@ -159,6 +159,9 @@ export default defineComponent({
         { text: "אורחים", path: "/event/guests", isActive: false },
         ...(isSeatingEnabled()
           ? [{ text: "הושבה", path: "/event/seating", isActive: false }]
+          : []),
+        ...(isWhatsAppMessagingEnabled()
+          ? [{ text: "הודעות לאורחים", path: "/event/messages", isActive: false }]
           : []),
         { text: "חבילה", path: "/event/plan", isActive: false },
         ...(isWhatsAppEnabled()

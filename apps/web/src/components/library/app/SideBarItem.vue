@@ -35,6 +35,8 @@ const ICONS: Record<string, string> = {
   "/event/guests": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" cx="9" cy="8" r="3.2"/><path fill="none" d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><path fill="none" d="M16 7.5h4.5M16 11.5h4.5M17.5 15.5h3"/></svg>`,
   /* Round table with chairs */
   "/event/seating": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle fill="none" cx="12" cy="12" r="4.6"/><circle fill="none" cx="12" cy="3.6" r="1.4"/><circle fill="none" cx="12" cy="20.4" r="1.4"/><circle fill="none" cx="3.6" cy="12" r="1.4"/><circle fill="none" cx="20.4" cy="12" r="1.4"/></svg>`,
+  /* Chat bubble with check (guest messaging) */
+  "/event/messages": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M4 18.5l1.3-3.6A8 8 0 1 1 9 19.3z"/><path fill="none" d="M9 11.5l2 2 4-4"/></svg>`,
   "/event/whatsapp": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path fill="none" d="M5 19l1.5-4A7.5 7.5 0 1 1 12 19.5H7z"/><path fill="none" d="M9 11c.5 2 2 3.5 4 4"/></svg>`,
 };
 

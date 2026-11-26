@@ -14,3 +14,16 @@ export function isSeatingEnabled(): boolean {
   if (flag === "false") return false;
   return process.env.NODE_ENV === "development" || process.env.VUE_APP_ENV === "local";
 }
+
+/**
+ * WhatsApp guest messaging workspace (templates, editable queue, automations, RSVP bot, inbox).
+ * TODO(pricing): Pro add-on / top-up checkout not wired yet.
+ * ON for local/dev builds unless VUE_APP_WHATSAPP_MESSAGING_ENABLED=false; other builds need =true.
+ * The server enforces WHATSAPP_MESSAGING_ENABLED regardless of this.
+ */
+export function isWhatsAppMessagingEnabled(): boolean {
+  const flag = process.env.VUE_APP_WHATSAPP_MESSAGING_ENABLED;
+  if (flag === "true") return true;
+  if (flag === "false") return false;
+  return process.env.NODE_ENV === "development" || process.env.VUE_APP_ENV === "local";
+}

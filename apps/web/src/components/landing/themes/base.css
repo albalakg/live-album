@@ -758,7 +758,11 @@ section[id^="sec-"], .decor-band, .quote-band { scroll-margin-top: 0; }
 .rsvp-sec .wrap.narrow, .block .wrap.narrow { width: min(100%, 480px); }
 .rsvp-sec .body { margin-inline: auto; }
 .rsvp-form { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
-.rsvp-form input[type="text"] {
+.rsvp-form input[type="text"],
+.rsvp-form input[type="tel"],
+.rsvp-form input[type="number"],
+.rsvp-form select {
+  color: inherit; font-family: inherit; width: 100%; box-sizing: border-box;
   background: transparent; border: 0; border-bottom: 1px solid var(--line-strong);
   padding: 12px 2px; font-size: 1.05rem; text-align: right;
 }
@@ -769,7 +773,14 @@ section[id^="sec-"], .decor-band, .quote-band { scroll-margin-top: 0; }
   border: 1px solid var(--line-strong); font-weight: 700; cursor: pointer;
 }
 .rsvp-opts input { accent-color: var(--accent); margin-left: 8px; }
+.rsvp-form input:focus-visible, .rsvp-form select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rsvp-form select option { color: #161310; background: #fffcfa; }
 .rsvp-form .btn { align-self: center; margin-top: 6px; }
+.rsvp-row { display: flex; gap: 12px; }
+.rsvp-row > * { flex: 1; min-width: 0; }
+.rsvp-done { padding: 18px 16px; border: 1px solid var(--line-strong); border-radius: 16px; }
+.rsvp-done p { margin: 0 0 10px; font-weight: 700; }
+.rsvp-err { margin: 0; font-weight: 700; font-size: 0.92rem; }
 
 /* Info cards, zones, dress */
 .info-cards {

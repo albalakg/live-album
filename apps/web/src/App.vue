@@ -77,6 +77,8 @@ export default defineComponent({
       const path = this.$route.path;
       // Public event landing / builder preview frame — no marketing/app chrome
       if (path === "/h-preview" || path === "/h" || path.startsWith("/h/")) return true;
+      // Personal RSVP link (WhatsApp / SMS) — public, no app chrome
+      if (path.startsWith("/rsvp/")) return true;
       if (path.includes("/event/trivia/")) return true;
       // Event page builder: focus mode, its own full-height workspace (no app bars, footer or side menu).
       if (path === "/event/page" || path.startsWith("/event/page/")) return true;

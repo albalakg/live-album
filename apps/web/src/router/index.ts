@@ -1,7 +1,7 @@
 import { installReveal } from "@snapshare/design/reveal";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Guard from "@/helpers/guard";
-import { isSeatingEnabled, isWhatsAppEnabled } from "@/helpers/features";
+import { isSeatingEnabled, isWhatsAppEnabled, isWhatsAppMessagingEnabled } from "@/helpers/features";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -103,6 +103,12 @@ const routes: Array<RouteRecordRaw> = [
     name: "landingPreviewFrame",
     // Same-origin iframe for builder device preview (no guard, no app chrome)
     component: () => import("@/views/LandingPreviewFrameView.vue"),
+  },
+  {
+    path: "/rsvp/:token",
+    name: "publicRsvp",
+    // Personal RSVP link from WhatsApp / SMS (public, no guard, no app chrome)
+    component: () => import("@/views/PublicRsvpView.vue"),
   },
   {
     path: "/h/:slug",
@@ -216,6 +222,15 @@ const routes: Array<RouteRecordRaw> = [
               path: "seating",
               name: "eventSeating",
               component: () => import("../views/EventSeatingView.vue"),
+            },
+          ]
+        : []),
+      ...(isWhatsAppMessagingEnabled()
+        ? [
+            {
+              path: "messages/:tab?",
+              name: "eventMessaging",
+              component: () => import("../views/EventMessagingView.vue"),
             },
           ]
         : []),

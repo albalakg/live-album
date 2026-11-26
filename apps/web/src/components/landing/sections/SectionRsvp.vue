@@ -4,13 +4,28 @@
       <p v-if="data.kicker" class="sec-kicker">{{ data.kicker }}</p>
       <h2 v-if="data.heading" class="sec-title">{{ data.heading }}</h2>
       <p class="body" style="margin-bottom:22px">{{ data.body }}</p>
-      <form class="rsvp-form" @submit.prevent="onSubmit">
-        <input v-model="name" type="text" maxlength="40" placeholder="השם שלכם" required :disabled="preview" />
+      <div v-if="done" class="rsvp-done" role="status">
+        <p>{{ coming === "yes" ? "תודה! האישור נשמר 💛" : "תודה שעדכנתם 💛" }}</p>
+        <button type="button" class="btn btn-ghost" @click="done = false">עדכון התשובה</button>
+      </div>
+      <form v-else class="rsvp-form" @submit.prevent="onSubmit">
+        <template v-if="!token">
+          <input v-model="name" type="text" maxlength="60" placeholder="השם שלכם" aria-label="השם שלכם" required :disabled="preview" />
+          <input v-model="phone" type="tel" inputmode="tel" maxlength="20" placeholder="טלפון נייד" aria-label="טלפון נייד" dir="ltr" :required="remote" :disabled="preview" />
+        </template>
         <div class="rsvp-opts" role="radiogroup" aria-label="הגעה">
           <label><input v-model="coming" type="radio" value="yes" required :disabled="preview" /> מגיעים</label>
           <label><input v-model="coming" type="radio" value="no" :disabled="preview" /> לא יוכלו</label>
         </div>
-        <button type="submit" class="btn btn-primary" :disabled="preview">שלחו אישור</button>
+        <div v-if="coming === 'yes' && config && (config.ask_party_size || (config.ask_meal && config.meals.length))" class="rsvp-row">
+          <input v-if="config.ask_party_size" v-model.number="partySize" type="number" min="1" :max="config.max_party_size" aria-label="כמה תגיעו" placeholder="כמה תגיעו" :disabled="preview" />
+          <select v-if="config.ask_meal && config.meals.length" v-model="meal" aria-label="מנה" :disabled="preview">
+            <option value="">מנה (אופציונלי)</option>
+            <option v-for="m in config.meals" :key="m" :value="m">{{ m }}</option>
+          </select>
+        </div>
+        <p v-if="error" class="rsvp-err" role="alert">{{ error }}</p>
+        <button type="submit" class="btn btn-primary" :disabled="preview || busy">שלחו אישור</button>
         <span v-if="preview" class="preview-note">בתצוגה מקדימה</span>
       </form>
     </div>
@@ -18,8 +33,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref } from "vue";
+import { computed, defineComponent, inject, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { LANDING_CTX } from "../landingContext";
+import { PublicRsvp, publicRsvpApi } from "@/helpers/messaging/api";
+import { msgError } from "@/helpers/messaging/labels";
 
 export default defineComponent({
   name: "LandingRsvp",
@@ -30,18 +48,68 @@ export default defineComponent({
   },
   setup() {
     const ctx = inject(LANDING_CTX, null);
+    const route = useRoute();
     const preview = computed(() => ctx?.preview === true);
+    const slug = computed(() => (route?.name === "eventHubPublic" ? String(route.params.slug || "") : ""));
+    /** Personal link from a WhatsApp message: /h/:slug?g=<rsvp token> */
+    const token = computed(() => (slug.value && typeof route.query.g === "string" ? route.query.g : ""));
     const name = ref("");
+    const phone = ref("");
     const coming = ref("yes");
-    function onSubmit() {
+    const partySize = ref(1);
+    const meal = ref("");
+    const config = ref<PublicRsvp["config"] | null>(null);
+    /** Hub has guest messaging on: answers go to the guest list (D8). */
+    const remote = ref(false);
+    const busy = ref(false);
+    const done = ref(false);
+    const error = ref("");
+
+    onMounted(async () => {
+      if (preview.value || !slug.value) return;
+      try {
+        if (token.value) {
+          const d = await publicRsvpApi.show(token.value);
+          config.value = d.config;
+          partySize.value = d.guest.party_size || 1;
+          meal.value = d.guest.answers?.meal || "";
+        } else {
+          config.value = await publicRsvpApi.hubConfig(slug.value);
+        }
+        remote.value = true;
+      } catch {
+        remote.value = false;
+      }
+    });
+
+    async function onSubmit() {
       if (preview.value) {
         ctx?.toast("בתצוגה מקדימה");
         return;
       }
-      ctx?.toast("אישור הגעה נשמר מקומית (תצוגה)");
-      name.value = "";
+      if (!remote.value) {
+        ctx?.toast("אישור הגעה נשמר מקומית (תצוגה)");
+        name.value = "";
+        return;
+      }
+      busy.value = true;
+      error.value = "";
+      const answers = {
+        status: coming.value === "yes" ? ("yes" as const) : ("no" as const),
+        ...(coming.value === "yes" && config.value?.ask_party_size ? { party_size: partySize.value || 1 } : {}),
+        ...(coming.value === "yes" && meal.value ? { meal: meal.value } : {}),
+      };
+      try {
+        if (token.value) await publicRsvpApi.submit(token.value, answers);
+        else await publicRsvpApi.hubSubmit(slug.value, { ...answers, full_name: name.value, phone: phone.value });
+        done.value = true;
+      } catch (e) {
+        error.value = msgError(e, "השליחה נכשלה, נסו שוב");
+      } finally {
+        busy.value = false;
+      }
     }
-    return { preview, name, coming, onSubmit };
+    return { preview, token, name, phone, coming, partySize, meal, config, remote, busy, done, error, onSubmit };
   },
 });
 </script>
