@@ -163,12 +163,23 @@ export default defineComponent({
     },
     tab() {
       this.loadTab();
+      this.revealTab();
     },
   },
   mounted() {
     this.loadAll();
+    this.revealTab();
   },
   methods: {
+    /** Mobile: keep the active tab visible in the horizontally scrolling tab row. */
+    revealTab() {
+      this.$nextTick(() => {
+        const row = this.$el?.querySelector?.(".msg-tabs") as HTMLElement | null;
+        const el = row?.querySelector(".active") as HTMLElement | null;
+        if (!row || !el || row.scrollWidth <= row.clientWidth) return;
+        el.scrollIntoView({ inline: "center", block: "nearest" });
+      });
+    },
     go(tab: Tab) {
       if (tab !== "compose") this.editSend = null;
       this.$router.push("/event/messages/" + tab);

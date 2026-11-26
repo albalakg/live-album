@@ -2,7 +2,7 @@
   <div class="msg-inbox">
     <aside class="gs-card msg-thread-list" aria-label="שיחות">
       <p v-if="!threads.length" class="msg-empty">עוד אין תגובות מאורחים</p>
-      <button v-for="t in threads" :key="t.guest_id" type="button" class="msg-thread-item" :class="{ on: active === t.guest_id }" :aria-current="active === t.guest_id ? 'true' : undefined" @click="open(t.guest_id)">
+      <button v-for="t in threads" :key="t.guest_id" type="button" class="msg-thread-item" :class="{ on: active === t.guest_id }" :aria-current="active === t.guest_id ? 'true' : undefined" @click="pick(t.guest_id)">
         <span class="gs-ava" aria-hidden="true">{{ initials(t.full_name) }}</span>
         <span style="flex: 1; min-width: 0">
           <span class="who"><span>{{ t.full_name }}</span><span v-if="t.unread" class="b b-red">{{ t.unread }}</span></span>
@@ -122,6 +122,14 @@ export default defineComponent({
       if (s.meal) parts.push(String(s.meal));
       if (s.allergies) parts.push(String(s.allergies));
       return parts.join(" · ");
+    },
+    /** Thread chosen by the host; on narrow screens the thread sits below the list, so bring it into view. */
+    async pick(guestId: number) {
+      await this.open(guestId);
+      if (window.innerWidth < 900) {
+        const el = this.$el.querySelector?.(".msg-thread") as HTMLElement | null;
+        if (el) window.scrollTo({ top: window.scrollY + el.getBoundingClientRect().top - 80, behavior: "smooth" });
+      }
     },
     async open(guestId: number) {
       this.active = guestId;

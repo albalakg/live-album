@@ -18,7 +18,9 @@
           <label><input v-model="coming" type="radio" value="no" :disabled="preview" /> לא יוכלו</label>
         </div>
         <div v-if="coming === 'yes' && config && (config.ask_party_size || (config.ask_meal && config.meals.length))" class="rsvp-row">
-          <input v-if="config.ask_party_size" v-model.number="partySize" type="number" min="1" :max="config.max_party_size" aria-label="כמה תגיעו" placeholder="כמה תגיעו" :disabled="preview" />
+          <select v-if="config.ask_party_size" v-model.number="partySize" aria-label="כמה תגיעו (כולל אתכם)" :disabled="preview">
+            <option v-for="n in Math.max(1, config.max_party_size)" :key="n" :value="n">{{ n === 1 ? "מגיע/ה לבד" : n + " אורחים" }}</option>
+          </select>
           <select v-if="config.ask_meal && config.meals.length" v-model="meal" aria-label="מנה" :disabled="preview">
             <option value="">מנה (אופציונלי)</option>
             <option v-for="m in config.meals" :key="m" :value="m">{{ m }}</option>

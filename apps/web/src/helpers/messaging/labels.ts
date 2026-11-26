@@ -129,7 +129,9 @@ export function fmtShort(iso: string | null | undefined): string {
 
 /** ISO → "YYYY-MM-DDTHH:mm" in Israel time for <input type="datetime-local">. */
 export function toLocalInput(iso: string | null | undefined): string {
-  const d = iso ? new Date(iso) : new Date(Date.now() + 60 * 60 * 1000);
+  // Default: about an hour from now, rounded up to the next 15 minutes (matches the time picker steps).
+  const q = 15 * 60 * 1000;
+  const d = iso ? new Date(iso) : new Date(Math.ceil((Date.now() + 60 * 60 * 1000) / q) * q);
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: TZ,
     year: "numeric",

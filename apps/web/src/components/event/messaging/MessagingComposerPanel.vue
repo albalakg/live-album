@@ -5,7 +5,7 @@
       השינויים יחולו רק על <b>{{ editSend.counts.pending }}</b> הודעות שעוד לא יצאו.
       <span v-if="editSend.counts.sent">{{ editSend.counts.sent }} כבר נשלחו ונעולות — הן לא ישתנו.</span>
     </div>
-    <div v-if="conflict" class="msg-note red" role="alert">
+    <div v-if="conflict" ref="conflictNote" class="msg-note red" role="alert">
       ההודעה עודכנה בינתיים ממקום אחר (חלון או מכשיר נוסף).
       <button class="gs-btn gs-btn-sm" type="button" @click="$emit('reload')">לטעון את הגרסה העדכנית</button>
     </div>
@@ -120,7 +120,7 @@
       </div>
       <div v-if="when === 'later' || editSend" class="gs-field" style="margin-top: 10px; max-width: 280px">
         <label class="gs-label" for="cmp-when">מועד (שעון ישראל)</label>
-        <input id="cmp-when" v-model="scheduledAt" class="gs-input" type="datetime-local" @change="refreshPreview" />
+        <MessagingDateTimeField id="cmp-when" v-model="scheduledAt" label="מועד שליחה" @change="refreshPreview" />
       </div>
       <label class="msg-toggle">
         <input v-model="overrideQuiet" type="checkbox" @change="refreshPreview" />
@@ -162,6 +162,7 @@
 import { defineComponent, PropType } from "vue";
 import MessagingPhonePreview from "./MessagingPhonePreview.vue";
 import MessagingAudiencePicker from "./MessagingAudiencePicker.vue";
+import MessagingDateTimeField from "./MessagingDateTimeField.vue";
 import { messagingApi, SendDraft, SendPatch } from "@/helpers/messaging/api";
 import { AudienceGuest, AudienceResponse, Category, MessageContent, MessagingSend, MessagingTemplate, Overview, PreviewResponse, Segment } from "@/helpers/messaging/types";
 import { CATEGORY_LABEL, CONFLICT_LABEL, errData, errStatus, fmtWhen, META_STATUS, msgError, renderVars, toLocalInput, VARIABLES } from "@/helpers/messaging/labels";
@@ -180,7 +181,7 @@ function cloneContent(c: Partial<MessageContent>): MessageContent {
 
 export default defineComponent({
   name: "MessagingComposerPanel",
-  components: { MessagingPhonePreview, MessagingAudiencePicker },
+  components: { MessagingPhonePreview, MessagingAudiencePicker, MessagingDateTimeField },
   props: {
     eventId: { type: Number, required: true },
     templates: { type: Array as PropType<MessagingTemplate[]>, required: true },
@@ -325,6 +326,10 @@ export default defineComponent({
     goStep(s: StepKey) {
       this.step = s;
       this.error = "";
+      this.$nextTick(() => {
+        const top = (this.$el as HTMLElement).getBoundingClientRect().top;
+        if (top < 0) window.scrollTo({ top: window.scrollY + top - 90, behavior: "smooth" });
+      });
       if (s === "schedule") this.refreshPreview();
     },
     payloadContent(): Partial<MessageContent> & { category: string } {
@@ -394,8 +399,10 @@ export default defineComponent({
         notify({ type: "success", text: txt });
         this.$emit("done", send);
       } catch (e) {
-        if (errStatus(e) === 409) this.conflict = true;
-        else this.error = msgError(e, "השמירה נכשלה");
+        if (errStatus(e) === 409) {
+          this.conflict = true;
+          this.$nextTick(() => (this.$refs.conflictNote as HTMLElement | undefined)?.scrollIntoView({ block: "center", behavior: "smooth" }));
+        } else this.error = msgError(e, "השמירה נכשלה");
         if (part !== "schedule") notify({ type: "error", text: this.conflict ? "ההודעה עודכנה ממקום אחר" : this.error });
       } finally {
         this.busy = false;

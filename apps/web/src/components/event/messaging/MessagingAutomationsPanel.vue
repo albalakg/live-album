@@ -19,7 +19,7 @@
           <input :id="'off-' + a.id" v-model.number="edits[a.id].offset_days" class="gs-input" type="number" min="-365" max="60" />
           <span class="msg-muted">ימים</span>
           <label class="gs-sr" :for="'tm-' + a.id">שעה</label>
-          <input :id="'tm-' + a.id" v-model="edits[a.id].send_time" class="gs-input" type="time" />
+          <MessagingTimeSelect :id="'tm-' + a.id" v-model="edits[a.id].send_time" label="שעה" />
           <button class="gs-btn gs-btn-sm" type="button" :disabled="busy === a.id || !dirty(a)" @click="save(a, {})">שמירה</button>
           <button v-if="a.send_id" class="gs-btn gs-btn-sm gs-btn-ghost" type="button" @click="$emit('go', 'queue')">בתור ←</button>
         </div>
@@ -34,6 +34,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import MessagingTimeSelect from "./MessagingTimeSelect.vue";
 import { messagingApi } from "@/helpers/messaging/api";
 import { Automation } from "@/helpers/messaging/types";
 import { CATEGORY_LABEL, fmtWhen, msgError, SEND_STATUS } from "@/helpers/messaging/labels";
@@ -42,6 +43,7 @@ import { notify } from "@/helpers/notify";
 
 export default defineComponent({
   name: "MessagingAutomationsPanel",
+  components: { MessagingTimeSelect },
   props: {
     eventId: { type: Number, required: true },
     automations: { type: Array as PropType<Automation[]>, required: true },

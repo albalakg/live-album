@@ -17,7 +17,7 @@
 
     <p v-if="!shown.length" class="msg-empty gs-card">אין כאן הודעות. אפשר ליצור הודעה חדשה או להפעיל אוטומציה.</p>
 
-    <article v-for="s in shown" :key="s.id" class="gs-card msg-q-card" :class="{ 'is-review': s.status === 'review', 'is-paused': s.status === 'paused' }" style="margin-bottom: 12px">
+    <article v-for="s in shown" :key="s.id" class="gs-card msg-q-card" :class="{ 'is-review': inReview(s), 'is-paused': s.status === 'paused' }" style="margin-bottom: 12px">
       <div class="msg-q-top">
         <span class="b b-dark">{{ s.source === "automation" ? "אוטומציה" : "ידני" }}</span>
         <span :class="'b ' + statusOf(s).cls">{{ statusOf(s).label }}</span>
@@ -34,9 +34,12 @@
         <span v-if="s.counts.skipped">דולגו: <b>{{ s.counts.skipped }}</b></span>
         <span>גרסה: <b>{{ s.version }}</b></span>
       </div>
-      <div v-if="s.status === 'review'" class="msg-note violet">
-        <template v-if="s.template_status === 'rejected'">Meta דחתה את הנוסח{{ s.template_reason ? ": " + s.template_reason : "" }}. ערכו את התוכן כדי לשלוח לבדיקה מחדש.</template>
-        <template v-else>הנוסח נמצא בבדיקת Meta. ההודעה תצא אוטומטית מיד אחרי האישור.</template>
+      <div v-if="inReview(s)" :class="['msg-note', s.template_status === 'rejected' ? 'red' : 'violet']">
+        <template v-if="s.template_status === 'rejected'">
+          Meta דחתה את הנוסח{{ s.template_reason ? ": " + s.template_reason : "" }}. ההודעה לא תצא עד שתערכו את התוכן (הנוסח החדש יישלח לבדיקה).
+          <button class="gs-btn gs-btn-sm" type="button" style="margin-inline-start: 8px" @click="$emit('edit', s, 'content')">עריכת הנוסח</button>
+        </template>
+        <template v-else>הנוסח נמצא בבדיקת Meta (בדרך כלל דקות). אם האישור יגיע לפני המועד ההודעה תצא בזמן; אחרת תצא מיד אחרי האישור.</template>
         <button v-if="devTools && s.template_status === 'pending'" class="gs-btn gs-btn-sm" type="button" style="margin-inline-start: 8px" @click="$emit('dev-approve', s)">אישור מדומה (מקומי)</button>
       </div>
       <div v-if="s.counts.sent && s.counts.pending" class="msg-note gold">
@@ -68,7 +71,7 @@
       <div v-if="resched === s.id" class="msg-resched">
         <div>
           <label class="gs-label" :for="'rs-' + s.id">מועד חדש (שעון ישראל)</label>
-          <input :id="'rs-' + s.id" v-model="reschedAt" class="gs-input" type="datetime-local" />
+          <MessagingDateTimeField :id="'rs-' + s.id" v-model="reschedAt" label="מועד חדש" />
         </div>
         <button class="gs-btn msg-btn-green" type="button" :disabled="busy" @click="saveResched(s)">שמירה</button>
         <button class="gs-btn" type="button" @click="resched = 0">ביטול</button>
@@ -82,7 +85,7 @@
           <button class="gs-btn gs-btn-sm" type="button" @click="$emit('edit', s, 'audience')">שינוי קהל</button>
           <button v-if="s.status !== 'paused'" class="gs-btn gs-btn-sm" type="button" :disabled="busy" @click="act(s, 'pause')">השהיה</button>
           <button v-else class="gs-btn gs-btn-sm" type="button" :disabled="busy" @click="act(s, 'resume')">המשך</button>
-          <button class="gs-btn gs-btn-sm msg-btn-green" type="button" :disabled="busy || s.status === 'review'" @click="sendNow(s)">שליחה עכשיו</button>
+          <button class="gs-btn gs-btn-sm msg-btn-green" type="button" :disabled="busy || inReview(s)" :title="inReview(s) ? 'אפשר לשלוח אחרי אישור Meta' : undefined" @click="sendNow(s)">שליחה עכשיו</button>
           <button class="gs-btn gs-btn-sm msg-btn-rose" type="button" :disabled="busy" @click="cancel(s)">ביטול שליחה ממתינה</button>
         </template>
         <button class="gs-btn gs-btn-sm gs-btn-ghost" type="button" :aria-expanded="!!expanded[s.id]" @click="toggle(s)">{{ expanded[s.id] ? "הסתרת פרטים" : "נמענים והיסטוריה" }}</button>
@@ -94,6 +97,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import MessagingDateTimeField from "./MessagingDateTimeField.vue";
 import { messagingApi, SendPatch } from "@/helpers/messaging/api";
 import { AuditRow, MessagingSend, RecipientRow } from "@/helpers/messaging/types";
 import { CATEGORY_LABEL, CONFLICT_LABEL, errData, errStatus, fmtShort, fmtWhen, msgError, RECIPIENT_STATUS, SEND_STATUS, SKIP_REASONS, toLocalInput } from "@/helpers/messaging/labels";
@@ -104,6 +108,7 @@ type FilterKey = "open" | "all" | "scheduled" | "review" | "paused" | "sending" 
 
 export default defineComponent({
   name: "MessagingQueuePanel",
+  components: { MessagingDateTimeField },
   props: {
     eventId: { type: Number, required: true },
     sends: { type: Array as PropType<MessagingSend[]>, required: true },
@@ -149,12 +154,20 @@ export default defineComponent({
       if (f === "all") return true;
       if (f === "open") return s.editable;
       if (f === "done") return !s.editable;
+      if (f === "review") return this.inReview(s);
+      if (f === "scheduled") return s.status === "scheduled" && !this.inReview(s);
       return s.status === f;
+    },
+    /** Waiting on Meta (template pending/rejected), even before the dispatcher reaches its time. */
+    inReview(s: MessagingSend): boolean {
+      return s.status === "review" || (s.editable && (s.template_status === "pending" || s.template_status === "rejected"));
     },
     countFor(f: FilterKey): number {
       return this.sends.filter((s) => this.match(s, f)).length;
     },
     statusOf(s: MessagingSend) {
+      if (s.editable && s.template_status === "rejected") return { label: "נדחה ע״י Meta", cls: "b-red" };
+      if (s.editable && s.status !== "paused" && s.template_status === "pending") return { label: "בבדיקת Meta", cls: "b-violet" };
       if (s.status === "sending" && s.counts.sent) return { label: "בשליחה חלקית", cls: "b-amber" };
       return SEND_STATUS[s.status] || { label: s.status, cls: "b-grey" };
     },
