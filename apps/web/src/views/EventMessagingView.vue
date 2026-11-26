@@ -67,7 +67,15 @@
       />
       <MessagingAnalyticsPanel v-else-if="tab === 'analytics' && analytics" :data="analytics" />
       <MessagingInboxPanel v-else-if="tab === 'inbox'" :key="'inbox-' + inboxKey" :event-id="eventId" :threads="threads" :guests="audience ? audience.guests : []" :dev-tools="overview.dev_tools" @changed="onInbox" @open-guest="openGuest" />
-      <MessagingPackagesPanel v-else-if="tab === 'packages'" :quota="overview.quota" :dev-tools="overview.dev_tools" @dev-entitlement="devEntitlement" />
+      <MessagingPackagesPanel
+        v-else-if="tab === 'packages'"
+        :quota="overview.quota"
+        :dev-tools="overview.dev_tools"
+        :checkout-mock="overview.checkout?.driver === 'mock'"
+        :busy="buying"
+        @buy="buy"
+        @dev-entitlement="devEntitlement"
+      />
     </template>
 
     <MessagingGuestDrawer v-if="drawerGuest" :event-id="eventId" :guest="drawerGuest" @close="drawerGuest = null" @go-queue="goQueue" />
@@ -86,6 +94,7 @@ import MessagingQueuePanel from "@/components/event/messaging/MessagingQueuePane
 import MessagingAnalyticsPanel from "@/components/event/messaging/MessagingAnalyticsPanel.vue";
 import MessagingInboxPanel from "@/components/event/messaging/MessagingInboxPanel.vue";
 import MessagingPackagesPanel from "@/components/event/messaging/MessagingPackagesPanel.vue";
+import { AddonProductKey, startAddonCheckout } from "@/helpers/addons/api";
 import MessagingGuestDrawer from "@/components/event/messaging/MessagingGuestDrawer.vue";
 import { messagingApi } from "@/helpers/messaging/api";
 import { AnalyticsResponse, AudienceResponse, Automation, InboxThread, MessagingSend, MessagingSettings, MessagingTemplate, Overview, Segment } from "@/helpers/messaging/types";
@@ -114,6 +123,7 @@ export default defineComponent({
   data() {
     return {
       overview: null as Overview | null,
+      buying: false,
       templates: [] as MessagingTemplate[],
       audience: null as AudienceResponse | null,
       sends: [] as MessagingSend[],
@@ -295,6 +305,16 @@ export default defineComponent({
     async devDelivery(s: MessagingSend) {
       await messagingApi.devDelivery(this.eventId, s.id, "read");
       this.onQueueChanged();
+    },
+    async buy(p: { product: AddonProductKey; quantity: number }) {
+      if (this.buying) return;
+      this.buying = true;
+      try {
+        await startAddonCheckout(this.eventId, p.product, p.quantity);
+      } catch (e) {
+        this.buying = false;
+        notify({ text: msgError(e, "לא הצלחנו לפתוח את דף התשלום"), type: "error", duration: 5000 });
+      }
     },
     async devEntitlement(p: { pro_addon?: boolean; topups?: number }) {
       await messagingApi.devEntitlement(this.eventId, p);

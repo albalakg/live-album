@@ -197,6 +197,8 @@
   .msg-thread-body { flex: 1; background: var(--msg-chat); padding: 14px; overflow: auto; max-height: 56vh; }
   .msg-thread-foot { padding: 10px 12px; border-top: 1px solid var(--gs-line); display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; .gs-textarea { min-height: 44px; flex: 1; } }
   .msg-sugg { background: #fff8e8; color: #3d2c08; border: 1px solid #ead7a8; border-radius: 12px; padding: 8px 10px; font-size: 12.5px; margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .msg-cls-badge { background: #12100e; color: #f3eee6; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 800; }
+  .msg-sugg-note { flex-basis: 100%; color: #4a3a17; }
 
   /* automations */
   .msg-auto { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px; }
@@ -221,6 +223,9 @@
 
   .msg-empty { text-align: center; padding: 30px 16px; color: var(--gs-muted); font-size: 14px; }
   .msg-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .msg-buy-row { margin-top: auto; }
+  .msg-qty { width: auto; min-width: 150px; height: 40px; }
+  .msg-pay-note { margin: 4px 2px 0; font-size: 13px; line-height: 1.6; }
   .msg-spacer { flex: 1; }
   .msg-muted { color: var(--gs-muted); font-size: 12.5px; }
 

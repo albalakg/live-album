@@ -63,6 +63,7 @@ export const VARIABLES: { key: string; label: string }[] = [
   { key: "venue_address", label: "כתובת" },
   { key: "waze_link", label: "Waze" },
   { key: "table_label", label: "מספר שולחן" },
+  { key: "table_link", label: "קישור השולחן שלי" },
   { key: "party_size", label: "מספר מוזמנים" },
   { key: "hub_link", label: "דף אירוע" },
   { key: "rsvp_link", label: "קישור אישור הגעה" },

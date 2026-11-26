@@ -79,6 +79,8 @@ export default defineComponent({
       if (path === "/h-preview" || path === "/h" || path.startsWith("/h/")) return true;
       // Personal RSVP link (WhatsApp / SMS) — public, no app chrome
       if (path.startsWith("/rsvp/")) return true;
+      // Personal "your table" page + add-on payment pages — no app chrome
+      if (path.startsWith("/t/") || path.startsWith("/addons/")) return true;
       if (path.includes("/event/trivia/")) return true;
       // Event page builder: focus mode, its own full-height workspace (no app bars, footer or side menu).
       if (path === "/event/page" || path.startsWith("/event/page/")) return true;

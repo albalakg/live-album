@@ -148,6 +148,8 @@ export interface Overview {
   enabled: boolean;
   provider: "mock" | "meta";
   sms_provider: string;
+  reply_classifier?: string;
+  checkout?: { enabled: boolean; driver: "payplus" | "mock" };
   dev_tools: boolean;
   event: { id: number; name: string; starts_at: string | null; vars: Record<string, string> };
   quota: QuotaSummary;
@@ -238,6 +240,9 @@ export interface ThreadMessage {
   suggestion: Record<string, string | number> | null;
   handled: string | null;
   at: string;
+  classifier?: "rules" | "openai" | "mock" | null;
+  confidence?: number | null;
+  suggestion_note?: string | null;
 }
 
 export interface ThreadResponse {
@@ -245,6 +250,7 @@ export interface ThreadResponse {
   window_open: boolean;
   window_closes_at: string | null;
   messages: ThreadMessage[];
+  classifier?: string;
 }
 
 export interface GuestQueueItem {

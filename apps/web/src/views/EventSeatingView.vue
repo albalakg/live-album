@@ -1,7 +1,23 @@
 <template>
   <div ref="page" class="gs-ui seating-page" :class="{ 'is-compact': isCompact, 'is-phone': isPhone }" :style="pageStyle">
     <!-- entitlement off -->
-    <div v-if="loaded && !entitlement.enabled" class="locked gs-card">
+    <div v-if="loaded && !entitlement.enabled && paywallProduct" class="locked paywall gs-card">
+      <span class="pw-kicker">תוסף לאירוע</span>
+      <h1>{{ paywallProduct.title }}</h1>
+      <p class="pw-price">₪{{ paywallProduct.price }} <small>תשלום אחד לאירוע</small></p>
+      <ul class="pw-list">
+        <li>מפת אולם עם גרירה ושחרור של אורחים לשולחנות</li>
+        <li>{{ quota.included || 5 }} סידורים חכמים עם AI כלולים, לפי קבוצות, צדדים והנחיות שלכם</li>
+        <li>אזהרות על שולחנות מלאים ואילוצים שלא נשמרו</li>
+        <li>לכל אורח קישור אישי "השולחן שלי" עם המיקום על מפת האולם</li>
+      </ul>
+      <button class="gs-btn gs-btn-gold pw-buy" type="button" :disabled="!entitlement.checkout_enabled || buying" @click="buy('seating_addon')">
+        {{ entitlement.checkout_enabled ? `פתיחת ההושבה ב-₪${paywallProduct.price}` : "רכישה תיפתח בקרוב" }}
+      </button>
+      <p class="pw-note">התשלום בדף התשלום המאובטח של SnapShare, כמו ברכישת חבילה. ניהול רשימת האורחים נשאר חינמי.</p>
+      <router-link class="pw-link" to="/event/guests">לניהול האורחים</router-link>
+    </div>
+    <div v-else-if="loaded && !entitlement.enabled" class="locked gs-card">
       <h1>סידורי הושבה</h1>
       <p>בניית מפת הושבה ושיבוץ חכם עדיין לא זמינים בחשבון הזה.</p>
       <router-link class="gs-btn gs-btn-deep" to="/event/guests">לניהול האורחים</router-link>
@@ -117,7 +133,18 @@
       <span v-if="gdrag.swapName" class="gswap">⇄ {{ gdrag.swapName }}</span>
     </div>
 
-    <SeatingSmartDialog v-if="showSmart" :event-id="eventId" :quota="quota" :flush="flush" @close="showSmart = false" @quota="quota = $event" @applied="onApplied" />
+    <SeatingSmartDialog
+      v-if="showSmart"
+      :event-id="eventId"
+      :quota="quota"
+      :flush="flush"
+      :topup="topupProduct"
+      :buying="buying"
+      @close="showSmart = false"
+      @quota="quota = $event"
+      @applied="onApplied"
+      @buy-topup="buy('seating_ai_topup')"
+    />
     <SeatingConstraintsDialog v-if="showConstraints" :event-id="eventId" @close="showConstraints = false" @changed="scheduleSave(0, true)" />
   </div>
 </template>
@@ -130,11 +157,12 @@ import SeatingTableInspector from "@/components/event/seating/SeatingTableInspec
 import SeatingSmartDialog from "@/components/event/seating/SeatingSmartDialog.vue";
 import SeatingConstraintsDialog from "@/components/event/seating/SeatingConstraintsDialog.vue";
 import { seatingApi } from "@/helpers/seating/api";
+import { AddonProductKey, startAddonCheckout } from "@/helpers/addons/api";
 import { SeatingBoard } from "@/helpers/seating/board";
 import { FIXTURE_DEFAULTS, GRID, isSeatable, party } from "@/helpers/seating/engine";
 import { apiData, apiError, apiStatus } from "@/helpers/seating/labels";
 import { buildXlsx, downloadBlob } from "@/helpers/seating/spreadsheet";
-import { AiQuota, Entitlement, FixtureKind, PlanState, SeatingWarning, TableShape } from "@/helpers/seating/types";
+import { AiQuota, Entitlement, EntitlementProduct, FixtureKind, PlanState, SeatingWarning, TableShape } from "@/helpers/seating/types";
 import { notify } from "@/helpers/notify";
 
 type SaveState = "idle" | "dirty" | "saving" | "saved" | "error" | "offline";
@@ -178,6 +206,7 @@ export default defineComponent({
     return {
       loaded: false,
       entitlement: { enabled: true, source: "", addon: "", pending_pricing: true } as Entitlement,
+      buying: false,
       quota: { included: 5, used: 0, remaining: 5, provider: "", model: "", is_mock: false, estimate: { tokens_in: 0, tokens_out: 0, cost_usd: 0, cost_ils: 0 } } as AiQuota,
       saveState: "idle" as SaveState,
       saving: false,
@@ -203,6 +232,13 @@ export default defineComponent({
   },
 
   computed: {
+    /** Paywall card only when the add-on paywall is on (otherwise the plain "not available" card). */
+    paywallProduct(): EntitlementProduct | null {
+      return this.entitlement.paywall && this.entitlement.feature_enabled ? this.entitlement.products?.seating_addon || null : null;
+    },
+    topupProduct(): EntitlementProduct | null {
+      return this.entitlement.checkout_enabled ? this.entitlement.products?.seating_ai_topup || null : null;
+    },
     eventId(): number {
       return Number(this.$store.getters["event/getEvent"]?.id || 0);
     },
@@ -299,6 +335,17 @@ export default defineComponent({
   },
 
   methods: {
+    async buy(product: AddonProductKey) {
+      if (this.buying) return;
+      this.buying = true;
+      try {
+        if (this.entitlement.enabled) await this.flush();
+        await startAddonCheckout(this.eventId, product, 1);
+      } catch (err) {
+        this.buying = false;
+        notify({ text: apiError(err, "לא הצלחנו לפתוח את דף התשלום"), type: "error", duration: 5000 });
+      }
+    },
     /* ───────── load ───────── */
     async load() {
       if (!this.eventId) return;
@@ -315,8 +362,9 @@ export default defineComponent({
           this.$nextTick(() => this.canvasApi?.fit());
         });
       } catch (err) {
-        if (apiStatus(err) === 403) {
-          this.entitlement = { ...this.entitlement, enabled: false };
+        if (apiStatus(err) === 403 || apiStatus(err) === 402) {
+          const ent = apiData<{ entitlement?: Entitlement }>(err)?.entitlement;
+          this.entitlement = ent ? ent : { ...this.entitlement, enabled: false };
           this.loaded = true;
           return;
         }
@@ -366,11 +414,14 @@ export default defineComponent({
         } else {
           this.saveState = typeof navigator !== "undefined" && navigator.onLine === false ? "offline" : "error";
           this.resolveFlush(false);
-          if (status === 403 || status === 422) {
+          if (status === 402) {
+            const ent = apiData<{ entitlement?: Entitlement }>(err)?.entitlement;
+            if (ent) this.entitlement = ent;
+          } else if (status === 403 || status === 422) {
             notify({ text: apiError(err, "השמירה נכשלה"), type: "error", duration: 5000 });
           }
           window.clearTimeout(this.retryTimer);
-          if (status !== 403) this.retryTimer = window.setTimeout(() => this.save(), 5000);
+          if (status !== 403 && status !== 402) this.retryTimer = window.setTimeout(() => this.save(), 5000);
         }
       } finally {
         this.saving = false;
@@ -731,6 +782,16 @@ export default defineComponent({
   color: #161310;
   direction: rtl;
   position: relative;
+}
+.paywall {
+  .pw-kicker { display: inline-block; background: #fff3cf; color: #5a4300; border: 1px solid #e6cf8a; border-radius: 999px; padding: 3px 12px; font-size: 12px; font-weight: 800; }
+  h1 { margin-top: 10px; }
+  .pw-price { font-size: 30px; font-weight: 900; color: #161310; margin: 0 0 12px; }
+  .pw-price small { font-size: 13px; font-weight: 700; color: #5e564e; }
+  .pw-list { text-align: start; margin: 0 auto 18px; padding-inline-start: 20px; max-width: 420px; color: #3b342d; line-height: 1.8; font-size: 14px; }
+  .pw-buy { min-width: 240px; }
+  .pw-note { font-size: 12.5px; margin: 12px 0 8px; }
+  .pw-link { color: #6e5228; font-weight: 800; font-size: 14px; }
 }
 .locked {
   max-width: 520px;

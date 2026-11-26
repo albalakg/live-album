@@ -111,6 +111,26 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/PublicRsvpView.vue"),
   },
   {
+    path: "/t/:token",
+    name: "publicTable",
+    // Personal "your table" link from WhatsApp / SMS ({{table_link}}): public, no guard, no app chrome
+    component: () => import("@/views/PublicTableView.vue"),
+  },
+  {
+    path: "/addons/mock-checkout",
+    name: "addonMockCheckout",
+    // Local stand-in for the PayPlus hosted page (mock add-on gateway only)
+    beforeEnter: Guard.user,
+    component: () => import("@/views/AddonMockCheckoutView.vue"),
+  },
+  {
+    path: "/addons/return",
+    name: "addonReturn",
+    // PayPlus refURL_success/failure/cancel for add-on purchases: waits for the server callback to credit the event
+    beforeEnter: Guard.user,
+    component: () => import("@/views/AddonReturnView.vue"),
+  },
+  {
     path: "/h/:slug",
     name: "eventHubPublic",
     // Public for logged-out AND logged-in visitors (no Guard.guest)

@@ -19,6 +19,10 @@
           </button>
         </div>
         <p v-if="!aiAvailable" class="note warn">מכסת השיבוצים עם AI לאירוע הזה נוצלה. אפשר להמשיך עם הסידור האוטומטי או ידנית.</p>
+        <div v-if="topup && (quota.remaining <= 1)" class="note topup">
+          <span>עוד {{ topup.runs }} סידורים חכמים ב-₪{{ topup.price }}</span>
+          <button class="gs-btn gs-btn-sm gs-btn-deep" type="button" :disabled="buying" @click="$emit('buy-topup')">לרכישה</button>
+        </div>
 
         <label class="gs-check"><input v-model="opts.mode" type="radio" value="fill" /><span>להשלים בלבד<small>לא להזיז מי שכבר יושב, רק למלא מקומות פנויים</small></span></label>
         <label class="gs-check"><input v-model="opts.mode" type="radio" value="reshuffle" /><span>לסדר הכל מחדש<small>מתחילים מאפס. ההושבה הנוכחית תוחלף רק אם תאשרו</small></span></label>
@@ -101,7 +105,7 @@ import { defineComponent, inject, PropType } from "vue";
 import { seatingApi } from "@/helpers/seating/api";
 import { SeatingBoard } from "@/helpers/seating/board";
 import { apiData, apiError, apiStatus } from "@/helpers/seating/labels";
-import { AiQuota, AiRun, AiRunOptions, PlanState } from "@/helpers/seating/types";
+import { AiQuota, AiRun, AiRunOptions, EntitlementProduct, PlanState } from "@/helpers/seating/types";
 import { notify } from "@/helpers/notify";
 
 interface PropRow {
@@ -118,10 +122,12 @@ export default defineComponent({
   props: {
     eventId: { type: Number, required: true },
     quota: { type: Object as PropType<AiQuota>, required: true },
+    topup: { type: Object as PropType<EntitlementProduct | null>, default: null },
+    buying: { type: Boolean, default: false },
     flush: { type: Function as PropType<() => Promise<boolean>>, required: true },
   },
 
-  emits: ["close", "applied", "quota"],
+  emits: ["close", "applied", "quota", "buy-topup"],
 
   setup() {
     const board = inject("seatingBoard") as SeatingBoard;
@@ -360,6 +366,16 @@ export default defineComponent({
   &.warn {
     background: #fdf0f1;
     color: #7d1a25;
+  }
+  &.topup {
+    background: #fff8e8;
+    border: 1px solid #ead7a8;
+    color: #3d2c08;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 700;
   }
 }
 .instr {

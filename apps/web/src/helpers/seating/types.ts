@@ -169,6 +169,8 @@ export interface SeatingWarning {
 
 export interface AiQuota {
   included: number;
+  base?: number;
+  extra?: number;
   used: number;
   remaining: number;
   provider: string;
@@ -177,11 +179,26 @@ export interface AiQuota {
   estimate: { tokens_in: number; tokens_out: number; cost_usd: number; cost_ils: number };
 }
 
+export interface EntitlementProduct {
+  key: string;
+  title: string;
+  price: number;
+  runs: number | null;
+  description: string | null;
+  max_quantity: number;
+}
+
 export interface Entitlement {
   enabled: boolean;
   source: string;
   addon: string;
   pending_pricing: boolean;
+  feature_enabled?: boolean;
+  paywall?: boolean;
+  unlocked_at?: string | null;
+  ai_extra_runs?: number;
+  products?: { seating_addon: EntitlementProduct | null; seating_ai_topup: EntitlementProduct | null };
+  checkout_enabled?: boolean;
 }
 
 export interface PlanState {

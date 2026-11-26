@@ -262,6 +262,7 @@ export default defineComponent({
       v.party_size = String(g ? g.party_size : 2);
       v.table_label = g ? g.table_label || "—" : "7";
       v.rsvp_link = v.rsvp_link || "https://snapshare-live.com/rsvp/…";
+      v.table_link = v.table_link || "https://snapshare-live.com/t/…";
       return v;
     },
     preview(): { header: string; body: string; footer: string } {

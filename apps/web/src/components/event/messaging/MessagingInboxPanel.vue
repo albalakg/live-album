@@ -39,7 +39,9 @@
               <div class="t">{{ fmtShort(m.at) }}{{ m.direction === "out" && m.handled === "bot" ? " · בוט" : "" }}{{ m.kind === "sms" ? " · SMS" : "" }}</div>
             </div>
             <div v-if="m.direction === 'in' && m.suggestion && !m.handled" class="msg-sugg">
+              <span class="b msg-cls-badge" :title="classifierTitle(m)">{{ classifierLabel(m.classifier) }}</span>
               <span>הצעה: {{ suggestionText(m.suggestion) }}</span>
+              <span v-if="m.suggestion_note && m.classifier !== 'rules'" class="msg-sugg-note">{{ m.suggestion_note }}</span>
               <button class="gs-btn gs-btn-sm msg-btn-green" type="button" :disabled="busy" @click="decide(m.id, true)">לעדכן ברשימה</button>
               <button class="gs-btn gs-btn-sm" type="button" :disabled="busy" @click="decide(m.id, false)">להתעלם</button>
             </div>
@@ -76,7 +78,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { messagingApi } from "@/helpers/messaging/api";
-import { AudienceGuest, InboxThread, ThreadResponse } from "@/helpers/messaging/types";
+import { AudienceGuest, InboxThread, ThreadMessage, ThreadResponse } from "@/helpers/messaging/types";
 import { fmtShort, msgError } from "@/helpers/messaging/labels";
 import { initials, STATUS_LABELS } from "@/helpers/seating/labels";
 import { notify } from "@/helpers/notify";
@@ -115,6 +117,14 @@ export default defineComponent({
   methods: {
     initials,
     fmtShort,
+    classifierLabel(c?: string | null): string {
+      return c === "openai" || c === "mock" ? "זוהה ב-AI" : "זוהה אוטומטית";
+    },
+    classifierTitle(m: ThreadMessage): string {
+      const conf = typeof m.confidence === "number" ? ` · ביטחון ${Math.round(m.confidence * 100)}%` : "";
+      const src = m.classifier === "openai" ? "מודל שפה" : m.classifier === "mock" ? "AI מקומי לבדיקות" : "כללים בעברית";
+      return `${src}${conf}. שום דבר לא מתעדכן בלי אישור שלכם.`;
+    },
     suggestionText(s: Record<string, string | number>): string {
       const parts: string[] = [];
       if (s.status !== undefined) parts.push(this.statusLabels[Number(s.status)]);
