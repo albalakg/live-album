@@ -47,7 +47,7 @@
         <h2>הגנות ושליחה</h2>
         <label class="msg-toggle"><input v-model="guards.quiet_hours_enabled" type="checkbox" /><span>שעות שקט 21:30–08:30<small>הודעה מתוזמנת לשעות האלה תצא ב-08:30</small></span></label>
         <label class="msg-toggle"><input v-model="guards.shabbat_guard_enabled" type="checkbox" /><span>שמירת שבת (שישי 15:00 – מוצ״ש 20:30)<small>הודעות יידחו לצאת השבת</small></span></label>
-        <label class="msg-toggle"><input v-model="guards.sms_fallback_enabled" type="checkbox" /><span>SMS לאורחים בלי וואטסאפ<small>נשלח SMS קצר עם קישור אישי לאישור הגעה (נספר כהודעה)</small></span></label>
+        <label class="msg-toggle"><input v-model="guards.sms_fallback_enabled" type="checkbox" /><span>SMS לאורחים בלי וואטסאפ<small>נשלח SMS קצר עם קישור אישי לאישור הגעה (נספר כהודעה)<template v-if="settings.sms_available === false"> · יתחיל לפעול כשיחובר ספק SMS</template></small></span></label>
       </section>
 
       <div class="msg-row">

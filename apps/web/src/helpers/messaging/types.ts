@@ -126,6 +126,8 @@ export interface MessagingSettings {
   quiet_hours_enabled: boolean;
   shabbat_guard_enabled: boolean;
   sms_fallback_enabled: boolean;
+  /** false in production until a real SMS provider is wired (then fallback is skipped) */
+  sms_available?: boolean;
   variables: Record<string, string>;
   rsvp_config: RsvpConfig;
   quiet_hours: { start: string; end: string };
