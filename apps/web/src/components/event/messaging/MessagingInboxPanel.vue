@@ -112,7 +112,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    if (this.threads.length) this.open(this.threads[0].guest_id);
+    const want = Number(this.$route?.query?.guest || 0);
+    const hit = want ? this.threads.find((t) => t.guest_id === want) : undefined;
+    if (hit) this.open(hit.guest_id);
+    else if (this.threads.length) this.open(this.threads[0].guest_id);
   },
   methods: {
     initials,

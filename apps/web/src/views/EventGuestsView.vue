@@ -301,6 +301,7 @@ export default defineComponent({
         this.stats = data.stats;
         const ids = new Set(this.guests.map((g) => g.id));
         this.selected = this.selected.filter((id) => ids.has(id));
+        this.applyRouteIntent();
       } catch (err) {
         this.loadError = apiError(err, "לא הצלחנו לטעון את רשימת האורחים");
       } finally {
@@ -330,6 +331,21 @@ export default defineComponent({
         const set = new Set(this.selected);
         this.pageRows.forEach((g) => set.add(g.id));
         this.selected = Array.from(set);
+      }
+    },
+    /** Deep links from smart search: ?guest=<id> opens the guest card, ?action=add opens a new one. */
+    applyRouteIntent() {
+      const q = this.$route.query;
+      const id = Number(q.guest || 0);
+      if (id) {
+        const g = this.guests.find((x) => x.id === id);
+        if (g) this.openEditor(g);
+      } else if (q.action === "add") this.openEditor(null);
+      if (q.guest || q.action) {
+        const rest = { ...q };
+        delete rest.guest;
+        delete rest.action;
+        this.$router.replace({ query: rest }).catch(() => undefined);
       }
     },
     openEditor(g: CrmGuest | null) {

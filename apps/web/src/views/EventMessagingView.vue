@@ -38,6 +38,7 @@
         :initial-template-key="composeKey"
         :initial-step="composerStep"
         :edit-send="editSend"
+        :initial-segment="composeSegment"
         @done="onComposed"
         @reload="reloadEdit"
         @open-guest="openGuest"
@@ -93,6 +94,7 @@ import MessagingAutomationsPanel from "@/components/event/messaging/MessagingAut
 import MessagingQueuePanel from "@/components/event/messaging/MessagingQueuePanel.vue";
 import MessagingAnalyticsPanel from "@/components/event/messaging/MessagingAnalyticsPanel.vue";
 import MessagingInboxPanel from "@/components/event/messaging/MessagingInboxPanel.vue";
+import { takeComposeHandoff } from "@/helpers/search/handoff";
 import MessagingPackagesPanel from "@/components/event/messaging/MessagingPackagesPanel.vue";
 import { AddonProductKey, startAddonCheckout } from "@/helpers/addons/api";
 import MessagingGuestDrawer from "@/components/event/messaging/MessagingGuestDrawer.vue";
@@ -138,6 +140,7 @@ export default defineComponent({
       composerKey: 0,
       editSend: null as MessagingSend | null,
       audienceSegment: { statuses: [0, 3] } as Segment,
+      composeSegment: null as Segment | null,
       drawerGuest: null as { id: number; full_name: string } | null,
       settingsKey: 0,
       inboxKey: 0,
@@ -177,6 +180,13 @@ export default defineComponent({
     },
   },
   mounted() {
+    if (this.$route.query.from === "search") {
+      const ids = takeComposeHandoff(this.eventId);
+      if (ids && ids.length) {
+        this.composeKey = "custom_manual";
+        this.composeSegment = { guest_ids: ids };
+      }
+    }
     this.loadAll();
     this.revealTab();
   },

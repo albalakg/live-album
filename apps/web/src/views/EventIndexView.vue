@@ -32,11 +32,20 @@
         <MobileScrollBar :items="items" />
       </nav>
       <div class="event-content">
+        <SearchTriggerButton v-if="searchOn && !isSeatingPage" @open="openSearch" />
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
       </div>
     </div>
+    <SearchCommandPalette
+      v-if="searchOn"
+      ref="search"
+      :event-id="eventId"
+      :nav="searchNav"
+      :seating="seatingOn"
+      :messaging="messagingOn"
+    />
   </template>
 </template>
 
@@ -44,7 +53,9 @@
 import Sidebar from "@/components/library/app/SideBar.vue";
 import MobileScrollBar from "@/components/library/app/MobileScrollBar.vue";
 import { defineComponent } from "vue";
-import { isSeatingEnabled, isWhatsAppEnabled, isWhatsAppMessagingEnabled } from "@/helpers/features";
+import { isSearchEnabled, isSeatingEnabled, isWhatsAppEnabled, isWhatsAppMessagingEnabled } from "@/helpers/features";
+import SearchCommandPalette from "@/components/search/SearchCommandPalette.vue";
+import SearchTriggerButton from "@/components/search/SearchTriggerButton.vue";
 import { IMobileScrollBarItem } from "@/helpers/interfaces";
 
 const SIDEBAR_STORAGE_KEY = "snapshare.sidebarCollapsed";
@@ -77,6 +88,8 @@ export default defineComponent({
   components: {
     Sidebar,
     MobileScrollBar,
+    SearchCommandPalette,
+    SearchTriggerButton,
   },
 
   data() {
@@ -102,6 +115,21 @@ export default defineComponent({
   },
 
   computed: {
+    eventId(): number {
+      return Number(this.$store.getters["event/getEvent"]?.id || 0);
+    },
+    searchOn(): boolean {
+      return isSearchEnabled() && this.eventId > 0 && !this.$store.getters["event/isPreview"];
+    },
+    seatingOn(): boolean {
+      return isSeatingEnabled();
+    },
+    messagingOn(): boolean {
+      return isWhatsAppMessagingEnabled();
+    },
+    searchNav(): { text: string; path: string }[] {
+      return this.items.map((i) => ({ text: i.text, path: i.path }));
+    },
     hasEvent(): boolean {
       return Boolean(this.$store.getters["event/getEvent"]);
     },
@@ -201,6 +229,9 @@ export default defineComponent({
         "--host-sidebar",
         mobile ? "0px" : `${this.sidebarWidthPx}px`
       );
+    },
+    openSearch() {
+      (this.$refs.search as { open?: (q?: string) => void } | undefined)?.open?.("");
     },
     toggleSidebar() {
       this.sidebarCollapsed = !this.sidebarCollapsed;

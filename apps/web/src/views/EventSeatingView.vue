@@ -162,7 +162,7 @@ import { SeatingBoard } from "@/helpers/seating/board";
 import { FIXTURE_DEFAULTS, GRID, isSeatable, party } from "@/helpers/seating/engine";
 import { apiData, apiError, apiStatus } from "@/helpers/seating/labels";
 import { buildXlsx, downloadBlob } from "@/helpers/seating/spreadsheet";
-import { AiQuota, Entitlement, EntitlementProduct, FixtureKind, PlanState, SeatingWarning, TableShape } from "@/helpers/seating/types";
+import { AiQuota, Entitlement, EntitlementProduct, FixtureKind, PlanState, SeatingStateResponse, SeatingWarning, TableShape } from "@/helpers/seating/types";
 import { notify } from "@/helpers/notify";
 
 type SaveState = "idle" | "dirty" | "saving" | "saved" | "error" | "offline";
@@ -346,6 +346,18 @@ export default defineComponent({
         notify({ text: apiError(err, "לא הצלחנו לפתוח את דף התשלום"), type: "error", duration: 5000 });
       }
     },
+    /** Deep links from smart search: ?table=<key> or ?guest=<id> selects that table. */
+    selectFromRoute(s: SeatingStateResponse) {
+      const q = this.$route.query;
+      let key = typeof q.table === "string" ? q.table : "";
+      const gid = Number(q.guest || 0);
+      if (!key && gid) {
+        const a = s.assignments.find((x) => x.guest_id === gid);
+        const t = a ? s.tables.find((x) => x.id === a.table_id) : undefined;
+        key = t ? t.key : "";
+      }
+      if (key && s.tables.some((t) => t.key === key)) this.board.select([key]);
+    },
     /* ───────── load ───────── */
     async load() {
       if (!this.eventId) return;
@@ -354,6 +366,7 @@ export default defineComponent({
         this.entitlement = s.entitlement;
         this.quota = s.ai;
         this.board.load(s, s.guests, s.groups);
+        this.selectFromRoute(s);
         this.savedVersion = this.board.version;
         this.saveState = "idle";
         this.loaded = true;

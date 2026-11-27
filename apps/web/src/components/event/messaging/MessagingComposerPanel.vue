@@ -190,6 +190,8 @@ export default defineComponent({
     initialTemplateKey: { type: String, default: "rsvp_invite" },
     initialStep: { type: String as PropType<StepKey>, default: "content" },
     editSend: { type: Object as PropType<MessagingSend | null>, default: null },
+    /** Ready audience handed off from smart search (guest ids only). */
+    initialSegment: { type: Object as PropType<Segment | null>, default: null },
   },
   emits: ["done", "reload", "open-guest"],
   data() {
@@ -201,7 +203,7 @@ export default defineComponent({
       title: src?.title || tpl?.title || "",
       category: (src?.category || tpl?.category || "marketing") as Category,
       content: cloneContent(src || tpl || {}),
-      segment: (src?.segment && Object.keys(src.segment).length ? { ...src.segment } : { statuses: [0, 3] }) as Segment,
+      segment: (src?.segment && Object.keys(src.segment).length ? { ...src.segment } : this.initialSegment ? { ...this.initialSegment } : { statuses: [0, 3] }) as Segment,
       when: "later" as "later" | "now",
       scheduledAt: toLocalInput(src?.scheduled_at),
       overrideQuiet: src?.override_quiet || false,

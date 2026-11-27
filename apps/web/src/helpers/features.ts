@@ -27,3 +27,14 @@ export function isWhatsAppMessagingEnabled(): boolean {
   if (flag === "false") return false;
   return process.env.NODE_ENV === "development" || process.env.VUE_APP_ENV === "local";
 }
+
+/**
+ * Smart search (command palette, Ctrl/⌘-K). Runs in the browser over data the dashboard already loads; no AI, no cost.
+ * Free in every plan. ON for local/dev builds unless VUE_APP_SEARCH_ENABLED=false; other builds need =true.
+ */
+export function isSearchEnabled(): boolean {
+  const flag = process.env.VUE_APP_SEARCH_ENABLED;
+  if (flag === "true") return true;
+  if (flag === "false") return false;
+  return process.env.NODE_ENV === "development" || process.env.VUE_APP_ENV === "local";
+}
