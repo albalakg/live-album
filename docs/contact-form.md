@@ -10,7 +10,7 @@ The floating WhatsApp button is shown only to a logged-in host whose user plan o
 
 ## Business email
 
-`hello@snapshare-live.com` until Gal confirms another address.
+`hello@snapshare-live.com` — confirmed by Gal (t144u) as the single contact / inquiries / reply-to address (web, marketing, terms page and all server emails).
 
 `PUBLIC_BUSINESS_EMAIL` / `VUE_APP_BUSINESS_EMAIL`.
 

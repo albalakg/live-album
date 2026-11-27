@@ -278,7 +278,7 @@
           בכתובת:
         </p>
         <address class="text--dark tnc-contact">
-          <p>gal.blacky@gmail.com</p>
+          <p><a :href="`mailto:${email}`" dir="ltr">{{ email }}</a></p>
         </address>
       </section>
     </div>
@@ -288,6 +288,7 @@
 <script lang="ts">
 import MainCube from "@/components/library/background/MainCube.vue";
 import { defineComponent } from "vue";
+import { BUSINESS_EMAIL_DEFAULT } from "@snapshare/design/site";
 
 export default defineComponent({
   name: "TermsAndConditionsView",
@@ -296,6 +297,11 @@ export default defineComponent({
   },
   data() {
     return {};
+  },
+  computed: {
+    email(): string {
+      return process.env.VUE_APP_BUSINESS_EMAIL || BUSINESS_EMAIL_DEFAULT;
+    },
   },
   methods: {},
 });
@@ -384,6 +390,12 @@ export default defineComponent({
 .tnc-contact {
   font-style: normal;
   margin: 0.5rem 0 0;
+}
+
+.tnc-contact a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .tnc-contact p {
